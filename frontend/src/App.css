@@ -1,0 +1,11 @@
+svg {
+  height: 100%;
+  width: 100%;
+}
+
+.navbar-nav {
+  padding-top: 20px;
+}
+.nav-link {
+  margin-right: 15px;
+}
