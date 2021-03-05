@@ -3,6 +3,9 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const proofSchema = new Schema({
+    label: {
+        type: String,
+    },
     problem : {
         type: String,
     },
@@ -13,13 +16,10 @@ const proofSchema = new Schema({
     dot : {
         type: String,
     },
-    svg : {
-        type: String,
-    },
     state : {
         type: String,
         require: true,
-        enum: ['proof_received', 'dot_ready', 'svg_ready', 'done', 'error']
+        enum: ['proof_received', 'dot_ready', 'done', 'error']
     }
 }, {
     timestamps: true,

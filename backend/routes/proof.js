@@ -7,17 +7,19 @@ const fs = require('fs');
 let Proof = require('../models/proof.model');
 
 router.route('/').get((req, res) => {
-    Proof.find().select('_id svg')
+    Proof.find().select('_id label dot')
     .then(proofs => res.json(proofs))
     .catch(err => res.status(400).json('Error: ' + err));
 });
 
 router.route('/add').post((req, res) => {
+  const label = req.body.label;
   const problem = req.body.problem;
   const input_language = 'smt2';
   const state = 'proof_received';
 
   const newProof = new Proof({
+    label,
     problem,
     input_language,
     state,
@@ -72,34 +74,5 @@ router.route('/process-proof/:id').get((req, res) => {
   });
 });
 
-router.route('/process-dot/:id').get((req, res) => {
-  Proof.findById(req.params.id).
-  then(proof => {
-    if(proof.state === 'svg_ready'){
-      res.json(proof.svg);
-      throw new Error('ok');
-    }
-    fs.writeFileSync(`${process.cwd()}/proof_files/proof.dot`, proof.dot, (err) => {
-        if(err) {
-          throw err;
-        }
-      }
-    );
-    return proof;
-  }).
-  then((proof) => {
-    const dot = spawnSync("dot",
-                        ["-Tsvg",
-                        `${process.cwd()}/proof_files/proof.dot`,
-                        ]);
-    proof.svg = dot.stdout;
-    proof.state = 'svg_ready';
-    proof.save();
-    res.json(proof.svg);
-  }).
-    catch((err) => {
-      if(err.message !== 'ok') res.status(400).json('Error: ' + err);
-  });
-});
 
 module.exports = router;

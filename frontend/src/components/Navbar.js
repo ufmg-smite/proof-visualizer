@@ -1,20 +1,21 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
-import 'bootstrap/dist/css/bootstrap.min.css'
+import { Navbar, Nav } from 'react-bootstrap';
 
-export default class Navbar extends Component {
+export default class MyNavbar extends Component {
 
   render() {
     return (
-      <nav class="navbar navbar-dark bg-dark">
-          <Link to="/" className="navbar-brand">Proof Viewer</Link>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-          <div class="navbar-nav">
-            <Link to="/" className="nav-link">Proofs</Link>
-            <Link to="/create" className="nav-link">New Proof</Link>
-          </div>
-        </div>
-      </nav>
+      <Navbar bg="light" expand="lg">
+        <Navbar.Brand href="/">Proof Visualizer</Navbar.Brand>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" />
+        <Navbar.Collapse id="basic-navbar-nav">
+          <Nav className="mr-auto">
+            <Nav.Link href="/" className="nav-link">Proofs</Nav.Link>
+            <Nav.Link href="/create" className="nav-link">New Proof</Nav.Link>
+          </Nav>
+        </Navbar.Collapse>
+      </Navbar>
     );
   }
 }

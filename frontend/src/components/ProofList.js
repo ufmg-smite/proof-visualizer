@@ -1,15 +1,17 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { Spinner } from 'react-bootstrap';
 
 const Proof = props => (
   <tr>
-    <td>{props.proof._id}</td>
+    <td>{props.proof.label}</td>
     <td>
       <Link to={{
             pathname: "/visualize/"+props.proof._id,
             state: {
-              svg: props.proof.svg ? props.proof.svg : false
+              label: props.proof.label,
+              dot: props.proof.dot ? props.proof.dot : false
             }}}
       >visualize</Link> | <a href="#" onClick={() => { props.deleteProof(props.proof._id) }}>delete</a>
     </td>
@@ -22,13 +24,13 @@ export default class ProofList extends Component {
 
     this.deleteProof = this.deleteProof.bind(this)
 
-    this.state = {proofs: []};
+    this.state = {proofs: [], loadingProofs: true};
   }
 
   componentDidMount() {
     axios.get('http://localhost:5000/proof/')
       .then(response => {
-        this.setState({ proofs: response.data })
+        this.setState({ proofs: response.data, loadingProofs: false })
       })
       .catch((error) => {
         console.log(error);
@@ -55,9 +57,9 @@ export default class ProofList extends Component {
       <div>
         <h3>Logged Proofs</h3>
         <table className="table">
-          <thead className="thead-light">
+          <thead className="thead-dark">
             <tr>
-              <th>ID</th>
+              <th>Label</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -65,6 +67,10 @@ export default class ProofList extends Component {
             { this.proofList() }
           </tbody>
         </table>
+        {this.state.loadingProofs ? 
+        <div className="spinner-container"><Spinner animation="border" role="status">
+          <span className="sr-only">Loading...</span>
+        </Spinner></div>: null}
       </div>
     )
   }

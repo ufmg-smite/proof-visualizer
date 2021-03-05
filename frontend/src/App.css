@@ -1,11 +1,7 @@
-svg {
-  height: 100%;
-  width: 100%;
+.spinner-container {
+  text-align: center;
 }
 
-.navbar-nav {
-  padding-top: 20px;
-}
-.nav-link {
-  margin-right: 15px;
+canvas {
+  border: 1px black;
 }

@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Route} from 'react-router-dom';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
 
-import Navbar from './components/Navbar';
+import MyNavbar from './components/Navbar';
 import ProofList from './components/ProofList';
 import CreateProof from './components/CreateProof';
 import VisualizeProof from './components/VisualizeProof';
@@ -12,7 +12,7 @@ function App() {
   return (
     <Router>
       <div className="container">
-        <Navbar />
+        <MyNavbar />
         <br />
         <Route path="/" exact component={ProofList} />
         <Route path="/create" exact component={CreateProof} />

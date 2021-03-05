@@ -1,1 +1,27 @@
-(set-logic QF_UF) (declare-sort U 0) (declare-fun a () U) (declare-fun b () U) (declare-fun f (U) U) (assert (= a b)) (assert (not (= (f a) (f b)))) (check-sat)
+(set-logic ALL)
+(declare-const actionName String)
+(declare-const actionNamespace String)
+; Action: p0.0
+(declare-const p0.0.action Bool)
+(assert (= p0.0.action (and (= actionNamespace "foobar") (str.in_re actionName (re.++ (str.to_re "wiz") (re.* re.allchar) (str.to_re "foobar") (re.* re.allchar) (str.to_re "baz/") (re.* re.allchar) (str.to_re ""))))))
+; Policy: 0
+(declare-const p0.denies Bool)
+(assert (not p0.denies))
+(declare-const p0.allows Bool)
+(assert (= p0.allows (and (not p0.denies) p0.0.action)))
+(declare-const p0.neutral Bool)
+(assert (= p0.neutral (and (not p0.allows) (not p0.denies))))
+; Action: p1.0
+(declare-const p1.0.action Bool)
+(assert (= p1.0.action (and (= actionNamespace "foobar") (str.in_re actionName (re.++ (str.to_re "wiz") (re.* re.allchar) (re.++ (str.to_re "foo") re.allchar (str.to_re "ar")) (re.* re.allchar) (str.to_re "baz/") (re.* re.allchar) (str.to_re ""))))))
+; Policy: 1
+(declare-const p1.denies Bool)
+(assert (not p1.denies))
+(declare-const p1.allows Bool)
+(assert (= p1.allows (and (not p1.denies) p1.0.action)))
+(declare-const p1.neutral Bool)
+(assert (= p1.neutral (and (not p1.allows) (not p1.denies))))
+; Goals
+(assert p0.allows)
+(assert (or p1.denies p1.neutral))
+(check-sat)
