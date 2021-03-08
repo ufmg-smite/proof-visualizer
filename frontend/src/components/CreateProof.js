@@ -9,39 +9,51 @@ export default class CreateProof extends Component {
     this.state = {
       label: '',
       problem: '',
-      inputLanguage: ''
-    }
+      inputLanguage: '',
+    };
   }
 
-  handleChange (evt) {
+  handleChange = (evt) => () => {
     this.setState({ [evt.target.name]: evt.target.value });
-  }
+  };
 
-  async onSubmit(e) {
+  onSubmit = async (e) => async () => {
     e.preventDefault();
 
-    const proof = {
-      label: this.state.label,
-      problem: this.state.problem,
-      inputLanguage: this.state.inputLanguage
-    }
+    const { label, problem, inputLanguage, id } = this.state;
 
-    await axios.post('http://localhost:5000/proof/add/', proof)
-      .then(res => this.setState({id: res.data}));
-    await axios.get('http://localhost:5000/proof/process-proof/'+this.state.id);
+    const proof = {
+      label,
+      problem,
+      inputLanguage,
+    };
+
+    await axios
+      .post('http://localhost:5000/proof/add/', proof)
+      .then((res) => this.setState({ id: res.data }));
+    await axios.get(`http://localhost:5000/proof/process-proof/${id}`);
     window.location = '/';
-  }
+  };
 
   render() {
     return (
-      <Form onSubmit={this.onSubmit.bind(this)}>
+      <Form onSubmit={this.onSubmit}>
         <Form.Group>
           <Form.Label>Problem label</Form.Label>
-          <Form.Control name="label" type="text" placeholder="proof-a-and-not-a" onChange={this.handleChange.bind(this)}/>
+          <Form.Control
+            name="label"
+            type="text"
+            placeholder="proof-a-and-not-a"
+            onChange={this.handleChange}
+          />
         </Form.Group>
-        <Form.Group onChange={this.handleChange.bind(this)}>
+        <Form.Group onChange={this.handleChange}>
           <Form.Label>Input language</Form.Label>
-          <Form.Control name="inputLanguage" onChange={this.handleChange.bind(this)} as="select">
+          <Form.Control
+            name="inputLanguage"
+            onChange={this.handleChange}
+            as="select"
+          >
             <option>SMT-LIB v2</option>
             <option>CVC4 Native Input Language</option>
             <option>SyGuS-IF</option>
@@ -50,17 +62,22 @@ export default class CreateProof extends Component {
         </Form.Group>
         <Form.Group>
           <Form.Label>Problem</Form.Label>
-          <Form.Control name='problem' as="textarea" rows={10} placeholder="(set-logic QF_UF)
+          <Form.Control
+            name="problem"
+            as="textarea"
+            rows={10}
+            placeholder="(set-logic QF_UF)
 (declare-fun a () Bool)
 (assert (not a))
 (assert a)
 (check-sat)"
-        onChange={this.handleChange.bind(this)} />
+            onChange={this.handleChange}
+          />
         </Form.Group>
         <Button variant="primary" type="submit">
           Submit
         </Button>
       </Form>
-    )
+    );
   }
 }

@@ -1,0 +1,4 @@
+{
+  "extends": ["wesbos"],
+  "parser": "babel-eslint"
+}
