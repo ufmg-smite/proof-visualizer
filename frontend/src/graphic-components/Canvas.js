@@ -1,10 +1,7 @@
 import React, { Component } from 'react';
-import { Stage, Layer, Line, Rect } from 'react-konva';
+import { Stage, Layer } from 'react-konva';
 import RuleShape from './RuleShape';
 import ConclusionShape from './ConclusionShape';
-
-
-
 
 export default class Canvas extends Component {
   constructor(props) {
@@ -45,6 +42,9 @@ export default class Canvas extends Component {
     }
 
     this.state = {
+      stageScale: 1,
+      stageX: 0,
+      stageY: 0,
       dot: this.props.dot,
       proofNodes: nodes,
       proofEdges: edges,
@@ -53,8 +53,30 @@ export default class Canvas extends Component {
     }
   }
 
+  handleWheel = e => {
+    e.evt.preventDefault();
+
+    const scaleBy = 1.02;
+    const stage = e.target.getStage();
+    const oldScale = stage.scaleX();
+    const mousePointTo = {
+      x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
+      y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale
+    };
+
+    const newScale = e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+
+
+    this.setState({
+      stageScale: newScale,
+      stageX:
+        -(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale,
+      stageY:
+        -(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale
+    });
+  };
+
   onClick = e => {
-    console.log(e.target.parent.attrs);
     const myIndex = e.target.parent.attrs.id;
     if(this.state.proofNodes[myIndex].clicked) return;
     var newNodes = [
@@ -64,7 +86,7 @@ export default class Canvas extends Component {
         id={(this.state.proofNodes[myIndex].id)}
         name={this.state.proofNodes[myIndex].id}
         x={e.target.parent.attrs.x}
-        y={e.target.parent.attrs.y+50}>
+        y={e.target.parent.attrs.y+42}>
           {this.state.proofNodes[myIndex].rule}
         </RuleShape>
     ]
@@ -75,7 +97,7 @@ export default class Canvas extends Component {
       onClick={(e2) => this.onClick(e2)}
       id={(index)}
       name={(index)}
-      key={(index)} y={e.target.parent.attrs.y+100} x={e.target.parent.attrs.x+(child * 200)}>
+      key={(index)} y={e.target.parent.attrs.y+84} x={e.target.parent.attrs.x+(child * 200)}>
         {this.state.proofNodes[index].conclusion}
       </ConclusionShape>)
     }
@@ -96,7 +118,7 @@ export default class Canvas extends Component {
       id={(this.state.proofNodes[0].id)+'c'}
       onClick={(e) => this.onClick(e)}
       name={this.state.proofNodes[0].id}
-      y={0} x={0}>
+      y={10} x={window.innerWidth * 0.35}>
         {this.state.proofNodes[0].conclusion}
       </ConclusionShape>,]
     })
@@ -104,7 +126,12 @@ export default class Canvas extends Component {
 
   render (){
     return (
-      <Stage width={window.innerWidth} height={window.innerHeight}>
+      <Stage width={window.innerWidth * 0.9} height={window.innerHeight * 0.7} 
+      onWheel={this.handleWheel}
+      scaleX={this.state.stageScale}
+      scaleY={this.state.stageScale}
+      x={this.state.stageX}
+      y={this.state.stageY}>
           <Layer>
             {this.state.showingNodes.map(element => element)}
           </Layer>

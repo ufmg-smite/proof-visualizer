@@ -26,8 +26,6 @@ export default class CreateProof extends Component {
       inputLanguage: this.state.inputLanguage
     }
 
-    console.log(proof);
-
     await axios.post('http://localhost:5000/proof/add/', proof)
       .then(res => this.setState({id: res.data}));
     await axios.get('http://localhost:5000/proof/process-proof/'+this.state.id);
