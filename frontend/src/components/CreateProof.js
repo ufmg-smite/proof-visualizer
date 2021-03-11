@@ -6,6 +6,9 @@ export default class CreateProof extends Component {
   constructor(props) {
     super(props);
 
+    this.onSubmit = this.onSubmit.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+
     this.state = {
       label: '',
       problem: '',
@@ -13,27 +16,30 @@ export default class CreateProof extends Component {
     };
   }
 
-  handleChange = (evt) => () => {
+  handleChange(evt) {
     this.setState({ [evt.target.name]: evt.target.value });
-  };
+  }
 
-  onSubmit = async (e) => async () => {
+  async onSubmit(e) {
+    console.log(e);
     e.preventDefault();
 
-    const { label, problem, inputLanguage, id } = this.state;
+    let { label, problem, inputLanguage, id } = this.state;
 
     const proof = {
       label,
       problem,
       inputLanguage,
     };
-
+    console.log(proof);
     await axios
       .post('http://localhost:5000/proof/add/', proof)
-      .then((res) => this.setState({ id: res.data }));
+      .then((res) =>
+        this.setState({ id: res.data }, () => ({ id } = this.state))
+      );
     await axios.get(`http://localhost:5000/proof/process-proof/${id}`);
     window.location = '/';
-  };
+  }
 
   render() {
     return (
