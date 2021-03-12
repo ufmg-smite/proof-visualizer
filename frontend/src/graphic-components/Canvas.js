@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Stage, Layer } from 'react-konva';
 import PropTypes from 'prop-types';
 import Node from './Node';
+import Line from './Line';
 
 export default class Canvas extends Component {
   constructor(props) {
@@ -9,127 +10,97 @@ export default class Canvas extends Component {
 
     const { dot } = this.props;
 
-    const numberOfNodes = (dot.match(/label/g) || []).length / 2;
-    const nodes = new Array(numberOfNodes);
-    const edges = [];
-    const lines = dot
-      .slice(dot.indexOf('{') + 1, dot.indexOf('}') - 2)
-      .replace(/(\n|\t)/gm, '')
-      .split(';');
-    lines.map((i) => {
-      const line = i;
-      if (line.search('label') !== -1) {
-        if (line.split('[')[0].search('c') === -1) {
-          const node = {
-            id: line.split('[')[0].trim().slice(1, -1),
-            rule: line.slice(line.indexOf('label') + 9, line.lastIndexOf('"')),
-            ref: React.createRef(),
-            children: [],
-            clicked: false,
-          };
-          nodes[parseInt(node.id)] = node;
-        } else {
-          const id = line.split('[')[0].trim().slice(1, -1);
-          nodes[parseInt(id)].conclusion = line.slice(
-            line.indexOf('label') + 9,
-            line.lastIndexOf('"')
-          );
-        }
-      } else if (line.search('->') !== -1) {
-        const edgeNodes = line
-          .split('->')
-          .map((element) =>
-            element.trim().replaceAll('"', '').replace('c', '')
-          );
-        edges.push({ from: edgeNodes[0], to: edgeNodes[1] });
-        if (edgeNodes[0] !== edgeNodes[1]) {
-          nodes[edgeNodes[1]].children.push(edgeNodes[0]);
-        }
-      }
-      return true;
-    });
+    const nodes = this.processDot(dot);
 
     this.state = {
       stageScale: 1,
       stageX: 0,
       stageY: 0,
-      // dot,
       proofNodes: nodes,
-      // proofEdges: edges,
-      showingNodes: [],
+      showingNodes: {},
+      showingEdges: {},
     };
   }
 
   componentDidMount() {
-    const { proofNodes } = this.state;
-    this.setState({
-      showingNodes: [
-        <Node
-          ref={proofNodes[0].ref}
-          key={`${proofNodes[0].id}c`}
-          id={`${proofNodes[0].id}c`}
-          onClick={(e) => this.onClick(e)}
-          name={proofNodes[0].id}
-          y={10}
-          x={window.innerWidth * 0.35}
-          conclusion
-        >
-          {proofNodes[0].conclusion}
-        </Node>,
-      ],
+    const { showingNodes, proofNodes } = this.state;
+    showingNodes['0c'] = new Node({
+      key: Math.random(),
+      id: `${proofNodes[0].id}c`,
+      onClick: (e) => this.onClick(e),
+      name: proofNodes[0].id,
+      x: window.innerWidth * 0.35,
+      y: 10,
+      conclusion: true,
+      children: proofNodes[0].conclusion,
+      updateParentState: this.updateParentState,
     });
+    this.setState({ showingNodes });
   }
 
   onClick = (e) => {
-    const { proofNodes, showingNodes } = this.state;
-    const myIndex = e.target.parent.attrs.id;
-    if (proofNodes[myIndex].clicked) return;
-    const newNodes = [
-      <Node
-        ref={proofNodes[myIndex].ref}
-        key={proofNodes[myIndex].id}
-        id={proofNodes[myIndex].id}
-        name={proofNodes[myIndex].id}
-        x={e.target.parent.attrs.x}
-        y={e.target.parent.attrs.y + 42}
-      >
-        {proofNodes[myIndex].rule}
-      </Node>,
-    ];
-    console.log(proofNodes);
-    proofNodes[myIndex].children.map((child) => {
-      console.log(child);
-      const index = child;
-      console.log(index);
-      console.log(proofNodes[index]);
-      newNodes.push(
-        <Node
-          ref={proofNodes[child].ref}
-          onClick={(e2) => this.onClick(e2)}
-          id={index}
-          name={index}
-          key={index}
-          y={e.target.parent.attrs.y + 84}
-          x={e.target.parent.attrs.x + child * 200}
-          conclusion
-        >
-          {proofNodes[index].conclusion}
-        </Node>
-      );
+    const { proofNodes, showingNodes, showingEdges } = this.state;
+    const { id, x, y } = e.target.parent.attrs;
+
+    if (proofNodes[id].showingChildren) return;
+
+    const rule = new Node({
+      key: Math.random(),
+      id: proofNodes[id].id,
+      name: proofNodes[id].id,
+      x,
+      y: y + 100,
+      children: proofNodes[id].rule,
+      updateParentState: this.updateParentState,
+    });
+
+    showingNodes[proofNodes[id].id.toString()] = rule;
+
+    showingEdges[`${proofNodes[id].id}->${proofNodes[id].id}c`] = new Line({
+      key: Math.random(),
+      points: [
+        showingNodes[proofNodes[id].id.toString()].props.x + 150,
+        showingNodes[proofNodes[id].id.toString()].props.y,
+        showingNodes[`${proofNodes[id].id.toString()}c`].props.x + 150,
+        showingNodes[`${proofNodes[id].id.toString()}c`].props.y + 36,
+      ],
+    });
+
+    let i = 0;
+    const lenChildren = proofNodes[id].children.length - 1;
+    proofNodes[id].children.map((child) => {
+      const childNode = proofNodes[child];
+      showingNodes[`${childNode.id}c`] = new Node({
+        key: Math.random(),
+        onClick: this.onClick,
+        id: `${childNode.id}c`,
+        name: childNode.id,
+        x: x + (i - lenChildren / 2) * 350,
+        y: y + 200,
+        conclusion: true,
+        children: childNode.conclusion,
+        updateParentState: this.updateParentState,
+      });
+      i += 1;
+      showingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line({
+        key: Math.random(),
+        points: [
+          showingNodes[`${childNode.id}c`].x() + 150,
+          showingNodes[`${childNode.id}c`].y(),
+          showingNodes[proofNodes[id].id.toString()].x() + 150,
+          showingNodes[proofNodes[id].id.toString()].y() + 36,
+        ],
+      });
       return true;
     });
-    this.setState({
-      showingNodes: [...showingNodes, ...newNodes],
-    });
-    const newProofNodes = proofNodes;
-    newProofNodes[myIndex].clicked = true;
-    this.setState({ proofNodes: newProofNodes });
+    proofNodes[id].showingChildren = true;
+    this.setState({ showingNodes, proofNodes, showingEdges });
   };
 
   handleWheel = (e) => {
     e.evt.preventDefault();
 
-    const scaleBy = 1.02;
+    const scaleBy = 1.08;
     const stage = e.target.getStage();
     const oldScale = stage.scaleX();
     const mousePointTo = {
@@ -148,8 +119,74 @@ export default class Canvas extends Component {
     });
   };
 
+  processDot = (dot) => {
+    const numberOfNodes = (dot.match(/label/g) || []).length / 2;
+    const nodes = new Array(numberOfNodes);
+    const lines = dot
+      .slice(dot.indexOf('{') + 1, dot.indexOf('}') - 2)
+      .replace(/(\n|\t)/gm, '')
+      .split(';');
+    lines.forEach((line) => {
+      if (line.search('label') !== -1) {
+        const id = line.split('[')[0].trim().slice(1, -1);
+        const text = line.slice(
+          line.indexOf('label') + 9,
+          line.lastIndexOf('"')
+        );
+        if (line.split('[')[0].search('c') === -1) {
+          const node = {
+            id,
+            rule: text,
+            children: [],
+            showingChildren: false,
+          };
+          nodes[parseInt(node.id)] = node;
+        } else {
+          nodes[parseInt(id)].conclusion = text;
+        }
+      } else if (line.search('->') !== -1) {
+        const edgeNodes = line
+          .split('->')
+          .map((element) =>
+            element.trim().replaceAll('"', '').replace('c', '')
+          );
+        if (edgeNodes[0] !== edgeNodes[1]) {
+          nodes[edgeNodes[1]].children.push(edgeNodes[0]);
+        }
+      }
+    });
+    return nodes;
+  };
+
+  updateParentState = (key, x, y) => {
+    const { showingNodes, showingEdges } = this.state;
+    showingNodes[key].props.x = x;
+    showingNodes[key].props.y = y;
+    Object.keys(showingEdges)
+      .filter((edgeKey) => edgeKey.indexOf(key) !== -1)
+      .forEach((edge) => {
+        const [from, to] = edge.split('->');
+        showingEdges[edge] = new Line({
+          key: Math.random(),
+          points: [
+            showingNodes[from].props.x + 150,
+            showingNodes[from].props.y,
+            showingNodes[to].props.x + 150,
+            showingNodes[to].props.y + 36,
+          ],
+        });
+      });
+    this.setState({ showingNodes, showingEdges });
+  };
+
   render() {
-    const { stageScale, stageX, stageY, showingNodes } = this.state;
+    const {
+      stageScale,
+      stageX,
+      stageY,
+      showingNodes,
+      showingEdges,
+    } = this.state;
     return (
       <Stage
         draggable
@@ -161,7 +198,18 @@ export default class Canvas extends Component {
         x={stageX}
         y={stageY}
       >
-        <Layer>{showingNodes.map((element) => element)}</Layer>
+        <Layer>
+          {Object.keys(showingNodes).length === 0
+            ? []
+            : Object.keys(showingNodes).map(function (key) {
+                return showingNodes[key].render();
+              })}
+          {Object.keys(showingEdges).length === 0
+            ? []
+            : Object.keys(showingEdges).map(function (key) {
+                return showingEdges[key].render();
+              })}
+        </Layer>
       </Stage>
     );
   }
