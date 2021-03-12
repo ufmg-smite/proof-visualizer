@@ -8,7 +8,7 @@ export default class Canvas extends Component {
   constructor(props) {
     super(props);
 
-    const { dot } = this.props;
+    const { dot, setCurrentText } = this.props;
 
     const nodes = this.processDot(dot);
 
@@ -19,6 +19,7 @@ export default class Canvas extends Component {
       proofNodes: nodes,
       showingNodes: {},
       showingEdges: {},
+      setCurrentText,
     };
   }
 
@@ -39,8 +40,16 @@ export default class Canvas extends Component {
   }
 
   onClick = (e) => {
-    const { proofNodes, showingNodes, showingEdges } = this.state;
+    const {
+      proofNodes,
+      showingNodes,
+      showingEdges,
+      setCurrentText,
+    } = this.state;
     const { id, x, y } = e.target.parent.attrs;
+
+    console.log(e);
+    setCurrentText(e.target.attrs.text);
 
     if (proofNodes[id].showingChildren) return;
 
@@ -51,6 +60,7 @@ export default class Canvas extends Component {
       x,
       y: y + 100,
       children: proofNodes[id].rule,
+      onClick: this.onClick,
       updateParentState: this.updateParentState,
     });
 
@@ -217,4 +227,5 @@ export default class Canvas extends Component {
 
 Canvas.propTypes = {
   dot: PropTypes.any,
+  setCurrentText: PropTypes.func,
 };

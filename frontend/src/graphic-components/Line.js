@@ -15,11 +15,7 @@ export default class Line extends Component {
   }
 
   setPoints(points) {
-    console.log(points);
-    this.setState({ points }, () => {
-      console.log(this.state);
-    });
-    console.log(this.state);
+    this.setState({ points });
   }
 
   render() {

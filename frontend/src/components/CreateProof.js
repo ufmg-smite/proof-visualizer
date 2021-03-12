@@ -21,7 +21,6 @@ export default class CreateProof extends Component {
   }
 
   async onSubmit(e) {
-    console.log(e);
     e.preventDefault();
 
     let { label, problem, inputLanguage, id } = this.state;
@@ -31,7 +30,6 @@ export default class CreateProof extends Component {
       problem,
       inputLanguage,
     };
-    console.log(proof);
     await axios
       .post('http://localhost:5000/proof/add/', proof)
       .then((res) =>

@@ -12,18 +12,28 @@ export default class VisualizeProof extends Component {
       },
     } = this.props;
 
+    this.setCurrentText = this.setCurrentText.bind(this);
+
     this.state = {
       dot,
       label,
+      currentText: 'click in a node to show the text here',
     };
   }
 
+  setCurrentText(text) {
+    this.setState({
+      currentText: text,
+    });
+  }
+
   render() {
-    const { label, dot } = this.state;
+    const { label, dot, currentText } = this.state;
     return (
       <div className="visualizer">
         <h3>My proof - {label}</h3>
-        <Canvas dot={dot} />
+        <p>{currentText}</p>
+        <Canvas dot={dot} setCurrentText={this.setCurrentText} />
       </div>
     );
   }
