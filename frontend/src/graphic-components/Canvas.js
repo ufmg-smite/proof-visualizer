@@ -48,10 +48,26 @@ export default class Canvas extends Component {
     } = this.state;
     const { id, x, y } = e.target.parent.attrs;
 
-    console.log(e);
     setCurrentText(e.target.attrs.text);
 
-    if (proofNodes[id].showingChildren) return;
+    if (proofNodes[id].showingChildren) {
+      proofNodes[id].showingChildren = false;
+      delete showingNodes[id];
+      delete showingEdges[`${id}->${id}c`];
+      const nodesToBeRemoved = this.recursivelyGetChildren(id);
+      nodesToBeRemoved.forEach((node) => {
+        proofNodes[node].showingChildren = false;
+        delete showingNodes[node.toString()];
+        delete showingNodes[`${node}c`];
+        Object.keys(showingEdges)
+          .filter((edgeKey) => edgeKey.indexOf(node) !== -1)
+          .forEach((edge) => {
+            delete showingEdges[edge];
+          });
+      });
+      this.setState({ showingNodes, showingEdges });
+      return;
+    }
 
     const rule = new Node({
       key: Math.random(),
@@ -188,6 +204,17 @@ export default class Canvas extends Component {
       });
     this.setState({ showingNodes, showingEdges });
   };
+
+  recursivelyGetChildren(nodeId) {
+    const { proofNodes } = this.state;
+    let nodes = [];
+    proofNodes[nodeId].children.forEach((node) => {
+      nodes = nodes.concat([node]);
+      if (proofNodes[node].showingChildren)
+        nodes = nodes.concat(this.recursivelyGetChildren(node));
+    });
+    return nodes;
+  }
 
   render() {
     const {
