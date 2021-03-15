@@ -60,7 +60,15 @@ export default class Canvas extends Component {
         delete showingNodes[node.toString()];
         delete showingNodes[`${node}c`];
         Object.keys(showingEdges)
-          .filter((edgeKey) => edgeKey.indexOf(node) !== -1)
+          .filter((edgeKey) => {
+            const edges = edgeKey.split('->');
+            return (
+              node.toString() === edges[0] ||
+              `${node}c` === edges[0] ||
+              node.toString() === edges[1] ||
+              `${node}c` === edges[1]
+            );
+          })
           .forEach((edge) => {
             delete showingEdges[edge];
           });
