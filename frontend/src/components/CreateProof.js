@@ -45,7 +45,7 @@ export default class CreateProof extends Component {
     return (
       <Form onSubmit={this.onSubmit}>
         <Form.Group>
-          <Form.Label>Problem label</Form.Label>
+          <Form.Label>Proof name</Form.Label>
           <Form.Control
             name="label"
             type="text"
@@ -62,19 +62,7 @@ export default class CreateProof extends Component {
             onChange={this.handleChange}
           />
         </Form.Group>
-        <Form.Group onChange={this.handleChange}>
-          <Form.Label>Input language</Form.Label>
-          <Form.Control
-            name="inputLanguage"
-            onChange={this.handleChange}
-            as="select"
-          >
-            <option>SMT-LIB v2</option>
-            <option>CVC4 Native Input Language</option>
-            <option>SyGuS-IF</option>
-            <option>TPTP</option>
-          </Form.Control>
-        </Form.Group>
+
         <Form.Group>
           <Form.Label>Problem</Form.Label>
           <Form.Control
@@ -90,7 +78,7 @@ export default class CreateProof extends Component {
           />
         </Form.Group>
         <Button variant="primary" type="submit">
-          Submit
+          Generate proof
         </Button>
       </Form>
     );

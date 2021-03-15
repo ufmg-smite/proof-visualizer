@@ -83,11 +83,11 @@ export default class ProofList extends Component {
     const { loadingProofs } = this.state;
     return (
       <div>
-        <h3>Logged Proofs</h3>
+        <h3>Proofs</h3>
         <table className="table">
           <thead className="thead-dark">
             <tr>
-              <th>Label</th>
+              <th>Name</th>
               <th>Actions</th>
             </tr>
           </thead>

@@ -54,7 +54,7 @@ export default class VisualizeProof extends Component {
     const { label, dot, currentText } = this.state;
     return (
       <div className="visualizer">
-        <h3>My proof - {label}</h3>
+        <h3>{label}</h3>
         <p>{currentText}</p>
         {dot ? <Canvas dot={dot} setCurrentText={this.setCurrentText} /> : null}
       </div>
