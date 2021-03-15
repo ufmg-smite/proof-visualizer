@@ -15,6 +15,7 @@ router.route('/').get((req, res) => {
 router.route('/add').post((req, res) => {
   const label = req.body.label;
   const problem = req.body.problem;
+  const options = req.body.options;
   const input_language = 'smt2';
   const state = 'proof_received';
 
@@ -23,6 +24,7 @@ router.route('/add').post((req, res) => {
     problem,
     input_language,
     state,
+    options
   });
 
   newProof.save()
@@ -57,12 +59,14 @@ router.route('/process-proof/:id').get((req, res) => {
     return proof;
   }).
   then((proof) => {
-    const cvc4 = spawnSync("cvc4",
-                        [`${process.cwd()}/proof_files/proof.smt2`,
-                        "--dump-proof",
-                        "--dag-thresh=0",
-                        "--simplification=none",
-                        "--proof-format-mode=dot"]);
+    const userOptions = proof.options !== '' ? proof.options.split(' ') : [];
+    let options = [`${process.cwd()}/proof_files/proof.smt2`,
+    "--dump-proof",
+    "--proof-format-mode=dot",
+    "--proof"].concat(userOptions);
+
+    const cvc4 = spawnSync("cvc4", options);
+
     proof.dot = cvc4.stdout;
     proof.dot = proof.dot.slice(proof.dot.indexOf('digraph'));
     proof.state = 'dot_ready';

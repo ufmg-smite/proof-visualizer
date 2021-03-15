@@ -20,7 +20,10 @@ const proofSchema = new Schema({
         type: String,
         require: true,
         enum: ['proof_received', 'dot_ready', 'done', 'error']
-    }
+    },
+    options : {
+        type: String,
+    },
 }, {
     timestamps: true,
 });

@@ -13,6 +13,7 @@ export default class CreateProof extends Component {
       label: '',
       problem: '',
       inputLanguage: '',
+      options: '',
     };
   }
 
@@ -23,12 +24,13 @@ export default class CreateProof extends Component {
   async onSubmit(e) {
     e.preventDefault();
 
-    let { label, problem, inputLanguage, id } = this.state;
+    let { label, problem, inputLanguage, id, options } = this.state;
 
     const proof = {
       label,
       problem,
       inputLanguage,
+      options,
     };
     await axios
       .post('http://localhost:5000/proof/add/', proof)
@@ -48,6 +50,15 @@ export default class CreateProof extends Component {
             name="label"
             type="text"
             placeholder="proof-a-and-not-a"
+            onChange={this.handleChange}
+          />
+        </Form.Group>
+        <Form.Group>
+          <Form.Label>CVC4 Options</Form.Label>
+          <Form.Control
+            name="options"
+            type="text"
+            placeholder="Default options: --proof --dump-proof --proof-format-mode=dot"
             onChange={this.handleChange}
           />
         </Form.Group>
