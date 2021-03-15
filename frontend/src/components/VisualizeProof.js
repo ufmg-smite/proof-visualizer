@@ -12,7 +12,7 @@ export default class VisualizeProof extends Component {
     let dot = null;
     let label = null;
 
-    if (location.state.dot) {
+    if (location.state) {
       dot = location.state.dot;
       label = location.state.label;
     }
@@ -28,7 +28,7 @@ export default class VisualizeProof extends Component {
 
   componentDidMount() {
     const { location } = this.props;
-    if (location.state.label) return;
+    if (location.state) return;
     const proofId = location.pathname.split('/').slice(-1)[0];
     axios
       .get(`http://localhost:5000/proof/${proofId}`)
