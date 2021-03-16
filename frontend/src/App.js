@@ -13,7 +13,6 @@ function App() {
     <Router>
       <div className="container">
         <MyNavbar />
-        <br />
         <Route path="/" exact component={ProofList} />
         <Route path="/create" exact component={CreateProof} />
         <Route path="/visualize/:id" exact component={VisualizeProof} />

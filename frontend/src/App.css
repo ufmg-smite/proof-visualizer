@@ -7,3 +7,14 @@ canvas {
   background-color: #d4d4d4 !important;
   border-radius: 10px;
 }
+
+.visualizer {
+  height: 100%;
+}
+
+.node-text{
+  overflow: auto;
+  height: 70px;
+  width: calc(100% + 20px);
+  text-align: center;
+}

@@ -13,6 +13,7 @@ export default class Canvas extends Component {
     const nodes = this.processDot(dot);
 
     this.state = {
+      canvasWidth: 520,
       stageScale: 1,
       stageX: 0,
       stageY: 0,
@@ -37,7 +38,10 @@ export default class Canvas extends Component {
       updateParentState: this.updateParentState,
       showingChildren: false,
     });
-    this.setState({ showingNodes });
+    this.setState({
+      showingNodes,
+      canvasWidth: document.getElementsByClassName('container')[0].offsetWidth,
+    });
   }
 
   onClick = (e) => {
@@ -233,6 +237,7 @@ export default class Canvas extends Component {
 
   render() {
     const {
+      canvasWidth,
       stageScale,
       stageX,
       stageY,
@@ -242,8 +247,8 @@ export default class Canvas extends Component {
     return (
       <Stage
         draggable
-        width={window.innerWidth * 0.9}
-        height={window.innerHeight * 0.7}
+        width={canvasWidth}
+        height={canvasWidth * 0.4}
         onWheel={this.handleWheel}
         scaleX={stageScale}
         scaleY={stageScale}

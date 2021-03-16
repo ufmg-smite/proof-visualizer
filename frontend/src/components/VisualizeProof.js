@@ -55,8 +55,10 @@ export default class VisualizeProof extends Component {
     return (
       <div className="visualizer">
         <h3>{label}</h3>
-        <p>{currentText}</p>
         {dot ? <Canvas dot={dot} setCurrentText={this.setCurrentText} /> : null}
+        <div className="node-text">
+          <p>{currentText}</p>
+        </div>
       </div>
     );
   }
