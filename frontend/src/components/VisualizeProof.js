@@ -22,7 +22,7 @@ export default class VisualizeProof extends Component {
     this.state = {
       dot,
       label,
-      currentText: 'click in a node to show the text here',
+      currentText: 'right-click in a node to show the text here',
     };
   }
 

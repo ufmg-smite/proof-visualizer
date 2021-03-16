@@ -48,7 +48,10 @@ export default class Canvas extends Component {
     } = this.state;
     const { id, x, y, conclusion } = e.target.parent.attrs;
 
-    setCurrentText(e.target.attrs.text);
+    if (e.evt.button === 2) {
+      setCurrentText(e.target.attrs.text);
+      return;
+    }
 
     if (!conclusion) return;
     if (proofNodes[id].showingChildren) {
@@ -243,6 +246,7 @@ export default class Canvas extends Component {
         scaleY={stageScale}
         x={stageX}
         y={stageY}
+        onContextMenu={(e) => e.evt.preventDefault()}
       >
         <Layer>
           {Object.keys(showingNodes).length === 0
