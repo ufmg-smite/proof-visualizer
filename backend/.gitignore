@@ -1,5 +1,0 @@
-# dependencies
-/node_modules
-
-./proof_files/*
-.env
