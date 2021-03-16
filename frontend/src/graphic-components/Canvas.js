@@ -35,6 +35,7 @@ export default class Canvas extends Component {
       conclusion: true,
       children: proofNodes[0].conclusion,
       updateParentState: this.updateParentState,
+      showingChildren: false,
     });
     this.setState({ showingNodes });
   }
@@ -77,6 +78,7 @@ export default class Canvas extends Component {
             delete showingEdges[edge];
           });
       });
+      showingNodes[`${id}c`].props.showingChildren = false;
       this.setState({ showingNodes, showingEdges });
       return;
     }
@@ -132,6 +134,7 @@ export default class Canvas extends Component {
       return true;
     });
     proofNodes[id].showingChildren = true;
+    showingNodes[`${id}c`].props.showingChildren = true;
     this.setState({ showingNodes, proofNodes, showingEdges });
   };
 

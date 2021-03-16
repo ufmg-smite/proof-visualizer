@@ -16,6 +16,7 @@ export default class Node extends Component {
       key,
       id,
       updateParentState,
+      showingChildren,
     } = this.props;
 
     this.state = {
@@ -29,6 +30,7 @@ export default class Node extends Component {
       id,
       isDragging: false,
       updateParentState,
+      showingChildren,
     };
   }
 
@@ -55,6 +57,10 @@ export default class Node extends Component {
   render() {
     const { name, onClick, y, x, children, conclusion, key } = this.state;
 
+    const { showingChildren } = this.props;
+
+    const colorConclusion = showingChildren ? 'darkgray' : 'gray';
+
     return (
       <Label
         conclusion={conclusion}
@@ -67,7 +73,7 @@ export default class Node extends Component {
         y={y}
         onDragEnd={(e) => this.onDragEnd(e)}
       >
-        <Tag fill={conclusion ? 'gray' : 'white'} stroke="black" />
+        <Tag fill={conclusion ? colorConclusion : 'white'} stroke="black" />
         <Text
           text={children}
           fontSize={15}
@@ -92,4 +98,5 @@ Node.propTypes = {
   key: PropTypes.any,
   id: PropTypes.any,
   updateParentState: PropTypes.func,
+  showingChildren: PropTypes.any,
 };
