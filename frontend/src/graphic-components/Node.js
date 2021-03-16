@@ -57,6 +57,7 @@ export default class Node extends Component {
 
     return (
       <Label
+        conclusion={conclusion}
         key={key}
         name={name}
         id={name}

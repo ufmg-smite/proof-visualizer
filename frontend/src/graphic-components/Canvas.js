@@ -46,10 +46,11 @@ export default class Canvas extends Component {
       showingEdges,
       setCurrentText,
     } = this.state;
-    const { id, x, y } = e.target.parent.attrs;
+    const { id, x, y, conclusion } = e.target.parent.attrs;
 
     setCurrentText(e.target.attrs.text);
 
+    if (!conclusion) return;
     if (proofNodes[id].showingChildren) {
       proofNodes[id].showingChildren = false;
       delete showingNodes[id];
