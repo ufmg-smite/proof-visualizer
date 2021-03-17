@@ -18,11 +18,13 @@ export default class VisualizeProof extends Component {
     }
 
     this.setCurrentText = this.setCurrentText.bind(this);
+    this.setFocusText = this.setFocusText.bind(this);
 
     this.state = {
       dot,
       label,
       currentText: 'right-click in a node to show the text here',
+      textOfFocusNode: '',
     };
   }
 
@@ -50,12 +52,30 @@ export default class VisualizeProof extends Component {
     });
   }
 
+  setFocusText(text) {
+    this.setState({
+      textOfFocusNode: text,
+    });
+  }
+
   render() {
-    const { label, dot, currentText } = this.state;
+    const { label, dot, currentText, textOfFocusNode } = this.state;
+    const props = textOfFocusNode !== '' ? { title: textOfFocusNode } : {};
+
     return (
       <div className="visualizer">
         <h3>{label}</h3>
-        {dot ? <Canvas dot={dot} setCurrentText={this.setCurrentText} /> : null}
+        {dot ? (
+          // eslint-disable-next-line react/jsx-props-no-spreading
+          <div {...props}>
+            {' '}
+            <Canvas
+              dot={dot}
+              setCurrentText={this.setCurrentText}
+              setFocusText={this.setFocusText}
+            />
+          </div>
+        ) : null}
         <div className="node-text">
           <p>{currentText}</p>
         </div>

@@ -8,7 +8,7 @@ export default class Canvas extends Component {
   constructor(props) {
     super(props);
 
-    const { dot, setCurrentText } = this.props;
+    const { dot, setCurrentText, setFocusText } = this.props;
 
     const nodes = this.processDot(dot);
 
@@ -21,6 +21,7 @@ export default class Canvas extends Component {
       showingNodes: {},
       showingEdges: {},
       setCurrentText,
+      setFocusText,
     };
   }
 
@@ -37,6 +38,8 @@ export default class Canvas extends Component {
       children: proofNodes[0].conclusion,
       updateParentState: this.updateParentState,
       showingChildren: false,
+      onMouseIn: this.onMouseIn,
+      onMouseOut: this.onMouseOut,
     });
     this.setState({
       showingNodes,
@@ -96,6 +99,8 @@ export default class Canvas extends Component {
       children: proofNodes[id].rule,
       onClick: this.onClick,
       updateParentState: this.updateParentState,
+      onMouseIn: this.onMouseIn,
+      onMouseOut: this.onMouseOut,
     });
 
     showingNodes[proofNodes[id].id.toString()] = rule;
@@ -124,6 +129,8 @@ export default class Canvas extends Component {
         conclusion: true,
         children: childNode.conclusion,
         updateParentState: this.updateParentState,
+        onMouseIn: this.onMouseIn,
+        onMouseOut: this.onMouseOut,
       });
       i += 1;
       showingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line({
@@ -162,6 +169,16 @@ export default class Canvas extends Component {
       stageY:
         -(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale,
     });
+  };
+
+  onMouseIn = (text) => {
+    const { setFocusText } = this.state;
+    setFocusText(text);
+  };
+
+  onMouseOut = () => {
+    const { setFocusText } = this.state;
+    setFocusText('');
   };
 
   processDot = (dot) => {
@@ -276,4 +293,5 @@ export default class Canvas extends Component {
 Canvas.propTypes = {
   dot: PropTypes.any,
   setCurrentText: PropTypes.func,
+  setFocusText: PropTypes.func,
 };

@@ -17,6 +17,8 @@ export default class Node extends Component {
       id,
       updateParentState,
       showingChildren,
+      onMouseIn,
+      onMouseOut,
     } = this.props;
 
     this.state = {
@@ -31,6 +33,8 @@ export default class Node extends Component {
       isDragging: false,
       updateParentState,
       showingChildren,
+      onMouseIn,
+      onMouseOut,
     };
   }
 
@@ -55,7 +59,17 @@ export default class Node extends Component {
   }
 
   render() {
-    const { name, onClick, y, x, children, conclusion, key } = this.state;
+    const {
+      name,
+      onClick,
+      y,
+      x,
+      children,
+      conclusion,
+      key,
+      onMouseIn,
+      onMouseOut,
+    } = this.state;
 
     const { showingChildren } = this.props;
 
@@ -72,6 +86,10 @@ export default class Node extends Component {
         x={x}
         y={y}
         onDragEnd={(e) => this.onDragEnd(e)}
+        onMouseEnter={(e) => {
+          onMouseIn(e.target.attrs.text);
+        }}
+        onMouseLeave={() => onMouseOut()}
       >
         <Tag fill={conclusion ? colorConclusion : 'white'} stroke="black" />
         <Text
@@ -99,4 +117,6 @@ Node.propTypes = {
   id: PropTypes.any,
   updateParentState: PropTypes.func,
   showingChildren: PropTypes.any,
+  onMouseIn: PropTypes.func,
+  onMouseOut: PropTypes.func,
 };
