@@ -35,6 +35,7 @@ export default class Node extends Component {
       showingChildren,
       onMouseIn,
       onMouseOut,
+      color: ['#8d99ae', '#2b2d42', '#edf2f4'],
     };
   }
 
@@ -69,11 +70,13 @@ export default class Node extends Component {
       key,
       onMouseIn,
       onMouseOut,
+      color,
     } = this.state;
 
     const { showingChildren } = this.props;
 
-    const colorConclusion = showingChildren ? 'darkgray' : 'gray';
+    const colorConclusionBG = showingChildren ? color[0] : color[1];
+    const colorText = conclusion && !showingChildren ? 'white' : 'black';
 
     return (
       <Label
@@ -91,7 +94,7 @@ export default class Node extends Component {
         }}
         onMouseLeave={() => onMouseOut()}
       >
-        <Tag fill={conclusion ? colorConclusion : 'white'} stroke="black" />
+        <Tag fill={conclusion ? colorConclusionBG : color[2]} stroke="black" />
         <Text
           text={children}
           fontSize={15}
@@ -99,7 +102,7 @@ export default class Node extends Component {
           height={35}
           padding={10}
           align="center"
-          fill="black"
+          fill={colorText}
         />
       </Label>
     );
