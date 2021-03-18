@@ -64,10 +64,10 @@ export default class VisualizeProof extends Component {
 
     return (
       <div className="visualizer">
-        <h3>{label}</h3>
+        <h3 className="proof-name">{label}</h3>
         {dot ? (
           // eslint-disable-next-line react/jsx-props-no-spreading
-          <div {...props}>
+          <div className="canvas-container" {...props}>
             {' '}
             <Canvas
               dot={dot}

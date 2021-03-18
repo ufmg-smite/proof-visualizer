@@ -14,6 +14,7 @@ export default class Canvas extends Component {
 
     this.state = {
       canvasWidth: 520,
+      canvasHeight: 300,
       stageScale: 1,
       stageX: 0,
       stageY: 0,
@@ -26,13 +27,13 @@ export default class Canvas extends Component {
   }
 
   componentDidMount() {
-    const { showingNodes, proofNodes } = this.state;
+    const { showingNodes, proofNodes, canvasWidth } = this.state;
     showingNodes['0c'] = new Node({
       key: Math.random(),
       id: `${proofNodes[0].id}c`,
       onClick: (e) => this.onClick(e),
       name: proofNodes[0].id,
-      x: window.innerWidth * 0.35,
+      x: canvasWidth * 0.5,
       y: 10,
       conclusion: true,
       children: proofNodes[0].conclusion,
@@ -43,8 +44,21 @@ export default class Canvas extends Component {
     });
     this.setState({
       showingNodes,
-      canvasWidth: document.getElementsByClassName('container')[0].offsetWidth,
+      canvasWidth:
+        document.getElementsByClassName('visualizer')[0].offsetWidth - 30,
+      canvasHeight:
+        window.innerHeight -
+        (document.getElementsByClassName('navbar')[0].offsetHeight +
+          20 +
+          document.getElementsByClassName('proof-name')[0].offsetHeight +
+          document.getElementsByClassName('node-text')[0].offsetHeight +
+          50),
     });
+
+    console.log(window.innerHeight);
+    console.log(document.getElementsByClassName('navbar')[0].offsetHeight);
+    console.log(document.getElementsByClassName('proof-name')[0].offsetHeight);
+    console.log(document.getElementsByClassName('node-text')[0].offsetHeight);
   }
 
   onClick = (e) => {
@@ -255,6 +269,7 @@ export default class Canvas extends Component {
   render() {
     const {
       canvasWidth,
+      canvasHeight,
       stageScale,
       stageX,
       stageY,
@@ -265,7 +280,7 @@ export default class Canvas extends Component {
       <Stage
         draggable
         width={canvasWidth}
-        height={canvasWidth * 0.4}
+        height={canvasHeight}
         onWheel={this.handleWheel}
         scaleX={stageScale}
         scaleY={stageScale}

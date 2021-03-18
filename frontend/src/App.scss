@@ -1,0 +1,34 @@
+.spinner-container {
+  text-align: center;
+}
+
+canvas {
+  border: 1px black;
+  background-color: #d4d4d4 !important;
+  border-radius: 10px;
+}
+
+html, body, #root, #root>.container {
+  height: 100%
+}
+
+.container {
+  display: flex;
+  flex-flow: column;
+  .visualizer {
+    flex: 1;  /* 1 and it will fill whole space left if no flex value are set to other children*/
+    display: flex;
+    flex-flow: column;
+    .canvas-container{
+      flex: 1;
+    }
+    .node-text{
+      overflow: auto;
+      height: 70px;
+      width: calc(100%);
+      text-align: center;
+    }
+  }
+}
+
+
