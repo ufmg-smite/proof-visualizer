@@ -2,6 +2,14 @@ import React, { Component } from 'react';
 import { Label, Text, Tag } from 'react-konva';
 import PropTypes from 'prop-types';
 
+function textColorFromBg(bgColor) {
+  const color = bgColor.charAt(0) === '#' ? bgColor.substring(1, 7) : bgColor;
+  const r = parseInt(color.substring(0, 2), 16);
+  const g = parseInt(color.substring(2, 4), 16);
+  const b = parseInt(color.substring(4, 6), 16);
+  return r * 0.299 + g * 0.587 + b * 0.114 > 150 ? '#000000' : '#ffffff';
+}
+
 export default class Node extends Component {
   constructor(props) {
     super(props);
@@ -32,11 +40,14 @@ export default class Node extends Component {
       bgRuleColor,
     } = this.state;
 
+    const conclusion = id.indexOf('c') !== -1;
+
     const bgConclusionColor = showingChildren
       ? bgOpenConclusionColor
       : bgClosedConclusionColor;
-    const conclusion = id.indexOf('c') !== -1;
-    const textColor = conclusion && !showingChildren ? 'white' : 'black';
+    const bgColor = conclusion ? bgConclusionColor : bgRuleColor;
+
+    const textColor = textColorFromBg(bgColor);
 
     return (
       <Label
@@ -56,10 +67,7 @@ export default class Node extends Component {
         x={x}
         y={y}
       >
-        <Tag
-          fill={conclusion ? bgConclusionColor : bgRuleColor}
-          stroke="black"
-        />
+        <Tag fill={bgColor} stroke="black" />
         <Text
           align="center"
           fill={textColor}
