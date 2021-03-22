@@ -44,7 +44,6 @@ export default class Node extends Component {
         draggable
         id={name}
         key={id}
-        name={name}
         onClick={onClick}
         onDragEnd={(e) => {
           const { updateParentState } = this.props;
