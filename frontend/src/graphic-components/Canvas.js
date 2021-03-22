@@ -29,7 +29,6 @@ export default class Canvas extends Component {
   componentDidMount() {
     const { showingNodes, proofNodes, canvasWidth } = this.state;
     showingNodes['0c'] = new Node({
-      key: Math.random(),
       id: `${proofNodes[0].id}c`,
       onClick: (e) => this.onClick(e),
       name: proofNodes[0].id,
@@ -100,7 +99,6 @@ export default class Canvas extends Component {
     }
 
     const rule = new Node({
-      key: Math.random(),
       id: proofNodes[id].id,
       name: proofNodes[id].id,
       x,
@@ -129,7 +127,6 @@ export default class Canvas extends Component {
     proofNodes[id].children.map((child) => {
       const childNode = proofNodes[child];
       showingNodes[`${childNode.id}c`] = new Node({
-        key: Math.random(),
         onClick: this.onClick,
         id: `${childNode.id}c`,
         name: childNode.id,
