@@ -297,7 +297,7 @@ export default class Canvas extends Component {
           {Object.keys(showingEdges).length === 0
             ? []
             : Object.keys(showingEdges).map(function (key) {
-                return showingEdges[key].render();
+                return showingEdges[key];
               })}
         </Layer>
       </Stage>
