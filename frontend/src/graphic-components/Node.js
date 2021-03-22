@@ -16,7 +16,6 @@ export default class Node extends Component {
       key,
       id,
       updateParentState,
-      showingChildren,
       onMouseIn,
       onMouseOut,
     } = this.props;
@@ -30,9 +29,7 @@ export default class Node extends Component {
       conclusion,
       key,
       id,
-      isDragging: false,
       updateParentState,
-      showingChildren,
       onMouseIn,
       onMouseOut,
       color: ['#8d99ae', '#2b2d42', '#edf2f4'],
@@ -41,23 +38,8 @@ export default class Node extends Component {
 
   onDragEnd = (e) => {
     const { updateParentState, id } = this.state;
-    this.state = {
-      ...this.state,
-      x: e.target.x(),
-      y: e.target.y(),
-    };
-    updateParentState(id, e.target.x(), e.target.y());
+    updateParentState(id, e.target.attrs.x, e.target.attrs.y);
   };
-
-  x() {
-    const { x } = this.state;
-    return x;
-  }
-
-  y() {
-    const { y } = this.state;
-    return y;
-  }
 
   render() {
     const {

@@ -54,11 +54,6 @@ export default class Canvas extends Component {
           document.getElementsByClassName('node-text')[0].offsetHeight +
           50),
     });
-
-    console.log(window.innerHeight);
-    console.log(document.getElementsByClassName('navbar')[0].offsetHeight);
-    console.log(document.getElementsByClassName('proof-name')[0].offsetHeight);
-    console.log(document.getElementsByClassName('node-text')[0].offsetHeight);
   }
 
   onClick = (e) => {
@@ -150,10 +145,10 @@ export default class Canvas extends Component {
       showingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line({
         key: Math.random(),
         points: [
-          showingNodes[`${childNode.id}c`].x() + 150,
-          showingNodes[`${childNode.id}c`].y(),
-          showingNodes[proofNodes[id].id.toString()].x() + 150,
-          showingNodes[proofNodes[id].id.toString()].y() + 36,
+          showingNodes[`${childNode.id}c`].props.x + 150,
+          showingNodes[`${childNode.id}c`].props.y,
+          showingNodes[proofNodes[id].id.toString()].props.x + 150,
+          showingNodes[proofNodes[id].id.toString()].props.y + 36,
         ],
       });
       return true;
