@@ -38,8 +38,7 @@ export default class Canvas extends Component {
       children: proofNodes[0].conclusion,
       updateParentState: this.updateParentState,
       showingChildren: false,
-      onMouseIn: this.onMouseIn,
-      onMouseOut: this.onMouseOut,
+      onMouse: this.onMouse,
     });
     this.setState({
       showingNodes,
@@ -106,8 +105,7 @@ export default class Canvas extends Component {
       children: proofNodes[id].rule,
       onClick: this.onClick,
       updateParentState: this.updateParentState,
-      onMouseIn: this.onMouseIn,
-      onMouseOut: this.onMouseOut,
+      onMouse: this.onMouse,
     });
 
     showingNodes[proofNodes[id].id.toString()] = rule;
@@ -135,8 +133,7 @@ export default class Canvas extends Component {
         conclusion: true,
         children: childNode.conclusion,
         updateParentState: this.updateParentState,
-        onMouseIn: this.onMouseIn,
-        onMouseOut: this.onMouseOut,
+        onMouse: this.onMouse,
       });
       i += 1;
       showingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line({
@@ -177,14 +174,9 @@ export default class Canvas extends Component {
     });
   };
 
-  onMouseIn = (text) => {
+  onMouse = (text) => {
     const { setFocusText } = this.state;
     setFocusText(text);
-  };
-
-  onMouseOut = () => {
-    const { setFocusText } = this.state;
-    setFocusText('');
   };
 
   processDot = (dot) => {

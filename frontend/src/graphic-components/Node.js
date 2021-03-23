@@ -27,8 +27,7 @@ export default class Node extends Component {
       id,
       name,
       onClick,
-      onMouseIn,
-      onMouseOut,
+      onMouse,
       showingChildren,
       x,
       y,
@@ -61,9 +60,9 @@ export default class Node extends Component {
           updateParentState(id, e.target.attrs.x, e.target.attrs.y);
         }}
         onMouseEnter={(e) => {
-          onMouseIn(e.target.attrs.text);
+          onMouse(e.target.attrs.text);
         }}
-        onMouseLeave={() => onMouseOut()}
+        onMouseLeave={() => onMouse('')}
         x={x}
         y={y}
       >
@@ -87,8 +86,7 @@ Node.propTypes = {
   id: PropTypes.string,
   name: PropTypes.string,
   onClick: PropTypes.func,
-  onMouseIn: PropTypes.func,
-  onMouseOut: PropTypes.func,
+  onMouse: PropTypes.func,
   showingChildren: PropTypes.bool,
   updateParentState: PropTypes.func,
   x: PropTypes.number,
