@@ -38,6 +38,28 @@ function processDot(dot) {
   return nodes;
 }
 
+function handleWheel(e) {
+  e.evt.preventDefault();
+
+  const scaleBy = 1.08;
+  const stage = e.target.getStage();
+  const oldScale = stage.scaleX();
+  const mousePointTo = {
+    x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
+    y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale,
+  };
+
+  const newScale = e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
+
+  return {
+    stageScale: newScale,
+    stageX:
+      -(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale,
+    stageY:
+      -(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale,
+  };
+}
+
 export default class Canvas extends Component {
   constructor(props) {
     super(props);
@@ -180,28 +202,6 @@ export default class Canvas extends Component {
     this.setState({ showingNodes, proofNodes, showingEdges });
   };
 
-  handleWheel = (e) => {
-    e.evt.preventDefault();
-
-    const scaleBy = 1.08;
-    const stage = e.target.getStage();
-    const oldScale = stage.scaleX();
-    const mousePointTo = {
-      x: stage.getPointerPosition().x / oldScale - stage.x() / oldScale,
-      y: stage.getPointerPosition().y / oldScale - stage.y() / oldScale,
-    };
-
-    const newScale = e.evt.deltaY > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-
-    this.setState({
-      stageScale: newScale,
-      stageX:
-        -(mousePointTo.x - stage.getPointerPosition().x / newScale) * newScale,
-      stageY:
-        -(mousePointTo.y - stage.getPointerPosition().y / newScale) * newScale,
-    });
-  };
-
   onMouse = (text) => {
     const { setFocusText } = this.props;
     setFocusText(text);
@@ -254,7 +254,7 @@ export default class Canvas extends Component {
         draggable
         width={canvasWidth}
         height={canvasHeight}
-        onWheel={this.handleWheel}
+        onWheel={(e) => this.setState(handleWheel(e))}
         scaleX={stageScale}
         scaleY={stageScale}
         x={stageX}
