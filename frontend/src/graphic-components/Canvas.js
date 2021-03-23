@@ -4,13 +4,47 @@ import PropTypes from 'prop-types';
 import Node from './Node';
 import Line from './Line';
 
+function processDot(dot) {
+  const numberOfNodes = (dot.match(/label/g) || []).length / 2;
+  const nodes = new Array(numberOfNodes);
+  const lines = dot
+    .slice(dot.indexOf('{') + 1, dot.indexOf('}') - 2)
+    .replace(/(\n|\t)/gm, '')
+    .split(';');
+  lines.forEach((line) => {
+    if (line.search('label') !== -1) {
+      const id = line.split('[')[0].trim().slice(1, -1);
+      const text = line.slice(line.indexOf('label') + 9, line.lastIndexOf('"'));
+      if (line.split('[')[0].search('c') === -1) {
+        const node = {
+          id,
+          rule: text,
+          children: [],
+          showingChildren: false,
+        };
+        nodes[parseInt(node.id)] = node;
+      } else {
+        nodes[parseInt(id)].conclusion = text;
+      }
+    } else if (line.search('->') !== -1) {
+      const edgeNodes = line
+        .split('->')
+        .map((element) => element.trim().replaceAll('"', '').replace('c', ''));
+      if (edgeNodes[0] !== edgeNodes[1]) {
+        nodes[edgeNodes[1]].children.push(edgeNodes[0]);
+      }
+    }
+  });
+  return nodes;
+}
+
 export default class Canvas extends Component {
   constructor(props) {
     super(props);
 
     const { dot } = this.props;
 
-    const proofNodes = this.processDot(dot);
+    const proofNodes = processDot(dot);
 
     this.state = {
       canvasWidth: 520,
@@ -27,16 +61,16 @@ export default class Canvas extends Component {
   componentDidMount() {
     const { showingNodes, proofNodes, canvasWidth } = this.state;
     showingNodes['0c'] = new Node({
+      children: proofNodes[0].conclusion,
+      conclusion: true,
       id: `${proofNodes[0].id}c`,
-      onClick: (e) => this.onClick(e),
       name: proofNodes[0].id,
+      onClick: (e) => this.onClick(e),
+      onMouse: this.onMouse,
+      showingChildren: false,
+      updateParentState: this.updateParentState,
       x: canvasWidth * 0.5,
       y: 10,
-      conclusion: true,
-      children: proofNodes[0].conclusion,
-      updateParentState: this.updateParentState,
-      showingChildren: false,
-      onMouse: this.onMouse,
     });
     this.setState({
       showingNodes,
@@ -92,14 +126,14 @@ export default class Canvas extends Component {
     }
 
     const rule = new Node({
+      children: proofNodes[id].rule,
       id: proofNodes[id].id,
       name: proofNodes[id].id,
+      onClick: this.onClick,
+      onMouse: this.onMouse,
+      updateParentState: this.updateParentState,
       x,
       y: y + 100,
-      children: proofNodes[id].rule,
-      onClick: this.onClick,
-      updateParentState: this.updateParentState,
-      onMouse: this.onMouse,
     });
 
     showingNodes[proofNodes[id].id.toString()] = rule;
@@ -119,15 +153,15 @@ export default class Canvas extends Component {
     proofNodes[id].children.map((child) => {
       const childNode = proofNodes[child];
       showingNodes[`${childNode.id}c`] = new Node({
-        onClick: this.onClick,
+        children: childNode.conclusion,
+        conclusion: true,
         id: `${childNode.id}c`,
         name: childNode.id,
+        onClick: this.onClick,
+        onMouse: this.onMouse,
+        updateParentState: this.updateParentState,
         x: x + (i - lenChildren / 2) * 350,
         y: y + 200,
-        conclusion: true,
-        children: childNode.conclusion,
-        updateParentState: this.updateParentState,
-        onMouse: this.onMouse,
       });
       i += 1;
       showingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line({
@@ -171,45 +205,6 @@ export default class Canvas extends Component {
   onMouse = (text) => {
     const { setFocusText } = this.props;
     setFocusText(text);
-  };
-
-  processDot = (dot) => {
-    const numberOfNodes = (dot.match(/label/g) || []).length / 2;
-    const nodes = new Array(numberOfNodes);
-    const lines = dot
-      .slice(dot.indexOf('{') + 1, dot.indexOf('}') - 2)
-      .replace(/(\n|\t)/gm, '')
-      .split(';');
-    lines.forEach((line) => {
-      if (line.search('label') !== -1) {
-        const id = line.split('[')[0].trim().slice(1, -1);
-        const text = line.slice(
-          line.indexOf('label') + 9,
-          line.lastIndexOf('"')
-        );
-        if (line.split('[')[0].search('c') === -1) {
-          const node = {
-            id,
-            rule: text,
-            children: [],
-            showingChildren: false,
-          };
-          nodes[parseInt(node.id)] = node;
-        } else {
-          nodes[parseInt(id)].conclusion = text;
-        }
-      } else if (line.search('->') !== -1) {
-        const edgeNodes = line
-          .split('->')
-          .map((element) =>
-            element.trim().replaceAll('"', '').replace('c', '')
-          );
-        if (edgeNodes[0] !== edgeNodes[1]) {
-          nodes[edgeNodes[1]].children.push(edgeNodes[0]);
-        }
-      }
-    });
-    return nodes;
   };
 
   updateParentState = (key, x, y) => {
