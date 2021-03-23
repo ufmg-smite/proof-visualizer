@@ -8,9 +8,9 @@ export default class Canvas extends Component {
   constructor(props) {
     super(props);
 
-    const { dot, setCurrentText, setFocusText } = this.props;
+    const { dot } = this.props;
 
-    const nodes = this.processDot(dot);
+    const proofNodes = this.processDot(dot);
 
     this.state = {
       canvasWidth: 520,
@@ -18,11 +18,9 @@ export default class Canvas extends Component {
       stageScale: 1,
       stageX: 0,
       stageY: 0,
-      proofNodes: nodes,
+      proofNodes,
       showingNodes: {},
       showingEdges: {},
-      setCurrentText,
-      setFocusText,
     };
   }
 
@@ -55,12 +53,8 @@ export default class Canvas extends Component {
   }
 
   onClick = (e) => {
-    const {
-      proofNodes,
-      showingNodes,
-      showingEdges,
-      setCurrentText,
-    } = this.state;
+    const { proofNodes, showingNodes, showingEdges } = this.state;
+    const { setCurrentText } = this.props;
     const { id, x, y, conclusion } = e.target.parent.attrs;
 
     if (e.evt.button === 2) {
@@ -175,7 +169,7 @@ export default class Canvas extends Component {
   };
 
   onMouse = (text) => {
-    const { setFocusText } = this.state;
+    const { setFocusText } = this.props;
     setFocusText(text);
   };
 
