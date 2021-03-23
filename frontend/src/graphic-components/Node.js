@@ -46,8 +46,6 @@ export default class Node extends Component {
       : bgClosedConclusionColor;
     const bgColor = conclusion ? bgConclusionColor : bgRuleColor;
 
-    const textColor = textColorFromBg(bgColor);
-
     return (
       <Label
         conclusion={conclusion}
@@ -69,7 +67,7 @@ export default class Node extends Component {
         <Tag fill={bgColor} stroke="black" />
         <Text
           align="center"
-          fill={textColor}
+          fill={textColorFromBg(bgColor)}
           fontSize={15}
           height={35}
           padding={10}
