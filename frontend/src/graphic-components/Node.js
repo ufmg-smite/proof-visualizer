@@ -25,7 +25,6 @@ export default class Node extends Component {
     const {
       children,
       id,
-      name,
       onClick,
       onMouse,
       showingChildren,
@@ -50,7 +49,7 @@ export default class Node extends Component {
       <Label
         conclusion={conclusion}
         draggable
-        id={name}
+        id={id}
         key={id}
         onClick={onClick}
         onDragEnd={(e) => {
@@ -82,7 +81,6 @@ export default class Node extends Component {
 Node.propTypes = {
   children: PropTypes.string,
   id: PropTypes.string,
-  name: PropTypes.string,
   onClick: PropTypes.func,
   onMouse: PropTypes.func,
   showingChildren: PropTypes.bool,

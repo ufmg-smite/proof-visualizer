@@ -22,9 +22,9 @@ function processDot(dot) {
           children: [],
           showingChildren: false,
         };
-        nodes[parseInt(node.id)] = node;
+        nodes[node.id] = node;
       } else {
-        nodes[parseInt(id)].conclusion = text;
+        nodes[id.replace('c', '')].conclusion = text;
       }
     } else if (line.search('->') !== -1) {
       const edgeNodes = line
@@ -86,7 +86,6 @@ export default class Canvas extends Component {
       children: proofNodes[0].conclusion,
       conclusion: true,
       id: `${proofNodes[0].id}c`,
-      name: proofNodes[0].id,
       onClick: (e) => this.onClick(e),
       onMouse: this.onMouse,
       showingChildren: false,
@@ -111,7 +110,8 @@ export default class Canvas extends Component {
   onClick = (e) => {
     const { proofNodes, showingNodes, showingEdges } = this.state;
     const { setCurrentText } = this.props;
-    const { id, x, y, conclusion } = e.target.parent.attrs;
+    let { id, x, y, conclusion } = e.target.parent.attrs;
+    id = id.replace('c', '');
 
     if (e.evt.button === 2) {
       setCurrentText(e.target.attrs.text);
@@ -150,7 +150,6 @@ export default class Canvas extends Component {
     const rule = new Node({
       children: proofNodes[id].rule,
       id: proofNodes[id].id,
-      name: proofNodes[id].id,
       onClick: this.onClick,
       onMouse: this.onMouse,
       updateParentState: this.updateParentState,
@@ -178,7 +177,6 @@ export default class Canvas extends Component {
         children: childNode.conclusion,
         conclusion: true,
         id: `${childNode.id}c`,
-        name: childNode.id,
         onClick: this.onClick,
         onMouse: this.onMouse,
         updateParentState: this.updateParentState,
