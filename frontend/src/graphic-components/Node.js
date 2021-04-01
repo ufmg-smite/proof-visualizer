@@ -52,7 +52,7 @@ export default class Node extends Component {
         id={id}
         key={id}
         onClick={onClick}
-        onDragEnd={(e) => {
+        onDragMove={(e) => {
           const { updateParentState } = this.props;
           updateParentState(id, e.target.attrs.x, e.target.attrs.y);
         }}
