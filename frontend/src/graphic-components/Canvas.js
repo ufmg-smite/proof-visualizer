@@ -123,17 +123,18 @@ export default function Canvas(props) {
 
     if (!conclusion) return;
 
+    const cpShowingNodes = { ...showingNodes };
     const cpShowingEdges = { ...showingEdges };
 
     if (proofNodes[id].showingChildren) {
       proofNodes[id].showingChildren = false;
-      delete showingNodes[id];
+      cpShowingNodes[id] = null;
       cpShowingEdges[`${id}->${id}c`] = null;
       const nodesToBeRemoved = recursivelyGetChildren(id);
       nodesToBeRemoved.forEach((node) => {
         proofNodes[node].showingChildren = false;
-        delete showingNodes[node.toString()];
-        delete showingNodes[`${node}c`];
+        cpShowingNodes[node.toString()] = null;
+        cpShowingNodes[`${node}c`] = null;
         Object.keys(cpShowingEdges)
           .filter((edgeKey) => {
             const edges = edgeKey.split('->');
@@ -148,8 +149,18 @@ export default function Canvas(props) {
             cpShowingEdges[edge] = null;
           });
       });
-      showingNodes[`${id}c`].props.showingChildren = false;
-      setShowingNodes(showingNodes);
+      cpShowingNodes[`${id}c`] = new Node({
+        id: `${id}c`,
+        conclusion,
+        children: proofNodes[id].conclusion,
+        showingChildren: false,
+        onClick,
+        onMouse,
+        updateParentState,
+        x,
+        y,
+      });
+      setShowingNodes(Object.assign(showingNodes, cpShowingNodes));
       setShowingEdges(Object.assign(showingEdges, cpShowingEdges));
       return;
     }
@@ -164,15 +175,15 @@ export default function Canvas(props) {
       y: y + 100,
     });
 
-    showingNodes[proofNodes[id].id.toString()] = rule;
+    cpShowingNodes[proofNodes[id].id.toString()] = rule;
 
     cpShowingEdges[`${proofNodes[id].id}->${proofNodes[id].id}c`] = new Line({
       key: Math.random(),
       points: [
-        showingNodes[proofNodes[id].id.toString()].props.x + 150,
-        showingNodes[proofNodes[id].id.toString()].props.y,
-        showingNodes[`${proofNodes[id].id.toString()}c`].props.x + 150,
-        showingNodes[`${proofNodes[id].id.toString()}c`].props.y + 36,
+        cpShowingNodes[proofNodes[id].id.toString()].props.x + 150,
+        cpShowingNodes[proofNodes[id].id.toString()].props.y,
+        cpShowingNodes[`${proofNodes[id].id.toString()}c`].props.x + 150,
+        cpShowingNodes[`${proofNodes[id].id.toString()}c`].props.y + 36,
       ],
     });
 
@@ -180,7 +191,8 @@ export default function Canvas(props) {
     const lenChildren = proofNodes[id].children.length - 1;
     proofNodes[id].children.map((child) => {
       const childNode = proofNodes[child];
-      showingNodes[`${childNode.id}c`] = new Node({
+      console.log({ ...cpShowingNodes[`${id}c`].props });
+      cpShowingNodes[`${childNode.id}c`] = new Node({
         children: childNode.conclusion,
         conclusion: true,
         id: `${childNode.id}c`,
@@ -194,17 +206,27 @@ export default function Canvas(props) {
       cpShowingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line({
         key: Math.random(),
         points: [
-          showingNodes[`${childNode.id}c`].props.x + 150,
-          showingNodes[`${childNode.id}c`].props.y,
-          showingNodes[proofNodes[id].id.toString()].props.x + 150,
-          showingNodes[proofNodes[id].id.toString()].props.y + 36,
+          cpShowingNodes[`${childNode.id}c`].props.x + 150,
+          cpShowingNodes[`${childNode.id}c`].props.y,
+          cpShowingNodes[proofNodes[id].id.toString()].props.x + 150,
+          cpShowingNodes[proofNodes[id].id.toString()].props.y + 36,
         ],
       });
       return true;
     });
     proofNodes[id].showingChildren = true;
-    showingNodes[`${id}c`].props.showingChildren = true;
-    setShowingNodes(showingNodes);
+    cpShowingNodes[`${id}c`] = new Node({
+      id: `${id}c`,
+      conclusion,
+      children: proofNodes[id].conclusion,
+      showingChildren: true,
+      onClick,
+      onMouse,
+      updateParentState,
+      x,
+      y,
+    });
+    setShowingNodes(Object.assign(showingNodes, cpShowingNodes));
     setShowingEdges(Object.assign(showingEdges, cpShowingEdges));
     setProofNodes(proofNodes);
   };
@@ -252,7 +274,7 @@ export default function Canvas(props) {
         {Object.keys(showingNodes).length === 0
           ? []
           : Object.keys(showingNodes).map(function (key) {
-              return showingNodes[key].render();
+              return showingNodes[key];
             })}
         {Object.keys(showingEdges).length === 0
           ? []

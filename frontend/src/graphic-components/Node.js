@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { Label, Text, Tag } from 'react-konva';
 import PropTypes from 'prop-types';
 
@@ -10,72 +10,52 @@ function textColorFromBg(bgColor) {
   return r * 0.299 + g * 0.587 + b * 0.114 > 150 ? '#000000' : '#ffffff';
 }
 
-export default class Node extends Component {
-  constructor(props) {
-    super(props);
+export default function Node(props) {
+  const [bgClosedConclusionColor, bgOpenConclusionColor, bgRuleColor] = [
+    '#2b2d42',
+    '#8d99ae',
+    '#edf2f4',
+  ];
 
-    this.state = {
-      bgClosedConclusionColor: '#2b2d42',
-      bgOpenConclusionColor: '#8d99ae',
-      bgRuleColor: '#edf2f4',
-    };
-  }
+  const { children, id, onClick, onMouse, showingChildren, x, y } = props;
 
-  render() {
-    const {
-      children,
-      id,
-      onClick,
-      onMouse,
-      showingChildren,
-      x,
-      y,
-    } = this.props;
+  const conclusion = id.indexOf('c') !== -1;
 
-    const {
-      bgClosedConclusionColor,
-      bgOpenConclusionColor,
-      bgRuleColor,
-    } = this.state;
+  const bgConclusionColor = showingChildren
+    ? bgOpenConclusionColor
+    : bgClosedConclusionColor;
+  const bgColor = conclusion ? bgConclusionColor : bgRuleColor;
 
-    const conclusion = id.indexOf('c') !== -1;
-
-    const bgConclusionColor = showingChildren
-      ? bgOpenConclusionColor
-      : bgClosedConclusionColor;
-    const bgColor = conclusion ? bgConclusionColor : bgRuleColor;
-
-    return (
-      <Label
-        conclusion={conclusion}
-        draggable
-        id={id}
-        key={id}
-        onClick={onClick}
-        onDragEnd={(e) => {
-          const { updateParentState } = this.props;
-          updateParentState(id, e.target.attrs.x, e.target.attrs.y);
-        }}
-        onMouseEnter={(e) => {
-          onMouse(e.target.attrs.text);
-        }}
-        onMouseLeave={() => onMouse('')}
-        x={x}
-        y={y}
-      >
-        <Tag fill={bgColor} stroke="black" />
-        <Text
-          align="center"
-          fill={textColorFromBg(bgColor)}
-          fontSize={15}
-          height={35}
-          padding={10}
-          text={children}
-          width={300}
-        />
-      </Label>
-    );
-  }
+  return (
+    <Label
+      conclusion={conclusion}
+      draggable
+      id={id}
+      key={id}
+      onClick={onClick}
+      onDragMove={(e) => {
+        const { updateParentState } = props;
+        updateParentState(id, e.target.attrs.x, e.target.attrs.y);
+      }}
+      onMouseEnter={(e) => {
+        onMouse(e.target.attrs.text);
+      }}
+      onMouseLeave={() => onMouse('')}
+      x={x}
+      y={y}
+    >
+      <Tag fill={bgColor} stroke="black" />
+      <Text
+        align="center"
+        fill={textColorFromBg(bgColor)}
+        fontSize={15}
+        height={35}
+        padding={10}
+        text={children}
+        width={300}
+      />
+    </Label>
+  );
 }
 
 Node.propTypes = {
