@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Stage, Layer } from 'react-konva';
 import PropTypes from 'prop-types';
 import Node from './Node';
@@ -60,56 +60,59 @@ function handleWheel(e) {
   };
 }
 
-export default class Canvas extends Component {
-  constructor(props) {
-    super(props);
+export default function Canvas(props) {
+  const { dot } = props;
+  const [canvasWidth, setCanvasWidth] = useState(520);
+  const [canvasHeight, setCanvasHeight] = useState(300);
+  const [stage, setStage] = useState({
+    stageScale: 1,
+    stageX: 0,
+    stageY: 0,
+  });
+  const [proofNodes, setProofNodes] = useState(processDot(dot));
+  const [showingNodes, setShowingNodes] = useState({});
+  const [showingEdges, setShowingEdges] = useState({});
 
-    const { dot } = this.props;
-
-    const proofNodes = processDot(dot);
-
-    this.state = {
-      canvasWidth: 520,
-      canvasHeight: 300,
-      stageScale: 1,
-      stageX: 0,
-      stageY: 0,
-      proofNodes,
-      showingNodes: {},
-      showingEdges: {},
-    };
-  }
-
-  componentDidMount() {
-    const { showingNodes, proofNodes, canvasWidth } = this.state;
-    showingNodes['0c'] = new Node({
-      children: proofNodes[0].conclusion,
-      conclusion: true,
-      id: `${proofNodes[0].id}c`,
-      onClick: (e) => this.onClick(e),
-      onMouse: this.onMouse,
-      showingChildren: false,
-      updateParentState: this.updateParentState,
-      x: canvasWidth * 0.5,
-      y: 10,
+  const recursivelyGetChildren = (nodeId) => {
+    let nodes = [];
+    proofNodes[nodeId].children.forEach((node) => {
+      nodes = nodes.concat([node]);
+      if (proofNodes[node].showingChildren)
+        nodes = nodes.concat(recursivelyGetChildren(node));
     });
-    this.setState({
-      showingNodes,
-      canvasWidth:
-        document.getElementsByClassName('visualizer')[0].offsetWidth - 30,
-      canvasHeight:
-        window.innerHeight -
-        (document.getElementsByClassName('navbar')[0].offsetHeight +
-          20 +
-          document.getElementsByClassName('proof-name')[0].offsetHeight +
-          document.getElementsByClassName('node-text')[0].offsetHeight +
-          50),
-    });
-  }
+    return nodes;
+  };
 
-  onClick = (e) => {
-    const { proofNodes, showingNodes, showingEdges } = this.state;
-    const { setCurrentText } = this.props;
+  const onMouse = (text) => {
+    const { setFocusText } = props;
+    setFocusText(text);
+  };
+
+  const updateParentState = (key, x, y) => {
+    const cpShowingNodes = { ...showingNodes };
+    const cpShowingEdges = { ...showingEdges };
+    cpShowingNodes[key].props.x = x;
+    cpShowingNodes[key].props.y = y;
+    Object.keys(cpShowingEdges)
+      .filter((edgeKey) => edgeKey.indexOf(key) !== -1)
+      .forEach((edge) => {
+        const [from, to] = edge.split('->');
+        cpShowingEdges[edge] = new Line({
+          key: Math.random(),
+          points: [
+            cpShowingNodes[from].props.x + 150,
+            cpShowingNodes[from].props.y,
+            cpShowingNodes[to].props.x + 150,
+            cpShowingNodes[to].props.y + 36,
+          ],
+        });
+      });
+    setShowingNodes(cpShowingNodes);
+    setShowingEdges(cpShowingEdges);
+  };
+
+  const onClick = (e) => {
+    const { setCurrentText } = props;
     let { id, x, y, conclusion } = e.target.parent.attrs;
     id = id.replace('c', '');
 
@@ -119,16 +122,19 @@ export default class Canvas extends Component {
     }
 
     if (!conclusion) return;
+
+    const cpShowingEdges = { ...showingEdges };
+
     if (proofNodes[id].showingChildren) {
       proofNodes[id].showingChildren = false;
       delete showingNodes[id];
-      delete showingEdges[`${id}->${id}c`];
-      const nodesToBeRemoved = this.recursivelyGetChildren(id);
+      cpShowingEdges[`${id}->${id}c`] = null;
+      const nodesToBeRemoved = recursivelyGetChildren(id);
       nodesToBeRemoved.forEach((node) => {
         proofNodes[node].showingChildren = false;
         delete showingNodes[node.toString()];
         delete showingNodes[`${node}c`];
-        Object.keys(showingEdges)
+        Object.keys(cpShowingEdges)
           .filter((edgeKey) => {
             const edges = edgeKey.split('->');
             return (
@@ -139,27 +145,28 @@ export default class Canvas extends Component {
             );
           })
           .forEach((edge) => {
-            delete showingEdges[edge];
+            cpShowingEdges[edge] = null;
           });
       });
       showingNodes[`${id}c`].props.showingChildren = false;
-      this.setState({ showingNodes, showingEdges });
+      setShowingNodes(showingNodes);
+      setShowingEdges(Object.assign(showingEdges, cpShowingEdges));
       return;
     }
 
     const rule = new Node({
       children: proofNodes[id].rule,
       id: proofNodes[id].id,
-      onClick: this.onClick,
-      onMouse: this.onMouse,
-      updateParentState: this.updateParentState,
+      onClick,
+      onMouse,
+      updateParentState,
       x,
       y: y + 100,
     });
 
     showingNodes[proofNodes[id].id.toString()] = rule;
 
-    showingEdges[`${proofNodes[id].id}->${proofNodes[id].id}c`] = new Line({
+    cpShowingEdges[`${proofNodes[id].id}->${proofNodes[id].id}c`] = new Line({
       key: Math.random(),
       points: [
         showingNodes[proofNodes[id].id.toString()].props.x + 150,
@@ -177,14 +184,14 @@ export default class Canvas extends Component {
         children: childNode.conclusion,
         conclusion: true,
         id: `${childNode.id}c`,
-        onClick: this.onClick,
-        onMouse: this.onMouse,
-        updateParentState: this.updateParentState,
+        onClick,
+        onMouse,
+        updateParentState,
         x: x + (i - lenChildren / 2) * 350,
         y: y + 200,
       });
       i += 1;
-      showingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line({
+      cpShowingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line({
         key: Math.random(),
         points: [
           showingNodes[`${childNode.id}c`].props.x + 150,
@@ -197,83 +204,64 @@ export default class Canvas extends Component {
     });
     proofNodes[id].showingChildren = true;
     showingNodes[`${id}c`].props.showingChildren = true;
-    this.setState({ showingNodes, proofNodes, showingEdges });
+    setShowingNodes(showingNodes);
+    setShowingEdges(Object.assign(showingEdges, cpShowingEdges));
+    setProofNodes(proofNodes);
   };
 
-  onMouse = (text) => {
-    const { setFocusText } = this.props;
-    setFocusText(text);
-  };
-
-  updateParentState = (key, x, y) => {
-    const { showingNodes, showingEdges } = this.state;
-    showingNodes[key].props.x = x;
-    showingNodes[key].props.y = y;
-    Object.keys(showingEdges)
-      .filter((edgeKey) => edgeKey.indexOf(key) !== -1)
-      .forEach((edge) => {
-        const [from, to] = edge.split('->');
-        showingEdges[edge] = new Line({
-          key: Math.random(),
-          points: [
-            showingNodes[from].props.x + 150,
-            showingNodes[from].props.y,
-            showingNodes[to].props.x + 150,
-            showingNodes[to].props.y + 36,
-          ],
-        });
-      });
-    this.setState({ showingNodes, showingEdges });
-  };
-
-  recursivelyGetChildren(nodeId) {
-    const { proofNodes } = this.state;
-    let nodes = [];
-    proofNodes[nodeId].children.forEach((node) => {
-      nodes = nodes.concat([node]);
-      if (proofNodes[node].showingChildren)
-        nodes = nodes.concat(this.recursivelyGetChildren(node));
+  useEffect(() => {
+    const cpShowingNodes = showingNodes;
+    cpShowingNodes['0c'] = new Node({
+      children: proofNodes[0].conclusion,
+      conclusion: true,
+      id: `${proofNodes[0].id}c`,
+      onClick: (e) => onClick(e),
+      onMouse,
+      showingChildren: false,
+      updateParentState,
+      x: canvasWidth * 0.5,
+      y: 10,
     });
-    return nodes;
-  }
-
-  render() {
-    const {
-      canvasWidth,
-      canvasHeight,
-      stageScale,
-      stageX,
-      stageY,
-      showingNodes,
-      showingEdges,
-    } = this.state;
-    return (
-      <Stage
-        draggable
-        width={canvasWidth}
-        height={canvasHeight}
-        onWheel={(e) => this.setState(handleWheel(e))}
-        scaleX={stageScale}
-        scaleY={stageScale}
-        x={stageX}
-        y={stageY}
-        onContextMenu={(e) => e.evt.preventDefault()}
-      >
-        <Layer>
-          {Object.keys(showingNodes).length === 0
-            ? []
-            : Object.keys(showingNodes).map(function (key) {
-                return showingNodes[key].render();
-              })}
-          {Object.keys(showingEdges).length === 0
-            ? []
-            : Object.keys(showingEdges).map(function (key) {
-                return showingEdges[key];
-              })}
-        </Layer>
-      </Stage>
+    setShowingNodes(cpShowingNodes);
+    setCanvasHeight(
+      window.innerHeight -
+        (document.getElementsByClassName('navbar')[0].offsetHeight +
+          20 +
+          document.getElementsByClassName('proof-name')[0].offsetHeight +
+          document.getElementsByClassName('node-text')[0].offsetHeight +
+          50)
     );
-  }
+    setCanvasWidth(
+      document.getElementsByClassName('visualizer')[0].offsetWidth - 30
+    );
+  }, []);
+
+  return (
+    <Stage
+      draggable
+      width={canvasWidth}
+      height={canvasHeight}
+      onWheel={(e) => setStage(handleWheel(e))}
+      scaleX={stage.stageScale}
+      scaleY={stage.stageScale}
+      x={stage.stageX}
+      y={stage.stageY}
+      onContextMenu={(e) => e.evt.preventDefault()}
+    >
+      <Layer>
+        {Object.keys(showingNodes).length === 0
+          ? []
+          : Object.keys(showingNodes).map(function (key) {
+              return showingNodes[key].render();
+            })}
+        {Object.keys(showingEdges).length === 0
+          ? []
+          : Object.keys(showingEdges).map(function (key) {
+              return showingEdges[key];
+            })}
+      </Layer>
+    </Stage>
+  );
 }
 
 Canvas.propTypes = {
