@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Spinner } from 'react-bootstrap';
@@ -35,74 +35,60 @@ const Proof = (props) => {
   );
 };
 
-export default class ProofList extends Component {
-  constructor(props) {
-    super(props);
+export default function ProofList() {
+  const [proofs, setProofs] = useState([]);
+  const [loadingProofs, setLoadingProofs] = useState(true);
 
-    this.deleteProof = this.deleteProof.bind(this);
-
-    this.state = { proofs: [], loadingProofs: true };
-  }
-
-  componentDidMount() {
+  useEffect(() => {
     axios
       .get('http://localhost:5000/proof/')
       .then((response) => {
-        this.setState({ proofs: response.data, loadingProofs: false });
+        setProofs(response.data);
+        setLoadingProofs(false);
       })
       .catch((error) => {
         console.log(error);
       });
-  }
+  }, []);
 
-  deleteProof(id) {
+  const deleteProof = (id) => {
     axios.delete(`http://localhost:5000/proof/${id}`).then((response) => {
       console.log(response.data);
     });
 
-    const { proofs } = this.state;
+    setProofs(proofs.filter((el) => el._id !== id));
+  };
 
-    this.setState({
-      proofs: proofs.filter((el) => el._id !== id),
-    });
-  }
-
-  proofList() {
-    const { proofs } = this.state;
-
-    return proofs.map((currentproof) => (
+  const proofList = () =>
+    proofs.map((currentproof) => (
       <Proof
         proof={currentproof}
-        deleteProof={this.deleteProof}
+        deleteProof={deleteProof}
         key={currentproof._id}
       />
     ));
-  }
 
-  render() {
-    const { loadingProofs } = this.state;
-    return (
-      <div>
-        <h3>Proofs</h3>
-        <table className="table">
-          <thead className="thead-dark">
-            <tr>
-              <th>Name</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>{this.proofList()}</tbody>
-        </table>
-        {loadingProofs ? (
-          <div className="spinner-container">
-            <Spinner animation="border" role="status">
-              <span className="sr-only">Loading...</span>
-            </Spinner>
-          </div>
-        ) : null}
-      </div>
-    );
-  }
+  return (
+    <div>
+      <h3>Proofs</h3>
+      <table className="table">
+        <thead className="thead-dark">
+          <tr>
+            <th>Name</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>{proofList()}</tbody>
+      </table>
+      {loadingProofs ? (
+        <div className="spinner-container">
+          <Spinner animation="border" role="status">
+            <span className="sr-only">Loading...</span>
+          </Spinner>
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 Proof.propTypes = {
