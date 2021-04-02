@@ -26,7 +26,8 @@ export default class Node extends Component {
       children,
       id,
       onClick,
-      onMouse,
+      setCurrentText,
+      setFocusText,
       showingChildren,
       x,
       y,
@@ -51,15 +52,17 @@ export default class Node extends Component {
         draggable
         id={id}
         key={id}
-        onClick={onClick}
+        onClick={(e) =>
+          e.evt.button === 2 ? setCurrentText(e.target.attrs.text) : onClick(e)
+        }
         onDragMove={(e) => {
           const { updateParentState } = this.props;
           updateParentState(id, e.target.attrs.x, e.target.attrs.y);
         }}
         onMouseEnter={(e) => {
-          onMouse(e.target.attrs.text);
+          setFocusText(e.target.attrs.text);
         }}
-        onMouseLeave={() => onMouse('')}
+        onMouseLeave={() => setFocusText('')}
         x={x}
         y={y}
       >
@@ -82,7 +85,8 @@ Node.propTypes = {
   children: PropTypes.string,
   id: PropTypes.string,
   onClick: PropTypes.func,
-  onMouse: PropTypes.func,
+  setFocusText: PropTypes.func,
+  setCurrentText: PropTypes.func,
   showingChildren: PropTypes.bool,
   updateParentState: PropTypes.func,
   x: PropTypes.number,

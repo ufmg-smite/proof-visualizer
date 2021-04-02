@@ -92,6 +92,7 @@ export default class Canvas extends Component {
         10
       )
     );
+
     this.setState({
       showingNodes,
       canvasWidth:
@@ -106,30 +107,27 @@ export default class Canvas extends Component {
     });
   }
 
-  nodeProps = (children, conclusion, id, x, y) => ({
-    children,
-    conclusion,
-    id,
-    onClick: this.onClick,
-    onMouse: this.onMouse,
-    updateParentState: this.updateParentState,
-    x,
-    y,
-  });
+  nodeProps = (children, conclusion, id, x, y) => {
+    const { setCurrentText, setFocusText } = this.props;
+    return {
+      children,
+      conclusion,
+      id,
+      onClick: this.onClick,
+      updateParentState: this.updateParentState,
+      setFocusText,
+      setCurrentText,
+      x,
+      y,
+    };
+  };
 
   onClick = (e) => {
-    const { proofNodes, showingNodes, showingEdges } = this.state;
-    const { setCurrentText } = this.props;
     let { id, x, y, conclusion } = e.target.parent.attrs;
+    const { proofNodes, showingNodes, showingEdges } = this.state;
     id = id.replace('c', '');
 
-    if (e.evt.button === 2) {
-      setCurrentText(e.target.attrs.text);
-      return;
-    }
-
-    if (!conclusion) return;
-    if (proofNodes[id].showingChildren) {
+    if (conclusion && proofNodes[id].showingChildren) {
       proofNodes[id].showingChildren = false;
       delete showingNodes[id];
       delete showingEdges[`${id}->${id}c`];
@@ -153,60 +151,54 @@ export default class Canvas extends Component {
           });
       });
       showingNodes[`${id}c`].props.showingChildren = false;
-      this.setState({ showingNodes, showingEdges });
-      return;
-    }
-
-    const rule = new Node(
-      this.nodeProps(proofNodes[id].rule, false, proofNodes[id].id, x, y + 100)
-    );
-
-    showingNodes[proofNodes[id].id.toString()] = rule;
-
-    showingEdges[`${proofNodes[id].id}->${proofNodes[id].id}c`] = new Line({
-      key: Math.random(),
-      points: [
-        showingNodes[proofNodes[id].id.toString()].props.x + 150,
-        showingNodes[proofNodes[id].id.toString()].props.y,
-        showingNodes[`${proofNodes[id].id.toString()}c`].props.x + 150,
-        showingNodes[`${proofNodes[id].id.toString()}c`].props.y + 36,
-      ],
-    });
-
-    let i = 0;
-    const lenChildren = proofNodes[id].children.length - 1;
-    proofNodes[id].children.map((child) => {
-      const childNode = proofNodes[child];
-
-      showingNodes[`${childNode.id}c`] = new Node(
+    } else if (conclusion) {
+      showingNodes[proofNodes[id].id.toString()] = new Node(
         this.nodeProps(
-          childNode.conclusion,
-          true,
-          `${childNode.id}c`,
-          x + (i - lenChildren / 2) * 350,
-          y + 200
+          proofNodes[id].rule,
+          false,
+          proofNodes[id].id,
+          x,
+          y + 100
         )
       );
-      i += 1;
-      showingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line({
+
+      showingEdges[`${proofNodes[id].id}->${proofNodes[id].id}c`] = new Line({
         key: Math.random(),
         points: [
-          showingNodes[`${childNode.id}c`].props.x + 150,
-          showingNodes[`${childNode.id}c`].props.y,
           showingNodes[proofNodes[id].id.toString()].props.x + 150,
-          showingNodes[proofNodes[id].id.toString()].props.y + 36,
+          showingNodes[proofNodes[id].id.toString()].props.y,
+          showingNodes[`${proofNodes[id].id.toString()}c`].props.x + 150,
+          showingNodes[`${proofNodes[id].id.toString()}c`].props.y + 36,
         ],
       });
-      return true;
-    });
-    proofNodes[id].showingChildren = true;
-    showingNodes[`${id}c`].props.showingChildren = true;
-    this.setState({ showingNodes, proofNodes, showingEdges });
-  };
 
-  onMouse = (text) => {
-    const { setFocusText } = this.props;
-    setFocusText(text);
+      const lenChildren = proofNodes[id].children.length - 1;
+      proofNodes[id].children.forEach((child, i) => {
+        const childNode = proofNodes[child];
+
+        showingNodes[`${childNode.id}c`] = new Node(
+          this.nodeProps(
+            childNode.conclusion,
+            true,
+            `${childNode.id}c`,
+            x + (i - lenChildren / 2) * 350,
+            y + 200
+          )
+        );
+        showingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line({
+          key: Math.random(),
+          points: [
+            showingNodes[`${childNode.id}c`].props.x + 150,
+            showingNodes[`${childNode.id}c`].props.y,
+            showingNodes[proofNodes[id].id.toString()].props.x + 150,
+            showingNodes[proofNodes[id].id.toString()].props.y + 36,
+          ],
+        });
+      });
+      proofNodes[id].showingChildren = true;
+      showingNodes[`${id}c`].props.showingChildren = true;
+    }
+    this.setState({ showingNodes, proofNodes, showingEdges });
   };
 
   updateParentState = (key, x, y) => {
