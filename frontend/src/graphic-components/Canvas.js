@@ -82,17 +82,16 @@ export default class Canvas extends Component {
 
   componentDidMount() {
     const { showingNodes, proofNodes, canvasWidth } = this.state;
-    showingNodes['0c'] = new Node({
-      children: proofNodes[0].conclusion,
-      conclusion: true,
-      id: `${proofNodes[0].id}c`,
-      onClick: (e) => this.onClick(e),
-      onMouse: this.onMouse,
-      showingChildren: false,
-      updateParentState: this.updateParentState,
-      x: canvasWidth * 0.5,
-      y: 10,
-    });
+
+    showingNodes['0c'] = new Node(
+      this.nodeProps(
+        proofNodes[0].conclusion,
+        true,
+        `${proofNodes[0].id}c`,
+        canvasWidth * 0.5,
+        10
+      )
+    );
     this.setState({
       showingNodes,
       canvasWidth:
@@ -106,6 +105,17 @@ export default class Canvas extends Component {
           50),
     });
   }
+
+  nodeProps = (children, conclusion, id, x, y) => ({
+    children,
+    conclusion,
+    id,
+    onClick: this.onClick,
+    onMouse: this.onMouse,
+    updateParentState: this.updateParentState,
+    x,
+    y,
+  });
 
   onClick = (e) => {
     const { proofNodes, showingNodes, showingEdges } = this.state;
@@ -147,15 +157,9 @@ export default class Canvas extends Component {
       return;
     }
 
-    const rule = new Node({
-      children: proofNodes[id].rule,
-      id: proofNodes[id].id,
-      onClick: this.onClick,
-      onMouse: this.onMouse,
-      updateParentState: this.updateParentState,
-      x,
-      y: y + 100,
-    });
+    const rule = new Node(
+      this.nodeProps(proofNodes[id].rule, false, proofNodes[id].id, x, y + 100)
+    );
 
     showingNodes[proofNodes[id].id.toString()] = rule;
 
@@ -173,16 +177,16 @@ export default class Canvas extends Component {
     const lenChildren = proofNodes[id].children.length - 1;
     proofNodes[id].children.map((child) => {
       const childNode = proofNodes[child];
-      showingNodes[`${childNode.id}c`] = new Node({
-        children: childNode.conclusion,
-        conclusion: true,
-        id: `${childNode.id}c`,
-        onClick: this.onClick,
-        onMouse: this.onMouse,
-        updateParentState: this.updateParentState,
-        x: x + (i - lenChildren / 2) * 350,
-        y: y + 200,
-      });
+
+      showingNodes[`${childNode.id}c`] = new Node(
+        this.nodeProps(
+          childNode.conclusion,
+          true,
+          `${childNode.id}c`,
+          x + (i - lenChildren / 2) * 350,
+          y + 200
+        )
+      );
       i += 1;
       showingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line({
         key: Math.random(),
