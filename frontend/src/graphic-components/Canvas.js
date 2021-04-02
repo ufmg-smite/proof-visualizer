@@ -122,6 +122,11 @@ export default class Canvas extends Component {
     };
   };
 
+  lineProps = (key, from, to) => ({
+    key,
+    points: [from.x + 150, from.y, to.x + 150, to.y + 36],
+  });
+
   onClick = (e) => {
     let { id, x, y, conclusion } = e.target.parent.attrs;
     const { proofNodes, showingNodes, showingEdges } = this.state;
@@ -129,6 +134,7 @@ export default class Canvas extends Component {
 
     if (conclusion && proofNodes[id].showingChildren) {
       proofNodes[id].showingChildren = false;
+      showingNodes[`${id}c`].props.showingChildren = false;
       delete showingNodes[id];
       delete showingEdges[`${id}->${id}c`];
       const nodesToBeRemoved = this.recursivelyGetChildren(id);
@@ -150,7 +156,6 @@ export default class Canvas extends Component {
             delete showingEdges[edge];
           });
       });
-      showingNodes[`${id}c`].props.showingChildren = false;
     } else if (conclusion) {
       showingNodes[proofNodes[id].id] = new Node(
         this.nodeProps(
@@ -161,21 +166,16 @@ export default class Canvas extends Component {
           y + 100
         )
       );
-
-      showingEdges[`${proofNodes[id].id}->${proofNodes[id].id}c`] = new Line({
-        key: Math.random(),
-        points: [
-          showingNodes[proofNodes[id].id].props.x + 150,
-          showingNodes[proofNodes[id].id].props.y,
-          showingNodes[`${proofNodes[id].id}c`].props.x + 150,
-          showingNodes[`${proofNodes[id].id}c`].props.y + 36,
-        ],
-      });
-
+      showingEdges[`${proofNodes[id].id}->${proofNodes[id].id}c`] = new Line(
+        this.lineProps(
+          `${proofNodes[id].id}->${proofNodes[id].id}c`,
+          showingNodes[proofNodes[id].id].props,
+          showingNodes[`${proofNodes[id].id}c`].props
+        )
+      );
       const lenChildren = proofNodes[id].children.length - 1;
       proofNodes[id].children.forEach((child, i) => {
         const childNode = proofNodes[child];
-
         showingNodes[`${childNode.id}c`] = new Node(
           this.nodeProps(
             childNode.conclusion,
@@ -185,15 +185,13 @@ export default class Canvas extends Component {
             y + 200
           )
         );
-        showingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line({
-          key: Math.random(),
-          points: [
-            showingNodes[`${childNode.id}c`].props.x + 150,
-            showingNodes[`${childNode.id}c`].props.y,
-            showingNodes[proofNodes[id].id].props.x + 150,
-            showingNodes[proofNodes[id].id].props.y + 36,
-          ],
-        });
+        showingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line(
+          this.lineProps(
+            `${childNode.id}c->${proofNodes[id].id}`,
+            showingNodes[`${childNode.id}c`].props,
+            showingNodes[proofNodes[id].id].props
+          )
+        );
       });
       proofNodes[id].showingChildren = true;
       showingNodes[`${id}c`].props.showingChildren = true;
@@ -209,15 +207,9 @@ export default class Canvas extends Component {
       .filter((edgeKey) => edgeKey.indexOf(key) !== -1)
       .forEach((edge) => {
         const [from, to] = edge.split('->');
-        showingEdges[edge] = new Line({
-          key: Math.random(),
-          points: [
-            showingNodes[from].props.x + 150,
-            showingNodes[from].props.y,
-            showingNodes[to].props.x + 150,
-            showingNodes[to].props.y + 36,
-          ],
-        });
+        showingEdges[edge] = new Line(
+          this.lineProps(edge, showingNodes[from].props, showingNodes[to].props)
+        );
       });
     this.setState({ showingNodes, showingEdges });
   };
