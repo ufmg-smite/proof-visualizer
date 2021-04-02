@@ -134,15 +134,15 @@ export default class Canvas extends Component {
       const nodesToBeRemoved = this.recursivelyGetChildren(id);
       nodesToBeRemoved.forEach((node) => {
         proofNodes[node].showingChildren = false;
-        delete showingNodes[node.toString()];
+        delete showingNodes[node];
         delete showingNodes[`${node}c`];
         Object.keys(showingEdges)
           .filter((edgeKey) => {
             const edges = edgeKey.split('->');
             return (
-              node.toString() === edges[0] ||
+              node === edges[0] ||
               `${node}c` === edges[0] ||
-              node.toString() === edges[1] ||
+              node === edges[1] ||
               `${node}c` === edges[1]
             );
           })
@@ -152,7 +152,7 @@ export default class Canvas extends Component {
       });
       showingNodes[`${id}c`].props.showingChildren = false;
     } else if (conclusion) {
-      showingNodes[proofNodes[id].id.toString()] = new Node(
+      showingNodes[proofNodes[id].id] = new Node(
         this.nodeProps(
           proofNodes[id].rule,
           false,
@@ -165,10 +165,10 @@ export default class Canvas extends Component {
       showingEdges[`${proofNodes[id].id}->${proofNodes[id].id}c`] = new Line({
         key: Math.random(),
         points: [
-          showingNodes[proofNodes[id].id.toString()].props.x + 150,
-          showingNodes[proofNodes[id].id.toString()].props.y,
-          showingNodes[`${proofNodes[id].id.toString()}c`].props.x + 150,
-          showingNodes[`${proofNodes[id].id.toString()}c`].props.y + 36,
+          showingNodes[proofNodes[id].id].props.x + 150,
+          showingNodes[proofNodes[id].id].props.y,
+          showingNodes[`${proofNodes[id].id}c`].props.x + 150,
+          showingNodes[`${proofNodes[id].id}c`].props.y + 36,
         ],
       });
 
@@ -190,8 +190,8 @@ export default class Canvas extends Component {
           points: [
             showingNodes[`${childNode.id}c`].props.x + 150,
             showingNodes[`${childNode.id}c`].props.y,
-            showingNodes[proofNodes[id].id.toString()].props.x + 150,
-            showingNodes[proofNodes[id].id.toString()].props.y + 36,
+            showingNodes[proofNodes[id].id].props.x + 150,
+            showingNodes[proofNodes[id].id].props.y + 36,
           ],
         });
       });
