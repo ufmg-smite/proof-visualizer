@@ -10,7 +10,7 @@ export default function Line(props) {
       strokeWidth={2}
       stroke="black"
       fill="black"
-      points={[points[0], points[1], points[2], points[3]]}
+      points={[...points]}
     />
   );
 }
