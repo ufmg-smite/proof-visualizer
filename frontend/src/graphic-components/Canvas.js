@@ -4,40 +4,6 @@ import PropTypes from 'prop-types';
 import Node from './Node';
 import Line from './Line';
 
-function processDot(dot) {
-  const numberOfNodes = (dot.match(/label/g) || []).length / 2;
-  const nodes = new Array(numberOfNodes);
-  const lines = dot
-    .slice(dot.indexOf('{') + 1, dot.indexOf('}') - 2)
-    .replace(/(\n|\t)/gm, '')
-    .split(';');
-  lines.forEach((line) => {
-    if (line.search('label') !== -1) {
-      const id = line.split('[')[0].trim().slice(1, -1);
-      const text = line.slice(line.indexOf('label') + 9, line.lastIndexOf('"'));
-      if (line.split('[')[0].search('c') === -1) {
-        const node = {
-          id,
-          rule: text,
-          children: [],
-          showingChildren: false,
-        };
-        nodes[node.id] = node;
-      } else {
-        nodes[id.replace('c', '')].conclusion = text;
-      }
-    } else if (line.search('->') !== -1) {
-      const edgeNodes = line
-        .split('->')
-        .map((element) => element.trim().replaceAll('"', '').replace('c', ''));
-      if (edgeNodes[0] !== edgeNodes[1]) {
-        nodes[edgeNodes[1]].children.push(edgeNodes[0]);
-      }
-    }
-  });
-  return nodes;
-}
-
 function handleWheel(e) {
   e.evt.preventDefault();
 
@@ -64,9 +30,7 @@ export default class Canvas extends Component {
   constructor(props) {
     super(props);
 
-    const { dot } = this.props;
-
-    const proofNodes = processDot(dot);
+    const { proofNodes } = this.props;
 
     this.state = {
       canvasWidth: 520,
@@ -265,7 +229,7 @@ export default class Canvas extends Component {
 }
 
 Canvas.propTypes = {
-  dot: PropTypes.any,
+  proofNodes: PropTypes.array,
   setCurrentText: PropTypes.func,
   setFocusText: PropTypes.func,
 };
