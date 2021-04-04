@@ -33,11 +33,15 @@ export default class Canvas extends Component {
     const { proofNodes } = this.props;
 
     this.state = {
-      canvasWidth: 520,
-      canvasHeight: 300,
-      stageScale: 1,
-      stageX: 0,
-      stageY: 0,
+      canvasSize: {
+        width: 520,
+        height: 300,
+      },
+      stage: {
+        stageScale: 1,
+        stageX: 0,
+        stageY: 0,
+      },
       proofNodes,
       showingNodes: {},
       showingEdges: {},
@@ -45,29 +49,31 @@ export default class Canvas extends Component {
   }
 
   componentDidMount() {
-    const { showingNodes, proofNodes, canvasWidth } = this.state;
+    const { showingNodes, proofNodes, canvasSize } = this.state;
 
     showingNodes['0c'] = new Node(
       this.nodeProps(
         proofNodes[0].conclusion,
         true,
         `${proofNodes[0].id}c`,
-        canvasWidth * 0.5,
+        canvasSize.width * 0.5,
         10
       )
     );
 
     this.setState({
       showingNodes,
-      canvasWidth:
-        document.getElementsByClassName('visualizer')[0].offsetWidth - 30,
-      canvasHeight:
-        window.innerHeight -
-        (document.getElementsByClassName('navbar')[0].offsetHeight +
-          20 +
-          document.getElementsByClassName('proof-name')[0].offsetHeight +
-          document.getElementsByClassName('node-text')[0].offsetHeight +
-          50),
+      canvasSize: {
+        width:
+          document.getElementsByClassName('visualizer')[0].offsetWidth - 30,
+        height:
+          window.innerHeight -
+          (document.getElementsByClassName('navbar')[0].offsetHeight +
+            20 +
+            document.getElementsByClassName('proof-name')[0].offsetHeight +
+            document.getElementsByClassName('node-text')[0].offsetHeight +
+            50),
+      },
     });
   }
 
@@ -178,7 +184,7 @@ export default class Canvas extends Component {
     this.setState({ showingNodes, showingEdges });
   };
 
-  recursivelyGetChildren(nodeId) {
+  recursivelyGetChildren = (nodeId) => {
     const { proofNodes } = this.state;
     let nodes = [];
     proofNodes[nodeId].children.forEach((node) => {
@@ -187,41 +193,31 @@ export default class Canvas extends Component {
         nodes = nodes.concat(this.recursivelyGetChildren(node));
     });
     return nodes;
-  }
+  };
 
   render() {
-    const {
-      canvasWidth,
-      canvasHeight,
-      stageScale,
-      stageX,
-      stageY,
-      showingNodes,
-      showingEdges,
-    } = this.state;
+    const { canvasSize, stage, showingNodes, showingEdges } = this.state;
     return (
       <Stage
         draggable
-        width={canvasWidth}
-        height={canvasHeight}
-        onWheel={(e) => this.setState(handleWheel(e))}
-        scaleX={stageScale}
-        scaleY={stageScale}
-        x={stageX}
-        y={stageY}
+        width={canvasSize.width}
+        height={canvasSize.height}
+        onWheel={(e) => this.setState({ stage: handleWheel(e) })}
+        scaleX={stage.stageScale}
+        scaleY={stage.stageScale}
+        x={stage.stageX}
+        y={stage.stageY}
         onContextMenu={(e) => e.evt.preventDefault()}
       >
         <Layer>
-          {Object.keys(showingNodes).length === 0
-            ? []
-            : Object.keys(showingNodes).map(function (key) {
-                return showingNodes[key].render();
-              })}
-          {Object.keys(showingEdges).length === 0
-            ? []
-            : Object.keys(showingEdges).map(function (key) {
-                return showingEdges[key];
-              })}
+          {Object.keys(showingNodes).length > 0 &&
+            Object.keys(showingNodes).map(function (key) {
+              return showingNodes[key].render();
+            })}
+          {Object.keys(showingEdges).length > 0 &&
+            Object.keys(showingEdges).map(function (key) {
+              return showingEdges[key];
+            })}
         </Layer>
       </Stage>
     );
