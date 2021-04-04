@@ -11,16 +11,6 @@ function textColorFromBg(bgColor) {
 }
 
 export default class Node extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      bgClosedConclusionColor: '#2b2d42',
-      bgOpenConclusionColor: '#8d99ae',
-      bgRuleColor: '#edf2f4',
-    };
-  }
-
   render() {
     const {
       children,
@@ -33,11 +23,9 @@ export default class Node extends Component {
       y,
     } = this.props;
 
-    const {
-      bgClosedConclusionColor,
-      bgOpenConclusionColor,
-      bgRuleColor,
-    } = this.state;
+    const bgClosedConclusionColor = '#2b2d42';
+    const bgOpenConclusionColor = '#8d99ae';
+    const bgRuleColor = '#edf2f4';
 
     const conclusion = id.indexOf('c') !== -1;
 
