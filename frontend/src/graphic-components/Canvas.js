@@ -53,7 +53,12 @@ export default class Canvas extends Component {
     const { showingNodes, proofNodes, canvasSize } = this.state;
 
     // this.subTreeWidth('0');
-    // this.nodeXPosition(canvasSize.width * 0.5, proofNodes['0'].width, 0, '0');
+    // this.nodeXPositionSubTreeWidth(
+    //   canvasSize.width * 0.5,
+    //   proofNodes['0'].width,
+    //   0,
+    //   '0'
+    // );
 
     this.recursivelyAssignLayer('0', 0);
     this.nodeXPositionFitLayer('0', canvasSize.width * 0.5);
@@ -139,7 +144,7 @@ export default class Canvas extends Component {
           proofNodes[id].rule,
           false,
           proofNodes[id].id,
-          proofNodes[id].x,
+          x,
           y + 100
         )
       );
@@ -158,7 +163,7 @@ export default class Canvas extends Component {
             childNode.conclusion,
             true,
             `${childNode.id}c`,
-            childNode.x,
+            childNode.x + (x - proofNodes[id].x),
             y + 200
           )
         );
