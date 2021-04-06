@@ -52,8 +52,7 @@ export default class Canvas extends Component {
   componentDidMount() {
     const { showingNodes, proofNodes, canvasSize } = this.state;
 
-    this.recursivelyAssignLayer('0', 0);
-    this.nodeXPosition('0', canvasSize.width * 0.5);
+    this.nodeXPosition('0', canvasSize.width * 0.5, 0);
     this.nodeFixXPosition('0', 0);
 
     showingNodes['0c'] = new Node(
@@ -207,29 +206,23 @@ export default class Canvas extends Component {
     return nodes;
   };
 
-  recursivelyAssignLayer = (nodeId, layerNumber) => {
+  nodeXPosition = (nodeId, x, layerNumber) => {
     const { proofNodes, layer } = this.state;
     proofNodes[nodeId].layer = layerNumber;
     layer[layerNumber] = 0;
-    proofNodes[nodeId].children.forEach((node) => {
-      this.recursivelyAssignLayer(node, layerNumber + 1);
-    });
-    this.setState({ proofNodes, layer });
-  };
-
-  nodeXPosition(nodeId, x) {
-    const { proofNodes } = this.state;
     proofNodes[nodeId].x = x;
     const lenChildren = proofNodes[nodeId].children.length - 1;
     proofNodes[nodeId].children.forEach((node, i) => {
       this.nodeXPosition(
         node,
-        proofNodes[nodeId].x + (i - lenChildren / 2) * 350
+        proofNodes[nodeId].x + (i - lenChildren / 2) * 350,
+        layerNumber + 1
       );
     });
-  }
+    this.setState({ proofNodes, layer });
+  };
 
-  nodeFixXPosition(nodeId, offsetFromParent) {
+  nodeFixXPosition = (nodeId, offsetFromParent) => {
     const { proofNodes, layer } = this.state;
     let offset = 0;
     if (
@@ -246,7 +239,7 @@ export default class Canvas extends Component {
     proofNodes[nodeId].x += offset + offsetFromParent;
     layer[proofNodes[nodeId].layer] = proofNodes[nodeId].x + 350;
     return offset;
-  }
+  };
 
   render() {
     const { canvasSize, stage, showingNodes, showingEdges } = this.state;
