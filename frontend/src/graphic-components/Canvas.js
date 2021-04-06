@@ -111,71 +111,80 @@ export default class Canvas extends Component {
 
   onClick = (e) => {
     let { id, x, y, conclusion } = e.target.parent.attrs;
-    const { proofNodes, showingNodes, showingEdges } = this.state;
+    const { proofNodes } = this.state;
     id = id.replace('c', '');
 
     if (conclusion && proofNodes[id].showingChildren) {
-      proofNodes[id].showingChildren = false;
-      showingNodes[`${id}c`].props.showingChildren = false;
-      delete showingNodes[id];
-      delete showingEdges[`${id}->${id}c`];
-      const nodesToBeRemoved = this.recursivelyGetChildren(id);
-      nodesToBeRemoved.forEach((node) => {
-        proofNodes[node].showingChildren = false;
-        delete showingNodes[node];
-        delete showingNodes[`${node}c`];
-        Object.keys(showingEdges)
-          .filter((edgeKey) => {
-            const edges = edgeKey.split('->');
-            return (
-              node === edges[0] ||
-              `${node}c` === edges[0] ||
-              node === edges[1] ||
-              `${node}c` === edges[1]
-            );
-          })
-          .forEach((edge) => {
-            delete showingEdges[edge];
-          });
-      });
+      this.removeNodes(id);
     } else if (conclusion) {
-      showingNodes[proofNodes[id].id] = new Node(
-        this.nodeProps(
-          proofNodes[id].rule,
-          false,
-          proofNodes[id].id,
-          x,
-          y + 100
-        )
-      );
-      showingEdges[`${proofNodes[id].id}->${proofNodes[id].id}c`] = new Line(
-        this.lineProps(
-          `${proofNodes[id].id}->${proofNodes[id].id}c`,
-          showingNodes[proofNodes[id].id].props,
-          showingNodes[`${proofNodes[id].id}c`].props
-        )
-      );
-      proofNodes[id].children.forEach((child) => {
-        const childNode = proofNodes[child];
-        showingNodes[`${childNode.id}c`] = new Node(
-          this.nodeProps(
-            childNode.conclusion,
-            true,
-            `${childNode.id}c`,
-            childNode.x + (x - proofNodes[id].x),
-            y + 200
-          )
-        );
-        showingEdges[`${childNode.id}c->${proofNodes[id].id}`] = new Line(
-          this.lineProps(
-            `${childNode.id}c->${proofNodes[id].id}`,
-            showingNodes[`${childNode.id}c`].props,
-            showingNodes[proofNodes[id].id].props
-          )
-        );
-      });
-      proofNodes[id].showingChildren = true;
-      showingNodes[`${id}c`].props.showingChildren = true;
+      this.addNodes(id, x, y);
+    }
+  };
+
+  addNodes = (id, x, y) => {
+    const { proofNodes, showingNodes } = this.state;
+    this.addNode(proofNodes[id], proofNodes[id], false, x, y);
+    proofNodes[id].children.forEach((child) => {
+      this.addNode(proofNodes[child], proofNodes[id], true, x, y);
+    });
+    proofNodes[id].showingChildren = true;
+    showingNodes[`${id}c`].props.showingChildren = true;
+    this.setState({ showingNodes, proofNodes });
+  };
+
+  addNode = (from, to, fromConclusion, x, y) => {
+    const { showingNodes, showingEdges } = this.state;
+    const fromKey = fromConclusion ? `${from.id}c` : from.id;
+    const toKey = fromConclusion ? to.id : `${to.id}c`;
+    showingNodes[fromKey] = new Node(
+      this.nodeProps(
+        fromConclusion ? from.conclusion : from.rule,
+        fromConclusion,
+        fromKey,
+        from.x + (x - to.x),
+        y + 100 + (fromConclusion ? 100 : 0)
+      )
+    );
+    showingEdges[`${fromKey}->${toKey}`] = new Line(
+      this.lineProps(
+        `${fromKey}->${toKey}`,
+        showingNodes[fromKey].props,
+        showingNodes[toKey].props
+      )
+    );
+  };
+
+  removeNodes = (id) => {
+    this.removeNode(id, false);
+    this.recursivelyGetChildren(id).forEach((node) => {
+      this.removeNode(node, true);
+    });
+  };
+
+  removeNode = (id, deleteConclusion) => {
+    const { proofNodes, showingNodes, showingEdges } = this.state;
+
+    proofNodes[id].showingChildren = false;
+    delete showingNodes[id];
+    if (deleteConclusion) {
+      delete showingNodes[`${id}c`];
+      Object.keys(showingEdges)
+        .filter((edgeKey) => {
+          const edges = edgeKey.split('->');
+          return (
+            id === edges[0] ||
+            `${id}c` === edges[0] ||
+            id === edges[1] ||
+            `${id}c` === edges[1]
+          );
+        })
+        .forEach((edge) => {
+          delete showingEdges[edge];
+        });
+    } else {
+      showingNodes[`${id}c`].props.showingChildren = false;
+      proofNodes[id].showingChildren = false;
+      delete showingEdges[`${id}->${id}c`];
     }
     this.setState({ showingNodes, proofNodes, showingEdges });
   };
