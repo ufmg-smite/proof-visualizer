@@ -52,16 +52,9 @@ export default class Canvas extends Component {
   componentDidMount() {
     const { showingNodes, proofNodes, canvasSize } = this.state;
 
-    // this.subTreeWidth('0');
-    // this.nodeXPositionSubTreeWidth(
-    //   canvasSize.width * 0.5,
-    //   proofNodes['0'].width,
-    //   0,
-    //   '0'
-    // );
-
     this.recursivelyAssignLayer('0', 0);
-    this.nodeXPositionFitLayer('0', canvasSize.width * 0.5);
+    this.nodeXPosition('0', canvasSize.width * 0.5);
+    this.nodeFixXPosition('0', 0);
 
     showingNodes['0c'] = new Node(
       this.nodeProps(
@@ -73,18 +66,26 @@ export default class Canvas extends Component {
       )
     );
 
+    const [width, height] = [
+      document.getElementsByClassName('visualizer')[0].offsetWidth - 30,
+      window.innerHeight -
+        (document.getElementsByClassName('navbar')[0].offsetHeight +
+          20 +
+          document.getElementsByClassName('proof-name')[0].offsetHeight +
+          document.getElementsByClassName('node-text')[0].offsetHeight +
+          50),
+    ];
+
     this.setState({
       showingNodes,
       canvasSize: {
-        width:
-          document.getElementsByClassName('visualizer')[0].offsetWidth - 30,
-        height:
-          window.innerHeight -
-          (document.getElementsByClassName('navbar')[0].offsetHeight +
-            20 +
-            document.getElementsByClassName('proof-name')[0].offsetHeight +
-            document.getElementsByClassName('node-text')[0].offsetHeight +
-            50),
+        width,
+        height,
+      },
+      stage: {
+        stageScale: 1,
+        stageX: width - (proofNodes['0'].x + 600),
+        stageY: 10,
       },
     });
   }
@@ -155,8 +156,7 @@ export default class Canvas extends Component {
           showingNodes[`${proofNodes[id].id}c`].props
         )
       );
-      // const lenChildren = proofNodes[id].children.length - 1;
-      proofNodes[id].children.forEach((child, i) => {
+      proofNodes[id].children.forEach((child) => {
         const childNode = proofNodes[child];
         showingNodes[`${childNode.id}c`] = new Node(
           this.nodeProps(
@@ -210,53 +210,42 @@ export default class Canvas extends Component {
   recursivelyAssignLayer = (nodeId, layerNumber) => {
     const { proofNodes, layer } = this.state;
     proofNodes[nodeId].layer = layerNumber;
-    layer[layerNumber] = layer[layerNumber] ? layer[layerNumber] + 1 : 1;
-    proofNodes[nodeId].positionInLayer = layer[layerNumber] - 1;
+    layer[layerNumber] = 0;
     proofNodes[nodeId].children.forEach((node) => {
       this.recursivelyAssignLayer(node, layerNumber + 1);
     });
     this.setState({ proofNodes, layer });
   };
 
-  subTreeWidth = (nodeId) => {
+  nodeXPosition(nodeId, x) {
     const { proofNodes } = this.state;
-    if (proofNodes[nodeId].children.length === 0) {
-      proofNodes[nodeId].width = 400;
-    } else {
-      proofNodes[nodeId].width = proofNodes[nodeId].children.reduce(
-        (totalWidth, node) => totalWidth + this.subTreeWidth(node),
-        0
+    proofNodes[nodeId].x = x;
+    const lenChildren = proofNodes[nodeId].children.length - 1;
+    proofNodes[nodeId].children.forEach((node, i) => {
+      this.nodeXPosition(
+        node,
+        proofNodes[nodeId].x + (i - lenChildren / 2) * 350
       );
-    }
-    return proofNodes[nodeId].width;
-  };
-
-  nodeXPositionFitLayer(nodeId, firstNodeXPosition) {
-    const { proofNodes, layer } = this.state;
-    proofNodes[nodeId].x =
-      firstNodeXPosition -
-      (layer[proofNodes[nodeId].layer] * 400) / 2 +
-      proofNodes[nodeId].positionInLayer * 400 +
-      50;
-    proofNodes[nodeId].children.forEach((node) => {
-      this.nodeXPositionFitLayer(node, firstNodeXPosition);
     });
   }
 
-  nodeXPositionSubTreeWidth(parentX, widthParent, siblingSum, nodeId) {
-    const { proofNodes } = this.state;
-    let childrenSum = 0;
-    proofNodes[nodeId].x =
-      parentX - widthParent / 2 + siblingSum + proofNodes[nodeId].width / 2;
+  nodeFixXPosition(nodeId, offsetFromParent) {
+    const { proofNodes, layer } = this.state;
+    let offset = 0;
+    if (
+      proofNodes[nodeId].x + offsetFromParent <
+      layer[proofNodes[nodeId].layer]
+    ) {
+      offset +=
+        layer[proofNodes[nodeId].layer] -
+        (proofNodes[nodeId].x + offsetFromParent);
+    }
     proofNodes[nodeId].children.forEach((node) => {
-      childrenSum += this.nodeXPositionSubTreeWidth(
-        proofNodes[nodeId].x,
-        proofNodes[nodeId].width,
-        childrenSum,
-        node
-      );
+      offset += this.nodeFixXPosition(node, offset + offsetFromParent);
     });
-    return proofNodes[nodeId].width;
+    proofNodes[nodeId].x += offset + offsetFromParent;
+    layer[proofNodes[nodeId].layer] = proofNodes[nodeId].x + 350;
+    return offset;
   }
 
   render() {
