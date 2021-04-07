@@ -15,7 +15,7 @@ router.route('/').get((req, res) => {
 router.route('/add').post((req, res) => {
   const label = req.body.label;
   const problem = req.body.problem;
-  const options = req.body.options + "--dump-proof --proof-format-mode=dot --proof";
+  const options = req.body.options;
   const input_language = 'smt2';
   const state = 'proof_received';
 

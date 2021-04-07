@@ -62,7 +62,11 @@ export default function VisualizeProof(props) {
         const proof = JSON.parse(response.request.response);
         setDot(proof.dot);
         setLabel(proof.label);
-        setProblem(`%%% ${proof.options}\n${proof.problem}`);
+        setProblem(
+          `%%% ${`${proof.options} --dump-proof --proof-format-mode=dot --proof`}\n${
+            proof.problem
+          }`
+        );
       })
       .catch((error) => {
         console.log(error);

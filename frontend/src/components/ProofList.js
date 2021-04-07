@@ -16,7 +16,7 @@ const Proof = (props) => {
             state: {
               label: proof.label,
               dot: proof.dot ? proof.dot : false,
-              problem: `%%% ${proof.options}\n${proof.problem}`,
+              problem: `%%% ${proof.options} --dump-proof --proof-format-mode=dot --proof\n${proof.problem}`,
             },
           }}
         >
