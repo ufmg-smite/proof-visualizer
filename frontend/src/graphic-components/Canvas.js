@@ -245,7 +245,16 @@ export default class Canvas extends Component {
     proofNodes[nodeId].children.forEach((node) => {
       offset += this.nodeFixXPosition(node, offset + offsetFromParent);
     });
-    proofNodes[nodeId].x += offset + offsetFromParent;
+    if (proofNodes[nodeId].children.length) {
+      proofNodes[nodeId].x =
+        (proofNodes[proofNodes[nodeId].children[0]].x +
+          proofNodes[
+            proofNodes[nodeId].children[proofNodes[nodeId].children.length - 1]
+          ].x) /
+        2;
+    } else {
+      proofNodes[nodeId].x += offset + offsetFromParent;
+    }
     layer[proofNodes[nodeId].layer] = proofNodes[nodeId].x + 350;
     return offset;
   };
