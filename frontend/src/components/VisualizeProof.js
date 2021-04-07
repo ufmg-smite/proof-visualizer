@@ -89,11 +89,27 @@ export default function VisualizeProof(props) {
             dot
           </Dropdown.Item>
           <Dropdown.Item
-            eventKey="1"
+            eventKey="2"
             href={`data:attachment/text,${encodeURIComponent(problem)}`}
             download={label ? `${label.replaceAll(' ', '_')}.smt2` : null}
           >
             problem
+          </Dropdown.Item>
+          <Dropdown.Item
+            eventKey="3"
+            onClick={(e) => {
+              e.preventDefault();
+              const link = document.createElement('a');
+              link.download = label
+                ? `${label.replaceAll(' ', '_')}.png`
+                : null;
+              link.href = document
+                .getElementsByClassName('konvajs-content')[0]
+                .children[0].toDataURL('image/png');
+              link.click();
+            }}
+          >
+            png
           </Dropdown.Item>
         </DropdownButton>
       </h3>
