@@ -123,9 +123,19 @@ export default class Canvas extends Component {
 
   addNodes = (id, x, y) => {
     const { proofNodes, showingNodes } = this.state;
+    let [nodeX, nodeY] = [null, null];
     this.addNode(proofNodes[id], proofNodes[id], false, x, y);
     proofNodes[id].children.forEach((child) => {
-      this.addNode(proofNodes[child], proofNodes[id], true, x, y);
+      [nodeX, nodeY] = this.addNode(
+        proofNodes[child],
+        proofNodes[id],
+        true,
+        x,
+        y
+      );
+      if (proofNodes[child].showingChildren) {
+        this.addNodes(child, nodeX, nodeY);
+      }
     });
     proofNodes[id].showingChildren = true;
     showingNodes[`${id}c`].props.showingChildren = true;
@@ -136,13 +146,17 @@ export default class Canvas extends Component {
     const { showingNodes, showingEdges } = this.state;
     const fromKey = fromConclusion ? `${from.id}c` : from.id;
     const toKey = fromConclusion ? to.id : `${to.id}c`;
+    const [nodeX, nodeY] = [
+      from.x + (x - to.x),
+      y + 100 + (fromConclusion ? 100 : 0),
+    ];
     showingNodes[fromKey] = new Node(
       this.nodeProps(
         fromConclusion ? from.conclusion : from.rule,
         fromConclusion,
         fromKey,
-        from.x + (x - to.x),
-        y + 100 + (fromConclusion ? 100 : 0)
+        nodeX,
+        nodeY
       )
     );
     showingEdges[`${fromKey}->${toKey}`] = new Line(
@@ -152,6 +166,7 @@ export default class Canvas extends Component {
         showingNodes[toKey].props
       )
     );
+    return [nodeX, nodeY];
   };
 
   removeNodes = (id) => {
@@ -164,7 +179,6 @@ export default class Canvas extends Component {
   removeNode = (id, deleteConclusion) => {
     const { proofNodes, showingNodes, showingEdges } = this.state;
 
-    proofNodes[id].showingChildren = false;
     delete showingNodes[id];
     if (deleteConclusion) {
       delete showingNodes[`${id}c`];
