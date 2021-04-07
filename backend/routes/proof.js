@@ -7,7 +7,7 @@ const fs = require('fs');
 let Proof = require('../models/proof.model');
 
 router.route('/').get((req, res) => {
-    Proof.find().select('_id label dot')
+    Proof.find().select('_id label problem options dot')
     .then(proofs => res.json(proofs))
     .catch(err => res.status(400).json('Error: ' + err));
 });
@@ -15,7 +15,7 @@ router.route('/').get((req, res) => {
 router.route('/add').post((req, res) => {
   const label = req.body.label;
   const problem = req.body.problem;
-  const options = req.body.options;
+  const options = req.body.options + "--dump-proof --proof-format-mode=dot --proof";
   const input_language = 'smt2';
   const state = 'proof_received';
 
@@ -33,7 +33,7 @@ router.route('/add').post((req, res) => {
 });
 
 router.route('/:id').get((req, res) => {
-  Proof.findById(req.params.id)
+  Proof.findById(req.params.id).select('label problem options dot')
     .then(proof => res.json(proof))
     .catch(err => res.status(400).json('Error: ' + err));
 });

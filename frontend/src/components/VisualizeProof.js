@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
+import { DropdownButton, Dropdown } from 'react-bootstrap';
 import Canvas from '../graphic-components/Canvas';
 
 function processDot(dot) {
@@ -39,8 +40,13 @@ function processDot(dot) {
 
 export default function VisualizeProof(props) {
   const { location } = props;
-  const [dot, setDot] = useState(location.state.dot);
-  const [label, setLabel] = useState(location.state.label);
+  const [dot, setDot] = useState(location.state ? location.state.dot : false);
+  const [problem, setProblem] = useState(
+    location.state ? location.state.problem : null
+  );
+  const [label, setLabel] = useState(
+    location.state ? location.state.label : null
+  );
   const [currentText, setCurrentText] = useState(
     'right-click in a node to show the text here'
   );
@@ -49,12 +55,14 @@ export default function VisualizeProof(props) {
   useEffect(() => {
     if (location.state) return;
     const proofId = location.pathname.split('/').slice(-1)[0];
+
     axios
       .get(`http://localhost:5000/proof/${proofId}`)
       .then((response) => {
-        const { dotCp, labelCp } = JSON.parse(response.request.response);
-        setDot(dotCp);
-        setLabel(labelCp);
+        const proof = JSON.parse(response.request.response);
+        setDot(proof.dot);
+        setLabel(proof.label);
+        setProblem(`%%% ${proof.options}\n${proof.problem}`);
       })
       .catch((error) => {
         console.log(error);
@@ -66,7 +74,26 @@ export default function VisualizeProof(props) {
 
   return (
     <div className="visualizer">
-      <h3 className="proof-name">{label}</h3>
+      <h3 className="proof-name">
+        <span>{label}</span>
+        <DropdownButton title="Download" id="bg-vertical-dropdown-3">
+          <Dropdown.Item
+            eventKey="1"
+            href={`data:attachment/text,${encodeURIComponent(dot)}`}
+            download={label ? `${label.replaceAll(' ', '_')}.dot` : ''}
+          >
+            dot
+          </Dropdown.Item>
+          <Dropdown.Item
+            eventKey="1"
+            href={`data:attachment/text,${encodeURIComponent(problem)}`}
+            download={label ? `${label.replaceAll(' ', '_')}.smt2` : null}
+          >
+            problem
+          </Dropdown.Item>
+        </DropdownButton>
+      </h3>
+
       {dot ? (
         // eslint-disable-next-line react/jsx-props-no-spreading
         <div className="canvas-container" {...canvasContainerProps}>

@@ -28,6 +28,11 @@ html, body, #root, #root>.container {
       width: calc(100%);
       text-align: center;
     }
+    .proof-name{
+      display: flex;
+      justify-content: space-between;
+      padding-right: 30px;
+    }
   }
 }
 
