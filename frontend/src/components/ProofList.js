@@ -1,31 +1,50 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Spinner } from 'react-bootstrap';
+import { Spinner, Badge } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
 const Proof = (props) => {
   const { proof, deleteProof } = props;
   return (
     <tr>
-      <td>{proof.label}</td>
       <td>
-        <Link
-          to={{
-            pathname: `/visualize/${proof._id}`,
-            state: {
-              label: proof.label,
-              dot: proof.dot ? proof.dot : false,
-              problem: `%%% ${proof.options} --dump-proof --proof-format-mode=dot --proof\n${proof.problem}`,
-            },
-          }}
-        >
-          visualize
-        </Link>{' '}
+        {proof.label}{' '}
+        {proof.state === 'error' ? (
+          <Badge className="bg-danger" variant="danger">
+            error
+          </Badge>
+        ) : null}
+      </td>
+      <td>
+        {proof.state !== 'error' ? (
+          <Link
+            to={{
+              pathname: `/visualize/${proof._id}`,
+              state: {
+                label: proof.label,
+                dot: proof.dot ? proof.dot : false,
+                problem: `%%% ${proof.options} --dump-proof --proof-format-mode=dot --proof\n${proof.problem}`,
+              },
+            }}
+          >
+            visualize
+          </Link>
+        ) : (
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+            }}
+          >
+            view error
+          </a>
+        )}{' '}
         |{' '}
         <a
           href="/"
-          onClick={() => {
+          onClick={(e) => {
+            e.preventDefault();
             deleteProof(props.proof._id);
           }}
         >
@@ -44,7 +63,7 @@ export default function ProofList() {
     axios
       .get('http://localhost:5000/proof/')
       .then((response) => {
-        setProofs(response.data);
+        setProofs(response.data.reverse());
         setLoadingProofs(false);
       })
       .catch((error) => {
