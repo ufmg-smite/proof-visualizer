@@ -6,41 +6,39 @@ import PropTypes from 'prop-types';
 
 const Proof = (props) => {
   const { proof, deleteProof } = props;
+  const problem = `%%% OPTIONS: ${proof.options} --dump-proof --proof-format-mode=dot --proof\n${proof.problem}`;
   return (
     <tr>
       <td>
-        {proof.label}{' '}
+        <span
+          title={problem.slice(0, 500) + (problem.length > 500 ? '...' : '')}
+        >
+          {proof.label}{' '}
+        </span>
         {proof.state === 'error' ? (
-          <Badge className="bg-danger" variant="danger">
+          <Badge className="bg-danger" variant="danger" title={proof.error}>
             error
           </Badge>
         ) : null}
       </td>
       <td>
         {proof.state !== 'error' ? (
-          <Link
-            to={{
-              pathname: `/visualize/${proof._id}`,
-              state: {
-                label: proof.label,
-                dot: proof.dot ? proof.dot : false,
-                problem: `%%% ${proof.options} --dump-proof --proof-format-mode=dot --proof\n${proof.problem}`,
-              },
-            }}
-          >
-            visualize
-          </Link>
-        ) : (
-          <a
-            href="/"
-            onClick={(e) => {
-              e.preventDefault();
-            }}
-          >
-            view error
-          </a>
-        )}{' '}
-        |{' '}
+          <>
+            <Link
+              to={{
+                pathname: `/visualize/${proof._id}`,
+                state: {
+                  label: proof.label,
+                  dot: proof.dot ? proof.dot : false,
+                  problem,
+                },
+              }}
+            >
+              visualize
+            </Link>{' '}
+            |{' '}
+          </>
+        ) : null}
         <a
           href="/"
           onClick={(e) => {
