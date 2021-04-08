@@ -1,32 +1,35 @@
 const mongoose = require('mongoose');
 
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
-const proofSchema = new Schema({
+const proofSchema = new Schema(
+  {
     label: {
-        type: String,
+      type: String,
     },
-    problem : {
-        type: String,
+    problem: {
+      type: String,
     },
-    input_language : {
-        type: String,
-        enum: ['smt2']
+    input_language: {
+      type: String,
+      enum: ['smt2'],
     },
-    dot : {
-        type: String,
+    dot: {
+      type: String,
     },
-    state : {
-        type: String,
-        require: true,
-        enum: ['proof_received', 'dot_ready', 'done', 'error']
+    state: {
+      type: String,
+      require: true,
+      enum: ['proof_received', 'dot_ready', 'done', 'error'],
     },
-    options : {
-        type: String,
+    options: {
+      type: String,
     },
-}, {
+  },
+  {
     timestamps: true,
-});
+  }
+);
 
 const Proof = mongoose.model('Proof', proofSchema);
 
