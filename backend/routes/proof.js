@@ -6,23 +6,16 @@ const Proof = require('../models/proof.model');
 
 router.route('/').get((req, res) => {
   Proof.find()
-    .select('_id label problem options dot')
     .then((proofs) => res.json(proofs))
     .catch((err) => res.status(400).json(`Error: ${err}`));
 });
 
 router.route('/add').post((req, res) => {
-  const { label } = req.body;
-  const { problem } = req.body;
-  const { options } = req.body;
-  const inputLanguage = 'smt2';
-  const state = 'proof_received';
+  const { label, problem, options } = req.body;
 
   const newProof = new Proof({
     label,
     problem,
-    inputLanguage,
-    state,
     options,
   });
 
@@ -34,7 +27,6 @@ router.route('/add').post((req, res) => {
 
 router.route('/:id').get((req, res) => {
   Proof.findById(req.params.id)
-    .select('label problem options dot')
     .then((proof) => res.json(proof))
     .catch((err) => res.status(400).json(`Error: ${err}`));
 });
@@ -48,11 +40,11 @@ router.route('/:id').delete((req, res) => {
 router.route('/process-proof/:id').get((req, res) => {
   Proof.findById(req.params.id)
     .then((proof) => {
-      if (proof.state === 'dot_ready') {
+      if (proof.state === 'done') {
         res.json(proof.dot);
       }
       fs.writeFileSync(
-        `${process.cwd()}/proof_files/proof.smt2`,
+        `${process.cwd()}/proof_files/proof.${proof.input_language}`,
         proof.problem,
         (err) => {
           if (err) {
@@ -65,7 +57,7 @@ router.route('/process-proof/:id').get((req, res) => {
     .then((proof) => {
       const userOptions = proof.options !== '' ? proof.options.split(' ') : [];
       const options = [
-        `${process.cwd()}/proof_files/proof.smt2`,
+        `${process.cwd()}/proof_files/proof.${proof.input_language}`,
         '--dump-proof',
         '--proof-format-mode=dot',
         '--proof',
@@ -73,9 +65,14 @@ router.route('/process-proof/:id').get((req, res) => {
 
       const cvc4 = spawnSync('cvc4', options);
 
-      proof.dot = cvc4.stdout;
-      proof.dot = proof.dot.slice(proof.dot.indexOf('digraph'));
-      proof.state = 'dot_ready';
+      if (!cvc4.stderr.toString().length) {
+        proof.dot = cvc4.stdout;
+        proof.dot = proof.dot.slice(proof.dot.indexOf('digraph'));
+        proof.state = 'done';
+      } else {
+        proof.error = cvc4.stderr.toString();
+        proof.state = 'error';
+      }
       proof.save();
       res.json(proof.dot);
     })

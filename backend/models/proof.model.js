@@ -13,6 +13,7 @@ const proofSchema = new Schema(
     input_language: {
       type: String,
       enum: ['smt2'],
+      default: 'smt2',
     },
     dot: {
       type: String,
@@ -20,9 +21,13 @@ const proofSchema = new Schema(
     state: {
       type: String,
       require: true,
-      enum: ['proof_received', 'dot_ready', 'done', 'error'],
+      enum: ['proof_received', 'done', 'error'],
+      default: 'proof_received',
     },
     options: {
+      type: String,
+    },
+    error: {
       type: String,
     },
   },
