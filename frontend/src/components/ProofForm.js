@@ -1,7 +1,9 @@
+/* eslint-disable no-nested-ternary */
 import axios from 'axios';
 import React, { useState } from 'react';
+import { Redirect } from 'react-router';
 import PropTypes from 'prop-types';
-import { Badge, Button, Form } from 'react-bootstrap';
+import { Badge, Button, Form, Spinner } from 'react-bootstrap';
 
 export default function ProofForm(props) {
   const { id, edit, error, label, options, problem } = props;
@@ -9,17 +11,37 @@ export default function ProofForm(props) {
   const [labelForm, setLabel] = useState(label);
   const [problemForm, setProblem] = useState(problem);
   const [optionsForm, setOptions] = useState(options);
+  const [redirect, setRedirect] = useState(null);
+  const [sending, setSending] = useState(false);
 
   const onSubmit = async (proof) => {
     await axios
       .post(`http://localhost:5000/proof/${edit ? `edit/${id}` : 'add'}`, proof)
-      .then((res) =>
-        axios.get(`http://localhost:5000/proof/process-proof/${res.data}`)
-      )
-      .then(() => (window.location = '/'));
+      .then(async (res) => {
+        setSending(true);
+        await axios.get(
+          `http://localhost:5000/proof/process-proof/${res.data}`
+        );
+        setSending(false);
+        return res.data;
+      })
+      .then((newProofId) =>
+        setRedirect(
+          <Redirect
+            to={{
+              pathname: '/',
+              state: { newProofId },
+            }}
+          />
+        )
+      );
   };
 
-  return (
+  return sending ? (
+    <Spinner animation="border" role="status">
+      <span className="sr-only">Sending...</span>
+    </Spinner>
+  ) : !redirect ? (
     <Form
       onSubmit={(e) => {
         e.preventDefault();
@@ -76,6 +98,8 @@ export default function ProofForm(props) {
         {edit ? 'Edit' : 'Generate'} proof
       </Button>
     </Form>
+  ) : (
+    redirect
   );
 }
 

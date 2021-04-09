@@ -5,7 +5,7 @@ import { Spinner, Badge } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
 const Proof = (props) => {
-  const { proof, deleteProof } = props;
+  const { proof, newProofId, deleteProof } = props;
   const problem = `%%% OPTIONS: ${proof.options} --dump-proof --proof-format-mode=dot --proof\n${proof.problem}`;
   return (
     <tr>
@@ -19,7 +19,8 @@ const Proof = (props) => {
           <Badge className="bg-danger" variant="danger" title={proof.error}>
             error
           </Badge>
-        ) : null}
+        ) : null}{' '}
+        {newProofId === proof._id ? <Badge>new</Badge> : null}
       </td>
       <td>
         {proof.state !== 'error' ? (
@@ -71,7 +72,13 @@ const Proof = (props) => {
   );
 };
 
-export default function ProofList() {
+export default function ProofList(props) {
+  const { location } = props;
+  let newProofId;
+  if (location.state) {
+    newProofId = location.state.newProofId;
+  }
+
   const [proofs, setProofs] = useState([]);
   const [loadingProofs, setLoadingProofs] = useState(true);
 
@@ -101,6 +108,7 @@ export default function ProofList() {
         proof={currentproof}
         deleteProof={deleteProof}
         key={currentproof._id}
+        newProofId={newProofId}
       />
     ));
 
@@ -127,8 +135,13 @@ export default function ProofList() {
   );
 }
 
+ProofList.propTypes = {
+  location: PropTypes.any,
+};
+
 Proof.propTypes = {
   label: PropTypes.any,
   proof: PropTypes.any,
+  newProofId: PropTypes.any,
   deleteProof: PropTypes.any,
 };
