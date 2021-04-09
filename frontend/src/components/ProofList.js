@@ -38,7 +38,24 @@ const Proof = (props) => {
             </Link>{' '}
             |{' '}
           </>
-        ) : null}
+        ) : (
+          <>
+            <Link
+              to={{
+                pathname: `/edit/${proof._id}`,
+                state: {
+                  error: proof.error,
+                  label: proof.label,
+                  options: proof.options,
+                  problem: proof.problem,
+                },
+              }}
+            >
+              edit
+            </Link>{' '}
+            |{' '}
+          </>
+        )}
         <a
           href="/"
           onClick={(e) => {

@@ -6,6 +6,7 @@ import 'bootstrap/dist/css/bootstrap.css';
 import MyNavbar from './components/Navbar';
 import ProofList from './components/ProofList';
 import CreateProof from './components/CreateProof';
+import EditProof from './components/EditProof';
 import VisualizeProof from './components/VisualizeProof';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <MyNavbar />
         <Route path="/" exact component={ProofList} />
         <Route path="/create" exact component={CreateProof} />
+        <Route path="/edit/:id" exact component={EditProof} />
         <Route path="/visualize/:id" exact component={VisualizeProof} />
       </div>
     </Router>
