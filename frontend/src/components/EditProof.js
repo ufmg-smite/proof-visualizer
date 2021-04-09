@@ -8,7 +8,7 @@ export default function EditProof(props) {
   if (!location.state) {
     window.location = '/';
   }
-  const { error } = location.state;
+  const { id, error } = location.state;
   const [label, setLabel] = useState(location.state.label);
   const [problem, setProblem] = useState(location.state.problem);
   const [options, setOptions] = useState(location.state.options);
@@ -22,7 +22,7 @@ export default function EditProof(props) {
       options,
     };
     await axios
-      .post('http://localhost:5000/proof/add/', proof)
+      .post(`http://localhost:5000/proof/edit/${id}`, proof)
       .then((res) =>
         axios.get(`http://localhost:5000/proof/process-proof/${res.data}`)
       )
@@ -33,9 +33,11 @@ export default function EditProof(props) {
     <Form onSubmit={onSubmit}>
       <Form.Group>
         <Form.Label>Proof name </Form.Label>{' '}
-        <Badge className="bg-danger" variant="danger" title={error}>
-          error
-        </Badge>
+        {error ? (
+          <Badge className="bg-danger" variant="danger" title={error}>
+            error
+          </Badge>
+        ) : null}
         <Form.Control
           name="label"
           type="text"

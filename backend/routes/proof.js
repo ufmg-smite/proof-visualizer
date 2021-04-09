@@ -25,6 +25,17 @@ router.route('/add').post((req, res) => {
     .catch((err) => res.status(400).json(`Error: ${err}`));
 });
 
+router.route('/edit/:id').post((req, res) => {
+  const { label, problem, options } = req.body;
+
+  Proof.findOneAndUpdate(
+    { _id: req.params.id },
+    { label, problem, options, error: undefined }
+  )
+    .then(() => res.json(req.params.id))
+    .catch((err) => res.status(400).json(`Error: ${err}`));
+});
+
 router.route('/:id').get((req, res) => {
   Proof.findById(req.params.id)
     .then((proof) => res.json(proof))
@@ -69,12 +80,14 @@ router.route('/process-proof/:id').get((req, res) => {
         proof.dot = cvc4.stdout;
         proof.dot = proof.dot.slice(proof.dot.indexOf('digraph'));
         proof.state = 'done';
+        proof.save();
+        res.json(proof.dot);
       } else {
         proof.error = `CVC4 ERROR:\n${cvc4.stderr.toString()}`;
         proof.state = 'error';
+        proof.save();
+        res.json(proof.error);
       }
-      proof.save();
-      res.json(proof.dot);
     })
     .catch((err) => {
       res.status(400).json(`Error: ${err}`);

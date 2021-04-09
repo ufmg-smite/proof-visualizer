@@ -45,6 +45,7 @@ const Proof = (props) => {
                 pathname: `/edit/${proof._id}`,
                 state: {
                   error: proof.error,
+                  id: proof._id,
                   label: proof.label,
                   options: proof.options,
                   problem: proof.problem,
