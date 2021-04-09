@@ -70,7 +70,7 @@ router.route('/process-proof/:id').get((req, res) => {
         proof.dot = proof.dot.slice(proof.dot.indexOf('digraph'));
         proof.state = 'done';
       } else {
-        proof.error = cvc4.stderr.toString();
+        proof.error = `CVC4 ERROR:\n${cvc4.stderr.toString()}`;
         proof.state = 'error';
       }
       proof.save();
