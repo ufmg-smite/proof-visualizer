@@ -30,7 +30,7 @@ router.route('/edit/:id').post((req, res) => {
 
   Proof.findOneAndUpdate(
     { _id: req.params.id },
-    { label, problem, options, error: undefined }
+    { label, problem, options, error: undefined, state: 'proof_received' }
   )
     .then(() => res.json(req.params.id))
     .catch((err) => res.status(400).json(`Error: ${err}`));
