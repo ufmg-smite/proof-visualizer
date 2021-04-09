@@ -1,13 +1,24 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Badge, Button, Form } from 'react-bootstrap';
 
 export default function ProofForm(props) {
-  const { edit, error, label, onSubmit, options, problem } = props;
+  const { id, edit, error, label, options, problem } = props;
 
   const [labelForm, setLabel] = useState(label);
   const [problemForm, setProblem] = useState(problem);
   const [optionsForm, setOptions] = useState(options);
+
+  const onSubmit = async (proof) => {
+    await axios
+      .post(`http://localhost:5000/proof/${edit ? `edit/${id}` : 'add'}`, proof)
+      .then((res) =>
+        axios.get(`http://localhost:5000/proof/process-proof/${res.data}`)
+      )
+      .then(() => (window.location = '/'));
+  };
+
   return (
     <Form
       onSubmit={(e) => {
@@ -69,10 +80,10 @@ export default function ProofForm(props) {
 }
 
 ProofForm.propTypes = {
+  id: PropTypes.any,
   edit: PropTypes.bool,
   error: PropTypes.any,
   label: PropTypes.string,
-  onSubmit: PropTypes.func,
   options: PropTypes.string,
   problem: PropTypes.string,
 };
