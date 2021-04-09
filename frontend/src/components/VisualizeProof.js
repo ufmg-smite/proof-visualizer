@@ -53,7 +53,7 @@ export default function VisualizeProof(props) {
   const [textOfFocusNode, setTextOfFocusNode] = useState('');
 
   useEffect(() => {
-    if (location.state) return;
+    if (location.state.dot) return;
     const proofId = location.pathname.split('/').slice(-1)[0];
 
     axios
