@@ -1,20 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import axios from 'axios';
 import ProofForm from './ProofForm';
 
 export default function CreateProof() {
-  const [label, setLabel] = useState('');
-  const [problem, setProblem] = useState('');
-  const [options, setOptions] = useState('');
-
-  const onSubmit = async (e) => {
-    e.preventDefault();
-
-    const proof = {
-      label,
-      problem,
-      options,
-    };
+  const onSubmit = async (proof) => {
     await axios
       .post('http://localhost:5000/proof/add/', proof)
       .then((res) =>
@@ -23,15 +12,5 @@ export default function CreateProof() {
       .then(() => (window.location = '/'));
   };
 
-  return (
-    <ProofForm
-      label={label}
-      setLabel={setLabel}
-      onSubmit={onSubmit}
-      options={options}
-      setOptions={setOptions}
-      problem={problem}
-      setProblem={setProblem}
-    />
-  );
+  return <ProofForm onSubmit={onSubmit} />;
 }

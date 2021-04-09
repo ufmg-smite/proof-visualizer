@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import ProofForm from './ProofForm';
@@ -8,19 +8,9 @@ export default function EditProof(props) {
   if (!location.state) {
     window.location = '/';
   }
-  const { id, error } = location.state;
-  const [label, setLabel] = useState(location.state.label);
-  const [problem, setProblem] = useState(location.state.problem);
-  const [options, setOptions] = useState(location.state.options);
+  const { id, error, label, problem, options } = location.state;
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-
-    const proof = {
-      label,
-      problem,
-      options,
-    };
+  const onSubmit = async (proof) => {
     await axios
       .post(`http://localhost:5000/proof/edit/${id}`, proof)
       .then((res) =>
@@ -34,12 +24,9 @@ export default function EditProof(props) {
       edit
       error={error}
       label={label}
-      setLabel={setLabel}
-      onSubmit={onSubmit}
       options={options}
-      setOptions={setOptions}
       problem={problem}
-      setProblem={setProblem}
+      onSubmit={onSubmit}
     />
   );
 }
