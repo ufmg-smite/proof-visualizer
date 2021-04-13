@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes from 'prop-types';
+import PropTypes, { node } from 'prop-types';
 import axios from 'axios';
 import { DropdownButton, Dropdown } from 'react-bootstrap';
 import Canvas from '../graphic-components/Canvas';
@@ -16,13 +16,11 @@ function processDot(dot) {
       const id = line.split('[')[0].trim().slice(1, -1);
       const text = line.slice(line.indexOf('label') + 9, line.lastIndexOf('"'));
       if (line.split('[')[0].search('c') === -1) {
-        const node = {
-          id,
-          rule: text,
-          children: [],
-          showingChildren: false,
-        };
-        nodes[node.id] = node;
+        if (!node[node.id]) nodes[id] = {};
+        nodes[id].id = id;
+        nodes[id].rule = text;
+        nodes[id].children = [];
+        nodes[id].showingChildren = false;
       } else {
         nodes[id.replace('c', '')].conclusion = text;
       }
@@ -31,7 +29,10 @@ function processDot(dot) {
         .split('->')
         .map((element) => element.trim().replaceAll('"', '').replace('c', ''));
       if (edgeNodes[0] !== edgeNodes[1]) {
-        nodes[edgeNodes[1]].children.push(edgeNodes[0]);
+        const [child, parent] = edgeNodes;
+        nodes[parent].children.push(child);
+        if (!node[node.id]) nodes[child] = {};
+        nodes[child].parent = parent;
       }
     }
   });
