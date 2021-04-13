@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Stage, Layer } from 'react-konva';
 import PropTypes from 'prop-types';
+import dagre from 'dagre';
 import Node from './Node';
 import Line from './Line';
 
@@ -45,15 +46,14 @@ export default class Canvas extends Component {
       proofNodes,
       showingNodes: {},
       showingEdges: {},
-      layer: [],
     };
   }
 
   componentDidMount() {
-    const { showingNodes, proofNodes, canvasSize } = this.state;
+    const { showingNodes, proofNodes } = this.state;
 
-    this.nodeXPosition('0', canvasSize.width * 0.5, 0);
-    this.nodeFixXPosition('0', 0);
+    this.setLayer('0', 0);
+    this.nodeXPosition();
 
     showingNodes['0c'] = new Node(
       this.nodeProps(
@@ -91,6 +91,7 @@ export default class Canvas extends Component {
 
   nodeProps = (children, conclusion, id, x, y) => {
     const { setCurrentText, setFocusText } = this.props;
+    const { proofNodes } = this.state;
     return {
       children,
       conclusion,
@@ -99,8 +100,8 @@ export default class Canvas extends Component {
       updateParentState: this.updateParentState,
       setFocusText,
       setCurrentText,
-      x,
-      y,
+      x: proofNodes[id.replace('c', '')].x,
+      y: proofNodes[id.replace('c', '')].y + (conclusion ? 0 : 100),
     };
   };
 
@@ -229,48 +230,38 @@ export default class Canvas extends Component {
     return nodes;
   };
 
-  nodeXPosition = (nodeId, x, layerNumber) => {
-    const { proofNodes, layer } = this.state;
+  setLayer = (nodeId, layerNumber) => {
+    const { proofNodes } = this.state;
     proofNodes[nodeId].layer = layerNumber;
-    layer[layerNumber] = 0;
-    proofNodes[nodeId].x = x;
-    const lenChildren = proofNodes[nodeId].children.length - 1;
-    proofNodes[nodeId].children.forEach((node, i) => {
-      this.nodeXPosition(
-        node,
-        proofNodes[nodeId].x + (i - lenChildren / 2) * 350,
-        layerNumber + 1
-      );
+    proofNodes[nodeId].children.forEach((node) => {
+      this.setLayer(node, layerNumber + 1);
     });
-    this.setState({ proofNodes, layer });
+    this.setState({ proofNodes });
   };
 
-  nodeFixXPosition = (nodeId, offsetFromParent) => {
-    const { proofNodes, layer } = this.state;
-    let offset = 0;
-    if (
-      proofNodes[nodeId].x + offsetFromParent <
-      layer[proofNodes[nodeId].layer]
-    ) {
-      offset +=
-        layer[proofNodes[nodeId].layer] -
-        (proofNodes[nodeId].x + offsetFromParent);
-    }
-    proofNodes[nodeId].children.forEach((node) => {
-      offset += this.nodeFixXPosition(node, offset + offsetFromParent);
+  nodeXPosition = () => {
+    const { proofNodes } = this.state;
+    const g = new dagre.graphlib.Graph();
+    g.setGraph({ rankdir: 'BT' });
+    g.setDefaultEdgeLabel(function () {
+      return {};
     });
-    if (proofNodes[nodeId].children.length) {
-      proofNodes[nodeId].x =
-        (proofNodes[proofNodes[nodeId].children[0]].x +
-          proofNodes[
-            proofNodes[nodeId].children[proofNodes[nodeId].children.length - 1]
-          ].x) /
-        2;
-    } else {
-      proofNodes[nodeId].x += offset + offsetFromParent;
-    }
-    layer[proofNodes[nodeId].layer] = proofNodes[nodeId].x + 350;
-    return offset;
+
+    proofNodes.forEach((node, i) => {
+      g.setNode(i, { width: 300, height: 165, rank: node.layer });
+      node.children.forEach((child) => {
+        g.setEdge(child, node.id);
+      });
+    });
+
+    dagre.layout(g);
+
+    g.nodes().forEach(function (v) {
+      const { x, y } = g.node(v);
+      proofNodes[v].x = x;
+      proofNodes[v].y = y;
+    });
+    this.setState({ proofNodes });
   };
 
   render() {
