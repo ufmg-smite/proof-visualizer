@@ -83,7 +83,7 @@ export default class Canvas extends Component {
       },
       stage: {
         stageScale: 1,
-        stageX: width - (proofNodes['0'].x + 600),
+        stageX: width / 2 - (proofNodes['0'].x + 300 / 2),
         stageY: 10,
       },
     });
