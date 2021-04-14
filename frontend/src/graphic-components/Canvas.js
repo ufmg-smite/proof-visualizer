@@ -83,7 +83,7 @@ export default class Canvas extends Component {
       },
       stage: {
         stageScale: 1,
-        stageX: width / 2 - (proofNodes['0'].x + 300 / 2),
+        stageX: width / 2 - (proofNodes['0'].conclusionPosition.x + 300 / 2),
         stageY: 10,
       },
     });
@@ -100,8 +100,12 @@ export default class Canvas extends Component {
       updateParentState: this.updateParentState,
       setFocusText,
       setCurrentText,
-      x: proofNodes[id.replace('c', '')].x,
-      y: proofNodes[id.replace('c', '')].y + (conclusion ? 0 : 100),
+      x: conclusion
+        ? proofNodes[id.replace('c', '')].conclusionPosition.x
+        : proofNodes[id.replace('c', '')].rulePosition.x,
+      y: conclusion
+        ? proofNodes[id.replace('c', '')].conclusionPosition.y
+        : proofNodes[id.replace('c', '')].rulePosition.y,
     };
   };
 
@@ -158,15 +162,14 @@ export default class Canvas extends Component {
   };
 
   removeNodes = (id) => {
-    this.removeNode(id, false);
     this.recursivelyGetChildren(id).forEach((node) => {
       this.removeNode(node, true);
     });
+    this.removeNode(id, false);
   };
 
   removeNode = (id, deleteConclusion) => {
     const { proofNodes, showingNodes, showingEdges } = this.state;
-
     delete showingNodes[id];
     if (deleteConclusion) {
       delete showingNodes[`${id}c`];
@@ -192,9 +195,28 @@ export default class Canvas extends Component {
   };
 
   updateParentState = (key, x, y) => {
-    const { showingNodes, showingEdges } = this.state;
+    const { showingNodes, showingEdges, proofNodes } = this.state;
     showingNodes[key].props.x = x;
     showingNodes[key].props.y = y;
+    if (key.indexOf('c') === -1) {
+      proofNodes[key].rulePosition = { x, y };
+    } else {
+      if (!proofNodes[key.replace('c', '')].showingChildren) {
+        const [xOffset, yOffset] = [
+          x - proofNodes[key.replace('c', '')].conclusionPosition.x,
+          y - proofNodes[key.replace('c', '')].conclusionPosition.y,
+        ];
+        proofNodes[key.replace('c', '')].rulePosition.x += xOffset;
+        proofNodes[key.replace('c', '')].rulePosition.y += yOffset;
+        this.recursivelyGetChildren(key.replace('c', '')).forEach((node) => {
+          proofNodes[node].conclusionPosition.x += xOffset;
+          proofNodes[node].conclusionPosition.y += yOffset;
+          proofNodes[node].rulePosition.x += xOffset;
+          proofNodes[node].rulePosition.y += yOffset;
+        });
+      }
+      proofNodes[key.replace('c', '')].conclusionPosition = { x, y };
+    }
     Object.keys(showingEdges)
       .filter((edgeKey) => edgeKey.indexOf(key) !== -1)
       .forEach((edge) => {
@@ -245,8 +267,8 @@ export default class Canvas extends Component {
 
     g.nodes().forEach(function (v) {
       const { x, y } = g.node(v);
-      proofNodes[v].x = x;
-      proofNodes[v].y = y;
+      proofNodes[v].conclusionPosition = { x, y };
+      proofNodes[v].rulePosition = { x, y: y + 100 };
     });
     this.setState({ proofNodes });
   };

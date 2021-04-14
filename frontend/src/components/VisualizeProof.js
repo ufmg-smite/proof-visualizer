@@ -36,7 +36,6 @@ function processDot(dot) {
       }
     }
   });
-  console.log(nodes);
   return nodes;
 }
 
@@ -76,7 +75,6 @@ const filterNodesByVision = (nodes, visionName) => {
       }
     }
   });
-  console.log(nodes);
   return nodes;
 };
 
@@ -134,6 +132,7 @@ export default function VisualizeProof(props) {
             >
               normal
             </Dropdown.Item>
+            <Dropdown.Divider />
             <Dropdown.Item
               eventKey="2"
               onClick={(e) => {
