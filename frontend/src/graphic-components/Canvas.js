@@ -89,7 +89,7 @@ export default class Canvas extends Component {
     });
   }
 
-  nodeProps = (children, conclusion, id, x, y) => {
+  nodeProps = (children, conclusion, id) => {
     const { setCurrentText, setFocusText } = this.props;
     const { proofNodes } = this.state;
     return {
@@ -111,31 +111,24 @@ export default class Canvas extends Component {
   });
 
   onClick = (e) => {
-    let { id, x, y, conclusion } = e.target.parent.attrs;
+    let { id, conclusion } = e.target.parent.attrs;
     const { proofNodes } = this.state;
     id = id.replace('c', '');
 
     if (conclusion && proofNodes[id].showingChildren) {
       this.removeNodes(id);
     } else if (conclusion) {
-      this.addNodes(id, x, y);
+      this.addNodes(id);
     }
   };
 
-  addNodes = (id, x, y) => {
+  addNodes = (id) => {
     const { proofNodes, showingNodes } = this.state;
-    let [nodeX, nodeY] = [null, null];
-    this.addNode(proofNodes[id], proofNodes[id], false, x, y);
+    this.addNode(proofNodes[id], proofNodes[id], false);
     proofNodes[id].children.forEach((child) => {
-      [nodeX, nodeY] = this.addNode(
-        proofNodes[child],
-        proofNodes[id],
-        true,
-        x,
-        y
-      );
+      this.addNode(proofNodes[child], proofNodes[id], true);
       if (proofNodes[child].showingChildren) {
-        this.addNodes(child, nodeX, nodeY);
+        this.addNodes(child);
       }
     });
     proofNodes[id].showingChildren = true;
@@ -143,21 +136,16 @@ export default class Canvas extends Component {
     this.setState({ showingNodes, proofNodes });
   };
 
-  addNode = (from, to, fromConclusion, x, y) => {
+  addNode = (from, to, fromConclusion) => {
     const { showingNodes, showingEdges } = this.state;
     const fromKey = fromConclusion ? `${from.id}c` : from.id;
     const toKey = fromConclusion ? to.id : `${to.id}c`;
-    const [nodeX, nodeY] = [
-      from.x + (x - to.x),
-      y + 100 + (fromConclusion ? 100 : 0),
-    ];
+
     showingNodes[fromKey] = new Node(
       this.nodeProps(
         fromConclusion ? from.conclusion : from.rule,
         fromConclusion,
-        fromKey,
-        nodeX,
-        nodeY
+        fromKey
       )
     );
     showingEdges[`${fromKey}->${toKey}`] = new Line(
@@ -167,7 +155,6 @@ export default class Canvas extends Component {
         showingNodes[toKey].props
       )
     );
-    return [nodeX, nodeY];
   };
 
   removeNodes = (id) => {
