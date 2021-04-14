@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import PropTypes, { node } from 'prop-types';
+import PropTypes from 'prop-types';
 import axios from 'axios';
 import { DropdownButton, Dropdown } from 'react-bootstrap';
 import Canvas from '../graphic-components/Canvas';
@@ -16,7 +16,7 @@ function processDot(dot) {
       const id = line.split('[')[0].trim().slice(1, -1);
       const text = line.slice(line.indexOf('label') + 9, line.lastIndexOf('"'));
       if (line.split('[')[0].search('c') === -1) {
-        if (!node[node.id]) nodes[id] = {};
+        if (!nodes[id]) nodes[id] = {};
         nodes[id].id = id;
         nodes[id].rule = text;
         nodes[id].children = [];
@@ -31,13 +31,54 @@ function processDot(dot) {
       if (edgeNodes[0] !== edgeNodes[1]) {
         const [child, parent] = edgeNodes;
         nodes[parent].children.push(child);
-        if (!node[node.id]) nodes[child] = {};
+        if (!nodes[child]) nodes[child] = {};
         nodes[child].parent = parent;
       }
     }
   });
+  console.log(nodes);
   return nodes;
 }
+
+const filterNodesByVision = (nodes, visionName) => {
+  const filter = ['ASSUME', 'SCOPE'];
+  let piNumber = 0;
+  switch (visionName) {
+    case 'normal':
+      return nodes;
+    case 'propositional':
+      filter.push('CHAIN_RESOLUTION');
+      break;
+    default:
+  }
+  nodes.forEach((node) => {
+    if (!filter.some((f) => node.rule.indexOf(f) !== -1)) {
+      node.inVision = false;
+    } else {
+      node.inVision = true;
+    }
+  });
+  nodes.forEach((node) => {
+    if (!node.inVision) {
+      if (nodes[node.parent].pi) {
+        const index = nodes[node.parent].children.indexOf(node.id);
+        if (index > -1) {
+          nodes[node.parent].children.splice(index, 1);
+        }
+        node.children.forEach((child) => (nodes[child].parent = node.parent));
+        nodes[node.parent].children.push(...node.children);
+        delete nodes[node.id];
+      } else {
+        node.rule = `π${piNumber}`;
+        node.pi = true;
+        node.inVision = true;
+        piNumber += 1;
+      }
+    }
+  });
+  console.log(nodes);
+  return nodes;
+};
 
 export default function VisualizeProof(props) {
   const { location } = props;
@@ -52,6 +93,7 @@ export default function VisualizeProof(props) {
     'right-click in a node to show the text here'
   );
   const [textOfFocusNode, setTextOfFocusNode] = useState('');
+  const [vision, setVision] = useState('normal');
 
   useEffect(() => {
     if (location.state.dot) return;
@@ -81,38 +123,69 @@ export default function VisualizeProof(props) {
     <div className="visualizer">
       <h3 className="proof-name">
         <span>{label}</span>
-        <DropdownButton title="Download" id="bg-vertical-dropdown-3">
-          <Dropdown.Item
-            eventKey="1"
-            href={`data:attachment/text,${encodeURIComponent(dot)}`}
-            download={label ? `${label.replaceAll(' ', '_')}.dot` : ''}
-          >
-            dot
-          </Dropdown.Item>
-          <Dropdown.Item
-            eventKey="2"
-            href={`data:attachment/text,${encodeURIComponent(problem)}`}
-            download={label ? `${label.replaceAll(' ', '_')}.smt2` : null}
-          >
-            problem
-          </Dropdown.Item>
-          <Dropdown.Item
-            eventKey="3"
-            onClick={(e) => {
-              e.preventDefault();
-              const link = document.createElement('a');
-              link.download = label
-                ? `${label.replaceAll(' ', '_')}.png`
-                : null;
-              link.href = document
-                .getElementsByClassName('konvajs-content')[0]
-                .children[0].toDataURL('image/png');
-              link.click();
-            }}
-          >
-            png
-          </Dropdown.Item>
-        </DropdownButton>
+        <span>
+          <DropdownButton title="Vision" id="bg-vertical-dropdown-3">
+            <Dropdown.Item
+              eventKey="1"
+              onClick={(e) => {
+                e.preventDefault();
+                setVision('normal');
+              }}
+            >
+              normal
+            </Dropdown.Item>
+            <Dropdown.Item
+              eventKey="2"
+              onClick={(e) => {
+                e.preventDefault();
+                setVision('basic');
+              }}
+            >
+              basic
+            </Dropdown.Item>
+            <Dropdown.Item
+              eventKey="3"
+              onClick={(e) => {
+                e.preventDefault();
+                setVision('propositional');
+              }}
+            >
+              propositional
+            </Dropdown.Item>
+          </DropdownButton>
+          <DropdownButton title="Download" id="bg-vertical-dropdown-3">
+            <Dropdown.Item
+              eventKey="1"
+              href={`data:attachment/text,${encodeURIComponent(dot)}`}
+              download={label ? `${label.replaceAll(' ', '_')}.dot` : ''}
+            >
+              dot
+            </Dropdown.Item>
+            <Dropdown.Item
+              eventKey="2"
+              href={`data:attachment/text,${encodeURIComponent(problem)}`}
+              download={label ? `${label.replaceAll(' ', '_')}.smt2` : null}
+            >
+              problem
+            </Dropdown.Item>
+            <Dropdown.Item
+              eventKey="3"
+              onClick={(e) => {
+                e.preventDefault();
+                const link = document.createElement('a');
+                link.download = label
+                  ? `${label.replaceAll(' ', '_')}.png`
+                  : null;
+                link.href = document
+                  .getElementsByClassName('konvajs-content')[0]
+                  .children[0].toDataURL('image/png');
+                link.click();
+              }}
+            >
+              png
+            </Dropdown.Item>
+          </DropdownButton>
+        </span>
       </h3>
 
       {dot ? (
@@ -120,7 +193,8 @@ export default function VisualizeProof(props) {
         <div className="canvas-container" {...canvasContainerProps}>
           {' '}
           <Canvas
-            proofNodes={processDot(dot)}
+            key={vision}
+            proofNodes={filterNodesByVision(processDot(dot), vision)}
             setCurrentText={setCurrentText}
             setFocusText={setTextOfFocusNode}
           />

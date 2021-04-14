@@ -8,32 +8,39 @@ canvas {
   border-radius: 10px;
 }
 
-html, body, #root, #root>.container {
-  height: 100%
+html,
+body,
+#root,
+#root > .container {
+  height: 100%;
 }
 
 .container {
   display: flex;
   flex-flow: column;
   .visualizer {
-    flex: 1;  /* 1 and it will fill whole space left if no flex value are set to other children*/
+    flex: 1; /* 1 and it will fill whole space left if no flex value are set to other children*/
     display: flex;
     flex-flow: column;
-    .canvas-container{
+    .canvas-container {
       flex: 1;
     }
-    .node-text{
+    .node-text {
       overflow: auto;
       height: 70px;
       width: calc(100%);
       text-align: center;
     }
-    .proof-name{
+    .proof-name {
       display: flex;
       justify-content: space-between;
       padding-right: 30px;
+      span {
+        display: flex;
+        button {
+          margin-left: 10px;
+        }
+      }
     }
   }
 }
-
-
