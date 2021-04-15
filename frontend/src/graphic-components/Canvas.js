@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Stage, Layer } from 'react-konva';
 import PropTypes from 'prop-types';
-import dagre from 'dagre';
 import Node from './Node';
 import Line from './Line';
 
@@ -52,16 +51,13 @@ export default class Canvas extends Component {
   componentDidMount() {
     const { showingNodes, proofNodes } = this.state;
 
-    this.setLayer('0', 0);
-    this.nodeXPosition();
-
     showingNodes['0c'] = new Node(
       this.nodeProps(
         proofNodes[0].conclusion,
         true,
         `${proofNodes[0].id}c`,
-        proofNodes['0'].x,
-        10
+        0,
+        0
       )
     );
 
@@ -83,15 +79,14 @@ export default class Canvas extends Component {
       },
       stage: {
         stageScale: 1,
-        stageX: width / 2 - (proofNodes['0'].conclusionPosition.x + 300 / 2),
+        stageX: width / 2 - (showingNodes['0c'].props.x + 300 / 2),
         stageY: 10,
       },
     });
   }
 
-  nodeProps = (children, conclusion, id) => {
+  nodeProps = (children, conclusion, id, x, y) => {
     const { setCurrentText, setFocusText } = this.props;
-    const { proofNodes } = this.state;
     return {
       children,
       conclusion,
@@ -100,12 +95,8 @@ export default class Canvas extends Component {
       updateParentState: this.updateParentState,
       setFocusText,
       setCurrentText,
-      x: conclusion
-        ? proofNodes[id.replace('c', '')].conclusionPosition.x
-        : proofNodes[id.replace('c', '')].rulePosition.x,
-      y: conclusion
-        ? proofNodes[id.replace('c', '')].conclusionPosition.y
-        : proofNodes[id.replace('c', '')].rulePosition.y,
+      x,
+      y,
     };
   };
 
@@ -115,24 +106,31 @@ export default class Canvas extends Component {
   });
 
   onClick = (e) => {
-    let { id, conclusion } = e.target.parent.attrs;
+    let { id, conclusion, x, y } = e.target.parent.attrs;
     const { proofNodes } = this.state;
     id = id.replace('c', '');
 
     if (conclusion && proofNodes[id].showingChildren) {
       this.removeNodes(id);
     } else if (conclusion) {
-      this.addNodes(id);
+      this.addNodes(id, x, y);
     }
   };
 
-  addNodes = (id) => {
+  addNodes = (id, x, y) => {
     const { proofNodes, showingNodes } = this.state;
-    this.addNode(proofNodes[id], proofNodes[id], false);
-    proofNodes[id].children.forEach((child) => {
-      this.addNode(proofNodes[child], proofNodes[id], true);
+    this.addNode(proofNodes[id], proofNodes[id], false, x, y + 100);
+    const lenChildren = proofNodes[id].children.length - 1;
+    proofNodes[id].children.forEach((child, i) => {
+      this.addNode(
+        proofNodes[child],
+        proofNodes[id],
+        true,
+        x + (i - lenChildren / 2) * 350,
+        y + 200
+      );
       if (proofNodes[child].showingChildren) {
-        this.addNodes(child);
+        this.addNodes(child, x + (i - lenChildren / 2) * 350, y + 200);
       }
     });
     proofNodes[id].showingChildren = true;
@@ -140,23 +138,25 @@ export default class Canvas extends Component {
     this.setState({ showingNodes, proofNodes });
   };
 
-  addNode = (from, to, fromConclusion) => {
+  addNode = (node, parent, nodeConclusion, x, y) => {
     const { showingNodes, showingEdges } = this.state;
-    const fromKey = fromConclusion ? `${from.id}c` : from.id;
-    const toKey = fromConclusion ? to.id : `${to.id}c`;
+    const nodeKey = nodeConclusion ? `${node.id}c` : node.id;
+    const parentKey = nodeConclusion ? parent.id : `${parent.id}c`;
 
-    showingNodes[fromKey] = new Node(
+    showingNodes[nodeKey] = new Node(
       this.nodeProps(
-        fromConclusion ? from.conclusion : from.rule,
-        fromConclusion,
-        fromKey
+        nodeConclusion ? node.conclusion : node.rule,
+        nodeConclusion,
+        nodeKey,
+        x,
+        y
       )
     );
-    showingEdges[`${fromKey}->${toKey}`] = new Line(
+    showingEdges[`${nodeKey}->${parentKey}`] = new Line(
       this.lineProps(
-        `${fromKey}->${toKey}`,
-        showingNodes[fromKey].props,
-        showingNodes[toKey].props
+        `${nodeKey}->${parentKey}`,
+        showingNodes[nodeKey].props,
+        showingNodes[parentKey].props
       )
     );
   };
@@ -237,40 +237,6 @@ export default class Canvas extends Component {
         nodes = nodes.concat(this.recursivelyGetChildren(node));
     });
     return nodes;
-  };
-
-  setLayer = (nodeId, layerNumber) => {
-    const { proofNodes } = this.state;
-    proofNodes[nodeId].layer = layerNumber;
-    proofNodes[nodeId].children.forEach((node) => {
-      this.setLayer(node, layerNumber + 1);
-    });
-    this.setState({ proofNodes });
-  };
-
-  nodeXPosition = () => {
-    const { proofNodes } = this.state;
-    const g = new dagre.graphlib.Graph();
-    g.setGraph({ rankdir: 'BT' });
-    g.setDefaultEdgeLabel(function () {
-      return {};
-    });
-
-    proofNodes.forEach((node, i) => {
-      g.setNode(i, { width: 300, height: 165, rank: node.layer });
-      node.children.forEach((child) => {
-        g.setEdge(child, node.id);
-      });
-    });
-
-    dagre.layout(g);
-
-    g.nodes().forEach(function (v) {
-      const { x, y } = g.node(v);
-      proofNodes[v].conclusionPosition = { x, y };
-      proofNodes[v].rulePosition = { x, y: y + 100 };
-    });
-    this.setState({ proofNodes });
   };
 
   render() {
