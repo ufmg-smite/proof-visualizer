@@ -146,32 +146,6 @@ export default class Canvas extends Component {
     const nodeKey = nodeConclusion ? `${node.id}c` : node.id;
     const parentKey = nodeConclusion ? parent.id : `${parent.id}c`;
 
-    if (
-      (nodeConclusion && proofNodes[node.id].conclusionPositionCache) ||
-      (!nodeConclusion && proofNodes[node.id].rulePositionCache)
-    ) {
-      showingNodes[nodeKey] = new Node(
-        this.nodeProps(
-          nodeConclusion ? node.conclusion : node.rule,
-          nodeConclusion,
-          nodeKey,
-          nodeConclusion
-            ? proofNodes[node.id].conclusionPosition.x
-            : proofNodes[node.id].rulePosition.x,
-          nodeConclusion
-            ? proofNodes[node.id].conclusionPosition.y
-            : proofNodes[node.id].rulePosition.y
-        )
-      );
-      showingEdges[`${nodeKey}->${parentKey}`] = new Line(
-        this.lineProps(
-          `${nodeKey}->${parentKey}`,
-          showingNodes[nodeKey].props,
-          showingNodes[parentKey].props
-        )
-      );
-      return 0;
-    }
     showingNodes[nodeKey] = new Node(
       this.nodeProps(
         nodeConclusion ? node.conclusion : node.rule,
@@ -188,6 +162,23 @@ export default class Canvas extends Component {
         showingNodes[parentKey].props
       )
     );
+
+    if (
+      (nodeConclusion && proofNodes[node.id].conclusionPositionCache) ||
+      (!nodeConclusion && proofNodes[node.id].rulePositionCache)
+    ) {
+      this.updateNodeState(
+        nodeKey,
+        nodeConclusion
+          ? proofNodes[node.id].conclusionPosition.x
+          : proofNodes[node.id].rulePosition.x,
+        nodeConclusion
+          ? proofNodes[node.id].conclusionPosition.y
+          : proofNodes[node.id].rulePosition.y
+      );
+      return 0;
+    }
+
     this.updateNodeState(nodeKey, x, y);
     return this.checkOverlapAndPush(nodeKey);
   };
