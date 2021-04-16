@@ -11,6 +11,23 @@ function textColorFromBg(bgColor) {
 }
 
 export default class Node extends Component {
+  overlap = (node) => {
+    const { x, y } = this.props;
+    const overlapXleftPointInside =
+      node.props.x > x - 25 && node.props.x < x + 325;
+    const overlapXrightPointInside =
+      node.props.x + 300 > x - 25 && node.props.x + 300 < x + 325;
+    const overlapX = overlapXleftPointInside || overlapXrightPointInside;
+    const overlapY =
+      (node.props.y > y - 25 && node.props.y < y + 60) ||
+      (node.props.y + 30 > y - 25 && node.props.y + 30 < y + 60);
+
+    if ((overlapX && overlapY) || (x === node.props.x && y === node.props.y)) {
+      return true;
+    }
+    return false;
+  };
+
   render() {
     const {
       children,
@@ -44,8 +61,8 @@ export default class Node extends Component {
           e.evt.button === 2 ? setCurrentText(e.target.attrs.text) : onClick(e)
         }
         onDragMove={(e) => {
-          const { updateParentState } = this.props;
-          updateParentState(id, e.target.attrs.x, e.target.attrs.y);
+          const { updateNodeState } = this.props;
+          updateNodeState(id, e.target.attrs.x, e.target.attrs.y);
         }}
         onMouseEnter={(e) => {
           setFocusText(e.target.attrs.text);
@@ -76,7 +93,7 @@ Node.propTypes = {
   setFocusText: PropTypes.func,
   setCurrentText: PropTypes.func,
   showingChildren: PropTypes.bool,
-  updateParentState: PropTypes.func,
+  updateNodeState: PropTypes.func,
   x: PropTypes.number,
   y: PropTypes.number,
 };
