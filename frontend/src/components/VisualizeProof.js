@@ -21,6 +21,8 @@ function processDot(dot) {
         nodes[id].rule = text;
         nodes[id].children = [];
         nodes[id].showingChildren = false;
+        nodes[id].conclusionPosition = { x: NaN, y: NaN };
+        nodes[id].rulePosition = { x: NaN, y: NaN };
       } else {
         nodes[id.replace('c', '')].conclusion = text;
       }

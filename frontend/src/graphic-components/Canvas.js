@@ -60,6 +60,7 @@ export default class Canvas extends Component {
         0
       )
     );
+    this.updateNodeState('0c', 0, 0);
 
     const [width, height] = [
       document.getElementsByClassName('visualizer')[0].offsetWidth - 30,
@@ -80,7 +81,7 @@ export default class Canvas extends Component {
       stage: {
         stageScale: 1,
         stageX: width / 2 - (showingNodes['0c'].props.x + 300 / 2),
-        stageY: 10,
+        stageY: height / 10 - (showingNodes['0c'].props.y + 30 / 2),
       },
     });
   }
@@ -92,7 +93,7 @@ export default class Canvas extends Component {
       conclusion,
       id,
       onClick: this.onClick,
-      updateParentState: this.updateParentState,
+      updateNodeState: this.updateNodeState,
       setFocusText,
       setCurrentText,
       x,
@@ -121,12 +122,13 @@ export default class Canvas extends Component {
     const { proofNodes, showingNodes } = this.state;
     this.addNode(proofNodes[id], proofNodes[id], false, x, y + 100);
     const lenChildren = proofNodes[id].children.length - 1;
+    let xOffset = 0;
     proofNodes[id].children.forEach((child, i) => {
-      this.addNode(
+      xOffset += this.addNode(
         proofNodes[child],
         proofNodes[id],
         true,
-        x + (i - lenChildren / 2) * 350,
+        x + (i - lenChildren / 2) * 350 + xOffset,
         y + 200
       );
       if (proofNodes[child].showingChildren) {
@@ -136,13 +138,40 @@ export default class Canvas extends Component {
     proofNodes[id].showingChildren = true;
     showingNodes[`${id}c`].props.showingChildren = true;
     this.setState({ showingNodes, proofNodes });
+    return xOffset;
   };
 
   addNode = (node, parent, nodeConclusion, x, y) => {
-    const { showingNodes, showingEdges } = this.state;
+    const { showingNodes, showingEdges, proofNodes } = this.state;
     const nodeKey = nodeConclusion ? `${node.id}c` : node.id;
     const parentKey = nodeConclusion ? parent.id : `${parent.id}c`;
 
+    if (
+      (nodeConclusion && proofNodes[node.id].conclusionPositionCache) ||
+      (!nodeConclusion && proofNodes[node.id].rulePositionCache)
+    ) {
+      showingNodes[nodeKey] = new Node(
+        this.nodeProps(
+          nodeConclusion ? node.conclusion : node.rule,
+          nodeConclusion,
+          nodeKey,
+          nodeConclusion
+            ? proofNodes[node.id].conclusionPosition.x
+            : proofNodes[node.id].rulePosition.x,
+          nodeConclusion
+            ? proofNodes[node.id].conclusionPosition.y
+            : proofNodes[node.id].rulePosition.y
+        )
+      );
+      showingEdges[`${nodeKey}->${parentKey}`] = new Line(
+        this.lineProps(
+          `${nodeKey}->${parentKey}`,
+          showingNodes[nodeKey].props,
+          showingNodes[parentKey].props
+        )
+      );
+      return 0;
+    }
     showingNodes[nodeKey] = new Node(
       this.nodeProps(
         nodeConclusion ? node.conclusion : node.rule,
@@ -159,6 +188,99 @@ export default class Canvas extends Component {
         showingNodes[parentKey].props
       )
     );
+    this.updateNodeState(nodeKey, x, y);
+    return this.checkOverlapAndPush(nodeKey);
+  };
+
+  checkOverlapAndPush = (nodeKey) => {
+    const { showingNodes, proofNodes } = this.state;
+    const parentNodeKey = proofNodes[nodeKey.replace('c', '')].parent;
+    const parentX = parentNodeKey ? showingNodes[parentNodeKey].props.x : 0;
+    let xOffset = 0;
+    Object.keys(showingNodes).some((showingNodeKey) => {
+      if (showingNodeKey !== nodeKey) {
+        if (showingNodes[nodeKey].overlap(showingNodes[showingNodeKey])) {
+          const parentShowingNodeKey =
+            proofNodes[showingNodeKey.replace('c', '')].parent;
+          const parentShowingNodeX = showingNodes[parentShowingNodeKey]
+            ? showingNodes[parentShowingNodeKey].props.x
+            : parentX;
+          const parentOnRight = parentX >= parentShowingNodeX;
+          xOffset = parentOnRight
+            ? showingNodes[showingNodeKey].props.x +
+              325 -
+              showingNodes[nodeKey].props.x
+            : showingNodes[showingNodeKey].props.x -
+              25 -
+              (showingNodes[nodeKey].props.x + 325);
+          return true;
+        }
+      }
+      return false;
+    });
+
+    if (xOffset) {
+      this.findNodesToBeUpdated(nodeKey, xOffset > 0).forEach(
+        (nodeToUpdateKey) => {
+          if (showingNodes[nodeToUpdateKey]) {
+            this.updateNodeState(
+              nodeToUpdateKey,
+              showingNodes[nodeToUpdateKey].props.x + xOffset,
+              showingNodes[nodeToUpdateKey].props.y
+            );
+          }
+        }
+      );
+    }
+    return xOffset;
+  };
+
+  findNodesToBeUpdated = (nodeKey, right) => {
+    const { proofNodes, showingNodes } = this.state;
+    const nodesToBeUpdated = new Set();
+    nodesToBeUpdated.add(nodeKey);
+    const { x } = showingNodes[nodeKey].props;
+    let parentKey = proofNodes[nodeKey.replace('c', '')].parent;
+    const parents = [parentKey];
+    while (showingNodes[parentKey]) {
+      nodesToBeUpdated.add(parentKey);
+      nodesToBeUpdated.add(`${parentKey}c`);
+      proofNodes[parentKey].children.forEach((childKey) => {
+        if (parents.indexOf(childKey) !== -1) return true;
+        if (right) {
+          if (showingNodes[childKey] && showingNodes[childKey].props.x >= x) {
+            nodesToBeUpdated.add(childKey);
+            this.recursivelyGetChildren(childKey).forEach((descendantKey) => {
+              nodesToBeUpdated.add(descendantKey);
+              nodesToBeUpdated.add(`${descendantKey}c`);
+            });
+          }
+          if (
+            showingNodes[`${childKey}c`] &&
+            showingNodes[`${childKey}c`].props.x >= x
+          ) {
+            nodesToBeUpdated.add(`${childKey}c`);
+          }
+        } else {
+          if (showingNodes[childKey] && showingNodes[childKey].props.x < x) {
+            nodesToBeUpdated.add(childKey);
+            this.recursivelyGetChildren(childKey).forEach((descendantKey) => {
+              nodesToBeUpdated.add(descendantKey);
+              nodesToBeUpdated.add(`${descendantKey}c`);
+            });
+          }
+          if (
+            showingNodes[`${childKey}c`] &&
+            showingNodes[`${childKey}c`].props.x < x
+          ) {
+            nodesToBeUpdated.add(`${childKey}c`);
+          }
+        }
+      });
+      parentKey = proofNodes[parentKey].parent;
+      parents.push(parentKey);
+    }
+    return nodesToBeUpdated;
   };
 
   removeNodes = (id) => {
@@ -194,11 +316,12 @@ export default class Canvas extends Component {
     this.setState({ showingNodes, proofNodes, showingEdges });
   };
 
-  updateParentState = (key, x, y) => {
+  updateNodeState = (key, x, y) => {
     const { showingNodes, showingEdges, proofNodes } = this.state;
     showingNodes[key].props.x = x;
     showingNodes[key].props.y = y;
     if (key.indexOf('c') === -1) {
+      proofNodes[key].rulePositionCache = true;
       proofNodes[key].rulePosition = { x, y };
     } else {
       if (!proofNodes[key.replace('c', '')].showingChildren) {
@@ -215,6 +338,7 @@ export default class Canvas extends Component {
           proofNodes[node].rulePosition.y += yOffset;
         });
       }
+      proofNodes[key.replace('c', '')].conclusionPositionCache = true;
       proofNodes[key.replace('c', '')].conclusionPosition = { x, y };
     }
     Object.keys(showingEdges)
