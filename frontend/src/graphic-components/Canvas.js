@@ -353,11 +353,11 @@ export default class Canvas extends Component {
   };
 
   recursivelyGetChildren = (nodeId) => {
-    const { proofNodes } = this.state;
+    const { proofNodes, showingNodes } = this.state;
     let nodes = [];
     proofNodes[nodeId].children.forEach((node) => {
       nodes = nodes.concat([node]);
-      if (proofNodes[node].showingChildren)
+      if (proofNodes[node].showingChildren || !showingNodes[node])
         nodes = nodes.concat(this.recursivelyGetChildren(node));
     });
     return nodes;
