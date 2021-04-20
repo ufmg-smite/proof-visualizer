@@ -30,19 +30,20 @@ function processDot(dot) {
         .trim()
         .split(' ');
 
-      const node = {
-        id,
-        conclusion,
-        rule,
-        visions,
-        children: [],
-        position: { x: NaN, y: NaN },
-        showingChildren: false,
-      };
-      nodes[id] = node;
+      if (!nodes[id]) nodes[id] = {};
+      nodes[id].id = id;
+      nodes[id].conclusion = conclusion;
+      nodes[id].rule = rule;
+      nodes[id].visions = visions;
+      nodes[id].children = [];
+      nodes[id].position = { x: NaN, y: NaN };
+      nodes[id].showingChildren = false;
     } else if (line.search('->') !== -1) {
-      const [from, to] = line.split('->');
-      nodes[parseInt(to.trim())].children.push(parseInt(from.trim()));
+      let [from, to] = line.split('->');
+      [from, to] = [parseInt(from.trim()), parseInt(to.trim())];
+      nodes[to].children.push(from);
+      if (!nodes[from]) nodes[from] = {};
+      nodes[from].parent = parseInt(to);
     }
   });
   return nodes;

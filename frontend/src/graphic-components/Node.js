@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Label, Text, Tag } from 'react-konva';
+import { Label, Text, Tag, Group } from 'react-konva';
 import PropTypes from 'prop-types';
 
 function textColorFromBg(bgColor) {
@@ -30,7 +30,8 @@ export default class Node extends Component {
 
   render() {
     const {
-      children,
+      rule,
+      conclusion,
       id,
       onClick,
       setCurrentText,
@@ -38,56 +39,83 @@ export default class Node extends Component {
       showingChildren,
       x,
       y,
+      hasChildren,
     } = this.props;
 
-    const bgClosedConclusionColor = '#2b2d42';
-    const bgOpenConclusionColor = '#8d99ae';
-    const bgRuleColor = '#edf2f4';
+    const bgClosedColor = '#2b2d42';
+    const bgOpenColor = '#8d99ae';
 
-    const conclusion = id.indexOf('c') !== -1;
-
-    const bgConclusionColor = showingChildren
-      ? bgOpenConclusionColor
-      : bgClosedConclusionColor;
-    const bgColor = conclusion ? bgConclusionColor : bgRuleColor;
+    const bgColor =
+      showingChildren || !hasChildren ? bgOpenColor : bgClosedColor;
 
     return (
-      <Label
-        conclusion={conclusion}
+      <Group
         draggable
         id={id}
         key={id}
-        onClick={(e) =>
-          e.evt.button === 2 ? setCurrentText(e.target.attrs.text) : onClick(e)
-        }
         onDragMove={(e) => {
           const { updateNodeState } = this.props;
           updateNodeState(id, e.target.attrs.x, e.target.attrs.y);
         }}
-        onMouseEnter={(e) => {
-          setFocusText(e.target.attrs.text);
-        }}
-        onMouseLeave={() => setFocusText('')}
         x={x}
         y={y}
       >
-        <Tag fill={bgColor} stroke="black" />
-        <Text
-          align="center"
-          fill={textColorFromBg(bgColor)}
-          fontSize={15}
-          height={35}
-          padding={10}
-          text={children}
-          width={300}
-        />
-      </Label>
+        <Label
+          onClick={(e) =>
+            e.evt.button === 2
+              ? setCurrentText(e.target.attrs.text)
+              : onClick({ id, x, y })
+          }
+          onMouseEnter={(e) => {
+            setFocusText(e.target.attrs.text);
+          }}
+          onMouseLeave={() => setFocusText('')}
+          x={0}
+          y={0}
+        >
+          <Tag fill={bgColor} stroke="black" />
+          <Text
+            align="center"
+            fill={textColorFromBg(bgColor)}
+            fontSize={15}
+            height={35}
+            padding={10}
+            text={conclusion}
+            width={300}
+          />
+        </Label>
+        <Label
+          x={0}
+          y={35}
+          onClick={(e) =>
+            e.evt.button === 2
+              ? setCurrentText(e.target.attrs.text)
+              : onClick({ id, x, y })
+          }
+          onMouseEnter={(e) => {
+            setFocusText(e.target.attrs.text);
+          }}
+          onMouseLeave={() => setFocusText('')}
+        >
+          <Tag fill={bgColor} stroke="black" />
+          <Text
+            align="center"
+            fill={textColorFromBg(bgColor)}
+            fontSize={15}
+            height={35}
+            padding={10}
+            text={rule}
+            width={300}
+          />
+        </Label>
+      </Group>
     );
   }
 }
 
 Node.propTypes = {
-  children: PropTypes.string,
+  rule: PropTypes.string,
+  conclusion: PropTypes.string,
   id: PropTypes.string,
   onClick: PropTypes.func,
   setFocusText: PropTypes.func,
@@ -96,4 +124,5 @@ Node.propTypes = {
   updateNodeState: PropTypes.func,
   x: PropTypes.number,
   y: PropTypes.number,
+  hasChildren: PropTypes.bool,
 };
