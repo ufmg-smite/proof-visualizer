@@ -15,12 +15,12 @@ function processDot(dot) {
     if (line.search('label') !== -1) {
       let [id, attributes] = [
         parseInt(line.slice(0, line.indexOf('[')).trim()),
-        line.slice(line.indexOf('['), line.lastIndexOf(']')).trim(),
+        line.slice(line.indexOf('[') + 1, line.lastIndexOf(']')).trim(),
       ];
 
-      let label = attributes.slice(line.search(/(?<!\\)"/) - 1);
-      label = label.slice(0, label.search(/(?<!\\)"/));
-      const [conclusion, rule] = label.slice(1, -1).split(/(?<!\\)\|/);
+      let label = attributes.slice(attributes.search(/(?<!\\)"/) + 2);
+      label = label.slice(0, label.search(/(?<!\\)"/) - 1);
+      const [conclusion, rule] = label.split(/(?<!\\)\|/);
 
       attributes = attributes.slice(
         attributes.indexOf(', class = ') + ', class = '.length
@@ -37,6 +37,7 @@ function processDot(dot) {
         visions,
         children: [],
         position: { x: NaN, y: NaN },
+        showingChildren: false,
       };
       nodes[id] = node;
     } else if (line.search('->') !== -1) {
@@ -44,7 +45,6 @@ function processDot(dot) {
       nodes[parseInt(to.trim())].children.push(parseInt(from.trim()));
     }
   });
-  console.log(nodes);
   return nodes;
 }
 
