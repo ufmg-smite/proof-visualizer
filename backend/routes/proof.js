@@ -71,7 +71,6 @@ router.route('/process-proof/:id').get((req, res) => {
         `${process.cwd()}/proof_files/proof.${proof.input_language}`,
         '--dump-proof',
         '--proof-format-mode=dot',
-        '--proof',
       ].concat(userOptions);
 
       const cvc4 = spawnSync('cvc4', options);
