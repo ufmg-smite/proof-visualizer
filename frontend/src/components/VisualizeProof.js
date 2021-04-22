@@ -2,11 +2,16 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { DropdownButton, Dropdown } from 'react-bootstrap';
+import dagre from 'dagre';
 import Canvas from '../graphic-components/Canvas';
 
 function processDot(dot) {
-  const numberOfNodes = dot.match(/label/g);
-  const nodes = new Array(numberOfNodes);
+  const g = new dagre.graphlib.Graph();
+  g.setGraph({ rankdir: 'BT' });
+  g.setDefaultEdgeLabel(function () {
+    return {};
+  });
+  const nodes = [];
   const lines = dot
     .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
     .replace(/(\n|\t)/gm, '')
@@ -36,15 +41,26 @@ function processDot(dot) {
       nodes[id].rule = rule;
       nodes[id].visions = visions;
       nodes[id].children = [];
-      nodes[id].position = { x: NaN, y: NaN };
+      nodes[id].x = NaN;
+      nodes[id].y = NaN;
       nodes[id].showingChildren = false;
+      g.setNode(id, { width: 300, height: 130 });
     } else if (line.search('->') !== -1) {
-      let [from, to] = line.split('->');
-      [from, to] = [parseInt(from.trim()), parseInt(to.trim())];
-      nodes[to].children.push(from);
-      if (!nodes[from]) nodes[from] = {};
-      nodes[from].parent = parseInt(to);
+      let [child, parent] = line.split('->');
+      [child, parent] = [parseInt(child.trim()), parseInt(parent.trim())];
+      nodes[parent].children.push(child);
+      if (!nodes[child]) nodes[child] = {};
+      nodes[child].parent = parseInt(parent);
+      g.setEdge(child, parent);
     }
+  });
+
+  dagre.layout(g);
+
+  g.nodes().forEach(function (v) {
+    const { x, y } = g.node(v);
+    nodes[v].x = x;
+    nodes[v].y = y;
   });
   return nodes;
 }

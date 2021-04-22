@@ -11,23 +11,6 @@ function textColorFromBg(bgColor) {
 }
 
 export default class Node extends Component {
-  overlap = (node) => {
-    const { x, y } = this.props;
-    const overlapXleftPointInside =
-      node.props.x > x - 25 && node.props.x < x + 325;
-    const overlapXrightPointInside =
-      node.props.x + 300 > x - 25 && node.props.x + 300 < x + 325;
-    const overlapX = overlapXleftPointInside || overlapXrightPointInside;
-    const overlapY =
-      (node.props.y > y - 25 && node.props.y < y + 60) ||
-      (node.props.y + 30 > y - 25 && node.props.y + 30 < y + 60);
-
-    if ((overlapX && overlapY) || (x === node.props.x && y === node.props.y)) {
-      return true;
-    }
-    return false;
-  };
-
   render() {
     const {
       rule,
@@ -90,7 +73,7 @@ export default class Node extends Component {
           onClick={(e) =>
             e.evt.button === 2
               ? setCurrentText(e.target.attrs.text)
-              : onClick({ id, x, y })
+              : onClick({ id })
           }
           onMouseEnter={(e) => {
             setFocusText(e.target.attrs.text);
