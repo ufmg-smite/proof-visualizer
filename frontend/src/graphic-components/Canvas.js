@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { Stage, Layer } from 'react-konva';
 import PropTypes from 'prop-types';
+import dagre from 'dagre';
 import Node from './Node';
 import Line from './Line';
 
@@ -50,6 +51,7 @@ export default class Canvas extends Component {
   componentDidMount() {
     const { showingNodes, proofNodes } = this.state;
 
+    this.updatePosition();
     showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
     this.addNodes(0);
 
@@ -158,6 +160,85 @@ export default class Canvas extends Component {
 
     delete showingNodes[id];
     this.setState({ showingNodes, proofNodes, showingEdges });
+  };
+
+  hideNode = (id) => {
+    const { proofNodes } = this.state;
+    const parentId = proofNodes[id].parent;
+    let piId;
+    if (proofNodes[parentId].foldedNode) {
+      piId = proofNodes[parentId].foldedNode;
+      proofNodes[piId].conclusion += proofNodes[id].conclusion;
+      proofNodes[piId].children.push(...proofNodes[id].children);
+      proofNodes[piId].hidedNodes.push(id);
+    } else {
+      piId = proofNodes.length;
+      proofNodes[piId] = {
+        id: piId,
+        conclusion: proofNodes[id].conclusion,
+        rule: 'π',
+        visions: ['basic'],
+        children: [...proofNodes[id].children],
+        x: NaN,
+        y: NaN,
+        showingChildren: true,
+        parent: parentId,
+        hided: false,
+        hidedNodes: [id],
+      };
+      proofNodes[parentId].foldedNode = piId;
+      proofNodes[parentId].children.push(piId);
+    }
+    proofNodes[id].hided = true;
+    proofNodes[parentId].children = proofNodes[parentId].children.filter(
+      (nodeId) => nodeId !== id
+    );
+    this.setState({ proofNodes });
+  };
+
+  unhideNode = (id) => {
+    const { proofNodes } = this.state;
+    const parentId = proofNodes[id].parent;
+    const piId = proofNodes[parentId].foldedNode;
+    proofNodes[id].hided = false;
+    proofNodes[parentId].children.push(id);
+    proofNodes[piId].hidedNodes = proofNodes[piId].hidedNodes.filter(
+      (nodeId) => nodeId !== id
+    );
+    proofNodes[piId].children = proofNodes[piId].children.filter((nodeId) =>
+      proofNodes[id].children.some((child) => child === nodeId)
+    );
+    if (proofNodes[piId].hidedNodes.length === 0) {
+      delete proofNodes[piId];
+      proofNodes[parentId].children = proofNodes[parentId].children.filter(
+        (nodeId) => nodeId !== piId
+      );
+      proofNodes[parentId].foldedNode = null;
+    }
+  };
+
+  updatePosition = () => {
+    const { proofNodes } = this.state;
+    const g = new dagre.graphlib.Graph();
+    g.setGraph({ rankdir: 'BT' });
+    g.setDefaultEdgeLabel(function () {
+      return {};
+    });
+    proofNodes.forEach((node) => {
+      if (!node.hided) {
+        g.setNode(node.id, { width: 300, height: 130 });
+        proofNodes[node.id].children.forEach((child) =>
+          g.setEdge(child, node.id)
+        );
+      }
+    });
+    dagre.layout(g);
+    g.nodes().forEach(function (v) {
+      const { x, y } = g.node(v);
+      proofNodes[v].x = x;
+      proofNodes[v].y = y;
+    });
+    this.setState({ proofNodes });
   };
 
   updateNodeState = (key, x, y) => {

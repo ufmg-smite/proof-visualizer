@@ -38,7 +38,9 @@ function processDot(dot) {
       nodes[id].children = [];
       nodes[id].x = NaN;
       nodes[id].y = NaN;
+      nodes[id].foldedNode = null;
       nodes[id].showingChildren = true;
+      nodes[id].hided = false;
     } else if (line.search('->') !== -1) {
       let [child, parent] = line.split('->');
       [child, parent] = [parseInt(child.trim()), parseInt(parent.trim())];
@@ -49,47 +51,6 @@ function processDot(dot) {
   });
 
   return nodes;
-}
-
-function processNodes(proofNodes) {
-  const g = new dagre.graphlib.Graph();
-  g.setGraph({ rankdir: 'BT' });
-  g.setDefaultEdgeLabel(function () {
-    return {};
-  });
-
-  const piId = proofNodes.length;
-  proofNodes[piId] = {
-    id: piId,
-    conclusion: proofNodes[1].conclusion,
-    rule: 'π',
-    visions: ['basic'],
-    children: [],
-    x: NaN,
-    y: NaN,
-    showingChildren: true,
-    parent: 1,
-    piNode: true,
-  };
-  g.setNode(0, { width: 300, height: 130 });
-  g.setNode(piId, { width: 300, height: 130 });
-  g.setEdge(piId, 0);
-  proofNodes[0].hiddenChildren = [...proofNodes[0].children];
-  proofNodes[0].children = [piId];
-  proofNodes.slice(1, piId).forEach((node) => {
-    if (node.visions.indexOf('basic') !== -1) {
-      proofNodes[piId].children.push(node.id);
-      g.setNode(node.id, { width: 300, height: 130 });
-      g.setEdge(node.id, piId);
-    }
-  });
-  dagre.layout(g);
-  g.nodes().forEach(function (v) {
-    const { x, y } = g.node(v);
-    proofNodes[v].x = x;
-    proofNodes[v].y = y;
-  });
-  return proofNodes;
 }
 
 export default function VisualizeProof(props) {
@@ -217,7 +178,7 @@ export default function VisualizeProof(props) {
           {' '}
           <Canvas
             key={vision}
-            proofNodes={processNodes(processDot(dot))}
+            proofNodes={processDot(dot)}
             setCurrentText={setCurrentText}
             setFocusText={setTextOfFocusNode}
           />
