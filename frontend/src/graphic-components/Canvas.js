@@ -51,6 +51,7 @@ export default class Canvas extends Component {
     const { showingNodes, proofNodes } = this.state;
 
     showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
+    this.addNodes(0);
 
     const [width, height] = [
       document.getElementsByClassName('visualizer')[0].offsetWidth - 30,
@@ -89,6 +90,7 @@ export default class Canvas extends Component {
       x: node.x,
       y: node.y,
       hasChildren: node.children.length > 0,
+      piNode: node.piNode,
     };
   };
 

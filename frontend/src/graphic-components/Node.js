@@ -23,6 +23,7 @@ export default class Node extends Component {
       x,
       y,
       hasChildren,
+      piNode,
     } = this.props;
 
     const bgClosedColor = '#2b2d42';
@@ -42,6 +43,19 @@ export default class Node extends Component {
         }}
         x={x}
         y={y}
+        onClick={(e) => {
+          if (e.evt.button === 2 && piNode) {
+            console.log(e.evt.clientY);
+            console.log(e.evt.clientX);
+            const menuNode = document.getElementById('menu');
+            menuNode.style.top = `${e.evt.clientY}px`;
+            menuNode.style.left = `${e.evt.clientX}px`;
+            menuNode.style.display = 'initial';
+            window.addEventListener('click', () => {
+              menuNode.style.display = 'none';
+            });
+          }
+        }}
       >
         <Label
           onClick={(e) =>
@@ -68,13 +82,13 @@ export default class Node extends Component {
           />
         </Label>
         <Label
-          x={0}
-          y={35}
           onClick={(e) =>
             e.evt.button === 2
               ? setCurrentText(e.target.attrs.text)
-              : onClick({ id })
+              : onClick({ id, x, y })
           }
+          x={0}
+          y={35}
           onMouseEnter={(e) => {
             setFocusText(e.target.attrs.text);
           }}
@@ -108,4 +122,5 @@ Node.propTypes = {
   x: PropTypes.number,
   y: PropTypes.number,
   hasChildren: PropTypes.bool,
+  piNode: PropTypes.bool,
 };

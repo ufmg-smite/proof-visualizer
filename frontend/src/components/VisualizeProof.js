@@ -6,11 +6,6 @@ import dagre from 'dagre';
 import Canvas from '../graphic-components/Canvas';
 
 function processDot(dot) {
-  const g = new dagre.graphlib.Graph();
-  g.setGraph({ rankdir: 'BT' });
-  g.setDefaultEdgeLabel(function () {
-    return {};
-  });
   const nodes = [];
   const lines = dot
     .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
@@ -43,26 +38,58 @@ function processDot(dot) {
       nodes[id].children = [];
       nodes[id].x = NaN;
       nodes[id].y = NaN;
-      nodes[id].showingChildren = false;
-      g.setNode(id, { width: 300, height: 130 });
+      nodes[id].showingChildren = true;
     } else if (line.search('->') !== -1) {
       let [child, parent] = line.split('->');
       [child, parent] = [parseInt(child.trim()), parseInt(parent.trim())];
       nodes[parent].children.push(child);
       if (!nodes[child]) nodes[child] = {};
       nodes[child].parent = parseInt(parent);
-      g.setEdge(child, parent);
     }
   });
 
-  dagre.layout(g);
+  return nodes;
+}
 
+function processNodes(proofNodes) {
+  const g = new dagre.graphlib.Graph();
+  g.setGraph({ rankdir: 'BT' });
+  g.setDefaultEdgeLabel(function () {
+    return {};
+  });
+
+  const piId = proofNodes.length;
+  proofNodes[piId] = {
+    id: piId,
+    conclusion: proofNodes[1].conclusion,
+    rule: 'π',
+    visions: ['basic'],
+    children: [],
+    x: NaN,
+    y: NaN,
+    showingChildren: true,
+    parent: 1,
+    piNode: true,
+  };
+  g.setNode(0, { width: 300, height: 130 });
+  g.setNode(piId, { width: 300, height: 130 });
+  g.setEdge(piId, 0);
+  proofNodes[0].hiddenChildren = [...proofNodes[0].children];
+  proofNodes[0].children = [piId];
+  proofNodes.slice(1, piId).forEach((node) => {
+    if (node.visions.indexOf('basic') !== -1) {
+      proofNodes[piId].children.push(node.id);
+      g.setNode(node.id, { width: 300, height: 130 });
+      g.setEdge(node.id, piId);
+    }
+  });
+  dagre.layout(g);
   g.nodes().forEach(function (v) {
     const { x, y } = g.node(v);
-    nodes[v].x = x;
-    nodes[v].y = y;
+    proofNodes[v].x = x;
+    proofNodes[v].y = y;
   });
-  return nodes;
+  return proofNodes;
 }
 
 export default function VisualizeProof(props) {
@@ -173,6 +200,16 @@ export default function VisualizeProof(props) {
           </DropdownButton>
         </span>
       </h3>
+      <div id="menu">
+        <div>
+          <button type="button" id="pulse-button">
+            Unfold All Nodes
+          </button>
+          <button type="button" id="delete-button">
+            Unfold Propositional Vision
+          </button>
+        </div>
+      </div>
 
       {dot ? (
         // eslint-disable-next-line react/jsx-props-no-spreading
@@ -180,7 +217,7 @@ export default function VisualizeProof(props) {
           {' '}
           <Canvas
             key={vision}
-            proofNodes={processDot(dot)}
+            proofNodes={processNodes(processDot(dot))}
             setCurrentText={setCurrentText}
             setFocusText={setTextOfFocusNode}
           />
