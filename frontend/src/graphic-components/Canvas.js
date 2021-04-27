@@ -88,30 +88,24 @@ export default class Canvas extends Component {
     });
   };
 
-  unfoldPropositionalView = () => {
-    const { proofNodes, showingNodes, nodeOnFocus } = this.state;
-    const parentId = proofNodes[nodeOnFocus].parent;
-    this.removeNodes(parentId);
-    const nodesToUnhide = [...proofNodes[nodeOnFocus].hidedNodes];
-    nodesToUnhide.forEach((nodeId) => this.unhideNode(nodeId));
-    nodesToUnhide.forEach((nodeId) => {
-      if (proofNodes[nodeId].views.indexOf('propositional') === -1) {
-        this.hideNode(nodeId);
-      }
-    });
-    this.updatePosition();
-    this.addNodes(parentId);
-    delete showingNodes[nodeOnFocus];
-    this.setState({ proofNodes });
-  };
-
-  unfoldTotalView = () => {
+  unfold = (view) => {
     const { proofNodes, nodeOnFocus } = this.state;
     const parentId = proofNodes[nodeOnFocus].parent;
     this.removeNodes(parentId);
     const nodesToUnhide = [...proofNodes[nodeOnFocus].hidedNodes];
     nodesToUnhide.forEach((nodeId) => this.unhideNode(nodeId));
+    switch (view) {
+      case 'propositional':
+        nodesToUnhide.forEach((nodeId) => {
+          if (proofNodes[nodeId].views.indexOf('propositional') === -1) {
+            this.hideNode(nodeId);
+          }
+        });
+        break;
+      default:
+    }
     this.updatePosition();
+    this.updateNodeState(0, proofNodes[0].x, proofNodes[0].y);
     this.addNodes(parentId);
     this.setState({ proofNodes });
   };
@@ -225,7 +219,6 @@ export default class Canvas extends Component {
         id: piId,
         conclusion: proofNodes[id].conclusion,
         rule: 'π',
-        views: ['basic'],
         children: [...proofNodes[id].children],
         x: NaN,
         y: NaN,
@@ -271,7 +264,7 @@ export default class Canvas extends Component {
   updatePosition = () => {
     const { proofNodes } = this.state;
     const g = new dagre.graphlib.Graph();
-    g.setGraph({ rankdir: 'BT' });
+    g.setGraph({ rankdir: 'BT', ranker: 'tight-tree' });
     g.setDefaultEdgeLabel(function () {
       return {};
     });
@@ -336,14 +329,14 @@ export default class Canvas extends Component {
         <div id="menu">
           <div>
             <button
-              onClick={(e) => this.unfoldTotalView(e)}
+              onClick={() => this.unfold()}
               type="button"
               id="pulse-button"
             >
               Unfold All Nodes
             </button>
             <button
-              onClick={(e) => this.unfoldPropositionalView(e)}
+              onClick={() => this.unfold('propositional')}
               type="button"
               id="delete-button"
             >
