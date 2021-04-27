@@ -25,7 +25,7 @@ function processDot(dot) {
       attributes = attributes.slice(
         attributes.indexOf(', class = ') + ', class = '.length
       );
-      const visions = attributes
+      const views = attributes
         .slice(attributes.indexOf('"') + 1, attributes.lastIndexOf('"'))
         .trim()
         .split(' ');
@@ -34,7 +34,7 @@ function processDot(dot) {
       nodes[id].id = id;
       nodes[id].conclusion = conclusion;
       nodes[id].rule = rule;
-      nodes[id].visions = visions;
+      nodes[id].views = views;
       nodes[id].children = [];
       nodes[id].x = NaN;
       nodes[id].y = NaN;
@@ -66,7 +66,7 @@ export default function VisualizeProof(props) {
     'right-click in a node to show the text here'
   );
   const [textOfFocusNode, setTextOfFocusNode] = useState('');
-  const [vision, setVision] = useState('normal');
+  const [view, setView] = useState('normal');
 
   useEffect(() => {
     if (location.state.dot) return;
@@ -97,12 +97,12 @@ export default function VisualizeProof(props) {
       <h3 className="proof-name">
         <span>{label}</span>
         <span>
-          <DropdownButton title="Vision" id="bg-vertical-dropdown-3">
+          <DropdownButton title="View" id="bg-vertical-dropdown-3">
             <Dropdown.Item
               eventKey="1"
               onClick={(e) => {
                 e.preventDefault();
-                setVision('normal');
+                setView('normal');
               }}
             >
               normal
@@ -112,7 +112,7 @@ export default function VisualizeProof(props) {
               eventKey="2"
               onClick={(e) => {
                 e.preventDefault();
-                setVision('basic');
+                setView('basic');
               }}
             >
               basic
@@ -121,7 +121,7 @@ export default function VisualizeProof(props) {
               eventKey="3"
               onClick={(e) => {
                 e.preventDefault();
-                setVision('propositional');
+                setView('propositional');
               }}
             >
               propositional
@@ -167,7 +167,7 @@ export default function VisualizeProof(props) {
             Unfold All Nodes
           </button>
           <button type="button" id="delete-button">
-            Unfold Propositional Vision
+            Unfold Propositional View
           </button>
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function VisualizeProof(props) {
         <div className="canvas-container" {...canvasContainerProps}>
           {' '}
           <Canvas
-            key={vision}
+            key={view}
             proofNodes={processDot(dot)}
             setCurrentText={setCurrentText}
             setFocusText={setTextOfFocusNode}

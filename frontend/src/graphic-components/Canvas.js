@@ -51,7 +51,7 @@ export default class Canvas extends Component {
   componentDidMount() {
     const { showingNodes, proofNodes } = this.state;
 
-    this.basicVision();
+    this.basicView();
     this.updatePosition();
     showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
     this.addNodes(0);
@@ -80,10 +80,10 @@ export default class Canvas extends Component {
     });
   }
 
-  basicVision = () => {
+  basicView = () => {
     const { proofNodes } = this.state;
     proofNodes.forEach((node) => {
-      if (node.visions.indexOf('basic') === -1) this.hideNode(node.id);
+      if (node.views.indexOf('basic') === -1) this.hideNode(node.id);
     });
   };
 
@@ -193,7 +193,7 @@ export default class Canvas extends Component {
         id: piId,
         conclusion: proofNodes[id].conclusion,
         rule: 'π',
-        visions: ['basic'],
+        views: ['basic'],
         children: [...proofNodes[id].children],
         x: NaN,
         y: NaN,
