@@ -205,8 +205,8 @@ export default class Canvas extends Component {
     proofNodes[piId].hidedNodes = proofNodes[piId].hidedNodes.filter(
       (nodeId) => nodeId !== id
     );
-    proofNodes[piId].children = proofNodes[piId].children.filter((nodeId) =>
-      proofNodes[id].children.some((child) => child === nodeId)
+    proofNodes[piId].children = proofNodes[piId].children.filter(
+      (nodeId) => !proofNodes[id].children.some((child) => child === nodeId)
     );
     if (proofNodes[piId].hidedNodes.length === 0) {
       delete proofNodes[piId];
