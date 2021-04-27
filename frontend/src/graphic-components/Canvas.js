@@ -89,27 +89,29 @@ export default class Canvas extends Component {
   };
 
   unfoldPropositionalView = () => {
-    const { proofNodes, nodeOnFocus } = this.state;
+    const { proofNodes, showingNodes, nodeOnFocus } = this.state;
     const parentId = proofNodes[nodeOnFocus].parent;
+    this.removeNodes(parentId);
     const nodesToUnhide = [...proofNodes[nodeOnFocus].hidedNodes];
+    nodesToUnhide.forEach((nodeId) => this.unhideNode(nodeId));
     nodesToUnhide.forEach((nodeId) => {
-      if (proofNodes[nodeId].views.indexOf('propositional') !== -1) {
-        this.unhideNode(nodeId);
+      if (proofNodes[nodeId].views.indexOf('propositional') === -1) {
+        this.hideNode(nodeId);
       }
     });
     this.updatePosition();
-    this.removeNodes(parentId);
     this.addNodes(parentId);
+    delete showingNodes[nodeOnFocus];
     this.setState({ proofNodes });
   };
 
   unfoldTotalView = () => {
     const { proofNodes, nodeOnFocus } = this.state;
     const parentId = proofNodes[nodeOnFocus].parent;
+    this.removeNodes(parentId);
     const nodesToUnhide = [...proofNodes[nodeOnFocus].hidedNodes];
     nodesToUnhide.forEach((nodeId) => this.unhideNode(nodeId));
     this.updatePosition();
-    this.removeNodes(parentId);
     this.addNodes(parentId);
     this.setState({ proofNodes });
   };
@@ -258,11 +260,11 @@ export default class Canvas extends Component {
       (nodeId) => !proofNodes[id].children.some((child) => child === nodeId)
     );
     if (proofNodes[piId].hidedNodes.length === 0) {
-      delete proofNodes[piId];
-      proofNodes[parentId].children = proofNodes[parentId].children.filter(
-        (nodeId) => nodeId !== piId
-      );
+      proofNodes[proofNodes[piId].parent].children = proofNodes[
+        proofNodes[piId].parent
+      ].children.filter((nodeId) => nodeId !== piId);
       proofNodes[parentId].foldedNode = null;
+      delete proofNodes[piId];
     }
   };
 
