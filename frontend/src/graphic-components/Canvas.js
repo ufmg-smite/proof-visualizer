@@ -256,7 +256,7 @@ export default class Canvas extends Component {
       proofNodes[proofNodes[piId].parent].children = proofNodes[
         proofNodes[piId].parent
       ].children.filter((nodeId) => nodeId !== piId);
-      proofNodes[parentId].foldedNode = null;
+      proofNodes[proofNodes[piId].parent].foldedNode = null;
       delete proofNodes[piId];
     }
   };
