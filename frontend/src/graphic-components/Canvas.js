@@ -51,6 +51,7 @@ export default class Canvas extends Component {
   componentDidMount() {
     const { showingNodes, proofNodes } = this.state;
 
+    this.basicVision();
     this.updatePosition();
     showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
     this.addNodes(0);
@@ -78,6 +79,13 @@ export default class Canvas extends Component {
       },
     });
   }
+
+  basicVision = () => {
+    const { proofNodes } = this.state;
+    proofNodes.forEach((node) => {
+      if (node.visions.indexOf('basic') === -1) this.hideNode(node.id);
+    });
+  };
 
   nodeProps = (node) => {
     const { setCurrentText, setFocusText } = this.props;
@@ -166,7 +174,15 @@ export default class Canvas extends Component {
     const { proofNodes } = this.state;
     const parentId = proofNodes[id].parent;
     let piId;
-    if (proofNodes[parentId].foldedNode) {
+    if (proofNodes[parentId].hided) {
+      piId = proofNodes[parentId].hidedIn;
+      proofNodes[piId].conclusion += proofNodes[id].conclusion;
+      proofNodes[piId].children.push(...proofNodes[id].children);
+      proofNodes[piId].hidedNodes.push(id);
+      proofNodes[piId].children = proofNodes[piId].children.filter(
+        (nodeId) => nodeId !== id
+      );
+    } else if (proofNodes[parentId].foldedNode) {
       piId = proofNodes[parentId].foldedNode;
       proofNodes[piId].conclusion += proofNodes[id].conclusion;
       proofNodes[piId].children.push(...proofNodes[id].children);
@@ -190,6 +206,7 @@ export default class Canvas extends Component {
       proofNodes[parentId].children.push(piId);
     }
     proofNodes[id].hided = true;
+    proofNodes[id].hidedIn = piId;
     proofNodes[parentId].children = proofNodes[parentId].children.filter(
       (nodeId) => nodeId !== id
     );
