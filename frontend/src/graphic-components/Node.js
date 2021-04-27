@@ -24,6 +24,7 @@ export default class Node extends Component {
       y,
       hasChildren,
       piNode,
+      setNodeOnFocus,
     } = this.props;
 
     const bgClosedColor = '#2b2d42';
@@ -45,8 +46,7 @@ export default class Node extends Component {
         y={y}
         onClick={(e) => {
           if (e.evt.button === 2 && piNode) {
-            console.log(e.evt.clientY);
-            console.log(e.evt.clientX);
+            setNodeOnFocus(id);
             const menuNode = document.getElementById('menu');
             menuNode.style.top = `${e.evt.clientY}px`;
             menuNode.style.left = `${e.evt.clientX}px`;
@@ -123,4 +123,5 @@ Node.propTypes = {
   y: PropTypes.number,
   hasChildren: PropTypes.bool,
   piNode: PropTypes.bool,
+  setNodeOnFocus: PropTypes.func,
 };

@@ -161,16 +161,6 @@ export default function VisualizeProof(props) {
           </DropdownButton>
         </span>
       </h3>
-      <div id="menu">
-        <div>
-          <button type="button" id="pulse-button">
-            Unfold All Nodes
-          </button>
-          <button type="button" id="delete-button">
-            Unfold Propositional View
-          </button>
-        </div>
-      </div>
 
       {dot ? (
         // eslint-disable-next-line react/jsx-props-no-spreading

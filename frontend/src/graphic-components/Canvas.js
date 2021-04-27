@@ -45,6 +45,7 @@ export default class Canvas extends Component {
       proofNodes,
       showingNodes: {},
       showingEdges: {},
+      nodeOnFocus: null,
     };
   }
 
@@ -87,6 +88,32 @@ export default class Canvas extends Component {
     });
   };
 
+  unfoldPropositionalView = () => {
+    const { proofNodes, nodeOnFocus } = this.state;
+    const parentId = proofNodes[nodeOnFocus].parent;
+    const nodesToUnhide = [...proofNodes[nodeOnFocus].hidedNodes];
+    nodesToUnhide.forEach((nodeId) => {
+      if (proofNodes[nodeId].views.indexOf('propositional') !== -1) {
+        this.unhideNode(nodeId);
+      }
+    });
+    this.updatePosition();
+    this.removeNodes(parentId);
+    this.addNodes(parentId);
+    this.setState({ proofNodes });
+  };
+
+  unfoldTotalView = () => {
+    const { proofNodes, nodeOnFocus } = this.state;
+    const parentId = proofNodes[nodeOnFocus].parent;
+    const nodesToUnhide = [...proofNodes[nodeOnFocus].hidedNodes];
+    nodesToUnhide.forEach((nodeId) => this.unhideNode(nodeId));
+    this.updatePosition();
+    this.removeNodes(parentId);
+    this.addNodes(parentId);
+    this.setState({ proofNodes });
+  };
+
   nodeProps = (node) => {
     const { setCurrentText, setFocusText } = this.props;
     return {
@@ -97,11 +124,16 @@ export default class Canvas extends Component {
       updateNodeState: this.updateNodeState,
       setFocusText,
       setCurrentText,
+      setNodeOnFocus: this.setNodeOnFocus,
       x: node.x,
       y: node.y,
       hasChildren: node.children.length > 0,
       piNode: node.piNode,
     };
+  };
+
+  setNodeOnFocus = (id) => {
+    this.setState({ nodeOnFocus: id });
   };
 
   lineProps = (key, from, to) => ({
@@ -178,7 +210,6 @@ export default class Canvas extends Component {
       piId = proofNodes[parentId].hidedIn;
       proofNodes[piId].conclusion += proofNodes[id].conclusion;
       proofNodes[piId].children.push(...proofNodes[id].children);
-      proofNodes[piId].hidedNodes.push(id);
       proofNodes[piId].children = proofNodes[piId].children.filter(
         (nodeId) => nodeId !== id
       );
@@ -186,7 +217,6 @@ export default class Canvas extends Component {
       piId = proofNodes[parentId].foldedNode;
       proofNodes[piId].conclusion += proofNodes[id].conclusion;
       proofNodes[piId].children.push(...proofNodes[id].children);
-      proofNodes[piId].hidedNodes.push(id);
     } else {
       piId = proofNodes.length;
       proofNodes[piId] = {
@@ -200,11 +230,13 @@ export default class Canvas extends Component {
         showingChildren: true,
         parent: parentId,
         hided: false,
-        hidedNodes: [id],
+        hidedNodes: [],
+        piNode: true,
       };
       proofNodes[parentId].foldedNode = piId;
       proofNodes[parentId].children.push(piId);
     }
+    proofNodes[piId].hidedNodes.push(id);
     proofNodes[id].hided = true;
     proofNodes[id].hidedIn = piId;
     proofNodes[parentId].children = proofNodes[parentId].children.filter(
@@ -216,7 +248,7 @@ export default class Canvas extends Component {
   unhideNode = (id) => {
     const { proofNodes } = this.state;
     const parentId = proofNodes[id].parent;
-    const piId = proofNodes[parentId].foldedNode;
+    const piId = proofNodes[id].hidedIn;
     proofNodes[id].hided = false;
     proofNodes[parentId].children.push(id);
     proofNodes[piId].hidedNodes = proofNodes[piId].hidedNodes.filter(
@@ -244,9 +276,9 @@ export default class Canvas extends Component {
     proofNodes.forEach((node) => {
       if (!node.hided) {
         g.setNode(node.id, { width: 300, height: 130 });
-        proofNodes[node.id].children.forEach((child) =>
-          g.setEdge(child, node.id)
-        );
+        proofNodes[node.id].children.forEach((child) => {
+          g.setEdge(child, node.id);
+        });
       }
     });
     dagre.layout(g);
@@ -298,28 +330,48 @@ export default class Canvas extends Component {
   render() {
     const { canvasSize, stage, showingNodes, showingEdges } = this.state;
     return (
-      <Stage
-        draggable
-        width={canvasSize.width}
-        height={canvasSize.height}
-        onWheel={(e) => this.setState({ stage: handleWheel(e) })}
-        scaleX={stage.stageScale}
-        scaleY={stage.stageScale}
-        x={stage.stageX}
-        y={stage.stageY}
-        onContextMenu={(e) => e.evt.preventDefault()}
-      >
-        <Layer>
-          {Object.keys(showingEdges).length > 0 &&
-            Object.keys(showingEdges).map(function (key) {
-              return showingEdges[key];
-            })}
-          {Object.keys(showingNodes).length > 0 &&
-            Object.keys(showingNodes).map(function (key) {
-              return showingNodes[key].render();
-            })}
-        </Layer>
-      </Stage>
+      <>
+        <div id="menu">
+          <div>
+            <button
+              onClick={(e) => this.unfoldTotalView(e)}
+              type="button"
+              id="pulse-button"
+            >
+              Unfold All Nodes
+            </button>
+            <button
+              onClick={(e) => this.unfoldPropositionalView(e)}
+              type="button"
+              id="delete-button"
+            >
+              Unfold Propositional View
+            </button>
+          </div>
+        </div>
+        <Stage
+          draggable
+          width={canvasSize.width}
+          height={canvasSize.height}
+          onWheel={(e) => this.setState({ stage: handleWheel(e) })}
+          scaleX={stage.stageScale}
+          scaleY={stage.stageScale}
+          x={stage.stageX}
+          y={stage.stageY}
+          onContextMenu={(e) => e.evt.preventDefault()}
+        >
+          <Layer>
+            {Object.keys(showingEdges).length > 0 &&
+              Object.keys(showingEdges).map(function (key) {
+                return showingEdges[key];
+              })}
+            {Object.keys(showingNodes).length > 0 &&
+              Object.keys(showingNodes).map(function (key) {
+                return showingNodes[key].render();
+              })}
+          </Layer>
+        </Stage>
+      </>
     );
   }
 }
