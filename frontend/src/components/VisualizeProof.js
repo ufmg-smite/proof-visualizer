@@ -2,8 +2,28 @@ import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { DropdownButton, Dropdown } from 'react-bootstrap';
-import dagre from 'dagre';
 import Canvas from '../graphic-components/Canvas';
+
+function removeEscapedCharacters(s) {
+  let newS = '';
+  for (let i = 0; i < s.length; i += 1) {
+    if (
+      !(
+        s[i] === '\\' &&
+        (s[i + 1] === '"' ||
+          s[i + 1] === '>' ||
+          s[i + 1] === '<' ||
+          s[i + 1] === '{' ||
+          s[i + 1] === '}' ||
+          s[i + 1] === '|')
+      )
+    ) {
+      newS += s[i];
+    }
+  }
+
+  return newS;
+}
 
 function processDot(dot) {
   const nodes = [];
@@ -32,8 +52,8 @@ function processDot(dot) {
 
       if (!nodes[id]) nodes[id] = {};
       nodes[id].id = id;
-      nodes[id].conclusion = conclusion;
-      nodes[id].rule = rule;
+      nodes[id].conclusion = removeEscapedCharacters(conclusion);
+      nodes[id].rule = removeEscapedCharacters(rule);
       nodes[id].views = views;
       nodes[id].children = [];
       nodes[id].x = NaN;
