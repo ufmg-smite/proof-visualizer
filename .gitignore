@@ -31,3 +31,27 @@ backend/proof_files/proof.smt2
 /frontend/npm-debug.log*
 /frontend/yarn-debug.log*
 /frontend/yarn-error.log*
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/frontend2/node_modules
+/frontend2/.pnp
+/frontend2/.pnp.js
+
+# testing
+/frontend2/coverage
+
+# production
+/frontend2/build
+
+# misc
+/frontend2/.DS_Store
+/frontend2/.env.local
+/frontend2/.env.development.local
+/frontend2/.env.test.local
+/frontend2/.env.production.local
+
+/frontend2/npm-debug.log*
+/frontend2/yarn-debug.log*
+/frontend2/yarn-error.log*
