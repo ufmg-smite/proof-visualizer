@@ -3,15 +3,15 @@ import React from 'react';
 import { Button, ButtonGroup, Card, Elevation, Intent } from '@blueprintjs/core';
 import { ObjectID } from 'mongodb';
 
-import '../scss/ProofElementList.scss';
+import '../scss/ElementProofList.scss';
 import proof from './ProofInterface';
 
-interface ProofElementList {
+interface ElementProofList {
     proof: proof;
     deleteProof: (id: ObjectID) => void;
 }
 
-const ProofElementList: React.FC<ProofElementList> = ({ proof, deleteProof }: ProofElementList) => {
+const ElementProofList: React.FC<ElementProofList> = ({ proof, deleteProof }: ElementProofList) => {
     return (
         <Card className="proof-element-card" elevation={Elevation.TWO}>
             <div className="left">
@@ -43,4 +43,4 @@ const ProofElementList: React.FC<ProofElementList> = ({ proof, deleteProof }: Pr
     );
 };
 
-export default ProofElementList;
+export default ElementProofList;

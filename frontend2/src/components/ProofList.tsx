@@ -4,7 +4,7 @@ import axios from 'axios';
 import { Spinner } from '@blueprintjs/core';
 import { ObjectID } from 'mongodb';
 
-import ProofElementList from './ProofElementList';
+import ElementProofList from './ElementProofList';
 import proof from './ProofInterface';
 
 const ProofList: React.FC = () => {
@@ -38,7 +38,7 @@ const ProofList: React.FC = () => {
             ) : (
                 <div>
                     {proofs.map((proof, i) => (
-                        <ProofElementList key={i} proof={proof} deleteProof={deleteProof} />
+                        <ElementProofList key={i} proof={proof} deleteProof={deleteProof} />
                     ))}
                 </div>
             )}
