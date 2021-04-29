@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 
 import axios from 'axios';
-import { Spinner } from '@blueprintjs/core';
+import { Icon, Intent, Spinner } from '@blueprintjs/core';
 import { ObjectID } from 'mongodb';
 
 import ElementProofList from './ElementProofList';
@@ -14,6 +14,7 @@ interface ProofListProps {
 const ProofList: React.FC<ProofListProps> = ({ addDeleteToast }: ProofListProps) => {
     const [proofs, setProofs] = useState([]);
     const [loadingProofs, setLoadingProofs] = useState(true);
+    const [error, setError] = useState(false);
 
     useEffect(() => {
         axios
@@ -22,8 +23,8 @@ const ProofList: React.FC<ProofListProps> = ({ addDeleteToast }: ProofListProps)
                 setProofs(response.data.reverse());
                 setLoadingProofs(false);
             })
-            .catch((error) => {
-                console.log(error);
+            .catch(() => {
+                setError(true);
             });
     }, []);
 
@@ -37,7 +38,14 @@ const ProofList: React.FC<ProofListProps> = ({ addDeleteToast }: ProofListProps)
 
     return (
         <>
-            {loadingProofs ? (
+            {error ? (
+                <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
+                    <Icon icon="error" intent={Intent.DANGER} iconSize={40}></Icon>
+                    <br></br>
+                    <br></br>
+                    <p>It looks like we are facing some issues, please contact the developers.</p>
+                </div>
+            ) : loadingProofs ? (
                 <div style={{ height: '200px', paddingTop: '50px' }}>
                     <Spinner size={30} />
                 </div>
