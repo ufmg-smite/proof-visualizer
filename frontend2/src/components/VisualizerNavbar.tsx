@@ -1,6 +1,8 @@
 import React, { Dispatch, SetStateAction } from 'react';
-import '../scss/VisualizerNavbar.scss';
+
 import { Navbar, Button, Alignment, Switch, Icon } from '@blueprintjs/core';
+
+import '../scss/VisualizerNavbar.scss';
 
 interface VisualizerNavbarProps {
     darkTheme: boolean;
@@ -33,6 +35,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                 />
                 <Button onClick={() => openDialog('new-proof')} className="bp3-minimal" icon="add" text="New Proof" />
             </Navbar.Group>
+
             <Navbar.Group align={Alignment.RIGHT}>
                 <span id="switch-button-dark-theme">
                     <Switch checked={darkTheme} onChange={() => setDarkTheme(!darkTheme)} />

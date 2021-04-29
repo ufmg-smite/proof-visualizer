@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
 
 const FormNewProof: React.FC = () => {
@@ -7,6 +8,7 @@ const FormNewProof: React.FC = () => {
             <FormGroup label="Proof name" labelFor="text-input" labelInfo="(required)">
                 <InputGroup id="text-input" placeholder="proof-a-and-not-a" autoFocus={true} />
             </FormGroup>
+
             <FormGroup
                 label="CVC4 Options"
                 helperText="Default options: --proof --dump-proof --proof-format-mode=dot"
@@ -15,6 +17,7 @@ const FormNewProof: React.FC = () => {
             >
                 <InputGroup id="text-input" placeholder="--simplification=none --dag-thresh=0" />
             </FormGroup>
+
             <FormGroup label="Problem" labelFor="text-area" labelInfo="(required)">
                 <TextArea
                     className="bp3-fill"

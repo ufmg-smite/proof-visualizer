@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
+
 import { Spinner } from '@blueprintjs/core';
+
 import ProofElementList from './ProofElementList';
 
 const ProofList: React.FC = () => {

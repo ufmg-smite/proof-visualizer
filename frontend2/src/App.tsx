@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import VisualizerNavbar from './components/VisualizerNavbar';
 import VisualizerDialog from './components/VisualizerDialog';
 

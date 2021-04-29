@@ -1,5 +1,9 @@
 import React from 'react';
+
 import { Button, ButtonGroup, Card, Elevation, Intent } from '@blueprintjs/core';
+
+import '../scss/ProofElementList.scss';
+
 interface ProofElementList {
     title: string;
     problem: string;
@@ -7,16 +11,18 @@ interface ProofElementList {
 
 const ProofElementList: React.FC<ProofElementList> = ({ title, problem }: ProofElementList) => {
     return (
-        <Card elevation={Elevation.TWO} style={{ height: 100, marginBottom: 10, marginRight: 5 }}>
-            <div style={{ float: 'left' }}>
-                <p style={{ fontWeight: 'bold' }}>{title}</p>
+        <Card className="proof-element-card" elevation={Elevation.TWO}>
+            <div className="left">
+                <p className="title">{title}</p>
                 <p>{problem}</p>
             </div>
-            <div style={{ float: 'right' }}>
+
+            <div className="right">
                 <ButtonGroup>
                     <Button icon="diagram-tree" intent={Intent.PRIMARY}>
                         Show
                     </Button>
+
                     <Button icon="delete" intent={Intent.DANGER}>
                         Delete
                     </Button>

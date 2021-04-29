@@ -1,9 +1,13 @@
 import React, { Dispatch, SetStateAction } from 'react';
+
 import { Dialog, Button, Classes, Intent } from '@blueprintjs/core';
 import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
 import { IconName } from '@blueprintjs/core/lib/esm/components/icon/icon';
+
 import FormNewProof from './FormNewProof';
 import ProofList from './ProofList';
+
+import '../scss/VisualizerDialog.scss';
 
 interface VisualizerDialogProps {
     darkTheme: boolean;
@@ -53,9 +57,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 usePortal={true}
                 {...dialogProps}
             >
-                <div className={Classes.DIALOG_BODY} style={{ maxHeight: '600px', overflow: 'auto' }}>
-                    {dialogBody}
-                </div>
+                <div className={Classes.DIALOG_BODY + ' dialog-body'}>{dialogBody}</div>
                 <div className={Classes.DIALOG_FOOTER}>
                     <div className={Classes.DIALOG_FOOTER_ACTIONS}>
                         <Button onClick={() => setDialogIsOpen(false)}>Close</Button>
