@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction } from 'react';
 
-import { Navbar, Button, Alignment, Switch, Icon } from '@blueprintjs/core';
+import { Alignment, Button, Icon, Navbar, Switch } from '@blueprintjs/core';
 
 import '../scss/VisualizerNavbar.scss';
 

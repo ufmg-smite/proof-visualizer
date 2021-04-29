@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction } from 'react';
 
-import { Dialog, Button, Classes, Intent } from '@blueprintjs/core';
+import { Button, Classes, Dialog, Intent } from '@blueprintjs/core';
 import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
 import { IconName } from '@blueprintjs/core/lib/esm/components/icon/icon';
 
