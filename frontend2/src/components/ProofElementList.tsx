@@ -14,11 +14,11 @@ const ProofElementList: React.FC<ProofElementList> = ({ title, problem }: ProofE
         <Card className="proof-element-card" elevation={Elevation.TWO}>
             <div className="left">
                 <p className="title">{title}</p>
-                <p>{problem}</p>
+                <p title={problem}>{problem.slice(0, 35) + (problem.length > 35 ? '...' : '')}</p>
             </div>
 
             <div className="right">
-                <ButtonGroup>
+                <ButtonGroup vertical={true}>
                     <Button icon="diagram-tree" intent={Intent.PRIMARY}>
                         Show
                     </Button>
