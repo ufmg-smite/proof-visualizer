@@ -82,14 +82,16 @@ router.route('/process-proof/:id').get((req, res) => {
         proof.save();
         res.json(proof.dot);
       } else {
-        proof.error = `CVC4 ERROR:\n${cvc4.stderr.toString()}`;
-        proof.state = 'error';
-        proof.save();
-        res.json(proof.error);
+        proof.delete();
+        throw Object.assign(
+          new Error(`CVC4 ERROR:\n${cvc4.stderr.toString()}`)
+        );
       }
     })
     .catch((err) => {
-      res.status(400).json(`Error: ${err}`);
+      res.status(400).send({
+        message: err.message,
+      });
     });
 });
 

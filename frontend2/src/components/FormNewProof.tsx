@@ -1,12 +1,40 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
 
 import { FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
 
-const FormNewProof: React.FC = () => {
+interface proof {
+    name: string;
+    options: string;
+    problem: string;
+}
+
+interface FormNewProofProps {
+    proof: proof;
+    setProof: Dispatch<SetStateAction<proof>>;
+}
+
+const FormNewProof: React.FC<FormNewProofProps> = ({ proof, setProof }: FormNewProofProps) => {
+    const [name, setName] = useState(proof.name);
+    const [options, setOptions] = useState(proof.options);
+    const [problem, setProblem] = useState(proof.problem);
+
+    useEffect(() => {
+        setProof({
+            name,
+            options,
+            problem,
+        });
+    }, [name, options, problem]);
+
     return (
         <>
             <FormGroup label="Proof name" labelFor="text-input" labelInfo="(required)">
-                <InputGroup id="text-input" placeholder="proof-a-and-not-a" autoFocus={true} />
+                <InputGroup
+                    placeholder="proof-a-and-not-a"
+                    autoFocus={true}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                />
             </FormGroup>
 
             <FormGroup
@@ -15,7 +43,11 @@ const FormNewProof: React.FC = () => {
                 labelFor="text-input"
                 labelInfo="(optional)"
             >
-                <InputGroup id="text-input" placeholder="--simplification=none --dag-thresh=0" />
+                <InputGroup
+                    placeholder="--simplification=none --dag-thresh=0"
+                    value={options}
+                    onChange={(e) => setOptions(e.target.value)}
+                />
             </FormGroup>
 
             <FormGroup label="Problem" labelFor="text-area" labelInfo="(required)">
@@ -28,6 +60,8 @@ const FormNewProof: React.FC = () => {
 (assert (not a))
 (assert a)
 (check-sat)"
+                    value={problem}
+                    onChange={(e) => setProblem(e.target.value)}
                 />
             </FormGroup>
         </>

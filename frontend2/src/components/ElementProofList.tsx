@@ -8,7 +8,7 @@ import proof from './ProofInterface';
 
 interface ElementProofList {
     proof: proof;
-    deleteProof: (id: ObjectID) => void;
+    deleteProof: (id: ObjectID | undefined) => void;
 }
 
 const ElementProofList: React.FC<ElementProofList> = ({ proof, deleteProof }: ElementProofList) => {

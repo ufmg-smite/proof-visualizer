@@ -23,7 +23,7 @@ const ProofList: React.FC = () => {
             });
     }, []);
 
-    const deleteProof = (id: ObjectID) => {
+    const deleteProof = (id: ObjectID | undefined) => {
         axios.delete(`http://localhost:5000/proof/${id}`).then((response) => {
             console.log(response.data);
         });
