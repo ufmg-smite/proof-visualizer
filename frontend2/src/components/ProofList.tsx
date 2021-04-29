@@ -1,30 +1,35 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
+import axios from 'axios';
 import { Spinner } from '@blueprintjs/core';
 
 import ProofElementList from './ProofElementList';
 
 const ProofList: React.FC = () => {
-    const [loadingProofList, setLoadingProofList] = useState(false);
+    const [proofs, setProofs] = useState([]);
+    const [loadingProofs, setLoadingProofs] = useState(true);
+
+    useEffect(() => {
+        axios
+            .get('http://localhost:5000/proof/')
+            .then((response) => {
+                setProofs(response.data.reverse());
+                setLoadingProofs(false);
+            })
+            .catch((error) => {
+                console.log(error);
+            });
+    }, []);
+
     return (
         <>
-            {loadingProofList ? (
+            {loadingProofs ? (
                 <Spinner size={30} />
             ) : (
                 <div>
-                    <ProofElementList
-                        title={'a-and-not-a'}
-                        problem={
-                            'Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industrys standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.'
-                        }
-                    />
-                    <ProofElementList title={'a-and-not-a'} problem={'bla ble bli'} />
-                    <ProofElementList title={'a-and-not-a'} problem={'bla ble bli'} />
-                    <ProofElementList title={'a-and-not-a'} problem={'bla ble bli'} />
-                    <ProofElementList title={'a-and-not-a'} problem={'bla ble bli'} />
-                    <ProofElementList title={'a-and-not-a'} problem={'bla ble bli'} />
-                    <ProofElementList title={'a-and-not-a'} problem={'bla ble bli'} />
-                    <ProofElementList title={'a-and-not-a'} problem={'bla ble bli'} />
+                    {proofs.map((proof, i) => (
+                        <ProofElementList key={i} proof={proof} />
+                    ))}
                 </div>
             )}
         </>

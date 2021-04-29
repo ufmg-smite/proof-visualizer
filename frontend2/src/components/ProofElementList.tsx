@@ -4,23 +4,29 @@ import { Button, ButtonGroup, Card, Elevation, Intent } from '@blueprintjs/core'
 
 import '../scss/ProofElementList.scss';
 
-interface ProofElementList {
-    title: string;
+interface proof {
+    label: string;
     problem: string;
 }
 
-const ProofElementList: React.FC<ProofElementList> = ({ title, problem }: ProofElementList) => {
+interface ProofElementList {
+    proof: proof;
+}
+
+const ProofElementList: React.FC<ProofElementList> = ({ proof }: ProofElementList) => {
     return (
         <Card className="proof-element-card" elevation={Elevation.TWO}>
             <div className="left">
-                <p className="title">{title}</p>
-                <p title={problem}>{problem.slice(0, 35) + (problem.length > 35 ? '...' : '')}</p>
+                <p className="title" title={proof.label}>
+                    {proof.label.slice(0, 35) + (proof.label.length > 35 ? '...' : '')}
+                </p>
+                <p title={proof.problem}>{proof.problem.slice(0, 35) + (proof.problem.length > 35 ? '...' : '')}</p>
             </div>
 
             <div className="right">
                 <ButtonGroup vertical={true}>
                     <Button icon="diagram-tree" intent={Intent.PRIMARY}>
-                        Show
+                        Visualize
                     </Button>
 
                     <Button icon="delete" intent={Intent.DANGER}>
