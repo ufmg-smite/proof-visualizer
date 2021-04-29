@@ -17,7 +17,8 @@ interface VisualizerDialogProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
     dialogContent: string;
     setDialogContent: Dispatch<SetStateAction<string>>;
-    addToast: (err: string) => void;
+    addErrorToast: (err: string) => void;
+    addDeleteToast: (err: string) => void;
 }
 
 interface DialogProps {
@@ -30,7 +31,8 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     dialogIsOpen,
     dialogContent,
     setDialogIsOpen,
-    addToast,
+    addErrorToast,
+    addDeleteToast,
 }: VisualizerDialogProps) => {
     let dialogProps: DialogProps = { icon: 'error', title: 'Error' };
     let dialogBody = <p>This wasn&apos;t supposed to happen. Please contact the developers.</p>;
@@ -50,7 +52,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
             })
             .then(() => setProofProcessed(true))
             .catch((err) => {
-                addToast(err.response.data.message);
+                addErrorToast(err.response.data.message);
                 setProcessingProof(false);
             });
     };
@@ -58,7 +60,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     switch (dialogContent) {
         case 'proof-list':
             dialogProps = { icon: 'list', title: 'Proof List' };
-            dialogBody = <ProofList></ProofList>;
+            dialogBody = <ProofList addDeleteToast={addDeleteToast}></ProofList>;
             break;
         case 'new-proof':
             dialogProps = { icon: 'add', title: 'New Proof' };
@@ -88,7 +90,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                             handleSubmit({ label: proof.name, options: proof.options, problem: proof.problem });
                         }}
                         intent={Intent.SUCCESS}
-                        disabled={processingProof}
+                        disabled={processingProof || proof.name === '' || proof.problem === ''}
                     >
                         Generate Proof
                     </Button>

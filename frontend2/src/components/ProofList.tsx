@@ -7,7 +7,11 @@ import { ObjectID } from 'mongodb';
 import ElementProofList from './ElementProofList';
 import proof from './ProofInterface';
 
-const ProofList: React.FC = () => {
+interface ProofListProps {
+    addDeleteToast: (err: string) => void;
+}
+
+const ProofList: React.FC<ProofListProps> = ({ addDeleteToast }: ProofListProps) => {
     const [proofs, setProofs] = useState([]);
     const [loadingProofs, setLoadingProofs] = useState(true);
 
@@ -23,9 +27,9 @@ const ProofList: React.FC = () => {
             });
     }, []);
 
-    const deleteProof = (id: ObjectID | undefined) => {
-        axios.delete(`http://localhost:5000/proof/${id}`).then((response) => {
-            console.log(response.data);
+    const deleteProof = (id: ObjectID | undefined, name: string) => {
+        axios.delete(`http://localhost:5000/proof/${id}`).then(() => {
+            addDeleteToast(name);
         });
 
         setProofs(proofs.filter((el: proof) => el._id !== id));
@@ -34,7 +38,9 @@ const ProofList: React.FC = () => {
     return (
         <>
             {loadingProofs ? (
-                <Spinner size={30} />
+                <div style={{ height: '200px', paddingTop: '50px' }}>
+                    <Spinner size={30} />
+                </div>
             ) : (
                 <div>
                     {proofs.map((proof, i) => (

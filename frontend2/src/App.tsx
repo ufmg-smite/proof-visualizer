@@ -15,8 +15,11 @@ const App: React.FC = () => {
     const refHandlers = {
         toaster: (ref: Toaster) => (toaster = ref),
     };
-    const addToast = (err: string) => {
+    const addErrorToast = (err: string) => {
         toaster.show({ icon: 'warning-sign', intent: Intent.DANGER, message: err });
+    };
+    const addDeleteToast = (proofName: string) => {
+        toaster.show({ icon: 'trash', intent: Intent.DANGER, message: '"' + proofName + '" was deleted.' });
     };
 
     return (
@@ -34,7 +37,8 @@ const App: React.FC = () => {
                 dialogContent={dialogContent}
                 setDialogContent={setDialogContent}
                 darkTheme={darkTheme}
-                addToast={addToast}
+                addErrorToast={addErrorToast}
+                addDeleteToast={addDeleteToast}
             ></VisualizerDialog>
         </div>
     );

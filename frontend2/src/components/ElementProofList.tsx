@@ -8,7 +8,7 @@ import proof from './ProofInterface';
 
 interface ElementProofList {
     proof: proof;
-    deleteProof: (id: ObjectID | undefined) => void;
+    deleteProof: (id: ObjectID | undefined, name: string) => void;
 }
 
 const ElementProofList: React.FC<ElementProofList> = ({ proof, deleteProof }: ElementProofList) => {
@@ -30,7 +30,7 @@ const ElementProofList: React.FC<ElementProofList> = ({ proof, deleteProof }: El
                     <Button
                         onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                             e.preventDefault();
-                            deleteProof(proof._id);
+                            deleteProof(proof._id, proof.label);
                         }}
                         icon="delete"
                         intent={Intent.DANGER}
