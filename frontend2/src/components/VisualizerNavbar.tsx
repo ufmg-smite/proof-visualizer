@@ -50,7 +50,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             <Navbar.Group align={Alignment.RIGHT}>
                 <span id="switch-button-dark-theme">
                     <Switch checked={darkTheme} onChange={() => setDarkTheme(!darkTheme)} />
-                    <Icon icon="contrast"></Icon>
+                    <Icon icon={darkTheme ? 'moon' : 'flash'}></Icon>
                 </span>
             </Navbar.Group>
         </Navbar>
