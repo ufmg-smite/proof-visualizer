@@ -1,19 +1,17 @@
 import React from 'react';
 
 import { Button, ButtonGroup, Card, Elevation, Intent } from '@blueprintjs/core';
+import { ObjectID } from 'mongodb';
 
 import '../scss/ProofElementList.scss';
-
-interface proof {
-    label: string;
-    problem: string;
-}
+import proof from './ProofInterface';
 
 interface ProofElementList {
     proof: proof;
+    deleteProof: (id: ObjectID) => void;
 }
 
-const ProofElementList: React.FC<ProofElementList> = ({ proof }: ProofElementList) => {
+const ProofElementList: React.FC<ProofElementList> = ({ proof, deleteProof }: ProofElementList) => {
     return (
         <Card className="proof-element-card" elevation={Elevation.TWO}>
             <div className="left">
@@ -29,7 +27,14 @@ const ProofElementList: React.FC<ProofElementList> = ({ proof }: ProofElementLis
                         Visualize
                     </Button>
 
-                    <Button icon="delete" intent={Intent.DANGER}>
+                    <Button
+                        onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                            e.preventDefault();
+                            deleteProof(proof._id);
+                        }}
+                        icon="delete"
+                        intent={Intent.DANGER}
+                    >
                         Delete
                     </Button>
                 </ButtonGroup>

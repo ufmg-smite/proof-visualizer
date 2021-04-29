@@ -28,12 +28,23 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                 <Navbar.Heading>Proof Visualizer</Navbar.Heading>
                 <Navbar.Divider />
                 <Button
-                    onClick={() => openDialog('proof-list')}
+                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                        e.preventDefault();
+                        openDialog('proof-list');
+                    }}
                     className="bp3-minimal"
                     icon="list"
                     text="Proof list"
                 />
-                <Button onClick={() => openDialog('new-proof')} className="bp3-minimal" icon="add" text="New Proof" />
+                <Button
+                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                        e.preventDefault();
+                        openDialog('new-proof');
+                    }}
+                    className="bp3-minimal"
+                    icon="add"
+                    text="New Proof"
+                />
             </Navbar.Group>
 
             <Navbar.Group align={Alignment.RIGHT}>

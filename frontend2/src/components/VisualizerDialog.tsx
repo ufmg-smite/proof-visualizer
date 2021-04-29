@@ -41,7 +41,13 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
             dialogProps = { icon: 'add', title: 'New Proof' };
             dialogBody = <FormNewProof></FormNewProof>;
             succesButton = (
-                <Button onClick={() => setDialogIsOpen(false)} intent={Intent.SUCCESS}>
+                <Button
+                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                        e.preventDefault();
+                        setDialogIsOpen(false);
+                    }}
+                    intent={Intent.SUCCESS}
+                >
                     Generate Proof
                 </Button>
             );
@@ -60,7 +66,14 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 <div className={Classes.DIALOG_BODY + ' dialog-body'}>{dialogBody}</div>
                 <div className={Classes.DIALOG_FOOTER}>
                     <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                        <Button onClick={() => setDialogIsOpen(false)}>Close</Button>
+                        <Button
+                            onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                                e.preventDefault();
+                                setDialogIsOpen(false);
+                            }}
+                        >
+                            Close
+                        </Button>
                         {succesButton}
                     </div>
                 </div>
