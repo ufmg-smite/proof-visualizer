@@ -52,8 +52,8 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
             })
             .then(() => setProofProcessed(true))
             .catch((err) => {
-                addErrorToast(err.response.data.message);
                 setProcessingProof(false);
+                addErrorToast(err.response ? err.response.data.message : 'Error! =(');
             });
     };
 
