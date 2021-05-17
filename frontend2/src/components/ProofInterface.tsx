@@ -5,4 +5,5 @@ export default interface proof {
     label: string;
     options?: string;
     problem: string;
+    dot?: string;
 }

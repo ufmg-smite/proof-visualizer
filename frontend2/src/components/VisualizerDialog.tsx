@@ -60,7 +60,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     switch (dialogContent) {
         case 'proof-list':
             dialogProps = { icon: 'list', title: 'Proof List' };
-            dialogBody = <ProofList addDeleteToast={addDeleteToast}></ProofList>;
+            dialogBody = <ProofList addDeleteToast={addDeleteToast} setDialogIsOpen={setDialogIsOpen}></ProofList>;
             break;
         case 'new-proof':
             dialogProps = { icon: 'add', title: 'New Proof' };

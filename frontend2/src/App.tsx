@@ -4,6 +4,7 @@ import { Intent, Position, Toaster } from '@blueprintjs/core';
 
 import VisualizerNavbar from './components/VisualizerNavbar';
 import VisualizerDialog from './components/VisualizerDialog';
+import VisualizerStage from './components/VisualizerStage';
 
 const App: React.FC = () => {
     const [darkTheme, setDarkTheme] = useState(true);
@@ -40,6 +41,7 @@ const App: React.FC = () => {
                 addErrorToast={addErrorToast}
                 addDeleteToast={addDeleteToast}
             ></VisualizerDialog>
+            <VisualizerStage></VisualizerStage>
         </div>
     );
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
 
 import axios from 'axios';
 import { Icon, Intent, Spinner } from '@blueprintjs/core';
@@ -6,15 +6,23 @@ import { ObjectID } from 'mongodb';
 
 import ElementProofList from './ElementProofList';
 import proof from './ProofInterface';
+import { useDispatch } from 'react-redux';
 
 interface ProofListProps {
     addDeleteToast: (err: string) => void;
+    setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const ProofList: React.FC<ProofListProps> = ({ addDeleteToast }: ProofListProps) => {
+const ProofList: React.FC<ProofListProps> = ({ addDeleteToast, setDialogIsOpen }: ProofListProps) => {
     const [proofs, setProofs] = useState([]);
     const [loadingProofs, setLoadingProofs] = useState(true);
     const [error, setError] = useState(false);
+    const dispatch = useDispatch();
+
+    const setDot = (dot: string | undefined) => {
+        dispatch({ type: 'SET_DOT', payload: dot });
+        setDialogIsOpen(false);
+    };
 
     useEffect(() => {
         axios
@@ -52,7 +60,7 @@ const ProofList: React.FC<ProofListProps> = ({ addDeleteToast }: ProofListProps)
             ) : (
                 <div>
                     {proofs.map((proof, i) => (
-                        <ElementProofList key={i} proof={proof} deleteProof={deleteProof} />
+                        <ElementProofList key={i} proof={proof} deleteProof={deleteProof} setDot={setDot} />
                     ))}
                 </div>
             )}
