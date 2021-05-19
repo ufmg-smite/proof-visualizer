@@ -5,7 +5,7 @@ export interface dotState {
 }
 
 const initialState = {
-    dot: 'blablabla',
+    dot: '',
 };
 
 type Action = { type: 'SET_DOT'; payload: string };
