@@ -1,0 +1,22 @@
+#menu {
+    position: absolute;
+    display: none;
+    width: 200px;
+    background-color: white;
+    box-shadow: 0 0 5px grey;
+    border-radius: 3px;
+    z-index: 1;
+  }
+  
+  #menu button {
+    width: 100%;
+    background-color: white;
+    border: none;
+    margin: 0;
+    padding: 10px;
+  }
+  
+  #menu button:hover {
+    background-color: lightgray;
+  }
+  
