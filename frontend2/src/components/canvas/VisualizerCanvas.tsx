@@ -9,6 +9,8 @@ import { nodeInterface } from '../interfaces/NodeInterface';
 import { nodeProps, onClickArgs } from '../interfaces/NodeProps';
 import { lineProps } from '../interfaces/LineProps';
 
+import '../../scss/VisualizerCanvas.scss';
+
 function handleWheel(e: Konva.KonvaEventObject<WheelEvent>): { stageScale: number; stageX: number; stageY: number } {
     e.evt.preventDefault();
 
@@ -55,7 +57,7 @@ interface CanvasState {
     canvasSize: { width: number; height: number };
     stage: { stageScale: number; stageX: number; stageY: number };
     proofNodes: Array<nodeInterface>;
-    showingNodes: { [id: number]: JSX.Element };
+    showingNodes: { [id: number]: Node };
     showingEdges: { [id: string]: JSX.Element };
     nodeOnFocus: number;
 }
@@ -87,18 +89,10 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
 
         this.basicView();
         this.updatePosition();
-        showingNodes[0] = Node(this.nodeProps(proofNodes[0]));
+        showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
         this.addNodes(0);
 
-        const [width, height] = [
-            (document.getElementsByClassName('visualizer')[0] as HTMLElement).offsetWidth - 30,
-            window.innerHeight -
-                ((document.getElementsByClassName('navbar')[0] as HTMLElement).offsetHeight +
-                    20 +
-                    (document.getElementsByClassName('proof-name')[0] as HTMLElement).offsetHeight +
-                    (document.getElementsByClassName('node-text')[0] as HTMLElement).offsetHeight +
-                    50),
-        ];
+        const [width, height] = [window.innerWidth, window.innerHeight];
 
         this.setState({
             showingNodes,
@@ -190,14 +184,14 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             }
         });
         proofNodes[id].showingChildren = true;
-        showingNodes[id].props.showingChildren = true;
+        showingNodes[id] = new Node({ ...showingNodes[id].props, showingChildren: true });
         this.setState({ proofNodes, showingNodes });
     };
 
     addNode = (node: nodeInterface, parent: nodeInterface): void => {
         const { showingNodes, showingEdges } = this.state;
 
-        showingNodes[node.id] = Node(this.nodeProps(node));
+        showingNodes[node.id] = new Node(this.nodeProps(node));
         showingEdges[`${node.id}->${parent.id}`] = Line(
             this.lineProps(`${node.id}->${parent.id}`, showingNodes[node.id].props, showingNodes[parent.id].props),
         );
@@ -208,7 +202,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.recursivelyGetChildren(id).forEach((node) => {
             this.removeNode(node);
         });
-        showingNodes[id].props.showingChildren = false;
+        showingNodes[id] = new Node({ ...showingNodes[id].props, showingChildren: false });
         proofNodes[id].showingChildren = false;
         this.setState({ showingNodes, proofNodes });
     };
@@ -315,8 +309,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
 
     updateNodeState = (key: number, x: number, y: number): void => {
         const { showingNodes, showingEdges, proofNodes } = this.state;
-        showingNodes[key].props.x = x;
-        showingNodes[key].props.y = y;
+        showingNodes[key] = new Node({ ...showingNodes[key].props, x, y });
 
         if (!proofNodes[key].showingChildren) {
             const [xOffset, yOffset] = [x - proofNodes[key].x, y - proofNodes[key].y];
@@ -380,7 +373,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                             })}
                         {Object.keys(showingNodes).length > 0 &&
                             Object.keys(showingNodes).map(
-                                (value: string): JSX.Element => showingNodes[parseInt(value)],
+                                (value: string): JSX.Element => showingNodes[parseInt(value)].render(),
                             )}
                     </Layer>
                 </Stage>

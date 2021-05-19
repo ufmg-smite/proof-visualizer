@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import { dotState } from '../redux/dotReducer';
 
+import Canvas from './canvas/VisualizerCanvas';
 import { nodeInterface } from './interfaces/NodeInterface';
 
 function removeEscapedCharacters(s: string): string {
@@ -100,13 +101,19 @@ function processDot(dot: string) {
 const VisualizerStage: React.FC = () => {
     const dot = useSelector<dotState, dotState['dot']>((state) => state.dot);
     const proof = processDot(dot);
+    const [currentText, setCurrentText] = useState('');
+    const [focusText, setFocusText] = useState('');
 
     console.log(proof);
+    console.log(currentText);
+    console.log(focusText);
 
     return (
-        <>
-            <p style={{ color: 'black' }}>{dot}</p>
-        </>
+        <div title={focusText}>
+            {proof.length ? (
+                <Canvas proofNodes={proof} setCurrentText={setCurrentText} setFocusText={setFocusText}></Canvas>
+            ) : null}
+        </div>
     );
 };
 
