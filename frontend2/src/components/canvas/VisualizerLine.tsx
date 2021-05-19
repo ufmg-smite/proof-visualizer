@@ -1,12 +1,9 @@
 import React from 'react';
 import { Arrow } from 'react-konva';
 
-interface LineProps {
-    key: number;
-    points: Array<number>;
-}
+import { lineProps } from '../interfaces/LineProps';
 
-const Line = ({ key, points }: LineProps): JSX.Element => {
+const Line = ({ key, points }: lineProps): JSX.Element => {
     return <Arrow key={key} strokeWidth={2} stroke="black" fill="black" points={[...points]} />;
 };
 

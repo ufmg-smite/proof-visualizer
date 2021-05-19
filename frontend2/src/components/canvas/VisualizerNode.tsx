@@ -1,5 +1,7 @@
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import { Label, Text, Tag, Group } from 'react-konva';
+
+import { nodeProps } from '../interfaces/NodeProps';
 
 function textColorFromBg(bgColor: string) {
     const color = bgColor.charAt(0) === '#' ? bgColor.substring(1, 7) : bgColor;
@@ -7,28 +9,6 @@ function textColorFromBg(bgColor: string) {
     const g = parseInt(color.substring(2, 4), 16);
     const b = parseInt(color.substring(4, 6), 16);
     return r * 0.299 + g * 0.587 + b * 0.114 > 150 ? '#000000' : '#ffffff';
-}
-
-interface onClickArgs {
-    id: number;
-    x: number;
-    y: number;
-}
-
-interface NodeProps {
-    rule: string;
-    conclusion: string;
-    id: number;
-    onClick: (arg0: onClickArgs) => void;
-    setFocusText: Dispatch<SetStateAction<string>>;
-    setCurrentText: Dispatch<SetStateAction<string>>;
-    showingChildren: boolean;
-    updateNodeState: (key: number, x: number, y: number) => void;
-    x: number;
-    y: number;
-    hasChildren: boolean;
-    piNode: boolean;
-    setNodeOnFocus: (id: number) => void;
 }
 
 const Node = ({
@@ -45,7 +25,7 @@ const Node = ({
     piNode,
     setNodeOnFocus,
     updateNodeState,
-}: NodeProps): JSX.Element => {
+}: nodeProps): JSX.Element => {
     const bgClosedColor = '#2b2d42';
     const bgOpenColor = '#8d99ae';
 

@@ -2,19 +2,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { dotState } from '../redux/dotReducer';
 
-interface Node {
-    id: number;
-    conclusion: string;
-    rule: string;
-    views: Array<string>;
-    children: Array<number>;
-    parent: number;
-    x: number;
-    y: number;
-    foldedNode: number;
-    showingChildren: boolean;
-    hided: boolean;
-}
+import { nodeInterface } from './interfaces/NodeInterface';
 
 function removeEscapedCharacters(s: string): string {
     let newS = '';
@@ -38,7 +26,7 @@ function removeEscapedCharacters(s: string): string {
 }
 
 function processDot(dot: string) {
-    const nodes: Array<Node> = [];
+    const nodes: Array<nodeInterface> = [];
     const lines = dot
         .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
         .replace(/(\n|\t)/gm, '')
@@ -71,6 +59,10 @@ function processDot(dot: string) {
                     foldedNode: NaN,
                     showingChildren: true,
                     hided: false,
+                    hidedNodes: [],
+                    piNode: false,
+                    hidedIn: NaN,
+                    positionCache: false,
                 };
             }
             nodes[id].conclusion = removeEscapedCharacters(conclusion);
@@ -92,6 +84,10 @@ function processDot(dot: string) {
                     foldedNode: NaN,
                     showingChildren: true,
                     hided: false,
+                    hidedNodes: [],
+                    piNode: false,
+                    hidedIn: NaN,
+                    positionCache: false,
                 };
             }
             nodes[child].parent = parent;
