@@ -111,7 +111,12 @@ const VisualizerStage: React.FC = () => {
     return (
         <div title={focusText}>
             {proof.length ? (
-                <Canvas proofNodes={proof} setCurrentText={setCurrentText} setFocusText={setFocusText}></Canvas>
+                <Canvas
+                    key={dot}
+                    proofNodes={proof}
+                    setCurrentText={setCurrentText}
+                    setFocusText={setFocusText}
+                ></Canvas>
             ) : null}
         </div>
     );

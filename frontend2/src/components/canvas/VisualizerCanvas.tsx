@@ -92,7 +92,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
         this.addNodes(0);
 
-        const [width, height] = [window.innerWidth, window.innerHeight];
+        const [width, height] = [window.innerWidth, window.innerHeight - 50];
 
         this.setState({
             showingNodes,
