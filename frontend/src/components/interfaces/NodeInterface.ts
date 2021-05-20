@@ -11,15 +11,15 @@ interface NodeInterface {
     x: number;
     y: number;
 
+    hided: boolean;
+    hidedIn: number;
+
     showingChildren: boolean;
 
     // The node that hide its children
     hideMyChildNode: number;
 
     hidedNodes: Array<number>;
-
-    hided: boolean;
-    hidedIn: number;
 }
 
 export type nodeInterface = NodeInterface;

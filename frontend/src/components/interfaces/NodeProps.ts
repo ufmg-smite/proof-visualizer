@@ -7,19 +7,23 @@ interface OnClickArgs {
 }
 
 interface NodeProps {
-    rule: string;
-    conclusion: string;
     id: number;
-    onClick: (arg0: onClickArgs) => void;
-    setFocusText: Dispatch<SetStateAction<string>>;
-    setCurrentText: Dispatch<SetStateAction<string>>;
+
+    conclusion: string;
+    rule: string;
+
     showingChildren: boolean;
-    updateNodeState: (key: number, x: number, y: number) => void;
-    x: number;
-    y: number;
+
     hasChildren: boolean;
     hidingNode?: boolean;
+
+    x: number;
+    y: number;
+
+    onClick: (arg0: onClickArgs) => void;
+    setFocusText: Dispatch<SetStateAction<string>>;
     setNodeOnFocus: (id: number) => void;
+    updateNodeState: (key: number, x: number, y: number) => void;
 }
 
 export type nodeProps = NodeProps;

@@ -23,7 +23,6 @@ export default class Node extends React.Component<nodeProps> {
             hasChildren,
             hidingNode,
             onClick,
-            setCurrentText,
             setFocusText,
             setNodeOnFocus,
             updateNodeState,
@@ -45,7 +44,9 @@ export default class Node extends React.Component<nodeProps> {
                 x={x}
                 y={y}
                 onClick={(e) => {
-                    if (e.evt.button === 2 && hidingNode) {
+                    if (e.evt.button === 1) {
+                        onClick({ id, x, y });
+                    } else if (e.evt.button === 2 && hidingNode) {
                         setNodeOnFocus(id);
                         const menuNode = document.getElementById('menu');
                         if (menuNode) {
@@ -63,7 +64,6 @@ export default class Node extends React.Component<nodeProps> {
                 }}
             >
                 <Label
-                    onClick={(e) => (e.evt.button === 2 ? setCurrentText(e.target.attrs.text) : onClick({ id, x, y }))}
                     onMouseEnter={(e) => {
                         setFocusText(e.target.attrs.text);
                     }}
@@ -83,7 +83,6 @@ export default class Node extends React.Component<nodeProps> {
                     />
                 </Label>
                 <Label
-                    onClick={(e) => (e.evt.button === 2 ? setCurrentText(e.target.attrs.text) : onClick({ id, x, y }))}
                     x={0}
                     y={35}
                     onMouseEnter={(e) => {

@@ -49,7 +49,6 @@ function handleWheel(e: Konva.KonvaEventObject<WheelEvent>): { stageScale: numbe
 
 interface CanvasProps {
     proofNodes: Array<nodeInterface>;
-    setCurrentText: Dispatch<SetStateAction<string>>;
     setFocusText: Dispatch<SetStateAction<string>>;
 }
 
@@ -138,7 +137,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     };
 
     nodeProps = (node: nodeInterface): nodeProps => {
-        const { setCurrentText, setFocusText } = this.props;
+        const { setFocusText } = this.props;
         return {
             id: node.id,
             rule: node.rule,
@@ -146,7 +145,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             onClick: this.onClick,
             updateNodeState: this.updateNodeState,
             setFocusText,
-            setCurrentText,
             setNodeOnFocus: this.setNodeOnFocus,
             x: node.x,
             y: node.y,
