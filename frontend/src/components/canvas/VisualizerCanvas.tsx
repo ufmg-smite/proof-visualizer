@@ -151,7 +151,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             x: node.x,
             y: node.y,
             hasChildren: node.children.length > 0,
-            piNode: node.piNode,
+            hidingNode: node.hidedNodes.length ? true : false,
             showingChildren: false,
         };
     };
@@ -227,12 +227,14 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const parentId = proofNodes[id].parent;
         let piId;
         if (proofNodes[parentId].hided) {
+            // if the parent node is hided in some node
             piId = proofNodes[parentId].hidedIn;
             proofNodes[piId].conclusion += proofNodes[id].conclusion;
             proofNodes[piId].children.push(...proofNodes[id].children);
             proofNodes[piId].children = proofNodes[piId].children.filter((nodeId) => nodeId !== id);
-        } else if (proofNodes[parentId].foldedNode) {
-            piId = proofNodes[parentId].foldedNode;
+        } else if (proofNodes[parentId].hideMyChildNode) {
+            // if the parent node has some node as child that hides node
+            piId = proofNodes[parentId].hideMyChildNode;
             proofNodes[piId].conclusion += proofNodes[id].conclusion;
             proofNodes[piId].children.push(...proofNodes[id].children);
         } else {
@@ -248,13 +250,12 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 parent: parentId,
                 hided: false,
                 hidedNodes: [],
-                piNode: true,
                 views: [],
-                foldedNode: NaN,
+                hideMyChildNode: NaN,
                 hidedIn: NaN,
                 positionCache: false,
             };
-            proofNodes[parentId].foldedNode = piId;
+            proofNodes[parentId].hideMyChildNode = piId;
             proofNodes[parentId].children.push(piId);
         }
         proofNodes[piId].hidedNodes.push(id);
@@ -278,7 +279,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             proofNodes[proofNodes[piId].parent].children = proofNodes[proofNodes[piId].parent].children.filter(
                 (nodeId) => nodeId !== piId,
             );
-            proofNodes[proofNodes[piId].parent].foldedNode = NaN;
+            proofNodes[proofNodes[piId].parent].hideMyChildNode = NaN;
             delete proofNodes[piId];
         }
     };

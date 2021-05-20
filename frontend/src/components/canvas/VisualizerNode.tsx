@@ -17,14 +17,14 @@ export default class Node extends React.Component<nodeProps> {
             rule,
             conclusion,
             id,
-            onClick,
-            setCurrentText,
-            setFocusText,
             showingChildren,
             x,
             y,
             hasChildren,
-            piNode,
+            hidingNode,
+            onClick,
+            setCurrentText,
+            setFocusText,
             setNodeOnFocus,
             updateNodeState,
         } = this.props;
@@ -45,7 +45,7 @@ export default class Node extends React.Component<nodeProps> {
                 x={x}
                 y={y}
                 onClick={(e) => {
-                    if (e.evt.button === 2 && piNode) {
+                    if (e.evt.button === 2 && hidingNode) {
                         setNodeOnFocus(id);
                         const menuNode = document.getElementById('menu');
                         if (menuNode) {

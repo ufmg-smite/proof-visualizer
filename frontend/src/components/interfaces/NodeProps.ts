@@ -18,7 +18,7 @@ interface NodeProps {
     x: number;
     y: number;
     hasChildren: boolean;
-    piNode: boolean;
+    hidingNode?: boolean;
     setNodeOnFocus: (id: number) => void;
 }
 
