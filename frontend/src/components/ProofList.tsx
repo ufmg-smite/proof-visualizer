@@ -8,6 +8,8 @@ import ElementProofList from './ElementProofList';
 import proof from './ProofInterface';
 import { useDispatch } from 'react-redux';
 
+import '../scss/ProofList.scss';
+
 interface ProofListProps {
     addDeleteToast: (err: string) => void;
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
@@ -47,14 +49,14 @@ const ProofList: React.FC<ProofListProps> = ({ addDeleteToast, setDialogIsOpen }
     return (
         <>
             {error ? (
-                <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
+                <div id="loading-and-error">
                     <Icon icon="error" intent={Intent.DANGER} iconSize={40}></Icon>
                     <br></br>
                     <br></br>
                     <p>It looks like we are facing some issues, please contact the developers.</p>
                 </div>
             ) : loadingProofs ? (
-                <div style={{ height: '200px', paddingTop: '50px' }}>
+                <div id="loading-and-error">
                     <Spinner size={30} />
                 </div>
             ) : (
