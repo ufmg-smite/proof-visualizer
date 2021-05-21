@@ -44,7 +44,8 @@ export default class Node extends React.Component<nodeProps> {
                 x={x}
                 y={y}
                 onClick={(e) => {
-                    if (e.evt.button === 1) {
+                    console.log(e);
+                    if (e.evt.button === 0) {
                         onClick({ id, x, y });
                     } else if (e.evt.button === 2 && hidingNode) {
                         setNodeOnFocus(id);
