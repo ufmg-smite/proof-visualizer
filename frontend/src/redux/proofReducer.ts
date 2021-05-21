@@ -1,6 +1,6 @@
 import stateInterface from './stateInterface';
 
-import proof from '../components/ProofInterface';
+import proof from '../components/interfaces/ProofInterface';
 
 export interface proofState {
     label: string;
@@ -18,7 +18,7 @@ const initialState = {
 
 type Action = { type: 'SET_DOT'; payload: proof };
 
-export const dotReducer = (state: proofState = initialState, action: Action): stateInterface => {
+export const proofReducer = (state: proofState = initialState, action: Action): stateInterface => {
     switch (action.type) {
         case 'SET_DOT':
             return {

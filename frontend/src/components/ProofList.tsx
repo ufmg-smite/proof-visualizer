@@ -5,7 +5,7 @@ import { Icon, Intent, Spinner } from '@blueprintjs/core';
 import { ObjectID } from 'mongodb';
 
 import ElementProofList from './ElementProofList';
-import proof from './ProofInterface';
+import proof from './interfaces/ProofInterface';
 import { useDispatch } from 'react-redux';
 
 import '../scss/ProofList.scss';

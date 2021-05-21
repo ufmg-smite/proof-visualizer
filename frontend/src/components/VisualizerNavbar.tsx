@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction } from 'react';
-import { proofState } from '../redux/dotReducer';
+import { proofState } from '../redux/proofReducer';
 import { useSelector } from 'react-redux';
 
 import { Alignment, Button, Icon, Navbar, Switch, Menu, MenuItem } from '@blueprintjs/core';

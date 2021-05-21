@@ -9,7 +9,7 @@ import FormNewProof from './FormNewProof';
 import ProofList from './ProofList';
 
 import '../scss/VisualizerDialog.scss';
-import proof from './ProofInterface';
+import proof from './interfaces/ProofInterface';
 
 interface VisualizerDialogProps {
     darkTheme: boolean;

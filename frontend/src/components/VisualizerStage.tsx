@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { proofState } from '../redux/dotReducer';
+import { proofState } from '../redux/proofReducer';
 
 import Canvas from './canvas/VisualizerCanvas';
 import { nodeInterface } from './interfaces/NodeInterface';
