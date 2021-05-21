@@ -83,6 +83,12 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             </Navbar.Group>
 
             <Navbar.Group align={Alignment.RIGHT}>
+                {proof.label ? (
+                    <>
+                        <Navbar.Heading>{proof.label}</Navbar.Heading>
+                        <Navbar.Divider />
+                    </>
+                ) : null}
                 <Popover2 content={proof.label ? exampleMenu : undefined} placement="bottom-end">
                     <Button
                         className="bp3-minimal"
