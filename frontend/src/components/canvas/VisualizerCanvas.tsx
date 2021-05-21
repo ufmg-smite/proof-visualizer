@@ -227,19 +227,19 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         if (proofNodes[parentId].hided) {
             // if the parent node is hided in some node
             piId = proofNodes[parentId].hidedIn;
-            proofNodes[piId].conclusion += proofNodes[id].conclusion;
             proofNodes[piId].children.push(...proofNodes[id].children);
             proofNodes[piId].children = proofNodes[piId].children.filter((nodeId) => nodeId !== id);
         } else if (proofNodes[parentId].hideMyChildNode) {
             // if the parent node has some node as child that hides node
             piId = proofNodes[parentId].hideMyChildNode;
-            proofNodes[piId].conclusion += proofNodes[id].conclusion;
+            proofNodes[piId].conclusion =
+                proofNodes[piId].conclusion.slice(0, -1) + "','" + proofNodes[id].conclusion + "']";
             proofNodes[piId].children.push(...proofNodes[id].children);
         } else {
             piId = proofNodes.length;
             proofNodes[piId] = {
                 id: piId,
-                conclusion: proofNodes[id].conclusion,
+                conclusion: "['" + proofNodes[id].conclusion + "']",
                 rule: 'π',
                 children: [...proofNodes[id].children],
                 x: NaN,
