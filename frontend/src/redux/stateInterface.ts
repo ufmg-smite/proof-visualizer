@@ -1,3 +1,6 @@
 export default interface stateInterface {
-    dot: string;
+    label: string;
+    options: string | undefined;
+    problem: string;
+    dot: string | undefined;
 }

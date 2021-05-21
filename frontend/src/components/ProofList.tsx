@@ -21,8 +21,8 @@ const ProofList: React.FC<ProofListProps> = ({ addDeleteToast, setDialogIsOpen }
     const [error, setError] = useState(false);
     const dispatch = useDispatch();
 
-    const setDot = (dot: string | undefined) => {
-        dispatch({ type: 'SET_DOT', payload: dot });
+    const setDot = (proof: proof) => {
+        dispatch({ type: 'SET_DOT', payload: proof });
         setDialogIsOpen(false);
     };
 

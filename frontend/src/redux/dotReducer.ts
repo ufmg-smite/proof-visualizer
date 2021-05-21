@@ -1,19 +1,33 @@
 import stateInterface from './stateInterface';
 
-export interface dotState {
-    dot: string;
+import proof from '../components/ProofInterface';
+
+export interface proofState {
+    label: string;
+    options: string | undefined;
+    problem: string;
+    dot: string | undefined;
 }
 
 const initialState = {
+    label: '',
+    options: '',
+    problem: '',
     dot: '',
 };
 
-type Action = { type: 'SET_DOT'; payload: string };
+type Action = { type: 'SET_DOT'; payload: proof };
 
-export const dotReducer = (state: dotState = initialState, action: Action): stateInterface => {
+export const dotReducer = (state: proofState = initialState, action: Action): stateInterface => {
     switch (action.type) {
         case 'SET_DOT':
-            return { ...state, dot: action.payload };
+            return {
+                ...state,
+                label: action.payload.label,
+                options: action.payload.options,
+                problem: action.payload.problem,
+                dot: action.payload.dot,
+            };
         default:
             return state;
     }

@@ -9,7 +9,7 @@ import proof from './ProofInterface';
 interface ElementProofList {
     proof: proof;
     deleteProof: (id: ObjectID | undefined, name: string) => void;
-    setDot: (dot: string | undefined) => void;
+    setDot: (proof: proof) => void;
 }
 
 const ElementProofList: React.FC<ElementProofList> = ({ proof, deleteProof, setDot }: ElementProofList) => {
@@ -27,7 +27,7 @@ const ElementProofList: React.FC<ElementProofList> = ({ proof, deleteProof, setD
                     <Button
                         onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                             e.preventDefault();
-                            setDot(proof.dot);
+                            setDot(proof);
                         }}
                         icon="diagram-tree"
                         intent={Intent.PRIMARY}
