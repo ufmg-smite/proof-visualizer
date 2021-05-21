@@ -81,8 +81,13 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             </Navbar.Group>
 
             <Navbar.Group align={Alignment.RIGHT}>
-                <Popover2 content={exampleMenu} placement="bottom-end">
-                    <Button className="bp3-minimal" icon="download" text="Download" />
+                <Popover2 content={proof.label ? exampleMenu : undefined} placement="bottom-end">
+                    <Button
+                        className="bp3-minimal"
+                        icon="download"
+                        text="Download"
+                        disabled={proof.label ? false : true}
+                    />
                 </Popover2>
                 <Button
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -91,6 +96,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     className="bp3-minimal"
                     icon="reset"
                     text="Basic view"
+                    disabled={proof.label ? false : true}
                 />
                 <Navbar.Divider />
                 <span id="switch-button-dark-theme">
