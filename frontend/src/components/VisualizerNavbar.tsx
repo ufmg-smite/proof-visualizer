@@ -58,7 +58,9 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     return (
         <Navbar>
             <Navbar.Group align={Alignment.LEFT}>
-                <Navbar.Heading>Proof Visualizer</Navbar.Heading>
+                <Navbar.Heading>
+                    <b>Proof Visualizer</b>
+                </Navbar.Heading>
                 <Navbar.Divider />
                 <Button
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
