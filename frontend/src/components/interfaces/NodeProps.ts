@@ -20,9 +20,12 @@ interface NodeProps {
     x: number;
     y: number;
 
+    selected: boolean;
+
     onClick: (arg0: onClickArgs) => void;
     setFocusText: Dispatch<SetStateAction<string>>;
     setNodeOnFocus: (id: number) => void;
+    toggleNodeSelection: (id: number) => void;
     updateNodeState: (key: number, x: number, y: number) => void;
 }
 

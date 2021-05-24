@@ -22,10 +22,12 @@ export default class Node extends React.Component<nodeProps> {
             y,
             hasChildren,
             hidingNode,
+            selected,
             onClick,
             setFocusText,
             setNodeOnFocus,
             updateNodeState,
+            toggleNodeSelection,
         } = this.props;
 
         const bgClosedColor = '#2b2d42';
@@ -44,9 +46,12 @@ export default class Node extends React.Component<nodeProps> {
                 x={x}
                 y={y}
                 onClick={(e) => {
-                    console.log(e);
                     if (e.evt.button === 0) {
-                        onClick({ id, x, y });
+                        if (e.evt.shiftKey) {
+                            toggleNodeSelection(id);
+                        } else {
+                            onClick({ id, x, y });
+                        }
                     } else if (e.evt.button === 2 && hidingNode) {
                         setNodeOnFocus(id);
                         const menuNode = document.getElementById('menu');
@@ -72,7 +77,7 @@ export default class Node extends React.Component<nodeProps> {
                     x={0}
                     y={0}
                 >
-                    <Tag fill={bgColor} stroke="black" />
+                    <Tag fill={bgColor} stroke={selected ? 'red' : 'black'} />
                     <Text
                         align="center"
                         fill={textColorFromBg(bgColor)}
@@ -91,7 +96,7 @@ export default class Node extends React.Component<nodeProps> {
                     }}
                     onMouseLeave={() => setFocusText('')}
                 >
-                    <Tag fill={bgColor} stroke="black" />
+                    <Tag fill={bgColor} stroke={selected ? 'red' : 'black'} />
                     <Text
                         align="center"
                         fill={textColorFromBg(bgColor)}

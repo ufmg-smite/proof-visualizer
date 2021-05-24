@@ -59,6 +59,7 @@ interface CanvasState {
     showingNodes: { [id: number]: Node };
     showingEdges: { [id: string]: JSX.Element };
     nodeOnFocus: number;
+    nodesSelected: Array<number>;
 }
 
 export default class Canvas extends Component<CanvasProps, CanvasState> {
@@ -80,6 +81,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             showingNodes: {},
             showingEdges: {},
             nodeOnFocus: NaN,
+            nodesSelected: [],
         };
     }
 
@@ -146,12 +148,27 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             updateNodeState: this.updateNodeState,
             setFocusText,
             setNodeOnFocus: this.setNodeOnFocus,
+            toggleNodeSelection: this.toggleNodeSelection,
             x: node.x,
             y: node.y,
             hasChildren: node.children.length > 0,
             hidingNode: node.hidedNodes.length ? true : false,
             showingChildren: false,
+            selected: false,
         };
+    };
+
+    toggleNodeSelection = (id: number): void => {
+        const { showingNodes } = this.state;
+        let { nodesSelected } = this.state;
+        if (showingNodes[id].props.selected) {
+            showingNodes[id] = new Node({ ...showingNodes[id].props, selected: false });
+            nodesSelected = nodesSelected.filter((nodeId) => nodeId !== id);
+        } else {
+            showingNodes[id] = new Node({ ...showingNodes[id].props, selected: true });
+            nodesSelected.push(id);
+        }
+        this.setState({ showingNodes, nodesSelected });
     };
 
     setNodeOnFocus = (id: number): void => {
