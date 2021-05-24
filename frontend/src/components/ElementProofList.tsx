@@ -4,7 +4,7 @@ import { Button, ButtonGroup, Card, Elevation, Intent } from '@blueprintjs/core'
 import { ObjectID } from 'mongodb';
 
 import '../scss/ElementProofList.scss';
-import proof from './interfaces/ProofInterface';
+import { proof } from './interfaces';
 
 interface ElementProofList {
     proof: proof;

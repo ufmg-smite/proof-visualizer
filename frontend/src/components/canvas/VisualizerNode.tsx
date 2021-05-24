@@ -1,7 +1,7 @@
 import React from 'react';
 import { Label, Text, Tag, Group } from 'react-konva';
 
-import { nodeProps } from '../interfaces/NodeProps';
+import { NodeProps } from '../interfaces';
 
 function textColorFromBg(bgColor: string) {
     const color = bgColor.charAt(0) === '#' ? bgColor.substring(1, 7) : bgColor;
@@ -11,7 +11,7 @@ function textColorFromBg(bgColor: string) {
     return r * 0.299 + g * 0.587 + b * 0.114 > 150 ? '#000000' : '#ffffff';
 }
 
-export default class Node extends React.Component<nodeProps> {
+export default class Node extends React.Component<NodeProps> {
     render(): JSX.Element {
         const {
             rule,

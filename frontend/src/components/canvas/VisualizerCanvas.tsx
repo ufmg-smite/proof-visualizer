@@ -6,9 +6,7 @@ import Node from './VisualizerNode';
 import Line from './VisualizerLine';
 import Menu from './VisualizerMenu';
 
-import { nodeInterface } from '../interfaces/NodeInterface';
-import { nodeProps, onClickArgs } from '../interfaces/NodeProps';
-import { lineProps } from '../interfaces/LineProps';
+import { NodeInterface, NodeProps, OnClickArgs, LineProps } from '../interfaces';
 
 import '../../scss/VisualizerCanvas.scss';
 
@@ -49,14 +47,14 @@ function handleWheel(e: Konva.KonvaEventObject<WheelEvent>): { stageScale: numbe
 }
 
 interface CanvasProps {
-    proofNodes: Array<nodeInterface>;
+    proofNodes: Array<NodeInterface>;
     setFocusText: Dispatch<SetStateAction<string>>;
 }
 
 interface CanvasState {
     canvasSize: { width: number; height: number };
     stage: { stageScale: number; stageX: number; stageY: number };
-    proofNodes: Array<nodeInterface>;
+    proofNodes: Array<NodeInterface>;
     showingNodes: { [id: number]: Node };
     showingEdges: { [id: string]: JSX.Element };
     nodeOnFocus: number;
@@ -139,7 +137,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.setNodeOnFocus(0);
     };
 
-    nodeProps = (node: nodeInterface): nodeProps => {
+    nodeProps = (node: NodeInterface): NodeProps => {
         const { setFocusText } = this.props;
         return {
             id: node.id,
@@ -176,12 +174,12 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.setState({ nodeOnFocus: id });
     };
 
-    lineProps = (key: string, from: nodeProps, to: nodeProps): lineProps => ({
+    LineProps = (key: string, from: NodeProps, to: NodeProps): LineProps => ({
         key,
         points: [from.x + 150, from.y, to.x + 150, to.y + 71],
     });
 
-    onClick = (e: onClickArgs): void => {
+    onClick = (e: OnClickArgs): void => {
         const { id } = e;
         const { proofNodes } = this.state;
         if (proofNodes[id].showingChildren) {
@@ -204,12 +202,12 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.setState({ proofNodes, showingNodes });
     };
 
-    addNode = (node: nodeInterface, parent: nodeInterface): void => {
+    addNode = (node: NodeInterface, parent: NodeInterface): void => {
         const { showingNodes, showingEdges } = this.state;
 
         showingNodes[node.id] = new Node(this.nodeProps(node));
         showingEdges[`${node.id}->${parent.id}`] = Line(
-            this.lineProps(`${node.id}->${parent.id}`, showingNodes[node.id].props, showingNodes[parent.id].props),
+            this.LineProps(`${node.id}->${parent.id}`, showingNodes[node.id].props, showingNodes[parent.id].props),
         );
     };
 
@@ -342,7 +340,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             .filter((edgeKey) => edgeKey.indexOf(key.toString()) !== -1)
             .forEach((edge) => {
                 const [from, to] = edge.split('->').map((x) => parseInt(x));
-                showingEdges[edge] = Line(this.lineProps(edge, showingNodes[from].props, showingNodes[to].props));
+                showingEdges[edge] = Line(this.LineProps(edge, showingNodes[from].props, showingNodes[to].props));
             });
         this.setState({ showingNodes, showingEdges });
     };

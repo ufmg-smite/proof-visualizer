@@ -2,7 +2,7 @@ import { combineReducers } from 'redux';
 
 import stateInterface from './stateInterface';
 
-import proof from '../components/interfaces/ProofInterface';
+import { proof } from '../components/interfaces';
 
 export interface proofState {
     label: string;

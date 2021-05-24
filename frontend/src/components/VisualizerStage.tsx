@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import stateInterface from '../redux/stateInterface';
 
 import Canvas from './canvas/VisualizerCanvas';
-import { nodeInterface } from './interfaces/NodeInterface';
+import { NodeInterface } from './interfaces';
 
 function removeEscapedCharacters(s: string): string {
     let newS = '';
@@ -27,7 +27,7 @@ function removeEscapedCharacters(s: string): string {
 }
 
 function processDot(dot: string) {
-    const nodes: Array<nodeInterface> = [];
+    const nodes: Array<NodeInterface> = [];
     const lines = dot
         .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
         .replace(/(\n|\t)/gm, '')
