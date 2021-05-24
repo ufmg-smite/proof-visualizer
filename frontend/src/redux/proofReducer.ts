@@ -16,11 +16,11 @@ const initialState = {
     dot: '',
 };
 
-type Action = { type: 'SET_DOT'; payload: proof };
+type Action = { type: 'SET_PROOF'; payload: proof };
 
 export const proofReducer = (state: proofState = initialState, action: Action): stateInterface => {
     switch (action.type) {
-        case 'SET_DOT':
+        case 'SET_PROOF':
             return {
                 ...state,
                 label: action.payload.label,
