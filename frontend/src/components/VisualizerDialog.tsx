@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import axios from 'axios';
 import { Button, Classes, Dialog, Intent, Spinner } from '@blueprintjs/core';
@@ -8,16 +9,17 @@ import FormNewProof from './FormNewProof';
 import ProofList from './ProofList';
 
 import '../scss/VisualizerDialog.scss';
-import { proof, VisualizerDialogProps, DialogProps } from './interfaces';
+import { proof, VisualizerDialogProps, DialogProps, stateInterface } from './interfaces';
 
 const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
-    darkTheme,
     dialogIsOpen,
     dialogContent,
     setDialogIsOpen,
     addErrorToast,
     addDeleteToast,
 }: VisualizerDialogProps) => {
+    const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
+
     let dialogProps: DialogProps = { icon: 'error', title: 'Error' };
     let dialogBody = <p>This wasn&apos;t supposed to happen. Please contact the developers.</p>;
     let succesButton = <></>;

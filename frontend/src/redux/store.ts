@@ -1,4 +1,4 @@
 import { createStore } from 'redux';
-import { proofReducer } from './proofReducer';
+import reducer from './reducer';
 
-export const store = createStore(proofReducer);
+export const store = createStore(reducer);

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 
 import { Intent, Position, Toaster } from '@blueprintjs/core';
 
@@ -6,10 +7,13 @@ import VisualizerNavbar from './components/VisualizerNavbar';
 import VisualizerDialog from './components/VisualizerDialog';
 import VisualizerStage from './components/VisualizerStage';
 
+import { stateInterface } from './components/interfaces';
+
 const App: React.FC = () => {
-    const [darkTheme, setDarkTheme] = useState(true);
     const [dialogIsOpen, setDialogIsOpen] = useState(false);
     const [dialogContent, setDialogContent] = useState('');
+
+    const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
 
     // Toaster
     let toaster: Toaster;
@@ -26,18 +30,12 @@ const App: React.FC = () => {
     return (
         <div className={darkTheme ? ' bp3-dark' : ''}>
             <Toaster position={Position.TOP} ref={refHandlers.toaster} />
-            <VisualizerNavbar
-                darkTheme={darkTheme}
-                setDarkTheme={setDarkTheme}
-                setDialogIsOpen={setDialogIsOpen}
-                setDialogContent={setDialogContent}
-            ></VisualizerNavbar>
+            <VisualizerNavbar setDialogIsOpen={setDialogIsOpen} setDialogContent={setDialogContent}></VisualizerNavbar>
             <VisualizerDialog
                 dialogIsOpen={dialogIsOpen}
                 setDialogIsOpen={setDialogIsOpen}
                 dialogContent={dialogContent}
                 setDialogContent={setDialogContent}
-                darkTheme={darkTheme}
                 addErrorToast={addErrorToast}
                 addDeleteToast={addDeleteToast}
             ></VisualizerDialog>

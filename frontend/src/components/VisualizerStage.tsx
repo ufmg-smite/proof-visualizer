@@ -96,7 +96,7 @@ function processDot(dot: string) {
 }
 
 const VisualizerStage: React.FC = () => {
-    const dot = useSelector<stateInterface, stateInterface['proof']['dot']>((state) => state.proof.dot);
+    const dot = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.dot);
     const proof = processDot(dot ? dot : '');
     const [focusText, setFocusText] = useState('');
 

@@ -1,15 +1,13 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { Alignment, Button, Icon, Navbar, Switch, Menu, MenuItem } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 
 import '../scss/VisualizerNavbar.scss';
-import { VisualizerNavbarProps, proof } from './interfaces';
+import { VisualizerNavbarProps, stateInterface, proof } from './interfaces';
 
 const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
-    darkTheme,
-    setDarkTheme,
     setDialogIsOpen,
     setDialogContent,
 }: VisualizerNavbarProps) => {
@@ -17,7 +15,13 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
         setDialogIsOpen(true);
         setDialogContent(content);
     };
-    const proof = useSelector<proof, proof>((state: proof) => state);
+    const proof = useSelector<stateInterface, proof>((state: stateInterface) => state.proofReducer.proof);
+    const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
+    const dispatch = useDispatch();
+
+    const setDarkTheme = () => {
+        dispatch({ type: 'TOGGLE_DARK_THEME', payload: {} });
+    };
 
     const exampleMenu = (
         <Menu>
@@ -101,7 +105,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                 />
                 <Navbar.Divider />
                 <span id="switch-button-dark-theme">
-                    <Switch checked={darkTheme} onChange={() => setDarkTheme(!darkTheme)} />
+                    <Switch checked={darkTheme} onChange={() => setDarkTheme()} />
                     <Icon icon={darkTheme ? 'moon' : 'flash'}></Icon>
                 </span>
             </Navbar.Group>

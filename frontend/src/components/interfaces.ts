@@ -102,7 +102,6 @@ interface ProofListProps {
 }
 
 interface VisualizerDialogProps {
-    darkTheme: boolean;
     dialogIsOpen: boolean;
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
     dialogContent: string;
@@ -112,14 +111,17 @@ interface VisualizerDialogProps {
 }
 
 interface VisualizerNavbarProps {
-    darkTheme: boolean;
-    setDarkTheme: Dispatch<SetStateAction<boolean>>;
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
     setDialogContent: Dispatch<SetStateAction<string>>;
 }
 
 interface stateInterface {
-    proof: proof;
+    proofReducer: {
+        proof: proof;
+    };
+    darkThemeReducer: {
+        darkTheme: boolean;
+    };
 }
 
 export type {
