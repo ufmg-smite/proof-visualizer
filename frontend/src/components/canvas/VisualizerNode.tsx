@@ -52,7 +52,7 @@ export default class Node extends React.Component<nodeProps> {
                         } else {
                             onClick({ id, x, y });
                         }
-                    } else if (e.evt.button === 2 && hidingNode) {
+                    } else if (e.evt.button === 2 && (hidingNode || selected)) {
                         setNodeOnFocus(id);
                         const menuNode = document.getElementById('menu');
                         if (menuNode) {

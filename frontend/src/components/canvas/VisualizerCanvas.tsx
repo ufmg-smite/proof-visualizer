@@ -4,6 +4,7 @@ import Konva from 'konva';
 import dagre from 'dagre';
 import Node from './VisualizerNode';
 import Line from './VisualizerLine';
+import Menu from './VisualizerMenu';
 
 import { nodeInterface } from '../interfaces/NodeInterface';
 import { nodeProps, onClickArgs } from '../interfaces/NodeProps';
@@ -358,19 +359,16 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     };
 
     render(): JSX.Element {
-        const { canvasSize, stage, showingNodes, showingEdges } = this.state;
+        const { canvasSize, stage, showingNodes, showingEdges, nodesSelected, nodeOnFocus, proofNodes } = this.state;
         return (
             <>
-                <div id="menu">
-                    <div>
-                        <button onClick={() => this.unfold('all')} type="button" id="pulse-button">
-                            Unfold All Nodes
-                        </button>
-                        <button onClick={() => this.unfold('propositional')} type="button" id="delete-button">
-                            Unfold Propositional View
-                        </button>
-                    </div>
-                </div>
+                <Menu
+                    unfold={this.unfold}
+                    options={{
+                        unfold: nodeOnFocus ? proofNodes[nodeOnFocus].rule === 'π' : false,
+                        foldSelected: nodesSelected.length && nodesSelected.includes(nodeOnFocus) ? true : false,
+                    }}
+                ></Menu>
                 <Stage
                     draggable
                     width={canvasSize.width}
