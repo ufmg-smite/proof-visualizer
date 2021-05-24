@@ -6,7 +6,7 @@ import Node from './VisualizerNode';
 import Line from './VisualizerLine';
 import Menu from './VisualizerMenu';
 
-import { NodeInterface, NodeProps, OnClickArgs, LineProps } from '../interfaces';
+import { NodeInterface, NodeProps, LineProps } from '../interfaces';
 
 import '../../scss/VisualizerCanvas.scss';
 
@@ -166,7 +166,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         points: [from.x + 150, from.y, to.x + 150, to.y + 71],
     });
 
-    onClick = (e: OnClickArgs): void => {
+    onClick = (e: { id: number; x: number; y: number }): void => {
         const { id } = e;
         const { proofNodes } = this.state;
         if (proofNodes[id].showingChildren) {

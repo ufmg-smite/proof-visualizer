@@ -40,6 +40,7 @@ interface LineProps {
     points: Array<number>;
 }
 
+// Mudar nome
 interface NodeInterface {
     id: number;
 
@@ -80,17 +81,11 @@ interface NodeProps {
 
     selected: boolean;
 
-    onClick: (arg0: OnClickArgs) => void;
+    onClick: (arg0: { id: number; x: number; y: number }) => void;
     setFocusText: Dispatch<SetStateAction<string>>;
     setNodeOnFocus: (id: number) => void;
     toggleNodeSelection: (id: number) => void;
     updateNodeState: (key: number, x: number, y: number) => void;
-}
-
-interface OnClickArgs {
-    id: number;
-    x: number;
-    y: number;
 }
 
 interface proof {
@@ -136,7 +131,6 @@ export type {
     LineProps,
     NodeInterface,
     NodeProps,
-    OnClickArgs,
     proof,
     ProofListProps,
     VisualizerDialogProps,
