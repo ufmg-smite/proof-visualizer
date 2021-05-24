@@ -136,6 +136,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.updatePosition();
         this.updateNodeState(0, proofNodes[0].x, proofNodes[0].y);
         this.addNodes(parentId);
+        this.setNodeOnFocus(0);
         this.setState({ proofNodes });
     };
 
