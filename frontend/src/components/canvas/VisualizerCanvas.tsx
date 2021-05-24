@@ -137,7 +137,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.updateNodeState(0, proofNodes[0].x, proofNodes[0].y);
         this.addNodes(parentId);
         this.setNodeOnFocus(0);
-        this.setState({ proofNodes });
     };
 
     nodeProps = (node: nodeInterface): nodeProps => {
@@ -225,7 +224,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     };
 
     removeNode = (id: number): void => {
-        const { proofNodes, showingNodes, showingEdges } = this.state;
+        const { showingNodes, showingEdges } = this.state;
         Object.keys(showingEdges)
             .filter((edgeKey) => {
                 const edges = edgeKey.split('->');
@@ -236,7 +235,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             });
 
         delete showingNodes[id];
-        this.setState({ showingNodes, proofNodes, showingEdges });
+        this.setState({ showingNodes, showingEdges });
     };
 
     hideNode = (id: number): void => {
