@@ -1,30 +1,21 @@
-import React, { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
 
-interface proof {
-    name: string;
-    options: string;
-    problem: string;
-}
-
-interface FormNewProofProps {
-    proof: proof;
-    setProof: Dispatch<SetStateAction<proof>>;
-}
+import { FormNewProofProps } from './interfaces';
 
 const FormNewProof: React.FC<FormNewProofProps> = ({ proof, setProof }: FormNewProofProps) => {
-    const [name, setName] = useState(proof.name);
+    const [label, setName] = useState(proof.label);
     const [options, setOptions] = useState(proof.options);
     const [problem, setProblem] = useState(proof.problem);
 
     useEffect(() => {
         setProof({
-            name,
+            label,
             options,
             problem,
         });
-    }, [name, options, problem]);
+    }, [label, options, problem]);
 
     return (
         <>
@@ -32,7 +23,7 @@ const FormNewProof: React.FC<FormNewProofProps> = ({ proof, setProof }: FormNewP
                 <InputGroup
                     placeholder="proof-a-and-not-a"
                     autoFocus={true}
-                    value={name}
+                    value={label}
                     onChange={(e) => setName(e.target.value)}
                 />
             </FormGroup>

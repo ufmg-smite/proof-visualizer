@@ -1,30 +1,14 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { useState } from 'react';
 
 import axios from 'axios';
 import { Button, Classes, Dialog, Intent, Spinner } from '@blueprintjs/core';
-import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
-import { Icon, IconName } from '@blueprintjs/core/lib/esm/components/icon/icon';
+import { Icon } from '@blueprintjs/core/lib/esm/components/icon/icon';
 
 import FormNewProof from './FormNewProof';
 import ProofList from './ProofList';
 
 import '../scss/VisualizerDialog.scss';
-import { proof } from './interfaces';
-
-interface VisualizerDialogProps {
-    darkTheme: boolean;
-    dialogIsOpen: boolean;
-    setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
-    dialogContent: string;
-    setDialogContent: Dispatch<SetStateAction<string>>;
-    addErrorToast: (err: string) => void;
-    addDeleteToast: (err: string) => void;
-}
-
-interface DialogProps {
-    icon: IconName | MaybeElement;
-    title: React.ReactNode;
-}
+import { proof, VisualizerDialogProps, DialogProps } from './interfaces';
 
 const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     darkTheme,
@@ -38,7 +22,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     let dialogBody = <p>This wasn&apos;t supposed to happen. Please contact the developers.</p>;
     let succesButton = <></>;
 
-    const [proof, setProof] = useState({ name: '', options: '', problem: '' });
+    const [proof, setProof] = useState<proof>({ label: '', options: '', problem: '' });
     const [processingProof, setProcessingProof] = useState(false);
     const [proofProcessed, setProofProcessed] = useState(false);
     const handleSubmit = async (proof: proof) => {
@@ -87,10 +71,10 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                         onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                             e.preventDefault();
                             setProcessingProof(!processingProof);
-                            handleSubmit({ label: proof.name, options: proof.options, problem: proof.problem });
+                            handleSubmit({ label: proof.label, options: proof.options, problem: proof.problem });
                         }}
                         intent={Intent.SUCCESS}
-                        disabled={processingProof || proof.name === '' || proof.problem === ''}
+                        disabled={processingProof || proof.label === '' || proof.problem === ''}
                     >
                         Generate Proof
                     </Button>
@@ -104,7 +88,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 className={darkTheme ? ' bp3-dark' : ''}
                 isOpen={dialogIsOpen}
                 onClose={(): void => {
-                    setProof({ name: '', options: '', problem: '' });
+                    setProof({ label: '', options: '', problem: '' });
                     setProcessingProof(false);
                     setProofProcessed(false);
                     setDialogIsOpen(false);

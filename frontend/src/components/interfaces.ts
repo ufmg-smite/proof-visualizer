@@ -1,5 +1,8 @@
 import { ObjectID } from 'mongodb';
 import { Dispatch, SetStateAction } from 'react';
+import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
+import { IconName } from '@blueprintjs/core/lib/esm/components/icon/icon';
+import Node from '../components/canvas/VisualizerNode';
 
 interface OnClickArgs {
     id: number;
@@ -67,4 +70,89 @@ interface proof {
     dot?: string;
 }
 
-export type { LineProps, NodeInterface, proof, OnClickArgs, NodeProps };
+interface ElementProofListProps {
+    proof: proof;
+    deleteProof: (id: ObjectID | undefined, name: string) => void;
+    setDot: (proof: proof) => void;
+}
+
+interface FormNewProofProps {
+    proof: proof;
+    setProof: Dispatch<SetStateAction<proof>>;
+}
+
+interface ProofListProps {
+    addDeleteToast: (err: string) => void;
+    setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
+}
+
+interface VisualizerDialogProps {
+    darkTheme: boolean;
+    dialogIsOpen: boolean;
+    setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
+    dialogContent: string;
+    setDialogContent: Dispatch<SetStateAction<string>>;
+    addErrorToast: (err: string) => void;
+    addDeleteToast: (err: string) => void;
+}
+
+interface DialogProps {
+    icon: IconName | MaybeElement;
+    title: React.ReactNode;
+}
+
+interface VisualizerNavbarProps {
+    darkTheme: boolean;
+    setDarkTheme: Dispatch<SetStateAction<boolean>>;
+    setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
+    setDialogContent: Dispatch<SetStateAction<string>>;
+}
+
+interface CanvasProps {
+    proofNodes: Array<NodeInterface>;
+    setFocusText: Dispatch<SetStateAction<string>>;
+}
+
+interface CanvasState {
+    canvasSize: { width: number; height: number };
+    stage: { stageScale: number; stageX: number; stageY: number };
+    proofNodes: Array<NodeInterface>;
+    showingNodes: { [id: number]: Node };
+    showingEdges: { [id: string]: JSX.Element };
+    nodeOnFocus: number;
+    nodesSelected: Array<number>;
+}
+
+interface proofState {
+    label: string;
+    options: string | undefined;
+    problem: string;
+    dot: string | undefined;
+}
+
+interface stateInterface {
+    proof: {
+        label: string;
+        options: string | undefined;
+        problem: string;
+        dot: string | undefined;
+    };
+}
+
+export type {
+    LineProps,
+    NodeInterface,
+    proof,
+    OnClickArgs,
+    NodeProps,
+    ElementProofListProps,
+    FormNewProofProps,
+    ProofListProps,
+    VisualizerDialogProps,
+    DialogProps,
+    VisualizerNavbarProps,
+    CanvasProps,
+    CanvasState,
+    proofState,
+    stateInterface,
+};

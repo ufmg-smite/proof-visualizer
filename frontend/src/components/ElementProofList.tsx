@@ -1,18 +1,11 @@
 import React from 'react';
 
 import { Button, ButtonGroup, Card, Elevation, Intent } from '@blueprintjs/core';
-import { ObjectID } from 'mongodb';
 
 import '../scss/ElementProofList.scss';
-import { proof } from './interfaces';
+import { ElementProofListProps } from './interfaces';
 
-interface ElementProofList {
-    proof: proof;
-    deleteProof: (id: ObjectID | undefined, name: string) => void;
-    setDot: (proof: proof) => void;
-}
-
-const ElementProofList: React.FC<ElementProofList> = ({ proof, deleteProof, setDot }: ElementProofList) => {
+const ElementProofList: React.FC<ElementProofListProps> = ({ proof, deleteProof, setDot }: ElementProofListProps) => {
     return (
         <Card className="proof-element-card" elevation={Elevation.TWO}>
             <div className="left">

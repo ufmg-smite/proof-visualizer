@@ -1,15 +1,6 @@
 import { combineReducers } from 'redux';
 
-import stateInterface from './stateInterface';
-
-import { proof } from '../components/interfaces';
-
-export interface proofState {
-    label: string;
-    options: string | undefined;
-    problem: string;
-    dot: string | undefined;
-}
+import { proof, stateInterface } from '../components/interfaces';
 
 const initialState = {
     proof: {

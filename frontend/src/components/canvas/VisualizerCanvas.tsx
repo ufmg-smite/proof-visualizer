@@ -1,4 +1,4 @@
-import React, { Component, Dispatch, SetStateAction } from 'react';
+import React, { Component } from 'react';
 import { Stage, Layer } from 'react-konva';
 import Konva from 'konva';
 import dagre from 'dagre';
@@ -9,6 +9,8 @@ import Menu from './VisualizerMenu';
 import { NodeInterface, NodeProps, OnClickArgs, LineProps } from '../interfaces';
 
 import '../../scss/VisualizerCanvas.scss';
+
+import { CanvasProps, CanvasState } from '../interfaces';
 
 function handleWheel(e: Konva.KonvaEventObject<WheelEvent>): { stageScale: number; stageX: number; stageY: number } {
     e.evt.preventDefault();
@@ -44,21 +46,6 @@ function handleWheel(e: Konva.KonvaEventObject<WheelEvent>): { stageScale: numbe
         stageX: 0,
         stageY: 0,
     };
-}
-
-interface CanvasProps {
-    proofNodes: Array<NodeInterface>;
-    setFocusText: Dispatch<SetStateAction<string>>;
-}
-
-interface CanvasState {
-    canvasSize: { width: number; height: number };
-    stage: { stageScale: number; stageX: number; stageY: number };
-    proofNodes: Array<NodeInterface>;
-    showingNodes: { [id: number]: Node };
-    showingEdges: { [id: string]: JSX.Element };
-    nodeOnFocus: number;
-    nodesSelected: Array<number>;
 }
 
 export default class Canvas extends Component<CanvasProps, CanvasState> {

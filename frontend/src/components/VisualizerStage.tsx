@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import stateInterface from '../redux/stateInterface';
 
 import Canvas from './canvas/VisualizerCanvas';
-import { NodeInterface } from './interfaces';
+import { NodeInterface, stateInterface } from './interfaces';
 
 function removeEscapedCharacters(s: string): string {
     let newS = '';

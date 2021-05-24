@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Dispatch, SetStateAction } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import axios from 'axios';
 import { Icon, Intent, Spinner } from '@blueprintjs/core';
@@ -10,10 +10,7 @@ import { useDispatch } from 'react-redux';
 
 import '../scss/ProofList.scss';
 
-interface ProofListProps {
-    addDeleteToast: (err: string) => void;
-    setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
-}
+import { ProofListProps } from './interfaces';
 
 const ProofList: React.FC<ProofListProps> = ({ addDeleteToast, setDialogIsOpen }: ProofListProps) => {
     const [proofs, setProofs] = useState([]);

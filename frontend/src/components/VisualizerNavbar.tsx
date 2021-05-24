@@ -1,18 +1,11 @@
-import React, { Dispatch, SetStateAction } from 'react';
-import { proofState } from '../redux/proofReducer';
+import React from 'react';
 import { useSelector } from 'react-redux';
 
 import { Alignment, Button, Icon, Navbar, Switch, Menu, MenuItem } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 
 import '../scss/VisualizerNavbar.scss';
-
-interface VisualizerNavbarProps {
-    darkTheme: boolean;
-    setDarkTheme: Dispatch<SetStateAction<boolean>>;
-    setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
-    setDialogContent: Dispatch<SetStateAction<string>>;
-}
+import { VisualizerNavbarProps, proofState } from './interfaces';
 
 const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     darkTheme,
