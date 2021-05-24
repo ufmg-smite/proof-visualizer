@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { proofState } from '../redux/proofReducer';
+import stateInterface from '../redux/stateInterface';
 
 import Canvas from './canvas/VisualizerCanvas';
 import { nodeInterface } from './interfaces/NodeInterface';
@@ -97,7 +97,7 @@ function processDot(dot: string) {
 }
 
 const VisualizerStage: React.FC = () => {
-    const dot = useSelector<proofState, proofState['dot']>((state) => state.dot);
+    const dot = useSelector<stateInterface, stateInterface['proof']['dot']>((state) => state.proof.dot);
     const proof = processDot(dot ? dot : '');
     const [focusText, setFocusText] = useState('');
 
