@@ -5,7 +5,7 @@ import { Alignment, Button, Icon, Navbar, Switch, Menu, MenuItem } from '@bluepr
 import { Popover2 } from '@blueprintjs/popover2';
 
 import '../scss/VisualizerNavbar.scss';
-import { VisualizerNavbarProps, proofState } from './interfaces';
+import { VisualizerNavbarProps, proof } from './interfaces';
 
 const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     darkTheme,
@@ -17,7 +17,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
         setDialogIsOpen(true);
         setDialogContent(content);
     };
-    const proof = useSelector<proofState, proofState>((state: proofState) => state);
+    const proof = useSelector<proof, proof>((state: proof) => state);
 
     const exampleMenu = (
         <Menu>
