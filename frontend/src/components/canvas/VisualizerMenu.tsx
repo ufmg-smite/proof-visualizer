@@ -2,9 +2,11 @@ import React from 'react';
 
 const Menu = ({
     unfold,
+    foldSelectedNodes,
     options,
 }: {
     unfold: (s: string) => void;
+    foldSelectedNodes: () => void;
     options: { unfold: boolean; foldSelected: boolean };
 }): JSX.Element => {
     return (
@@ -21,7 +23,7 @@ const Menu = ({
                     </>
                 ) : null}
                 {options.foldSelected ? (
-                    <button onClick={() => null} type="button" id="delete-button">
+                    <button onClick={() => foldSelectedNodes()} type="button" id="delete-button">
                         Fold selected nodes
                     </button>
                 ) : null}

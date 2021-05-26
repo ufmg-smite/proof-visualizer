@@ -102,6 +102,16 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         });
     };
 
+    foldSelectedNodes = (): void => {
+        const { nodesSelected } = this.state;
+        this.removeNodes(0);
+        nodesSelected.forEach((nodeId) => {
+            this.hideNode(nodeId);
+        });
+        this.updatePosition();
+        this.addNodes(0);
+    };
+
     unfold = (view: string): void => {
         const { proofNodes, nodeOnFocus } = this.state;
         const parentId = proofNodes[nodeOnFocus].parent;
@@ -349,6 +359,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             <>
                 <Menu
                     unfold={this.unfold}
+                    foldSelectedNodes={this.foldSelectedNodes}
                     options={{
                         unfold: nodeOnFocus ? proofNodes[nodeOnFocus].rule === 'π' : false,
                         foldSelected: nodesSelected.length && nodesSelected.includes(nodeOnFocus) ? true : false,
