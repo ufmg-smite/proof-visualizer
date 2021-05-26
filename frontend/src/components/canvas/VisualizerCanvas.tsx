@@ -103,10 +103,10 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     };
 
     foldSelectedNodes = (): void => {
-        const { nodesSelected } = this.state;
+        const { proofNodes, nodesSelected } = this.state;
         this.removeNodes(0);
         nodesSelected.forEach((nodeId) => {
-            this.hideNode(nodeId);
+            if (proofNodes[nodeId].rule !== 'π') this.hideNode(nodeId);
         });
         this.updatePosition();
         this.addNodes(0);
