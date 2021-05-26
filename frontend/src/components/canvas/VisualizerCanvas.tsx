@@ -105,12 +105,17 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     foldSelectedNodes = (): void => {
         const { proofNodes, nodesSelected } = this.state;
         this.removeNodes(0);
-        nodesSelected.forEach((nodeId) => {
-            if (proofNodes[nodeId].rule !== 'π') this.hideNode(nodeId);
+        nodesSelected.sort().forEach((nodeId) => {
+            if (proofNodes[nodeId].rule === 'π' || nodeId === 0) {
+                alert("You can't fold the root node or a hiding node.");
+            } else {
+                this.hideNode(nodeId);
+            }
         });
         this.updatePosition();
         this.updateNodeState(0, proofNodes[0].x, proofNodes[0].y);
         this.addNodes(0);
+        this.setState({ nodesSelected: [] });
     };
 
     unfold = (view: string): void => {
