@@ -77,7 +77,7 @@ export default class Node extends React.Component<NodeProps> {
                     x={0}
                     y={0}
                 >
-                    <Tag fill={bgColor} stroke={selected ? 'red' : 'black'} />
+                    <Tag fill={bgColor} stroke={selected ? 'red' : 'black'} strokeWidth={selected ? 3 : 1} />
                     <Text
                         align="center"
                         fill={textColorFromBg(bgColor)}
@@ -96,7 +96,7 @@ export default class Node extends React.Component<NodeProps> {
                     }}
                     onMouseLeave={() => setFocusText('')}
                 >
-                    <Tag fill={bgColor} stroke={selected ? 'red' : 'black'} />
+                    <Tag fill={bgColor} stroke={selected ? 'red' : 'black'} strokeWidth={selected ? 3 : 1} />
                     <Text
                         align="center"
                         fill={textColorFromBg(bgColor)}
