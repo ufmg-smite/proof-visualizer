@@ -103,7 +103,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     };
 
     foldSelectedNodes = (): void => {
-        const { proofNodes, nodesSelected } = this.state;
+        const { proofNodes, nodesSelected, showingNodes } = this.state;
         this.removeNodes(0);
         nodesSelected.sort().forEach((nodeId) => {
             if (proofNodes[nodeId].rule === 'π' || nodeId === 0) {
@@ -114,6 +114,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         });
         this.updatePosition();
         this.updateNodeState(0, proofNodes[0].x, proofNodes[0].y);
+        showingNodes[0] = new Node({ ...showingNodes[0].props, selected: false });
         this.addNodes(0);
         this.setState({ nodesSelected: [] });
     };
