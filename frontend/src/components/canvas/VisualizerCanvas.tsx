@@ -109,6 +109,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             if (proofNodes[nodeId].rule !== 'π') this.hideNode(nodeId);
         });
         this.updatePosition();
+        this.updateNodeState(0, proofNodes[0].x, proofNodes[0].y);
         this.addNodes(0);
     };
 
@@ -311,10 +312,12 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             }
         });
         dagre.layout(g);
+        const xOffset = g.node(g.nodes()[0]).x - (proofNodes[0].x ? proofNodes[0].x : 0);
+        const yOffset = g.node(g.nodes()[0]).y - (proofNodes[0].y ? proofNodes[0].y : 0);
         g.nodes().forEach(function (v) {
             const { x, y } = g.node(v);
-            proofNodes[parseInt(v)].x = x;
-            proofNodes[parseInt(v)].y = y;
+            proofNodes[parseInt(v)].x = x - xOffset;
+            proofNodes[parseInt(v)].y = y - yOffset;
         });
         this.setState({ proofNodes });
     };
