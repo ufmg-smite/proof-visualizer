@@ -15,7 +15,10 @@ const initialStateDarkThemeReducer = {
     darkTheme: true,
 };
 
-type Action = { type: 'SET_PROOF'; payload: proof } | { type: 'TOGGLE_DARK_THEME' };
+type Action =
+    | { type: 'SET_PROOF'; payload: proof }
+    | { type: 'TOGGLE_DARK_THEME' }
+    | { type: 'SET_DOT'; payload: proof['dot'] };
 
 const proofReducer = (
     state: stateInterface['proofReducer'] = initialStateProofReducer,
@@ -30,6 +33,14 @@ const proofReducer = (
                     options: action.payload.options,
                     problem: action.payload.problem,
                     dot: action.payload.dot,
+                },
+            };
+        case 'SET_DOT':
+            return {
+                ...state,
+                proof: {
+                    ...state.proof,
+                    dot: action.payload,
                 },
             };
         default:

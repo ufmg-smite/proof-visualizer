@@ -23,6 +23,13 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
         dispatch({ type: 'TOGGLE_DARK_THEME', payload: {} });
     };
 
+    const resetBasicView = () => {
+        dispatch({ type: 'SET_DOT', payload: '' });
+        setTimeout(function () {
+            dispatch({ type: 'SET_DOT', payload: proof.dot });
+        }, 10);
+    };
+
     const exampleMenu = (
         <Menu>
             <MenuItem
@@ -97,6 +104,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                 <Button
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                         e.preventDefault();
+                        resetBasicView();
                     }}
                     className="bp3-minimal"
                     icon="reset"
