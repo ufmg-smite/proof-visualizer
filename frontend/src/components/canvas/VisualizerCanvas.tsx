@@ -316,8 +316,8 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             }
         });
         dagre.layout(g);
-        const xOffset = g.node(g.nodes()[id]).x - (proofNodes[id].x ? proofNodes[id].x : 0);
-        const yOffset = g.node(g.nodes()[id]).y - (proofNodes[id].y ? proofNodes[id].y : 0);
+        const xOffset = g.node(id.toString()).x - (proofNodes[id].x ? proofNodes[id].x : 0);
+        const yOffset = g.node(id.toString()).y - (proofNodes[id].y ? proofNodes[id].y : 0);
         g.nodes().forEach(function (v) {
             const { x, y } = g.node(v);
             proofNodes[parseInt(v)].x = x - xOffset;
