@@ -75,7 +75,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const { showingNodes, proofNodes } = this.state;
 
         this.basicView();
-        this.updatePosition();
+        this.updatePosition(0);
         showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
         this.addNodes(0);
 
@@ -112,8 +112,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 this.hideNode(nodeId);
             }
         });
-        this.updatePosition();
-        this.updateNodeState(0, proofNodes[0].x, proofNodes[0].y);
+        this.updatePosition(0);
         showingNodes[0] = new Node({ ...showingNodes[0].props, selected: false });
         this.addNodes(0);
         this.setState({ nodesSelected: [] });
@@ -135,8 +134,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 break;
             default:
         }
-        this.updatePosition();
-        this.updateNodeState(0, proofNodes[0].x, proofNodes[0].y);
+        this.updatePosition(parentId);
         this.addNodes(parentId);
         this.setNodeOnFocus(0);
     };
@@ -302,7 +300,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         }
     };
 
-    updatePosition = (): void => {
+    updatePosition = (id: number): void => {
         const { proofNodes } = this.state;
         const g = new dagre.graphlib.Graph();
         g.setGraph({ rankdir: 'BT', ranker: 'tight-tree' });
@@ -318,8 +316,8 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             }
         });
         dagre.layout(g);
-        const xOffset = g.node(g.nodes()[0]).x - (proofNodes[0].x ? proofNodes[0].x : 0);
-        const yOffset = g.node(g.nodes()[0]).y - (proofNodes[0].y ? proofNodes[0].y : 0);
+        const xOffset = g.node(g.nodes()[id]).x - (proofNodes[id].x ? proofNodes[id].x : 0);
+        const yOffset = g.node(g.nodes()[id]).y - (proofNodes[id].y ? proofNodes[id].y : 0);
         g.nodes().forEach(function (v) {
             const { x, y } = g.node(v);
             proofNodes[parseInt(v)].x = x - xOffset;
