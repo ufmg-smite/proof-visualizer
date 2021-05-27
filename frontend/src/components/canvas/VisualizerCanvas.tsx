@@ -120,7 +120,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
 
     unfold = (view: string): void => {
         const { proofNodes, nodeOnFocus } = this.state;
-        const parentId = proofNodes[nodeOnFocus].parent;
         this.removeNodes(0);
         const nodesToUnhide = [...proofNodes[nodeOnFocus].hidedNodes];
         nodesToUnhide.forEach((nodeId) => this.unhideNode(nodeId));
