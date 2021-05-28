@@ -252,6 +252,13 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             proofNodes[piId].conclusion =
                 proofNodes[piId].conclusion.slice(0, -1) + "','" + proofNodes[id].conclusion + "']";
             proofNodes[piId].children.push(...proofNodes[id].children);
+        } else if (proofNodes[id].children.length === 1 && proofNodes[proofNodes[id].children[0]].rule === 'π') {
+            piId = proofNodes[id].children[0];
+            proofNodes[id].children = [];
+            proofNodes[parentId].children.push(piId);
+            proofNodes[parentId].hideMyChildNode = piId;
+            proofNodes[piId].parent = parentId;
+            proofNodes[piId].replace = id;
         } else {
             piId = proofNodes.length;
             proofNodes[piId] = {
