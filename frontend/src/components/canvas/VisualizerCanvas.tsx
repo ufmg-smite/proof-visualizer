@@ -269,6 +269,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 hideMyChildNode: NaN,
                 hidedIn: NaN,
                 positionCache: false,
+                replace: id,
             };
             proofNodes[parentId].hideMyChildNode = piId;
             proofNodes[parentId].children.push(piId);
@@ -308,10 +309,24 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         });
         proofNodes.forEach((node) => {
             if (!node.hided) {
-                g.setNode(node.id.toString(), { width: 300, height: 130 });
-                proofNodes[node.id].children.forEach((child) => {
-                    g.setEdge(child.toString(), node.id.toString());
-                });
+                if (node.rule !== 'π') {
+                    g.setNode(node.id.toString(), { width: 300, height: 130 });
+                    proofNodes[node.id].children.sort().forEach((child) => {
+                        if (proofNodes[child].rule !== 'π') g.setEdge(child.toString(), node.id.toString());
+                        else {
+                            const childNode = proofNodes[child];
+                            g.setEdge(
+                                (childNode.replace ? childNode.replace : childNode.id).toString(),
+                                node.id.toString(),
+                            );
+                        }
+                    });
+                } else {
+                    g.setNode((node.replace ? node.replace : node.id).toString(), { width: 300, height: 130 });
+                    proofNodes[node.id].children.forEach((child) => {
+                        g.setEdge(child.toString(), (node.replace ? node.replace : node.id).toString());
+                    });
+                }
             }
         });
         dagre.layout(g);
@@ -319,8 +334,13 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const yOffset = g.node(id.toString()).y - (proofNodes[id].y ? proofNodes[id].y : 0);
         g.nodes().forEach(function (v) {
             const { x, y } = g.node(v);
-            proofNodes[parseInt(v)].x = x - xOffset;
-            proofNodes[parseInt(v)].y = y - yOffset;
+            if (!proofNodes[parseInt(v)].hided) {
+                proofNodes[parseInt(v)].x = x - xOffset;
+                proofNodes[parseInt(v)].y = y - yOffset;
+            } else {
+                proofNodes[proofNodes[parseInt(v)].hidedIn].x = x - xOffset;
+                proofNodes[proofNodes[parseInt(v)].hidedIn].y = y - yOffset;
+            }
         });
         this.setState({ proofNodes });
     };

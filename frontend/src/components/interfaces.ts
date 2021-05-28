@@ -63,6 +63,8 @@ interface NodeInterface {
     hideMyChildNode: number;
 
     hidedNodes: Array<number>;
+
+    replace?: number;
 }
 
 interface NodeProps {
