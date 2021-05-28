@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { Alignment, Button, Icon, Navbar, Switch, Menu, MenuItem } from '@blueprintjs/core';
@@ -6,6 +6,32 @@ import { Popover2 } from '@blueprintjs/popover2';
 
 import '../scss/VisualizerNavbar.scss';
 import { VisualizerNavbarProps, stateInterface, proof } from './interfaces';
+
+function useWindowSize() {
+    // Initialize state with undefined width/height so server and client renders match
+    // Learn more here: https://joshwcomeau.com/react/the-perils-of-rehydration/
+    const [windowSize, setWindowSize] = useState({
+        width: 0,
+        height: 0,
+    });
+    useEffect(() => {
+        // Handler to call on window resize
+        function handleResize() {
+            // Set window width/height to state
+            setWindowSize({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            });
+        }
+        // Add event listener
+        window.addEventListener('resize', handleResize);
+        // Call handler right away so state gets updated with initial window size
+        handleResize();
+        // Remove event listener on cleanup
+        return () => window.removeEventListener('resize', handleResize);
+    }, []); // Empty array ensures that effect is only run on mount
+    return windowSize;
+}
 
 const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     setDialogIsOpen,
@@ -17,6 +43,8 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     };
     const proof = useSelector<stateInterface, proof>((state: stateInterface) => state.proofReducer.proof);
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
+    const windowSize = useWindowSize();
+
     const dispatch = useDispatch();
 
     const setDarkTheme = () => {
@@ -63,7 +91,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
         <Navbar>
             <Navbar.Group align={Alignment.LEFT}>
                 <Navbar.Heading>
-                    <b>Proof Visualizer</b>
+                    <b>{windowSize.width >= 900 ? 'Proof Visualizer' : 'PV'}</b>
                 </Navbar.Heading>
                 <Navbar.Divider />
                 <Button
@@ -73,7 +101,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     }}
                     className="bp3-minimal"
                     icon="list"
-                    text="Proof list"
+                    text={windowSize.width >= 900 ? 'Proof list' : ''}
                 />
                 <Button
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -82,7 +110,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     }}
                     className="bp3-minimal"
                     icon="add"
-                    text="New Proof"
+                    text={windowSize.width >= 900 ? 'New Proof' : ''}
                 />
             </Navbar.Group>
 
@@ -93,11 +121,15 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                         <Navbar.Divider />
                     </>
                 ) : null}
-                <Popover2 content={proof.label ? exampleMenu : undefined} placement="bottom-end">
+                <Popover2
+                    content={proof.label ? exampleMenu : undefined}
+                    placement="bottom-end"
+                    disabled={proof.label ? false : true}
+                >
                     <Button
                         className="bp3-minimal"
                         icon="download"
-                        text="Download"
+                        text={windowSize.width >= 900 ? 'Download' : ''}
                         disabled={proof.label ? false : true}
                     />
                 </Popover2>
@@ -108,7 +140,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     }}
                     className="bp3-minimal"
                     icon="reset"
-                    text="Basic view"
+                    text={windowSize.width >= 900 ? 'Basic view' : ''}
                     disabled={proof.label ? false : true}
                 />
                 <Navbar.Divider />
