@@ -51,12 +51,50 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
         dispatch({ type: 'TOGGLE_DARK_THEME', payload: {} });
     };
 
-    const resetBasicView = () => {
+    const changeView = (view: string) => {
+        switch (view) {
+            case 'basic':
+                dispatch({ type: 'BASIC_VIEW', payload: proof.dot });
+                break;
+            case 'propositional':
+                dispatch({ type: 'PROPOSITIONAL_VIEW', payload: proof.dot });
+                break;
+            case 'full':
+                dispatch({ type: 'FULL_VIEW', payload: proof.dot });
+                break;
+            default:
+        }
         dispatch({ type: 'SET_DOT', payload: '' });
         setTimeout(function () {
             dispatch({ type: 'SET_DOT', payload: proof.dot });
         }, 10);
     };
+
+    const viewsMenu = (
+        <Menu>
+            <MenuItem
+                text="Basic"
+                onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                    e.preventDefault();
+                    changeView('basic');
+                }}
+            />
+            <MenuItem
+                text="Propositional"
+                onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                    e.preventDefault();
+                    changeView('propositional');
+                }}
+            />
+            <MenuItem
+                text="Full"
+                onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                    e.preventDefault();
+                    changeView('full');
+                }}
+            />
+        </Menu>
+    );
 
     const exampleMenu = (
         <Menu>
@@ -133,16 +171,19 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                         disabled={proof.label ? false : true}
                     />
                 </Popover2>
-                <Button
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        resetBasicView();
-                    }}
-                    className="bp3-minimal"
-                    icon="reset"
-                    text={windowSize.width >= 900 ? 'Basic view' : ''}
+                <Popover2
+                    content={proof.label ? viewsMenu : undefined}
+                    placement="bottom-end"
                     disabled={proof.label ? false : true}
-                />
+                >
+                    <Button
+                        className="bp3-minimal"
+                        icon="diagram-tree"
+                        text={windowSize.width >= 900 ? 'View' : ''}
+                        disabled={proof.label ? false : true}
+                    />
+                </Popover2>
+
                 <Navbar.Divider />
                 <span id="switch-button-dark-theme">
                     <Switch checked={darkTheme} onChange={() => setDarkTheme()} />

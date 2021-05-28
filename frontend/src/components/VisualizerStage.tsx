@@ -97,12 +97,15 @@ function processDot(dot: string) {
 
 const VisualizerStage: React.FC = () => {
     const dot = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.dot);
+    const view = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.view);
     const proof = processDot(dot ? dot : '');
     const [focusText, setFocusText] = useState('');
 
     return (
         <div title={focusText}>
-            {proof.length ? <Canvas key={dot} proofNodes={proof} setFocusText={setFocusText}></Canvas> : null}
+            {proof.length ? (
+                <Canvas key={dot} view={view} proofNodes={proof} setFocusText={setFocusText}></Canvas>
+            ) : null}
         </div>
     );
 };

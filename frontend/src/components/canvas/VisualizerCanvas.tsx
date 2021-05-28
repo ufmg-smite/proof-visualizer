@@ -73,8 +73,11 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
 
     componentDidMount(): void {
         const { showingNodes, proofNodes } = this.state;
+        const { view } = this.props;
 
-        this.basicView();
+        if (view === 'basic') this.basicView();
+        else if (view === 'propositional') this.propositionalView();
+
         this.updatePosition(0);
         showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
         this.addNodes(0);
@@ -102,6 +105,14 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         });
     };
 
+    propositionalView = (): void => {
+        const { proofNodes } = this.state;
+        proofNodes.forEach((node) => {
+            if (node.views.indexOf('basic') === -1 && node.views.indexOf('propositional') === -1)
+                this.hideNode(node.id);
+        });
+    };
+
     foldSelectedNodes = (): void => {
         const { proofNodes, nodesSelected, showingNodes } = this.state;
         this.removeNodes(0);
@@ -118,21 +129,11 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.setState({ nodesSelected: [] });
     };
 
-    unfold = (view: string): void => {
+    unfold = (): void => {
         const { proofNodes, nodeOnFocus } = this.state;
         this.removeNodes(0);
         const nodesToUnhide = [...proofNodes[nodeOnFocus].hidedNodes];
         nodesToUnhide.forEach((nodeId) => this.unhideNode(nodeId));
-        switch (view) {
-            case 'propositional':
-                nodesToUnhide.forEach((nodeId) => {
-                    if (proofNodes[nodeId].views.indexOf('propositional') === -1) {
-                        this.hideNode(nodeId);
-                    }
-                });
-                break;
-            default:
-        }
         this.updatePosition(0);
         this.addNodes(0);
         this.setNodeOnFocus(0);
@@ -241,12 +242,14 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const { proofNodes } = this.state;
         const parentId = proofNodes[id].parent;
         let piId;
-        if (proofNodes[parentId].hided) {
+        console.log(proofNodes);
+        console.log(parentId);
+        if (parentId && proofNodes[parentId].hided) {
             // if the parent node is hided in some node
             piId = proofNodes[parentId].hidedIn;
             proofNodes[piId].children.push(...proofNodes[id].children);
             proofNodes[piId].children = proofNodes[piId].children.filter((nodeId) => nodeId !== id);
-        } else if (proofNodes[parentId].hideMyChildNode) {
+        } else if (parentId && proofNodes[parentId].hideMyChildNode) {
             // if the parent node has some node as child that hides node
             piId = proofNodes[parentId].hideMyChildNode;
             proofNodes[piId].conclusion =

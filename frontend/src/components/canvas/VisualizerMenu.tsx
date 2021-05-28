@@ -5,7 +5,7 @@ const Menu = ({
     foldSelectedNodes,
     options,
 }: {
-    unfold: (s: string) => void;
+    unfold: () => void;
     foldSelectedNodes: () => void;
     options: { unfold: boolean; foldSelected: boolean };
 }): JSX.Element => {
@@ -14,11 +14,8 @@ const Menu = ({
             <div>
                 {options.unfold ? (
                     <>
-                        <button onClick={() => unfold('all')} type="button" id="pulse-button">
-                            Unfold All Nodes
-                        </button>
-                        <button onClick={() => unfold('propositional')} type="button" id="delete-button">
-                            Unfold Propositional View
+                        <button onClick={() => unfold()} type="button" id="pulse-button">
+                            Unfold
                         </button>
                     </>
                 ) : null}

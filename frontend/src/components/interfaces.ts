@@ -7,6 +7,7 @@ import Node from '../components/canvas/VisualizerNode';
 interface CanvasProps {
     proofNodes: Array<NodeInterface>;
     setFocusText: Dispatch<SetStateAction<string>>;
+    view?: string;
 }
 
 interface CanvasState {
@@ -96,6 +97,7 @@ interface proof {
     options?: string;
     problem: string;
     dot?: string;
+    view?: string;
 }
 
 interface ProofListProps {
