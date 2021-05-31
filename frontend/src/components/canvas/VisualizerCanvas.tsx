@@ -75,8 +75,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const { showingNodes, proofNodes } = this.state;
         const { view } = this.props;
 
-        if (view === 'basic') this.basicView();
-        else if (view === 'propositional') this.propositionalView();
+        this.applyView(view);
 
         this.updatePosition(0);
         showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
@@ -98,18 +97,20 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         });
     }
 
-    basicView = (): void => {
+    applyView = (view: string | undefined): void => {
         const { proofNodes } = this.state;
-        proofNodes.forEach((node) => {
-            if (node.views.indexOf('basic') === -1) this.hideNode(node.id);
+        const nodesToHide = proofNodes.filter((node) => {
+            switch (view) {
+                case 'basic':
+                    return node.views.indexOf('basic') === -1;
+                case 'propositional':
+                    return node.views.indexOf('basic') === -1 && node.views.indexOf('propositional') === -1;
+                default:
+                    return false;
+            }
         });
-    };
-
-    propositionalView = (): void => {
-        const { proofNodes } = this.state;
-        proofNodes.forEach((node) => {
-            if (node.views.indexOf('basic') === -1 && node.views.indexOf('propositional') === -1)
-                this.hideNode(node.id);
+        nodesToHide.forEach((node) => {
+            this.hideNode(node.id);
         });
     };
 
