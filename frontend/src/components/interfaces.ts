@@ -58,8 +58,6 @@ interface NodeInterface {
     hided: boolean;
     hidedIn: number;
 
-    showingChildren: boolean;
-
     // The node that hide its children
     hideMyChildNode: number;
 

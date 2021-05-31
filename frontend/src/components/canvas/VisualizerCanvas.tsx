@@ -182,11 +182,8 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const { proofNodes, showingNodes } = this.state;
         proofNodes[id].children.forEach((child) => {
             this.addNode(proofNodes[child], proofNodes[id]);
-            if (proofNodes[child].showingChildren) {
-                this.addNodes(child);
-            }
+            this.addNodes(child);
         });
-        proofNodes[id].showingChildren = true;
         this.setState({ proofNodes, showingNodes });
     };
 
@@ -204,7 +201,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.recursivelyGetChildren(id).forEach((node) => {
             this.removeNode(node);
         });
-        proofNodes[id].showingChildren = false;
         this.setState({ showingNodes, proofNodes });
     };
 
@@ -254,7 +250,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 children: [...proofNodes[id].children],
                 x: NaN,
                 y: NaN,
-                showingChildren: true,
                 parent: parentId,
                 hided: false,
                 hidedNodes: [],
@@ -359,8 +354,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         let nodes: Array<number> = [];
         proofNodes[nodeId].children.forEach((node) => {
             nodes = nodes.concat([node]);
-            if (proofNodes[node].showingChildren || !showingNodes[node])
-                nodes = nodes.concat(this.recursivelyGetChildren(node));
+            nodes = nodes.concat(this.recursivelyGetChildren(node));
         });
         return nodes;
     };
