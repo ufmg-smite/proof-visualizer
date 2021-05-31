@@ -19,7 +19,6 @@ export default class Node extends React.Component<NodeProps> {
             id,
             x,
             y,
-            hidingNode,
             selected,
             setFocusText,
             setNodeOnFocus,
@@ -44,7 +43,7 @@ export default class Node extends React.Component<NodeProps> {
                         if (e.evt.shiftKey) {
                             toggleNodeSelection(id);
                         }
-                    } else if (e.evt.button === 2 && (hidingNode || selected)) {
+                    } else if (e.evt.button === 2) {
                         setNodeOnFocus(id);
                         const menuNode = document.getElementById('menu');
                         if (menuNode) {

@@ -151,7 +151,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             toggleNodeSelection: this.toggleNodeSelection,
             x: node.x,
             y: node.y,
-            hidingNode: node.hidedNodes.length ? true : false,
             selected: false,
         };
     };
@@ -372,6 +371,13 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         return nodes;
     };
 
+    foldAllDescendants = (): void => {
+        const { nodeOnFocus } = this.state;
+        this.setState({ nodesSelected: [nodeOnFocus, ...this.recursivelyGetChildren(nodeOnFocus)] }, () =>
+            this.foldSelectedNodes(),
+        );
+    };
+
     render(): JSX.Element {
         const { canvasSize, stage, showingNodes, showingEdges, nodesSelected, nodeOnFocus, proofNodes } = this.state;
         return (
@@ -379,9 +385,11 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 <Menu
                     unfold={this.unfold}
                     foldSelectedNodes={this.foldSelectedNodes}
+                    foldAllDescendants={this.foldAllDescendants}
                     options={{
                         unfold: nodeOnFocus ? proofNodes[nodeOnFocus].rule === 'π' : false,
                         foldSelected: nodesSelected.length && nodesSelected.includes(nodeOnFocus) ? true : false,
+                        foldAllDescendants: proofNodes[nodeOnFocus] && proofNodes[nodeOnFocus].children.length > 0,
                     }}
                 ></Menu>
                 <Stage

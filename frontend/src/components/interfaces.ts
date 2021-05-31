@@ -74,8 +74,6 @@ interface NodeProps {
     conclusion: string;
     rule: string;
 
-    hidingNode?: boolean;
-
     x: number;
     y: number;
 
