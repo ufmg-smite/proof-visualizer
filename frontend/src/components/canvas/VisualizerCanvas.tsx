@@ -117,13 +117,15 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     foldSelectedNodes = (): void => {
         const { proofNodes, nodesSelected, showingNodes } = this.state;
         this.removeNodes(0);
-        nodesSelected.sort().forEach((nodeId) => {
-            if (proofNodes[nodeId].rule === 'π' || nodeId === 0) {
-                alert("You can't fold the root node or a hiding node.");
-            } else {
-                this.hideNode(nodeId);
-            }
-        });
+        nodesSelected
+            .sort((a, b) => a - b)
+            .forEach((nodeId) => {
+                if (proofNodes[nodeId].rule === 'π' || nodeId === 0) {
+                    alert("You can't fold the root node or a hiding node.");
+                } else {
+                    this.hideNode(nodeId);
+                }
+            });
         this.updatePosition(0);
         showingNodes[0] = new Node({ ...showingNodes[0].props, selected: false });
         this.addNodes(0);
@@ -350,7 +352,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     };
 
     recursivelyGetChildren = (nodeId: number): Array<number> => {
-        const { proofNodes, showingNodes } = this.state;
+        const { proofNodes } = this.state;
         let nodes: Array<number> = [];
         proofNodes[nodeId].children.forEach((node) => {
             nodes = nodes.concat([node]);
