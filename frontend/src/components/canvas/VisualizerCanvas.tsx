@@ -342,13 +342,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const { showingNodes, showingEdges, proofNodes } = this.state;
         showingNodes[key] = new Node({ ...showingNodes[key].props, x, y });
 
-        if (!proofNodes[key].showingChildren) {
-            const [xOffset, yOffset] = [x - proofNodes[key].x, y - proofNodes[key].y];
-            this.recursivelyGetChildren(key).forEach((node) => {
-                proofNodes[node].x += xOffset;
-                proofNodes[node].y += yOffset;
-            });
-        }
         proofNodes[key].positionCache = true;
         proofNodes[key] = { ...proofNodes[key], x, y };
 
