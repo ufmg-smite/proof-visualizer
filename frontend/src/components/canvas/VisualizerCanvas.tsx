@@ -145,16 +145,13 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             id: node.id,
             rule: node.rule,
             conclusion: node.conclusion,
-            onClick: this.onClick,
             updateNodeState: this.updateNodeState,
             setFocusText,
             setNodeOnFocus: this.setNodeOnFocus,
             toggleNodeSelection: this.toggleNodeSelection,
             x: node.x,
             y: node.y,
-            hasChildren: node.children.length > 0,
             hidingNode: node.hidedNodes.length ? true : false,
-            showingChildren: false,
             selected: false,
         };
     };
@@ -181,16 +178,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         points: [from.x + 150, from.y, to.x + 150, to.y + 71],
     });
 
-    onClick = (e: { id: number; x: number; y: number }): void => {
-        const { id } = e;
-        const { proofNodes } = this.state;
-        if (proofNodes[id].showingChildren) {
-            this.removeNodes(id);
-        } else {
-            this.addNodes(id);
-        }
-    };
-
     addNodes = (id: number): void => {
         const { proofNodes, showingNodes } = this.state;
         proofNodes[id].children.forEach((child) => {
@@ -200,7 +187,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             }
         });
         proofNodes[id].showingChildren = true;
-        showingNodes[id] = new Node({ ...showingNodes[id].props, showingChildren: true });
         this.setState({ proofNodes, showingNodes });
     };
 
@@ -218,7 +204,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.recursivelyGetChildren(id).forEach((node) => {
             this.removeNode(node);
         });
-        showingNodes[id] = new Node({ ...showingNodes[id].props, showingChildren: false });
         proofNodes[id].showingChildren = false;
         this.setState({ showingNodes, proofNodes });
     };
@@ -242,8 +227,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const { proofNodes } = this.state;
         const parentId = proofNodes[id].parent;
         let piId;
-        console.log(proofNodes);
-        console.log(parentId);
         if (parentId && proofNodes[parentId].hided) {
             // if the parent node is hided in some node
             piId = proofNodes[parentId].hidedIn;

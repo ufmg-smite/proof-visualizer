@@ -17,23 +17,17 @@ export default class Node extends React.Component<NodeProps> {
             rule,
             conclusion,
             id,
-            showingChildren,
             x,
             y,
-            hasChildren,
             hidingNode,
             selected,
-            onClick,
             setFocusText,
             setNodeOnFocus,
             updateNodeState,
             toggleNodeSelection,
         } = this.props;
 
-        const bgClosedColor = '#2b2d42';
-        const bgOpenColor = '#8d99ae';
-
-        const bgColor = showingChildren || !hasChildren ? bgOpenColor : bgClosedColor;
+        const bgColor = '#8d99ae';
 
         return (
             <Group
@@ -49,8 +43,6 @@ export default class Node extends React.Component<NodeProps> {
                     if (e.evt.button === 0) {
                         if (e.evt.shiftKey) {
                             toggleNodeSelection(id);
-                        } else {
-                            onClick({ id, x, y });
                         }
                     } else if (e.evt.button === 2 && (hidingNode || selected)) {
                         setNodeOnFocus(id);

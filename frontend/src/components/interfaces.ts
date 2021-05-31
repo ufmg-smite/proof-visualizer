@@ -74,9 +74,6 @@ interface NodeProps {
     conclusion: string;
     rule: string;
 
-    showingChildren: boolean;
-
-    hasChildren: boolean;
     hidingNode?: boolean;
 
     x: number;
@@ -84,7 +81,6 @@ interface NodeProps {
 
     selected: boolean;
 
-    onClick: (arg0: { id: number; x: number; y: number }) => void;
     setFocusText: Dispatch<SetStateAction<string>>;
     setNodeOnFocus: (id: number) => void;
     toggleNodeSelection: (id: number) => void;
