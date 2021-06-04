@@ -75,6 +75,8 @@ interface NodeProps {
     x: number;
     y: number;
 
+    nHided: number;
+
     selected: boolean;
 
     setFocusText: Dispatch<SetStateAction<string>>;

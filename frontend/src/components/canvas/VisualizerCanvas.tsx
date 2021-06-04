@@ -161,6 +161,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             x: node.x,
             y: node.y,
             selected: false,
+            nHided: node.hidedNodes.length,
         };
     };
 
@@ -183,7 +184,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
 
     LineProps = (key: string, from: NodeProps, to: NodeProps): LineProps => ({
         key,
-        points: [from.x + 150, from.y, to.x + 150, to.y + 71],
+        points: [from.x + 150, from.y, to.x + 150, to.y + 106],
     });
 
     addNodes = (id: number): void => {

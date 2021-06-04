@@ -21,6 +21,7 @@ export default class Node extends React.Component<NodeProps> {
             x,
             y,
             selected,
+            nHided,
             setFocusText,
             setNodeOnFocus,
             updateNodeState,
@@ -93,6 +94,11 @@ export default class Node extends React.Component<NodeProps> {
                 <Label {...labelProps} x={0} y={35}>
                     <Tag {...tagProps} />
                     <Text {...textProps} text={rule} />
+                </Label>
+
+                <Label {...labelProps} x={0} y={70}>
+                    <Tag {...tagProps} />
+                    <Text {...textProps} text={(nHided ? '#hided: ' + nHided : '') + ' #descendants: 0'} />
                 </Label>
             </Group>
         );
