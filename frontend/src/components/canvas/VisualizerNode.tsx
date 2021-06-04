@@ -1,3 +1,4 @@
+import { KonvaEventObject } from 'konva/types/Node';
 import React from 'react';
 import { Label, Text, Tag, Group } from 'react-konva';
 
@@ -29,6 +30,30 @@ export default class Node extends React.Component<NodeProps> {
 
         const bgColor = '#8d99ae';
 
+        const labelProps = {
+            onMouseEnter: (e: KonvaEventObject<MouseEvent>) => {
+                setFocusText(e.target.attrs.text);
+            },
+            onMouseLeave: () => setFocusText(''),
+            x: 0,
+            y: 0,
+        };
+        const tagProps = {
+            fill: bgColor,
+            stroke: selected ? 'red' : 'black',
+            strokeWidth: selected ? 3 : 1,
+            shadowColor: 'black',
+            shadowOffset: { x: 5, y: 5 },
+            shadowOpacity: 0.25,
+        };
+        const textProps = {
+            align: 'center',
+            fill: textColorFromBg(bgColor),
+            fontSize: 15,
+            height: 35,
+            padding: 10,
+            width: 300,
+        };
         return (
             <Group
                 draggable
@@ -63,24 +88,9 @@ export default class Node extends React.Component<NodeProps> {
                     }
                 }}
             >
-                <Label
-                    onMouseEnter={(e) => {
-                        setFocusText(e.target.attrs.text);
-                    }}
-                    onMouseLeave={() => setFocusText('')}
-                    x={0}
-                    y={0}
-                >
-                    <Tag fill={bgColor} stroke={selected ? 'red' : 'black'} strokeWidth={selected ? 3 : 1} />
-                    <Text
-                        align="center"
-                        fill={textColorFromBg(bgColor)}
-                        fontSize={15}
-                        height={35}
-                        padding={10}
-                        text={conclusion}
-                        width={300}
-                    />
+                <Label {...labelProps}>
+                    <Tag {...tagProps} />
+                    <Text {...textProps} text={conclusion} />
                 </Label>
                 <Label
                     x={0}
@@ -90,16 +100,8 @@ export default class Node extends React.Component<NodeProps> {
                     }}
                     onMouseLeave={() => setFocusText('')}
                 >
-                    <Tag fill={bgColor} stroke={selected ? 'red' : 'black'} strokeWidth={selected ? 3 : 1} />
-                    <Text
-                        align="center"
-                        fill={textColorFromBg(bgColor)}
-                        fontSize={15}
-                        height={35}
-                        padding={10}
-                        text={rule}
-                        width={300}
-                    />
+                    <Tag {...tagProps} />
+                    <Text {...textProps} text={rule} />
                 </Label>
             </Group>
         );
