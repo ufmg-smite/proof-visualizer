@@ -35,8 +35,6 @@ export default class Node extends React.Component<NodeProps> {
                 setFocusText(e.target.attrs.text);
             },
             onMouseLeave: () => setFocusText(''),
-            x: 0,
-            y: 0,
         };
         const tagProps = {
             fill: bgColor,
@@ -88,18 +86,11 @@ export default class Node extends React.Component<NodeProps> {
                     }
                 }}
             >
-                <Label {...labelProps}>
+                <Label {...labelProps} x={0} y={0}>
                     <Tag {...tagProps} />
                     <Text {...textProps} text={conclusion} />
                 </Label>
-                <Label
-                    x={0}
-                    y={35}
-                    onMouseEnter={(e) => {
-                        setFocusText(e.target.attrs.text);
-                    }}
-                    onMouseLeave={() => setFocusText('')}
-                >
+                <Label {...labelProps} x={0} y={35}>
                     <Tag {...tagProps} />
                     <Text {...textProps} text={rule} />
                 </Label>
