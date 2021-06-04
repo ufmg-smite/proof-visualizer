@@ -142,6 +142,11 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.setNodeOnFocus(0);
     };
 
+    unfoldOnClick = (id: number): void => {
+        this.setNodeOnFocus(id);
+        setTimeout(() => this.unfold(), 10);
+    };
+
     nodeProps = (node: NodeInterface): NodeProps => {
         const { setFocusText } = this.props;
         return {
@@ -152,6 +157,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             setFocusText,
             setNodeOnFocus: this.setNodeOnFocus,
             toggleNodeSelection: this.toggleNodeSelection,
+            unfoldOnClick: this.unfoldOnClick,
             x: node.x,
             y: node.y,
             selected: false,
@@ -377,7 +383,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                     foldSelectedNodes={this.foldSelectedNodes}
                     foldAllDescendants={this.foldAllDescendants}
                     options={{
-                        unfold: nodeOnFocus ? proofNodes[nodeOnFocus].rule === 'π' : false,
+                        unfold: proofNodes[nodeOnFocus] ? proofNodes[nodeOnFocus].rule === 'π' : false,
                         foldSelected: nodesSelected.length && nodesSelected.includes(nodeOnFocus) ? true : false,
                         foldAllDescendants: proofNodes[nodeOnFocus] && proofNodes[nodeOnFocus].children.length > 0,
                     }}

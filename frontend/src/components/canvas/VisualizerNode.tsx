@@ -24,6 +24,7 @@ export default class Node extends React.Component<NodeProps> {
             setNodeOnFocus,
             updateNodeState,
             toggleNodeSelection,
+            unfoldOnClick,
         } = this.props;
 
         const bgColor = '#8d99ae';
@@ -42,6 +43,8 @@ export default class Node extends React.Component<NodeProps> {
                     if (e.evt.button === 0) {
                         if (e.evt.shiftKey) {
                             toggleNodeSelection(id);
+                        } else if (rule === 'π') {
+                            unfoldOnClick(id);
                         }
                     } else if (e.evt.button === 2) {
                         setNodeOnFocus(id);
