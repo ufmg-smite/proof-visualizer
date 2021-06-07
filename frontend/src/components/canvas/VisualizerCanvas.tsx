@@ -231,7 +231,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     hideNode = (id: number): void => {
         const { proofNodes } = this.state;
         const parentId = proofNodes[id].parent;
-        let piId;
+        let piId: number;
         if (parentId && proofNodes[parentId].hided) {
             // if the parent node is hided in some node
             piId = proofNodes[parentId].hidedIn;
@@ -242,6 +242,15 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             piId = proofNodes[parentId].hideMyChildNode;
             proofNodes[piId].conclusion =
                 proofNodes[piId].conclusion.slice(0, -1) + "','" + proofNodes[id].conclusion + "']";
+            if (proofNodes[id].children.length === 1 && proofNodes[proofNodes[id].children[0]].rule === 'π') {
+                proofNodes[proofNodes[id].children[0]].hidedNodes.forEach(
+                    (child) => (proofNodes[child].hidedIn = piId),
+                );
+                proofNodes[piId].hidedNodes.push(...proofNodes[proofNodes[id].children[0]].hidedNodes);
+                delete proofNodes[proofNodes[id].children[0]];
+                proofNodes[id].children = [];
+                proofNodes[id].hideMyChildNode = NaN;
+            }
             proofNodes[piId].children.push(...proofNodes[id].children);
         } else if (proofNodes[id].children.length === 1 && proofNodes[proofNodes[id].children[0]].rule === 'π') {
             piId = proofNodes[id].children[0];
