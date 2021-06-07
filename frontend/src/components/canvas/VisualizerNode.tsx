@@ -41,9 +41,6 @@ export default class Node extends React.Component<NodeProps> {
             fill: bgColor,
             stroke: selected ? 'red' : 'black',
             strokeWidth: selected ? 3 : 1,
-            shadowColor: 'black',
-            shadowOffset: { x: 5, y: 5 },
-            shadowOpacity: 0.25,
         };
         const textProps = {
             align: 'center',
@@ -95,10 +92,14 @@ export default class Node extends React.Component<NodeProps> {
                     <Tag {...tagProps} />
                     <Text {...textProps} text={rule} />
                 </Label>
-
                 <Label {...labelProps} x={0} y={70}>
                     <Tag {...tagProps} />
-                    <Text {...textProps} text={(nHided ? '#hided: ' + nHided : '') + ' #descendants: 0'} />
+                    <Text
+                        {...textProps}
+                        text={(nHided ? '#hided: ' + nHided : '') + ' #descendants: 0'}
+                        height={25}
+                        fontSize={12}
+                    />
                 </Label>
             </Group>
         );
