@@ -118,11 +118,9 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const { proofNodes, nodesSelected, showingNodes } = this.state;
         this.removeNodes(0);
         nodesSelected
-            .sort((a, b) => a - b)
+            .sort((a, b) => b - a)
             .forEach((nodeId) => {
-                if (proofNodes[nodeId].rule === 'π' || nodeId === 0) {
-                    alert("You can't fold the root node or a hiding node.");
-                } else {
+                if (!(proofNodes[nodeId].rule === 'π' || nodeId === 0)) {
                     this.hideNode(nodeId);
                 }
             });
@@ -284,6 +282,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         proofNodes[id].hided = true;
         proofNodes[id].hidedIn = piId;
         proofNodes[parentId].children = proofNodes[parentId].children.filter((nodeId) => nodeId !== id);
+        proofNodes[id].hideMyChildNode = NaN;
         this.setState({ proofNodes });
     };
 

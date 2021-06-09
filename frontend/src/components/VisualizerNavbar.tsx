@@ -117,8 +117,9 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     e.preventDefault();
                     const link = document.createElement('a');
                     link.download = proof.label ? `${proof.label.replaceAll(' ', '_')}.png` : '';
-                    link.href = (document.getElementsByClassName('konvajs-content')[0]
-                        .children[0] as HTMLCanvasElement).toDataURL('image/png');
+                    link.href = (
+                        document.getElementsByClassName('konvajs-content')[0].children[0] as HTMLCanvasElement
+                    ).toDataURL('image/png');
                     link.click();
                 }}
             />
