@@ -14,6 +14,7 @@ import { proof, VisualizerDialogProps, DialogProps, stateInterface } from './int
 const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     dialogIsOpen,
     dialogContent,
+    setDialogContent,
     setDialogIsOpen,
     addErrorToast,
     addDeleteToast,
@@ -44,6 +45,17 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     };
 
     switch (dialogContent) {
+        case 'welcome':
+            dialogProps = { icon: 'graph', title: 'Welcome' };
+            dialogBody = (
+                <div className="welcome-menu">
+                    <h2>Welcome to Proof Visualizer</h2>
+                    <p>Open or create a proof to begin exploring the app.</p>
+                    <Button icon="list" large text="Proof list" onClick={() => setDialogContent('proof-list')} />
+                    <Button icon="add" large text="New proof" onClick={() => setDialogContent('new-proof')} />
+                </div>
+            );
+            break;
         case 'proof-list':
             dialogProps = { icon: 'list', title: 'Proof List' };
             dialogBody = <ProofList addDeleteToast={addDeleteToast} setDialogIsOpen={setDialogIsOpen}></ProofList>;

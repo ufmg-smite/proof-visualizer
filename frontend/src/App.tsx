@@ -10,8 +10,8 @@ import VisualizerStage from './components/VisualizerStage';
 import { stateInterface } from './components/interfaces';
 
 const App: React.FC = () => {
-    const [dialogIsOpen, setDialogIsOpen] = useState(false);
-    const [dialogContent, setDialogContent] = useState('');
+    const [dialogIsOpen, setDialogIsOpen] = useState(true);
+    const [dialogContent, setDialogContent] = useState('welcome');
 
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
 
