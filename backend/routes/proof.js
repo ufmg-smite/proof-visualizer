@@ -73,10 +73,10 @@ router.route('/process-proof/:id').get((req, res) => {
         '--proof-format-mode=dot',
       ].concat(userOptions);
 
-      const cvc4 = spawnSync('cvc4', options);
+      const cvc5 = spawnSync('cvc5', options);
 
-      if (!cvc4.stderr.toString().length) {
-        proof.dot = cvc4.stdout;
+      if (!cvc5.stderr.toString().length) {
+        proof.dot = cvc5.stdout;
         proof.dot = proof.dot.slice(proof.dot.indexOf('digraph'));
         proof.state = 'done';
         proof.save();
@@ -84,7 +84,7 @@ router.route('/process-proof/:id').get((req, res) => {
       } else {
         proof.delete();
         throw Object.assign(
-          new Error(`CVC4 ERROR:\n${cvc4.stderr.toString()}`)
+          new Error(`CVC5 ERROR:\n${cvc5.stderr.toString()}`)
         );
       }
     })
