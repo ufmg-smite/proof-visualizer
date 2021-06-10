@@ -212,6 +212,36 @@ function ruleHelper(rule: string) {
                 rule +
                 '\n\n========= SAT Refutation for assumption-based unsat cores\nChildren: (P1, ..., Pn)\nArguments: none\n---------------------\nConclusion: false\nNote: P1, ..., Pn correspond to the unsat core determined by the SAT solver.'
             );
+        case 'RESOLUTION':
+            return (
+                rule +
+                "\n\n======== Resolution\nChildren:\n(P1:C1, P2:C2)\nArguments: (pol, L)\n---------------------\nConclusion: C\nwhere\n- C1 and C2 are nodes viewed as clauses, i.e., either an OR node with each children viewed as a literal or a node viewed as a literal. Note that an OR node could also be a literal.\n- pol is either true or false, representing the polarity of the pivot on the first clause\n- L is the pivot of the resolution, which occurs as is (resp. under a NOT) in C1 and negatively (as is) in C2 if pol = true (pol = false).\nC is a clause resulting from collecting all the literals in C1, minus the first occurrence of the pivot or its negation, and C2, minus the first occurrence of the pivot or its negation, according to the policy above. If the resulting clause has a single literal, that literal itself is the result; if it has no literals, then the result is false; otherwise it's an OR node of the resulting literals.\n\nNote that it may be the case that the pivot does not occur in the clauses. In this case the rule is not unsound, but it does not correspond to resolution but rather to a weakening of the clause that did not have a literal eliminated."
+            );
+        case 'CHAIN_RESOLUTION':
+            return (
+                rule +
+                "\n\n======== N-ary Resolution\nChildren: (P1:C_1, ..., Pm:C_n)\nArguments: (pol_1, L_1, ..., pol_{n-1}, L_{n-1})\n---------------------\nConclusion: C\nwhere\n- let C_1 ... C_n be nodes viewed as clauses, as defined above\n- let \"C_1 <>_{L,pol} C_2\" represent the resolution of C_1 with C_2 with pivot L and polarity pol, as defined above\n- let C_1' = C_1 (from P1),\n- for each i > 1, let C_i' = C_{i-1} <>_{L_{i-1}, pol_{i-1}} C_i'\nThe result of the chain resolution is C = C_n'"
+            );
+        case 'FACTORING':
+            return (
+                rule +
+                '\n\n======== Factoring\nChildren: (P:C1)\nArguments: ()\n---------------------\nConclusion: C2\nwhere Set representations of C1 and C2 is the same and the number of literals in C2 is smaller than that of C1'
+            );
+        case 'REORDERING':
+            return (
+                rule +
+                '\n\n======== Reordering\nChildren: (P:C1)\nArguments: (C2)\n---------------------\nConclusion: C2\nwhere Set representations of C1 and C2 are the same and the number of literals in C2 is the same of that of C1'
+            );
+        case 'MACRO_RESOLUTION':
+            return (
+                rule +
+                "\n\n======== N-ary Resolution + Factoring + Reordering\nChildren: (P1:C_1, ..., Pm:C_n)\nArguments: (C, pol_1, L_1, ..., pol_{n-1}, L_{n-1})\n---------------------\nConclusion: C\nwhere\n- let C_1 ... C_n be nodes viewed as clauses, as defined in RESOLUTION\n- let \"C_1 <>_{L,pol} C_2\" represent the resolution of C_1 with C_2 with pivot L and polarity pol, as defined in RESOLUTION\n- let C_1' be equal, in its set representation, to C_1 (from P1),\n- for each i > 1, let C_i' be equal, it its set representation, to C_{i-1} <>_{L_{i-1}, pol_{i-1}} C_i'\nThe result of the chain resolution is C, which is equal, in its set representation, to C_n'"
+            );
+        case 'MACRO_RESOLUTION_TRUST':
+            return (
+                rule +
+                "\n\nAs MACRO_RESOLUTION but not checked\n\nMACRO_RESOLUTION definition:\n======== N-ary Resolution + Factoring + Reordering\nChildren: (P1:C_1, ..., Pm:C_n)\nArguments: (C, pol_1, L_1, ..., pol_{n-1}, L_{n-1})\n---------------------\nConclusion: C\nwhere\n- let C_1 ... C_n be nodes viewed as clauses, as defined in RESOLUTION\n- let \"C_1 <>_{L,pol} C_2\" represent the resolution of C_1 with C_2 with pivot L and polarity pol, as defined in RESOLUTION\n- let C_1' be equal, in its set representation, to C_1 (from P1),\n- for each i > 1, let C_i' be equal, it its set representation, to C_{i-1} <>_{L_{i-1}, pol_{i-1}} C_i'\nThe result of the chain resolution is C, which is equal, in its set representation, to C_n'"
+            );
         default:
             return rule;
     }
