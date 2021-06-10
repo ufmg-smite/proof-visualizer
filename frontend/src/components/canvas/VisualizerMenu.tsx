@@ -12,24 +12,36 @@ const Menu = ({
     options: { unfold: boolean; foldSelected: boolean; foldAllDescendants: boolean };
 }): JSX.Element => {
     return (
-        <div id="menu">
-            <div>
+        <div className="bp3-popover2-content">
+            <ul id="menu" className="bp3-menu">
                 {options.unfold ? (
-                    <button onClick={() => unfold()} type="button" id="pulse-button">
-                        Unfold
-                    </button>
+                    <li className="">
+                        <a className="bp3-menu-item" onClick={() => unfold()}>
+                            <div className="bp3-text-overflow-ellipsis bp3-fill bp3-icon-eye-open">
+                                <span> Unfold</span>
+                            </div>
+                        </a>
+                    </li>
                 ) : null}
                 {options.foldSelected ? (
-                    <button onClick={() => foldSelectedNodes()} type="button" id="delete-button">
-                        Fold selected nodes
-                    </button>
+                    <li className="">
+                        <a className="bp3-menu-item" onClick={() => foldSelectedNodes()}>
+                            <div className="bp3-text-overflow-ellipsis bp3-fill bp3-icon-eye-off">
+                                <span> Fold selected nodes</span>
+                            </div>
+                        </a>
+                    </li>
                 ) : null}
                 {options.foldAllDescendants ? (
-                    <button onClick={() => foldAllDescendants()} type="button" id="pulse-button">
-                        Fold all descendants
-                    </button>
+                    <li className="">
+                        <a className="bp3-menu-item" onClick={() => foldAllDescendants()}>
+                            <div className="bp3-text-overflow-ellipsis bp3-fill bp3-icon-eye-off">
+                                <span> Fold all descendants</span>
+                            </div>
+                        </a>
+                    </li>
                 ) : null}
-            </div>
+            </ul>
         </div>
     );
 };
