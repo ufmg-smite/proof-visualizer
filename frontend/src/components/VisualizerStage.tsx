@@ -107,6 +107,21 @@ function ruleHelper(rule: string) {
                 rule +
                 '\n\n======== Scope (a binder for assumptions)\nChildren: (P:F)\nArguments: (F1, ..., Fn)\n--------------\nConclusion: (=> (and F1 ... Fn) F) or (not (and F1 ... Fn)) if F is false\n\nThis rule has a dual purpose with ASSUME. It is a way to close assumptions in a proof. We require that F1 ... Fn are free assumptions in P and say that F1, ..., Fn are not free in (SCOPE P). In other words, they are bound by this application. For example, the proof node: (SCOPE (ASSUME F) :args F) has the conclusion (=> F F) and has no free assumptions. More generally, a proof with no free assumptions always concludes a valid formula.'
             );
+        case 'SUBS':
+            return (
+                rule +
+                '\n\n======== Substitution\nChildren: (P1:F1, ..., Pn:Fn)\nArguments: (t, (ids)?)\n---------------------------------------------------------------\nConclusion: (= t t*sigma{ids}(Fn)*...*sigma{ids}(F1)) where sigma{ids}(Fi) are substitutions, which notice are applied in reverse order. Notice that ids is a MethodId identifier, which determines how to convert the formulas F1, ..., Fn into substitutions.'
+            );
+        case 'REWRITE':
+            return (
+                rule +
+                '\n\n======== Rewrite\nChildren: none\nArguments: (t, (idr)?)\n----------------------------------------\nConclusion: (= t Rewriter{idr}(t)) where idr is a MethodId identifier, which determines the kind of rewriter to apply, e.g. Rewriter::rewrite.'
+            );
+        case 'EVALUATE':
+            return (
+                rule +
+                '\n\n======== Evaluate\nChildren: none\n\nArguments: (t)\n----------------------------------------\nConclusion: (= t Evaluator::evaluate(t))\nNote this is equivalent to: (REWRITE t MethodId::RW_EVALUATE)'
+            );
         default:
             return rule;
     }
