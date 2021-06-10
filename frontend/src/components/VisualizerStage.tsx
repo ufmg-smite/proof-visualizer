@@ -142,6 +142,11 @@ function ruleHelper(rule: string) {
                 rule +
                 "\n\nIn this rule, if we have proven a formula F, then we may provide a formula G and conclude it if F and G are equivalent after rewriting under a proven substitution.\n\nChildren: (P1:F, P2:F1, ..., P_{n+1}:Fn)\nArguments: (G, (ids (ida (idr)?)?)?)\n----------------------------------------\nConclusion: G\nwhere Rewriter{idr}(F*sigma{ids, ida}(Fn)*...*sigma{ids, ida}(F1)) == Rewriter{idr}(G*sigma{ids, ida}(Fn)*...*sigma{ids, ida}(F1))\n\nMore generally, this rule also holds when:\n  Rewriter::rewrite(toOriginal(F')) == Rewriter::rewrite(toOriginal(G'))\nwhere F' and G' are the result of each side of the equation above. Here, original forms are used in a similar manner to MACRO_SR_PRED_INTRO above."
             );
+        case 'REMOVE_TERM_FORMULA_AXIOM':
+            return (
+                rule +
+                '\n\n======== Remove Term Formulas Axiom\nChildren: none\nArguments: (t)\n---------------------------------------------------------------\nConclusion: RemoveTermFormulas::getAxiomFor(t).'
+            );
         default:
             return rule;
     }
