@@ -110,12 +110,12 @@ function ruleHelper(rule: string) {
         case 'SUBS':
             return (
                 rule +
-                '\n\n======== Substitution\nChildren: (P1:F1, ..., Pn:Fn)\nArguments: (t, (ids)?)\n---------------------------------------------------------------\nConclusion: (= t t*sigma{ids}(Fn)*...*sigma{ids}(F1)) where sigma{ids}(Fi) are substitutions, which notice are applied in reverse order. Notice that ids is a MethodId identifier, which determines how to convert the formulas F1, ..., Fn into substitutions.'
+                '\n\n======== Substitution\nChildren: (P1:F1, ..., Pn:Fn)\nArguments: (t, (ids)?)\n---------------------------------------------------------------\nConclusion: (= t t*sigma{ids}(Fn)*...*sigma{ids}(F1))\nwhere sigma{ids}(Fi) are substitutions, which notice are applied in reverse order. Notice that ids is a MethodId identifier, which determines how to convert the formulas F1, ..., Fn into substitutions.'
             );
         case 'REWRITE':
             return (
                 rule +
-                '\n\n======== Rewrite\nChildren: none\nArguments: (t, (idr)?)\n----------------------------------------\nConclusion: (= t Rewriter{idr}(t)) where idr is a MethodId identifier, which determines the kind of rewriter to apply, e.g. Rewriter::rewrite.'
+                '\n\n======== Rewrite\nChildren: none\nArguments: (t, (idr)?)\n----------------------------------------\nConclusion: (= t Rewriter{idr}(t))\nwhere idr is a MethodId identifier, which determines the kind of rewriter to apply, e.g. Rewriter::rewrite.'
             );
         case 'EVALUATE':
             return (
@@ -125,12 +125,17 @@ function ruleHelper(rule: string) {
         case 'MACRO_SR_EQ_INTRO':
             return (
                 rule +
-                "\n\nIn this rule, we provide a term t and conclude that it is equal to its rewritten form under a (proven) substitution.\n\nChildren: (P1:F1, ..., Pn:Fn)\nArguments: (t, (ids (ida (idr)?)?)?)\n---------------------------------------------------------------\nConclusion: (= t t') where t' is Rewriter{idr}(t*sigma{ids, ida}(Fn)*...*sigma{ids, ida}(F1))\n\nIn other words, from the point of view of Skolem forms, this rule transforms t to t' by standard substitution + rewriting.\n\nThe arguments ids, ida and idr are optional and specify the identifier of the substitution, the substitution application and rewriter respectively to be used."
+                "\n\nIn this rule, we provide a term t and conclude that it is equal to its rewritten form under a (proven) substitution.\n\nChildren: (P1:F1, ..., Pn:Fn)\nArguments: (t, (ids (ida (idr)?)?)?)\n---------------------------------------------------------------\nConclusion: (= t t')\nwhere t' is Rewriter{idr}(t*sigma{ids, ida}(Fn)*...*sigma{ids, ida}(F1))\n\nIn other words, from the point of view of Skolem forms, this rule transforms t to t' by standard substitution + rewriting.\n\nThe arguments ids, ida and idr are optional and specify the identifier of the substitution, the substitution application and rewriter respectively to be used."
             );
         case 'MACRO_SR_PRED_INTRO':
             return (
                 rule +
-                "\n\nIn this rule, we provide a formula F and conclude it, under the condition that it rewrites to true under a proven substitution.\n\nChildren: (P1:F1, ..., Pn:Fn)\nArguments: (F, (ids (ida (idr)?)?)?)\n---------------------------------------------------------------\nConclusion: F where Rewriter{idr}(F*sigma{ids, ida}(Fn)*...*sigma{ids, ida}(F1)) == true where ids and idr are method identifiers.\n\nMore generally, this rule also holds when: Rewriter::rewrite(toOriginal(F')) == true where F' is the result of the left hand side of the equality above. Here, notice that we apply rewriting on the original form of F', meaning that this rule may conclude an F whose Skolem form is justified by the definition of its (fresh) Skolem variables. For example, this rule may justify the conclusion (= k t) where k is the purification Skolem for t, e.g. where the original form of k is t.\n\nFurthermore, notice that the rewriting and substitution is applied only within the side condition, meaning the rewritten form of the original form of F does not escape this rule."
+                "\n\nIn this rule, we provide a formula F and conclude it, under the condition that it rewrites to true under a proven substitution.\n\nChildren: (P1:F1, ..., Pn:Fn)\nArguments: (F, (ids (ida (idr)?)?)?)\n---------------------------------------------------------------\nConclusion: F\nwhere Rewriter{idr}(F*sigma{ids, ida}(Fn)*...*sigma{ids, ida}(F1)) == true where ids and idr are method identifiers.\n\nMore generally, this rule also holds when: Rewriter::rewrite(toOriginal(F')) == true where F' is the result of the left hand side of the equality above. Here, notice that we apply rewriting on the original form of F', meaning that this rule may conclude an F whose Skolem form is justified by the definition of its (fresh) Skolem variables. For example, this rule may justify the conclusion (= k t) where k is the purification Skolem for t, e.g. where the original form of k is t.\n\nFurthermore, notice that the rewriting and substitution is applied only within the side condition, meaning the rewritten form of the original form of F does not escape this rule."
+            );
+        case 'MACRO_SR_PRED_ELIM':
+            return (
+                rule +
+                "\n\nIn this rule, if we have proven a formula F, then we may conclude its rewritten form under a proven substitution.\n\nChildren: (P1:F, P2:F1, ..., P_{n+1}:Fn)\nArguments: ((ids (ida (idr)?)?)?)\n----------------------------------------\nConclusion: F'\nwhere F' is Rewriter{idr}(F*sigma{ids, ida}(Fn)*...*sigma{ids, ida}(F1)). where ids and idr are method identifiers.\n\nWe rewrite only on the Skolem form of F, similar to MACRO_SR_EQ_INTRO."
             );
         default:
             return rule;
