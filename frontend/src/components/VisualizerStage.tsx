@@ -93,6 +93,25 @@ function processDot(dot: string) {
     return nodes;
 }
 
+function ruleHelper(rule: string) {
+    switch (rule.split(' ')[0]) {
+        case 'π':
+            return 'This node hides some parts of the proof, you can left-click to unfold it.';
+        case 'ASSUME':
+            return (
+                rule +
+                '\n\n======== Assumption (a leaf)\nChildren: none\nArguments: (F)\n--------------\nConclusion: F\n\nThis rule has special status, in that an application of assume is an open leaf in a proof that is not (yet) justified. An assume leaf is analogous to a free variable in a term, where we say "F is a free assumption in proof P" if it contains an application of F that is not  bound by SCOPE.'
+            );
+        case 'SCOPE':
+            return (
+                rule +
+                '\n\n======== Scope (a binder for assumptions)\nChildren: (P:F)\nArguments: (F1, ..., Fn)\n--------------\nConclusion: (=> (and F1 ... Fn) F) or (not (and F1 ... Fn)) if F is false\n\nThis rule has a dual purpose with ASSUME. It is a way to close assumptions in a proof. We require that F1 ... Fn are free assumptions in P and say that F1, ..., Fn are not free in (SCOPE P). In other words, they are bound by this application. For example, the proof node: (SCOPE (ASSUME F) :args F) has the conclusion (=> F F) and has no free assumptions. More generally, a proof with no free assumptions always concludes a valid formula.'
+            );
+        default:
+            return rule;
+    }
+}
+
 const VisualizerStage: React.FC = () => {
     const dot = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.dot);
     const view = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.view);
@@ -100,7 +119,7 @@ const VisualizerStage: React.FC = () => {
     const [focusText, setFocusText] = useState('');
 
     return (
-        <div title={focusText}>
+        <div title={ruleHelper(focusText)}>
             {proof.length ? (
                 <Canvas key={dot} view={view} proofNodes={proof} setFocusText={setFocusText}></Canvas>
             ) : null}
