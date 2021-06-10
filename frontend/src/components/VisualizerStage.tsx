@@ -122,6 +122,11 @@ function ruleHelper(rule: string) {
                 rule +
                 '\n\n======== Evaluate\nChildren: none\n\nArguments: (t)\n----------------------------------------\nConclusion: (= t Evaluator::evaluate(t))\nNote this is equivalent to: (REWRITE t MethodId::RW_EVALUATE)'
             );
+        case 'MACRO_SR_EQ_INTRO':
+            return (
+                rule +
+                "\n\nIn this rule, we provide a term t and conclude that it is equal to its rewritten form under a (proven) substitution.\n\nChildren: (P1:F1, ..., Pn:Fn)\nArguments: (t, (ids (ida (idr)?)?)?)\n---------------------------------------------------------------\nConclusion: (= t t') where t' is Rewriter{idr}(t*sigma{ids, ida}(Fn)*...*sigma{ids, ida}(F1))\n\nIn other words, from the point of view of Skolem forms, this rule transforms t to t' by standard substitution + rewriting.\n\nThe arguments ids, ida and idr are optional and specify the identifier of the substitution, the substitution application and rewriter respectively to be used."
+            );
         default:
             return rule;
     }
