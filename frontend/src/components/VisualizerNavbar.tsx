@@ -158,34 +158,34 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     <>
                         <Navbar.Heading>{proof.label}</Navbar.Heading>
                         <Navbar.Divider />
+                        <Popover2
+                            content={proof.label ? exampleMenu : undefined}
+                            placement="bottom-end"
+                            disabled={proof.label ? false : true}
+                        >
+                            <Button
+                                className="bp3-minimal"
+                                icon="download"
+                                text={windowSize.width >= 900 ? 'Download' : ''}
+                                disabled={proof.label ? false : true}
+                            />
+                        </Popover2>
+                        <Popover2
+                            content={proof.label ? viewsMenu : undefined}
+                            placement="bottom-end"
+                            disabled={proof.label ? false : true}
+                        >
+                            <Button
+                                className="bp3-minimal"
+                                icon="diagram-tree"
+                                text={windowSize.width >= 900 ? 'View' : ''}
+                                disabled={proof.label ? false : true}
+                            />
+                        </Popover2>
+                        <Navbar.Divider />
                     </>
                 ) : null}
-                <Popover2
-                    content={proof.label ? exampleMenu : undefined}
-                    placement="bottom-end"
-                    disabled={proof.label ? false : true}
-                >
-                    <Button
-                        className="bp3-minimal"
-                        icon="download"
-                        text={windowSize.width >= 900 ? 'Download' : ''}
-                        disabled={proof.label ? false : true}
-                    />
-                </Popover2>
-                <Popover2
-                    content={proof.label ? viewsMenu : undefined}
-                    placement="bottom-end"
-                    disabled={proof.label ? false : true}
-                >
-                    <Button
-                        className="bp3-minimal"
-                        icon="diagram-tree"
-                        text={windowSize.width >= 900 ? 'View' : ''}
-                        disabled={proof.label ? false : true}
-                    />
-                </Popover2>
 
-                <Navbar.Divider />
                 <span id="switch-button-dark-theme">
                     <Switch checked={darkTheme} onChange={() => setDarkTheme()} />
                     <Icon icon={darkTheme ? 'moon' : 'flash'}></Icon>
