@@ -18,7 +18,7 @@ const ProofList: React.FC<ProofListProps> = ({ addDeleteToast, setDialogIsOpen }
     const [error, setError] = useState(false);
     const dispatch = useDispatch();
 
-    const setDot = (proof: proof) => {
+    const setProof = (proof: proof) => {
         dispatch({ type: 'SET_PROOF', payload: proof });
         setDialogIsOpen(false);
     };
@@ -68,7 +68,7 @@ const ProofList: React.FC<ProofListProps> = ({ addDeleteToast, setDialogIsOpen }
                             proof={proof}
                             deleteProof={deleteProof}
                             editProof={editProof}
-                            setDot={setDot}
+                            setProof={setProof}
                         />
                     ))}
                 </div>

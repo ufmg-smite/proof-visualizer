@@ -9,7 +9,7 @@ const ElementProofList: React.FC<ElementProofListProps> = ({
     proof,
     deleteProof,
     editProof,
-    setDot,
+    setProof,
 }: ElementProofListProps) => {
     return (
         <Card className="proof-element-card" elevation={Elevation.TWO} style={{ height: '130px' }}>
@@ -28,7 +28,7 @@ const ElementProofList: React.FC<ElementProofListProps> = ({
                     <Button
                         onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                             e.preventDefault();
-                            setDot(proof);
+                            setProof(proof);
                         }}
                         icon="diagram-tree"
                         intent={Intent.PRIMARY}

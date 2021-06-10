@@ -29,7 +29,7 @@ interface ElementProofListProps {
     proof: proof;
     deleteProof: (id: ObjectID | undefined, name: string) => void;
     editProof: (proof: proof) => void;
-    setDot: (proof: proof) => void;
+    setProof: (proof: proof) => void;
 }
 
 interface FormNewProofProps {
