@@ -43,6 +43,10 @@ const ProofList: React.FC<ProofListProps> = ({ addDeleteToast, setDialogIsOpen }
         setProofs(proofs.filter((el: proof) => el._id !== id));
     };
 
+    const editProof = (proof: proof) => {
+        console.log(proof);
+    };
+
     return (
         <>
             {error ? (
@@ -59,7 +63,13 @@ const ProofList: React.FC<ProofListProps> = ({ addDeleteToast, setDialogIsOpen }
             ) : (
                 <div>
                     {proofs.map((proof, i) => (
-                        <ElementProofList key={i} proof={proof} deleteProof={deleteProof} setDot={setDot} />
+                        <ElementProofList
+                            key={i}
+                            proof={proof}
+                            deleteProof={deleteProof}
+                            editProof={editProof}
+                            setDot={setDot}
+                        />
                     ))}
                 </div>
             )}

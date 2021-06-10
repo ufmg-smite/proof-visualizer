@@ -5,12 +5,20 @@ import { Button, ButtonGroup, Card, Elevation, Intent } from '@blueprintjs/core'
 import '../scss/ElementProofList.scss';
 import { ElementProofListProps } from './interfaces';
 
-const ElementProofList: React.FC<ElementProofListProps> = ({ proof, deleteProof, setDot }: ElementProofListProps) => {
+const ElementProofList: React.FC<ElementProofListProps> = ({
+    proof,
+    deleteProof,
+    editProof,
+    setDot,
+}: ElementProofListProps) => {
     return (
-        <Card className="proof-element-card" elevation={Elevation.TWO}>
+        <Card className="proof-element-card" elevation={Elevation.TWO} style={{ height: '130px' }}>
             <div className="left">
                 <p className="title" title={proof.label}>
                     {proof.label.slice(0, 35) + (proof.label.length > 35 ? '...' : '')}
+                </p>
+                <p title={proof.options} style={{ fontStyle: 'italic', fontSize: '13px' }}>
+                    {proof.options ? proof.options.slice(0, 35) + (proof.problem.length > 35 ? '...' : '') : null}
                 </p>
                 <p title={proof.problem}>{proof.problem.slice(0, 35) + (proof.problem.length > 35 ? '...' : '')}</p>
             </div>
@@ -27,7 +35,16 @@ const ElementProofList: React.FC<ElementProofListProps> = ({ proof, deleteProof,
                     >
                         Visualize
                     </Button>
-
+                    <Button
+                        onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                            e.preventDefault();
+                            editProof(proof);
+                        }}
+                        icon="edit"
+                        intent={Intent.NONE}
+                    >
+                        Edit
+                    </Button>
                     <Button
                         onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                             e.preventDefault();
