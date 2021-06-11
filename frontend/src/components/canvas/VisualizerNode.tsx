@@ -22,6 +22,7 @@ export default class Node extends React.Component<NodeProps> {
             y,
             selected,
             nHided,
+            nDescendants,
             setFocusText,
             setNodeOnFocus,
             updateNodeState,
@@ -96,7 +97,10 @@ export default class Node extends React.Component<NodeProps> {
                     <Tag {...tagProps} />
                     <Text
                         {...textProps}
-                        text={(nHided ? '#hided: ' + nHided : '') + ' #descendants: 0'}
+                        text={
+                            (nHided ? '#hided: ' + nHided : '') +
+                            (nDescendants ? '#descendants: ' + (nDescendants - 1) : '')
+                        }
                         height={25}
                         fontSize={12}
                         padding={8}

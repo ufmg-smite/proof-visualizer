@@ -41,10 +41,10 @@ function processDot(dot: string) {
             const [conclusion, rule] = label.split(/(?<!\\)\|/);
 
             attributes = attributes.slice(attributes.indexOf(', class = ') + ', class = '.length);
-            const views = attributes
-                .slice(attributes.indexOf('"') + 1, attributes.lastIndexOf('"'))
-                .trim()
-                .split(' ');
+            attributes = attributes.slice(attributes.indexOf('"') + 1, attributes.slice(1).indexOf('"') + 1);
+            const views = attributes.trim().split(' ');
+            const comment: string = line.slice(line.indexOf('comment'), line.lastIndexOf('"'));
+            const commentJSON = JSON.parse(comment.slice(comment.indexOf('"') + 1).replace(/'/g, '"'));
 
             if (!nodes[id]) {
                 nodes[id] = {
@@ -61,11 +61,13 @@ function processDot(dot: string) {
                     hidedNodes: [],
                     hidedIn: NaN,
                     positionCache: false,
+                    descendants: commentJSON.subProofQty,
                 };
             }
             nodes[id].conclusion = removeEscapedCharacters(conclusion);
             nodes[id].rule = removeEscapedCharacters(rule);
             nodes[id].views = views;
+            nodes[id].descendants = commentJSON.subProofQty;
         } else if (line.search('->') !== -1) {
             const [child, parent] = line.split('->').map((x) => parseInt(x.trim()));
             nodes[parent].children.push(child);
@@ -84,6 +86,7 @@ function processDot(dot: string) {
                     hidedNodes: [],
                     hidedIn: NaN,
                     positionCache: false,
+                    descendants: 0,
                 };
             }
             nodes[child].parent = parent;

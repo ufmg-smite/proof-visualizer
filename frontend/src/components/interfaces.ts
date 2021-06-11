@@ -51,6 +51,7 @@ interface NodeInterface {
     views: Array<string>;
     children: Array<number>;
     parent: number;
+    descendants: number;
 
     positionCache: boolean;
     x: number;
@@ -77,6 +78,7 @@ interface NodeProps {
     y: number;
 
     nHided: number;
+    nDescendants: number;
 
     selected: boolean;
 

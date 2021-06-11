@@ -160,6 +160,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             y: node.y,
             selected: false,
             nHided: node.hidedNodes.length,
+            nDescendants: node.descendants,
         };
     };
 
@@ -274,6 +275,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 hidedIn: NaN,
                 positionCache: false,
                 replace: id,
+                descendants: 0,
             };
             proofNodes[parentId].hideMyChildNode = piId;
             proofNodes[parentId].children.push(piId);
