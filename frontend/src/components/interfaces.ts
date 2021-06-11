@@ -99,6 +99,8 @@ interface proof {
 interface ProofListProps {
     addDeleteToast: (err: string) => void;
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
+    setDialogContent: Dispatch<SetStateAction<string>>;
+    setProof: Dispatch<SetStateAction<proof>>;
 }
 
 interface VisualizerDialogProps {

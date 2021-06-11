@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import axios from 'axios';
@@ -10,6 +10,54 @@ import ProofList from './ProofList';
 
 import '../scss/VisualizerDialog.scss';
 import { proof, VisualizerDialogProps, DialogProps, stateInterface } from './interfaces';
+
+function dialogBodyNewEditProof(
+    proofProcessed: boolean,
+    processingProof: boolean,
+    proof: proof,
+    setProof: Dispatch<SetStateAction<proof>>,
+) {
+    return proofProcessed ? (
+        <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
+            <Icon icon="tick" intent={Intent.SUCCESS} iconSize={40}></Icon>
+            <br></br>
+            <br></br>
+            <p>Your proof is ready to be visualized!</p>
+        </div>
+    ) : processingProof ? (
+        <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
+            <p>Processing your proof...</p>
+            <Spinner size={30} />
+        </div>
+    ) : (
+        <FormNewProof proof={proof} setProof={setProof}></FormNewProof>
+    );
+}
+
+function succesButtonNewEditProof(
+    newProof: boolean,
+    proofProcessed: boolean,
+    processingProof: boolean,
+    setProcessingProof: Dispatch<SetStateAction<boolean>>,
+    proof: proof,
+    handleSubmit: (proof: proof) => void,
+) {
+    return processingProof || proofProcessed ? (
+        <></>
+    ) : (
+        <Button
+            onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                e.preventDefault();
+                setProcessingProof(!processingProof);
+                handleSubmit({ label: proof.label, options: proof.options, problem: proof.problem });
+            }}
+            intent={Intent.SUCCESS}
+            disabled={processingProof || proof.label === '' || proof.problem === ''}
+        >
+            {newProof ? 'Generate' : 'Edit'} Proof
+        </Button>
+    );
+}
 
 const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     dialogIsOpen,
@@ -58,41 +106,38 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
             break;
         case 'proof-list':
             dialogProps = { icon: 'list', title: 'Proof List' };
-            dialogBody = <ProofList addDeleteToast={addDeleteToast} setDialogIsOpen={setDialogIsOpen}></ProofList>;
+            dialogBody = (
+                <ProofList
+                    addDeleteToast={addDeleteToast}
+                    setDialogIsOpen={setDialogIsOpen}
+                    setDialogContent={setDialogContent}
+                    setProof={setProof}
+                ></ProofList>
+            );
             break;
         case 'new-proof':
             dialogProps = { icon: 'add', title: 'New Proof' };
-            dialogBody = proofProcessed ? (
-                <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
-                    <Icon icon="tick" intent={Intent.SUCCESS} iconSize={40}></Icon>
-                    <br></br>
-                    <br></br>
-                    <p>Your proof is ready to be visualized!</p>
-                </div>
-            ) : processingProof ? (
-                <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
-                    <p>Processing your proof...</p>
-                    <Spinner size={30} />
-                </div>
-            ) : (
-                <FormNewProof proof={proof} setProof={setProof}></FormNewProof>
+            dialogBody = dialogBodyNewEditProof(proofProcessed, processingProof, proof, setProof);
+            succesButton = succesButtonNewEditProof(
+                true,
+                proofProcessed,
+                processingProof,
+                setProcessingProof,
+                proof,
+                handleSubmit,
             );
-            succesButton =
-                processingProof || proofProcessed ? (
-                    <></>
-                ) : (
-                    <Button
-                        onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                            e.preventDefault();
-                            setProcessingProof(!processingProof);
-                            handleSubmit({ label: proof.label, options: proof.options, problem: proof.problem });
-                        }}
-                        intent={Intent.SUCCESS}
-                        disabled={processingProof || proof.label === '' || proof.problem === ''}
-                    >
-                        Generate Proof
-                    </Button>
-                );
+            break;
+        case 'edit-proof':
+            dialogProps = { icon: 'edit', title: 'Edit Proof' };
+            dialogBody = dialogBodyNewEditProof(proofProcessed, processingProof, proof, setProof);
+            succesButton = succesButtonNewEditProof(
+                false,
+                proofProcessed,
+                processingProof,
+                setProcessingProof,
+                proof,
+                handleSubmit,
+            );
             break;
     }
 
@@ -117,6 +162,9 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                             onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                                 e.preventDefault();
                                 setDialogIsOpen(false);
+                                setProof({ label: '', options: '', problem: '' });
+                                setProcessingProof(false);
+                                setProofProcessed(false);
                             }}
                         >
                             Close

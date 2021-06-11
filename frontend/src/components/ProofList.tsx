@@ -12,13 +12,18 @@ import '../scss/ProofList.scss';
 
 import { ProofListProps } from './interfaces';
 
-const ProofList: React.FC<ProofListProps> = ({ addDeleteToast, setDialogIsOpen }: ProofListProps) => {
+const ProofList: React.FC<ProofListProps> = ({
+    addDeleteToast,
+    setDialogIsOpen,
+    setDialogContent,
+    setProof,
+}: ProofListProps) => {
     const [proofs, setProofs] = useState([]);
     const [loadingProofs, setLoadingProofs] = useState(true);
     const [error, setError] = useState(false);
     const dispatch = useDispatch();
 
-    const setProof = (proof: proof) => {
+    const setProofRedux = (proof: proof) => {
         dispatch({ type: 'SET_PROOF', payload: proof });
         setDialogIsOpen(false);
     };
@@ -44,7 +49,8 @@ const ProofList: React.FC<ProofListProps> = ({ addDeleteToast, setDialogIsOpen }
     };
 
     const editProof = (proof: proof) => {
-        console.log(proof);
+        setProof(proof);
+        setDialogContent('edit-proof');
     };
 
     return (
@@ -68,7 +74,7 @@ const ProofList: React.FC<ProofListProps> = ({ addDeleteToast, setDialogIsOpen }
                             proof={proof}
                             deleteProof={deleteProof}
                             editProof={editProof}
-                            setProof={setProof}
+                            setProof={setProofRedux}
                         />
                     ))}
                 </div>
