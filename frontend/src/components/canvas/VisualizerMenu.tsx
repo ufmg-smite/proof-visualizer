@@ -11,7 +11,7 @@ const Menu = ({
     foldAllDescendants: () => void;
     options: { unfold: boolean; foldSelected: boolean; foldAllDescendants: boolean };
 }): JSX.Element => {
-    return (
+    return options.unfold || options.foldSelected || options.foldAllDescendants ? (
         <div className="bp3-popover2-content">
             <ul id="menu" className="bp3-menu">
                 {options.unfold ? (
@@ -43,6 +43,8 @@ const Menu = ({
                 ) : null}
             </ul>
         </div>
+    ) : (
+        <></>
     );
 };
 

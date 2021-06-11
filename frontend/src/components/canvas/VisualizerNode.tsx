@@ -78,9 +78,6 @@ export default class Node extends React.Component<NodeProps> {
                             window.addEventListener('click', () => {
                                 menuNode.style.display = 'none';
                             });
-                        } else {
-                            // Apagar depois que garantido que o menu está ok
-                            alert('Problema com menu do canvas');
                         }
                     }
                 }}
