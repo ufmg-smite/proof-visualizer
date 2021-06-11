@@ -5,12 +5,14 @@ import { FormGroup, InputGroup, TextArea } from '@blueprintjs/core';
 import { FormNewProofProps } from './interfaces';
 
 const FormNewProof: React.FC<FormNewProofProps> = ({ proof, setProof }: FormNewProofProps) => {
+    const _id = proof._id;
     const [label, setName] = useState(proof.label);
     const [options, setOptions] = useState(proof.options);
     const [problem, setProblem] = useState(proof.problem);
 
     useEffect(() => {
         setProof({
+            _id,
             label,
             options,
             problem,

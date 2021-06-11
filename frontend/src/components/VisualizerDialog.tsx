@@ -35,12 +35,12 @@ function dialogBodyNewEditProof(
 }
 
 function succesButtonNewEditProof(
-    newProof: boolean,
+    edit: boolean,
     proofProcessed: boolean,
     processingProof: boolean,
     setProcessingProof: Dispatch<SetStateAction<boolean>>,
     proof: proof,
-    handleSubmit: (proof: proof) => void,
+    handleSubmit: (proof: proof, edit: boolean) => void,
 ) {
     return processingProof || proofProcessed ? (
         <></>
@@ -49,12 +49,15 @@ function succesButtonNewEditProof(
             onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                 e.preventDefault();
                 setProcessingProof(!processingProof);
-                handleSubmit({ label: proof.label, options: proof.options, problem: proof.problem });
+                handleSubmit(
+                    { _id: proof._id, label: proof.label, options: proof.options, problem: proof.problem },
+                    edit,
+                );
             }}
             intent={Intent.SUCCESS}
             disabled={processingProof || proof.label === '' || proof.problem === ''}
         >
-            {newProof ? 'Generate' : 'Edit'} Proof
+            {edit ? 'Edit' : 'Generate'} Proof
         </Button>
     );
 }
@@ -73,12 +76,12 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     let dialogBody = <p>This wasn&apos;t supposed to happen. Please contact the developers.</p>;
     let succesButton = <></>;
 
-    const [proof, setProof] = useState<proof>({ label: '', options: '', problem: '' });
+    const [proof, setProof] = useState<proof>({ _id: undefined, label: '', options: '', problem: '' });
     const [processingProof, setProcessingProof] = useState(false);
     const [proofProcessed, setProofProcessed] = useState(false);
-    const handleSubmit = async (proof: proof) => {
+    const handleSubmit = async (proof: proof, edit: boolean) => {
         await axios
-            .post('http://localhost:5000/proof/add', proof)
+            .post('http://localhost:5000/proof/' + (edit ? 'edit/' + proof._id : 'add'), proof)
             .then(async (res) => {
                 setProcessingProof(true);
                 await axios.get(`http://localhost:5000/proof/process-proof/${res.data}`);
@@ -119,7 +122,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
             dialogProps = { icon: 'add', title: 'New Proof' };
             dialogBody = dialogBodyNewEditProof(proofProcessed, processingProof, proof, setProof);
             succesButton = succesButtonNewEditProof(
-                true,
+                false,
                 proofProcessed,
                 processingProof,
                 setProcessingProof,
@@ -131,7 +134,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
             dialogProps = { icon: 'edit', title: 'Edit Proof' };
             dialogBody = dialogBodyNewEditProof(proofProcessed, processingProof, proof, setProof);
             succesButton = succesButtonNewEditProof(
-                false,
+                true,
                 proofProcessed,
                 processingProof,
                 setProcessingProof,
