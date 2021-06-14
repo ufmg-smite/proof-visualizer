@@ -264,6 +264,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 id: piId,
                 conclusion: "['" + proofNodes[id].conclusion + "']",
                 rule: 'π',
+                args: '',
                 children: [...proofNodes[id].children],
                 x: NaN,
                 y: NaN,

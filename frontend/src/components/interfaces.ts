@@ -48,6 +48,7 @@ interface NodeInterface {
 
     conclusion: string;
     rule: string;
+    args: string;
     views: Array<string>;
     children: Array<number>;
     parent: number;

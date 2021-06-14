@@ -38,7 +38,9 @@ function processDot(dot: string) {
 
             let label = attributes.slice(attributes.search(/(?<!\\)"/) + 2);
             label = label.slice(0, label.search(/(?<!\\)"/) - 1);
-            const [conclusion, rule] = label.split(/(?<!\\)\|/);
+            let [conclusion, rule, args] = ['', '', ''];
+            [conclusion, rule] = label.split(/(?<!\\)\|/);
+            [rule, args] = rule.indexOf(':args') != -1 ? rule.split(':args') : [rule, ''];
 
             attributes = attributes.slice(attributes.indexOf(', class = ') + ', class = '.length);
             attributes = attributes.slice(attributes.indexOf('"') + 1, attributes.slice(1).indexOf('"') + 1);
@@ -51,6 +53,7 @@ function processDot(dot: string) {
                     id: id,
                     conclusion: '',
                     rule: '',
+                    args: '',
                     views: [],
                     children: [],
                     parent: NaN,
@@ -66,6 +69,8 @@ function processDot(dot: string) {
             }
             nodes[id].conclusion = removeEscapedCharacters(conclusion);
             nodes[id].rule = removeEscapedCharacters(rule);
+            nodes[id].args = removeEscapedCharacters(args);
+            console.log(nodes[id].args);
             nodes[id].views = views;
             nodes[id].descendants = commentJSON.subProofQty;
         } else if (line.search('->') !== -1) {
@@ -76,6 +81,7 @@ function processDot(dot: string) {
                     id: child,
                     conclusion: '',
                     rule: '',
+                    args: '',
                     views: [],
                     children: [],
                     parent: parent,
