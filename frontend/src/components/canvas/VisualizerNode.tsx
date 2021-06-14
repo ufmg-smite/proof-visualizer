@@ -95,7 +95,7 @@ export default class Node extends React.Component<NodeProps> {
                     <Text
                         {...textProps}
                         text={
-                            (nHided ? '#hided: ' + nHided : '') +
+                            (nHided ? '#hidden: ' + nHided : '') +
                             (nDescendants ? '#descendants: ' + (nDescendants - 1) : '')
                         }
                         height={25}
