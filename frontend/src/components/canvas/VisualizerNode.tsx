@@ -98,9 +98,6 @@ export default class Node extends React.Component<NodeProps> {
                             (nHided ? '#hidden: ' + nHided : '') +
                             (nDescendants ? '#descendants: ' + (nDescendants - 1) : '')
                         }
-                        height={25}
-                        fontSize={12}
-                        padding={8}
                     />
                 </Label>
             </Group>

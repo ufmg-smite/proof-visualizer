@@ -183,7 +183,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
 
     LineProps = (key: string, from: NodeProps, to: NodeProps): LineProps => ({
         key,
-        points: [from.x + 150, from.y, to.x + 150, to.y + 96],
+        points: [from.x + 150, from.y, to.x + 150, to.y + 105],
     });
 
     addNodes = (id: number): void => {
