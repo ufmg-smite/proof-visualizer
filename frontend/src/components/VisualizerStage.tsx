@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
+import { Drawer, Position, Classes } from '@blueprintjs/core';
 import Canvas from './canvas/VisualizerCanvas';
 import { NodeInterface, stateInterface } from './interfaces';
 
@@ -259,14 +260,93 @@ const VisualizerStage: React.FC = () => {
     const dot = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.dot);
     const view = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.view);
     const proof = processDot(dot ? dot : '');
+    const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const [focusText, setFocusText] = useState('');
+    const [nodeInfo, setNodeInfo] = useState<{
+        rule: string;
+        args: string;
+        conclusion: string;
+        nHided: number;
+        nDescendants: number;
+    }>({
+        rule: '',
+        args: '',
+        conclusion: '',
+        nHided: 0,
+        nDescendants: 0,
+    });
+
+    const openDrawer = (nodeInfo: {
+        rule: string;
+        args: string;
+        conclusion: string;
+        nHided: number;
+        nDescendants: number;
+    }) => {
+        setNodeInfo(nodeInfo);
+        setDrawerIsOpen(true);
+    };
 
     return (
         // <div title={ruleHelper(focusText)}>
         <div title={focusText}>
             {proof.length ? (
-                <Canvas key={dot} view={view} proofNodes={proof} setFocusText={setFocusText}></Canvas>
+                <Canvas
+                    key={dot}
+                    view={view}
+                    proofNodes={proof}
+                    setFocusText={setFocusText}
+                    openDrawer={openDrawer}
+                ></Canvas>
             ) : null}
+            <Drawer
+                className={'bp3-dark'}
+                autoFocus={true}
+                canEscapeKeyClose={true}
+                canOutsideClickClose={true}
+                enforceFocus={true}
+                hasBackdrop={false}
+                isOpen={drawerIsOpen}
+                position={Position.BOTTOM}
+                size={300}
+                usePortal={true}
+                onClose={(e) => {
+                    e.preventDefault();
+                    setDrawerIsOpen(false);
+                }}
+                icon="info-sign"
+                title="Node info"
+            >
+                <div className={Classes.DRAWER_BODY}>
+                    <div className={Classes.DIALOG_BODY}>
+                        <p>
+                            <strong>RULE:</strong>
+                            <span> {nodeInfo.rule}</span>
+                        </p>
+
+                        {nodeInfo.args ? (
+                            <p>
+                                <strong>ARGS:</strong>
+                                <span> {nodeInfo.args}</span>
+                            </p>
+                        ) : null}
+                        <p>
+                            <strong>CONCLUSION:</strong>
+                            <span> {nodeInfo.conclusion}</span>
+                        </p>
+                        <p>
+                            <strong>#DESCENDANTS:</strong>
+                            <span> {nodeInfo.nDescendants}</span>
+                        </p>
+                        {nodeInfo.nHided ? (
+                            <p>
+                                <strong>#HIDEN:</strong>
+                                <span> {nodeInfo.nHided}</span>
+                            </p>
+                        ) : null}
+                    </div>
+                </div>
+            </Drawer>
         </div>
     );
 };

@@ -17,6 +17,7 @@ export default class Node extends React.Component<NodeProps> {
         const {
             rule,
             conclusion,
+            args,
             id,
             x,
             y,
@@ -27,7 +28,7 @@ export default class Node extends React.Component<NodeProps> {
             setNodeOnFocus,
             updateNodeState,
             toggleNodeSelection,
-            unfoldOnClick,
+            openDrawer,
         } = this.props;
 
         const bgColor = '#8d99ae';
@@ -65,8 +66,14 @@ export default class Node extends React.Component<NodeProps> {
                     if (e.evt.button === 0) {
                         if (e.evt.shiftKey) {
                             toggleNodeSelection(id);
-                        } else if (rule === 'π') {
-                            unfoldOnClick(id);
+                        } else {
+                            openDrawer({
+                                rule: rule,
+                                args: args,
+                                conclusion: conclusion,
+                                nHided: nHided,
+                                nDescendants: nDescendants - (rule === 'π' ? nHided : 1),
+                            });
                         }
                     } else if (e.evt.button === 2) {
                         setNodeOnFocus(id);

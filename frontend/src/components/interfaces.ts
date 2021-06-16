@@ -7,6 +7,13 @@ import Node from '../components/canvas/VisualizerNode';
 interface CanvasProps {
     proofNodes: Array<NodeInterface>;
     setFocusText: Dispatch<SetStateAction<string>>;
+    openDrawer: (nodeInfo: {
+        rule: string;
+        args: string;
+        conclusion: string;
+        nHided: number;
+        nDescendants: number;
+    }) => void;
     view?: string;
 }
 
@@ -74,6 +81,7 @@ interface NodeProps {
 
     conclusion: string;
     rule: string;
+    args: string;
 
     x: number;
     y: number;
@@ -88,6 +96,13 @@ interface NodeProps {
     toggleNodeSelection: (id: number) => void;
     updateNodeState: (key: number, x: number, y: number) => void;
     unfoldOnClick: (id: number) => void;
+    openDrawer: (nodeInfo: {
+        rule: string;
+        args: string;
+        conclusion: string;
+        nHided: number;
+        nDescendants: number;
+    }) => void;
 }
 
 interface proof {
