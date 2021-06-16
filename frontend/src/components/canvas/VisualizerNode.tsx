@@ -96,7 +96,8 @@ export default class Node extends React.Component<NodeProps> {
                         {...textProps}
                         text={
                             (nHided ? '#hidden: ' + nHided : '') +
-                            (nDescendants ? '#descendants: ' + (nDescendants - 1) : '')
+                            ' #descendants: ' +
+                            (nDescendants - (rule === 'π' ? nHided : 1))
                         }
                     />
                 </Label>
