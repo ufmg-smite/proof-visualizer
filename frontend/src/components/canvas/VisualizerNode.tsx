@@ -24,7 +24,6 @@ export default class Node extends React.Component<NodeProps> {
             selected,
             nHided,
             nDescendants,
-            setFocusText,
             setNodeOnFocus,
             updateNodeState,
             toggleNodeSelection,
@@ -33,12 +32,6 @@ export default class Node extends React.Component<NodeProps> {
 
         const bgColor = '#8d99ae';
 
-        const labelProps = {
-            onMouseEnter: (e: KonvaEventObject<MouseEvent>) => {
-                setFocusText(e.target.attrs.text);
-            },
-            onMouseLeave: () => setFocusText(''),
-        };
         const tagProps = {
             fill: bgColor,
             stroke: selected ? 'red' : 'black',
@@ -89,15 +82,15 @@ export default class Node extends React.Component<NodeProps> {
                     }
                 }}
             >
-                <Label {...labelProps} x={0} y={0}>
+                <Label x={0} y={0}>
                     <Tag {...tagProps} />
                     <Text {...textProps} text={conclusion} />
                 </Label>
-                <Label {...labelProps} x={0} y={35}>
+                <Label x={0} y={35}>
                     <Tag {...tagProps} />
                     <Text {...textProps} text={rule} />
                 </Label>
-                <Label {...labelProps} x={0} y={70}>
+                <Label x={0} y={70}>
                     <Tag {...tagProps} />
                     <Text
                         {...textProps}

@@ -261,7 +261,6 @@ const VisualizerStage: React.FC = () => {
     const view = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.view);
     const proof = processDot(dot ? dot : '');
     const [drawerIsOpen, setDrawerIsOpen] = useState(false);
-    const [focusText, setFocusText] = useState('');
     const [nodeInfo, setNodeInfo] = useState<{
         rule: string;
         args: string;
@@ -289,16 +288,8 @@ const VisualizerStage: React.FC = () => {
 
     return (
         // <div title={ruleHelper(focusText)}>
-        <div title={focusText}>
-            {proof.length ? (
-                <Canvas
-                    key={dot}
-                    view={view}
-                    proofNodes={proof}
-                    setFocusText={setFocusText}
-                    openDrawer={openDrawer}
-                ></Canvas>
-            ) : null}
+        <div>
+            {proof.length ? <Canvas key={dot} view={view} proofNodes={proof} openDrawer={openDrawer}></Canvas> : null}
             <Drawer
                 className={'bp3-dark'}
                 autoFocus={true}

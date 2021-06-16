@@ -146,14 +146,13 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     };
 
     nodeProps = (node: NodeInterface): NodeProps => {
-        const { setFocusText, openDrawer } = this.props;
+        const { openDrawer } = this.props;
         return {
             id: node.id,
             rule: node.rule,
             conclusion: node.conclusion,
             args: node.args,
             updateNodeState: this.updateNodeState,
-            setFocusText,
             setNodeOnFocus: this.setNodeOnFocus,
             toggleNodeSelection: this.toggleNodeSelection,
             unfoldOnClick: this.unfoldOnClick,

@@ -6,7 +6,6 @@ import Node from '../components/canvas/VisualizerNode';
 
 interface CanvasProps {
     proofNodes: Array<NodeInterface>;
-    setFocusText: Dispatch<SetStateAction<string>>;
     openDrawer: (nodeInfo: {
         rule: string;
         args: string;
@@ -91,7 +90,6 @@ interface NodeProps {
 
     selected: boolean;
 
-    setFocusText: Dispatch<SetStateAction<string>>;
     setNodeOnFocus: (id: number) => void;
     toggleNodeSelection: (id: number) => void;
     updateNodeState: (key: number, x: number, y: number) => void;
