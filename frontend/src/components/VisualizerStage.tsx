@@ -322,13 +322,14 @@ const VisualizerStage: React.FC = () => {
                             <tbody>
                                 <tr>
                                     <td>
+                                        <strong>RULE </strong>{' '}
                                         <a onClick={() => setRuleHelperOpen(!ruleHelperOpen)}>
-                                            <strong>RULE</strong>
+                                            <Icon icon="help" style={{ color: 'white' }}></Icon>
                                         </a>
                                     </td>
                                     <td>
                                         {nodeInfo.rule}
-                                        <div style={{ maxWidth: window.innerWidth * 0.8 }}>
+                                        <div style={{ maxWidth: window.innerWidth * 0.875 }}>
                                             <Collapse isOpen={ruleHelperOpen}>
                                                 <Pre style={{ whiteSpace: 'pre-wrap' }}>
                                                     {ruleHelper(nodeInfo.rule)}

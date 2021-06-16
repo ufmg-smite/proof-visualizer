@@ -1,4 +1,3 @@
-import { KonvaEventObject } from 'konva/types/Node';
 import React from 'react';
 import { Label, Text, Tag, Group } from 'react-konva';
 
