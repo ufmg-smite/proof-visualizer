@@ -70,7 +70,6 @@ function processDot(dot: string) {
             nodes[id].conclusion = removeEscapedCharacters(conclusion);
             nodes[id].rule = removeEscapedCharacters(rule);
             nodes[id].args = removeEscapedCharacters(args);
-            console.log(nodes[id].args);
             nodes[id].views = views;
             nodes[id].descendants = commentJSON.subProofQty;
         } else if (line.search('->') !== -1) {
