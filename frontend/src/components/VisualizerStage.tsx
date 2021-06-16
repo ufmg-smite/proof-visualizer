@@ -308,7 +308,7 @@ const VisualizerStage: React.FC = () => {
                 hasBackdrop={false}
                 isOpen={drawerIsOpen}
                 position={Position.BOTTOM}
-                size={300}
+                size={325}
                 usePortal={true}
                 onClose={(e) => {
                     e.preventDefault();
@@ -319,31 +319,50 @@ const VisualizerStage: React.FC = () => {
             >
                 <div className={Classes.DRAWER_BODY}>
                     <div className={Classes.DIALOG_BODY}>
-                        <p>
-                            <strong>RULE:</strong>
-                            <span> {nodeInfo.rule}</span>
-                        </p>
-
-                        {nodeInfo.args ? (
-                            <p>
-                                <strong>ARGS:</strong>
-                                <span> {nodeInfo.args}</span>
-                            </p>
-                        ) : null}
-                        <p>
-                            <strong>CONCLUSION:</strong>
-                            <span> {nodeInfo.conclusion}</span>
-                        </p>
-                        <p>
-                            <strong>#DESCENDANTS:</strong>
-                            <span> {nodeInfo.nDescendants}</span>
-                        </p>
-                        {nodeInfo.nHided ? (
-                            <p>
-                                <strong>#HIDEN:</strong>
-                                <span> {nodeInfo.nHided}</span>
-                            </p>
-                        ) : null}
+                        <table className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Property</th>
+                                    <th>Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <strong>RULE</strong>
+                                    </td>
+                                    <td>{nodeInfo.rule}</td>
+                                </tr>
+                                {nodeInfo.args ? (
+                                    <tr>
+                                        <td>
+                                            <strong>ARGS</strong>
+                                        </td>
+                                        <td>{nodeInfo.args}</td>
+                                    </tr>
+                                ) : null}
+                                <tr>
+                                    <td>
+                                        <strong>CONCLUSION</strong>
+                                    </td>
+                                    <td>{nodeInfo.conclusion}</td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <strong>#DESCENDANTS</strong>
+                                    </td>
+                                    <td>{nodeInfo.nDescendants}</td>
+                                </tr>
+                                {nodeInfo.nHided ? (
+                                    <tr>
+                                        <td>
+                                            <strong>#HIDEN</strong>
+                                        </td>
+                                        <td>{nodeInfo.nHided}</td>
+                                    </tr>
+                                ) : null}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </Drawer>
