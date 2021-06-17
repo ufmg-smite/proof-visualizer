@@ -1,0 +1,22 @@
+.bp3-drawer {
+    width: 70%;
+    margin: auto !important;
+    #table-node-info {
+        width: 90%;
+        margin: auto;
+        thead {
+            tr {
+                th:first-child {
+                    width: 150px;
+                }
+            }
+        }
+        #rule-icon {
+            color: white
+        }
+        #pre-rule {
+            white-space: 'pre-wrap'
+        }
+    }
+}
+

@@ -5,6 +5,8 @@ import { Drawer, Position, Classes, Icon, Collapse, Pre } from '@blueprintjs/cor
 import Canvas from './canvas/VisualizerCanvas';
 import { NodeInterface, stateInterface } from './interfaces';
 
+import '../scss/VisualizerStage.scss';
+
 function removeEscapedCharacters(s: string): string {
     let newS = '';
     for (let i = 0; i < s.length; i += 1) {
@@ -312,7 +314,10 @@ const VisualizerStage: React.FC = () => {
             >
                 <div className={Classes.DRAWER_BODY}>
                     <div className={Classes.DIALOG_BODY}>
-                        <table className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped">
+                        <table
+                            id="table-node-info"
+                            className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
+                        >
                             <thead>
                                 <tr>
                                     <th>Property</th>
@@ -323,17 +328,17 @@ const VisualizerStage: React.FC = () => {
                                 <tr>
                                     <td>
                                         <strong>RULE </strong>{' '}
-                                        <a onClick={() => setRuleHelperOpen(!ruleHelperOpen)}>
-                                            <Icon icon="help" style={{ color: 'white' }}></Icon>
-                                        </a>
+                                        <Icon
+                                            id="rule-icon"
+                                            icon="help"
+                                            onClick={() => setRuleHelperOpen(!ruleHelperOpen)}
+                                        ></Icon>
                                     </td>
                                     <td>
                                         {nodeInfo.rule}
-                                        <div style={{ maxWidth: window.innerWidth * 0.875 }}>
+                                        <div>
                                             <Collapse isOpen={ruleHelperOpen}>
-                                                <Pre style={{ whiteSpace: 'pre-wrap' }}>
-                                                    {ruleHelper(nodeInfo.rule)}
-                                                </Pre>
+                                                <Pre id="pre-rule">{ruleHelper(nodeInfo.rule)}</Pre>
                                             </Collapse>
                                         </div>
                                     </td>
