@@ -1,5 +1,6 @@
 .bp3-drawer {
     width: 70%;
+    height: max-content !important;
     margin: auto !important;
     #table-node-info {
         width: 90%;
@@ -15,7 +16,7 @@
             color: white
         }
         #pre-rule {
-            white-space: 'pre-wrap'
+            white-space: pre-wrap
         }
     }
 }

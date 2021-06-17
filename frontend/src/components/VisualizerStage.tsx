@@ -303,7 +303,6 @@ const VisualizerStage: React.FC = () => {
                 hasBackdrop={false}
                 isOpen={drawerIsOpen}
                 position={Position.BOTTOM}
-                size={325}
                 usePortal={true}
                 onClose={(e) => {
                     e.preventDefault();
@@ -336,11 +335,9 @@ const VisualizerStage: React.FC = () => {
                                     </td>
                                     <td>
                                         {nodeInfo.rule}
-                                        <div>
-                                            <Collapse isOpen={ruleHelperOpen}>
-                                                <Pre id="pre-rule">{ruleHelper(nodeInfo.rule)}</Pre>
-                                            </Collapse>
-                                        </div>
+                                        <Collapse isOpen={ruleHelperOpen}>
+                                            <Pre id="pre-rule">{ruleHelper(nodeInfo.rule)}</Pre>
+                                        </Collapse>
                                     </td>
                                 </tr>
                                 {nodeInfo.args ? (
