@@ -162,6 +162,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             selected: false,
             nHided: node.hidedNodes.length,
             nDescendants: node.descendants,
+            topHidedNodes: node.topHidedNodes ? node.topHidedNodes : undefined,
         };
     };
 
@@ -240,8 +241,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         } else if (parentId && proofNodes[parentId].hideMyChildNode) {
             // if the parent node has some node as child that hides node
             piId = proofNodes[parentId].hideMyChildNode;
-            proofNodes[piId].conclusion =
-                proofNodes[piId].conclusion.slice(0, -1) + "','" + proofNodes[id].conclusion + "']";
             if (proofNodes[id].children.length === 1 && proofNodes[proofNodes[id].children[0]].rule === 'π') {
                 proofNodes[proofNodes[id].children[0]].hidedNodes.forEach(
                     (child) => (proofNodes[child].hidedIn = piId),
@@ -253,6 +252,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             }
             proofNodes[piId].children.push(...proofNodes[id].children);
             proofNodes[piId].descendants += proofNodes[id].descendants;
+            proofNodes[piId].topHidedNodes?.push([proofNodes[id].rule, proofNodes[id].conclusion]);
         } else if (proofNodes[id].children.length === 1 && proofNodes[proofNodes[id].children[0]].rule === 'π') {
             piId = proofNodes[id].children[0];
             proofNodes[id].children = [];
@@ -265,7 +265,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             piId = proofNodes.length;
             proofNodes[piId] = {
                 id: piId,
-                conclusion: "['" + proofNodes[id].conclusion + "']",
+                conclusion: '∴',
                 rule: 'π',
                 args: '',
                 children: [...proofNodes[id].children],
@@ -280,6 +280,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 positionCache: false,
                 replace: id,
                 descendants: 0,
+                topHidedNodes: [[proofNodes[id].rule, proofNodes[id].conclusion]],
             };
             proofNodes[parentId].hideMyChildNode = piId;
             proofNodes[parentId].children.push(piId);

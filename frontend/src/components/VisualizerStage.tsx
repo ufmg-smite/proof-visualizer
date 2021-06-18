@@ -270,12 +270,14 @@ const VisualizerStage: React.FC = () => {
         conclusion: string;
         nHided: number;
         nDescendants: number;
+        topHidedNodes?: Array<[string, string]>;
     }>({
         rule: '',
         args: '',
         conclusion: '',
         nHided: 0,
         nDescendants: 0,
+        topHidedNodes: undefined,
     });
 
     const openDrawer = (nodeInfo: {
@@ -284,6 +286,7 @@ const VisualizerStage: React.FC = () => {
         conclusion: string;
         nHided: number;
         nDescendants: number;
+        topHidedNodes?: Array<[string, string]>;
     }) => {
         setRuleHelperOpen(false);
         setNodeInfo(nodeInfo);
@@ -368,6 +371,22 @@ const VisualizerStage: React.FC = () => {
                                         <td>{nodeInfo.nHided}</td>
                                     </tr>
                                 ) : null}
+                                {nodeInfo.topHidedNodes
+                                    ? nodeInfo.topHidedNodes.map((node, i) => (
+                                          <tr key={i}>
+                                              <td>
+                                                  <strong>TOP RANK HIDEN NODE {i}</strong>
+                                              </td>
+                                              <td>
+                                                  {nodeInfo.topHidedNodes
+                                                      ? nodeInfo.topHidedNodes[i][0] +
+                                                        ' => ' +
+                                                        nodeInfo.topHidedNodes[i][1]
+                                                      : ''}
+                                              </td>
+                                          </tr>
+                                      ))
+                                    : null}
                             </tbody>
                         </table>
                     </div>

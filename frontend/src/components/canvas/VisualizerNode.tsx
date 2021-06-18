@@ -23,6 +23,7 @@ export default class Node extends React.Component<NodeProps> {
             selected,
             nHided,
             nDescendants,
+            topHidedNodes,
             setNodeOnFocus,
             updateNodeState,
             toggleNodeSelection,
@@ -65,6 +66,7 @@ export default class Node extends React.Component<NodeProps> {
                                 conclusion: conclusion,
                                 nHided: nHided,
                                 nDescendants: nDescendants - (rule === 'π' ? nHided : 1),
+                                topHidedNodes: topHidedNodes,
                             });
                         }
                     } else if (e.evt.button === 2) {
@@ -83,11 +85,27 @@ export default class Node extends React.Component<NodeProps> {
             >
                 <Label x={0} y={0}>
                     <Tag {...tagProps} />
-                    <Text {...textProps} text={conclusion} />
+                    <Text
+                        {...textProps}
+                        text={
+                            conclusion +
+                            (conclusion === '∴' && topHidedNodes
+                                ? '[' + topHidedNodes.map((e) => e[1].trim()).join(',') + ']'
+                                : '')
+                        }
+                    />
                 </Label>
                 <Label x={0} y={35}>
                     <Tag {...tagProps} />
-                    <Text {...textProps} text={rule} />
+                    <Text
+                        {...textProps}
+                        text={
+                            rule +
+                            (rule === 'π' && topHidedNodes
+                                ? '[' + topHidedNodes.map((e) => e[0].trim()).join(',') + ']'
+                                : '')
+                        }
+                    />
                 </Label>
                 <Label x={0} y={70}>
                     <Tag {...tagProps} />

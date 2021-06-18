@@ -72,6 +72,8 @@ interface NodeInterface {
 
     hidedNodes: Array<number>;
 
+    topHidedNodes?: Array<[string, string]>;
+
     replace?: number;
 }
 
@@ -90,6 +92,8 @@ interface NodeProps {
 
     selected: boolean;
 
+    topHidedNodes?: Array<[string, string]>;
+
     setNodeOnFocus: (id: number) => void;
     toggleNodeSelection: (id: number) => void;
     updateNodeState: (key: number, x: number, y: number) => void;
@@ -100,6 +104,7 @@ interface NodeProps {
         conclusion: string;
         nHided: number;
         nDescendants: number;
+        topHidedNodes?: Array<[string, string]>;
     }) => void;
 }
 
