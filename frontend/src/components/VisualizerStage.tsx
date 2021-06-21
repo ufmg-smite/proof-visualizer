@@ -29,7 +29,26 @@ function removeEscapedCharacters(s: string): string {
 }
 
 function processDot(dot: string) {
-    const nodes: Array<NodeInterface> = [];
+    const nodes: Array<NodeInterface> = [
+        {
+            id: 0,
+            conclusion: '',
+            rule: '',
+            args: '',
+            views: [],
+            children: [],
+            parent: NaN,
+            x: NaN,
+            y: NaN,
+            hideMyChildNode: NaN,
+            hided: false,
+            hidedNodes: [],
+            hidedIn: NaN,
+            positionCache: false,
+            descendants: 0,
+            rank: 0,
+        },
+    ];
     const lines = dot
         .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
         .replace(/(\n|\t)/gm, '')
@@ -67,7 +86,8 @@ function processDot(dot: string) {
                     hidedNodes: [],
                     hidedIn: NaN,
                     positionCache: false,
-                    descendants: commentJSON.subProofQty,
+                    descendants: 0,
+                    rank: 0,
                 };
             }
             nodes[id].conclusion = removeEscapedCharacters(conclusion);
@@ -95,9 +115,11 @@ function processDot(dot: string) {
                     hidedIn: NaN,
                     positionCache: false,
                     descendants: 0,
+                    rank: nodes[parent].rank + 1,
                 };
             }
             nodes[child].parent = parent;
+            nodes[child].rank = nodes[parent].rank + 1;
         }
     });
 
@@ -296,7 +318,9 @@ const VisualizerStage: React.FC = () => {
     return (
         // <div title={ruleHelper(focusText)}>
         <div>
-            {proof.length ? <Canvas key={dot} view={view} proofNodes={proof} openDrawer={openDrawer}></Canvas> : null}
+            {proof.length > 1 ? (
+                <Canvas key={dot} view={view} proofNodes={proof} openDrawer={openDrawer}></Canvas>
+            ) : null}
             <Drawer
                 className={'bp3-dark'}
                 autoFocus={true}

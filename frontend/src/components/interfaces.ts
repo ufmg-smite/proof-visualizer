@@ -59,6 +59,7 @@ interface NodeInterface {
     children: Array<number>;
     parent: number;
     descendants: number;
+    rank: number;
 
     positionCache: boolean;
     x: number;

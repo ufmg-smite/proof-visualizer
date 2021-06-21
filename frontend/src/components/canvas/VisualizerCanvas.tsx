@@ -110,7 +110,9 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             }
         });
         nodesToHide.forEach((node) => {
-            this.hideNode(node.id);
+            if (!(proofNodes[node.id].rule === 'π' || node.id === 0)) {
+                this.hideNode(node.id);
+            }
         });
     };
 
@@ -281,6 +283,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 replace: id,
                 descendants: 0,
                 topHidedNodes: [[proofNodes[id].rule, proofNodes[id].conclusion]],
+                rank: proofNodes[parentId].rank + 1,
             };
             proofNodes[parentId].hideMyChildNode = piId;
             proofNodes[parentId].children.push(piId);
