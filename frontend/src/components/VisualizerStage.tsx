@@ -390,7 +390,7 @@ const VisualizerStage: React.FC = () => {
                                 {nodeInfo.nHided ? (
                                     <tr>
                                         <td>
-                                            <strong>#HIDEN</strong>
+                                            <strong>#HIDDEN</strong>
                                         </td>
                                         <td>{nodeInfo.nHided}</td>
                                     </tr>
@@ -399,7 +399,7 @@ const VisualizerStage: React.FC = () => {
                                     ? nodeInfo.topHidedNodes.map((node, i) => (
                                           <tr key={i}>
                                               <td>
-                                                  <strong>TOP RANK HIDEN NODE {i}</strong>
+                                                  <strong>TOP HIDDEN NODE {i}</strong>
                                               </td>
                                               <td>
                                                   {nodeInfo.topHidedNodes
