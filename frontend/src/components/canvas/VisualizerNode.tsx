@@ -46,13 +46,13 @@ export default class Node extends React.Component<NodeProps> {
             width: 300,
         };
         const nHidedStr = nHided
-            ? '#hidden: ' + '[' + (topHidedNodes ? topHidedNodes.map((node) => node[3]).join(', ') : '') + ']'
+            ? '#hidden: ' + '[' + (topHidedNodes ? topHidedNodes.map((node) => node[4]).join(', ') : '') + ']'
             : '';
         const nDescendantsStr =
             ' #descendants: ' +
             (rule !== 'π'
                 ? nDescendants - 1
-                : '[' + (topHidedNodes ? topHidedNodes.map((node) => node[2] - 1).join(', ') : '') + ']');
+                : '[' + (topHidedNodes ? topHidedNodes.map((node) => node[3] - 1).join(', ') : '') + ']');
         return (
             <Group
                 draggable
@@ -98,7 +98,7 @@ export default class Node extends React.Component<NodeProps> {
                         text={
                             conclusion +
                             (conclusion === '∴' && topHidedNodes
-                                ? '[' + topHidedNodes.map((e) => e[1].trim()).join(',') + ']'
+                                ? '[' + topHidedNodes.map((e) => e[2].trim()).join(',') + ']'
                                 : '')
                         }
                     />
@@ -110,7 +110,7 @@ export default class Node extends React.Component<NodeProps> {
                         text={
                             rule +
                             (rule === 'π' && topHidedNodes
-                                ? '[' + topHidedNodes.map((e) => e[0].trim()).join(',') + ']'
+                                ? '[' + topHidedNodes.map((e) => e[1].trim()).join(',') + ']'
                                 : '')
                         }
                     />

@@ -292,7 +292,7 @@ const VisualizerStage: React.FC = () => {
         conclusion: string;
         nHided: number;
         nDescendants: number;
-        topHidedNodes?: Array<[string, string, number, number]>;
+        topHidedNodes?: Array<[number, string, string, number, number]>;
     }>({
         rule: '',
         args: '',
@@ -308,7 +308,7 @@ const VisualizerStage: React.FC = () => {
         conclusion: string;
         nHided: number;
         nDescendants: number;
-        topHidedNodes?: Array<[string, string, number, number]>;
+        topHidedNodes?: Array<[number, string, string, number, number]>;
     }) => {
         setRuleHelperOpen(false);
         setNodeInfo(nodeInfo);
@@ -393,7 +393,7 @@ const VisualizerStage: React.FC = () => {
                                         <td>
                                             <strong>#DESCENDANTS</strong>
                                         </td>
-                                        <td>[{nodeInfo.topHidedNodes.map((node) => node[2] - 1).join(', ')}]</td>
+                                        <td>[{nodeInfo.topHidedNodes.map((node) => node[3] - 1).join(', ')}]</td>
                                     </tr>
                                 )}
                                 {nodeInfo.nHided ? (
@@ -404,7 +404,7 @@ const VisualizerStage: React.FC = () => {
                                         <td>
                                             [
                                             {nodeInfo.topHidedNodes
-                                                ? nodeInfo.topHidedNodes.map((node) => node[3]).join(', ')
+                                                ? nodeInfo.topHidedNodes.map((node) => node[4]).join(', ')
                                                 : ''}
                                             ]
                                         </td>
@@ -416,7 +416,7 @@ const VisualizerStage: React.FC = () => {
                                               <td>
                                                   <strong>TOP HIDDEN NODE {i}</strong>
                                               </td>
-                                              <td>{node[0] + ' => ' + node[1]}</td>
+                                              <td>{node[1] + ' => ' + node[2]}</td>
                                           </tr>
                                       ))
                                     : null}
