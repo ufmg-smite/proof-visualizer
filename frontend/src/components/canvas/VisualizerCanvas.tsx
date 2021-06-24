@@ -123,7 +123,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             .sort((a, b) => b - a)
             .forEach((nodeId) => {
                 if (!(proofNodes[nodeId].rule === 'π' || nodeId === 0)) {
-                    console.log(nodeId);
                     this.hideNode(nodeId);
                 }
             });
@@ -263,11 +262,21 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         } else if (parentId && proofNodes[parentId].hideMyChildNode) {
             // if the parent node has some node as child that hides node
             piId = proofNodes[parentId].hideMyChildNode;
+            let nH: number | undefined = 1,
+                nD: number | undefined = 0;
             if (proofNodes[id].children.length === 1 && proofNodes[proofNodes[id].children[0]].rule === 'π') {
                 proofNodes[proofNodes[id].children[0]].hidedNodes.forEach(
                     (child) => (proofNodes[child].hidedIn = piId),
                 );
                 proofNodes[piId].hidedNodes.push(...proofNodes[proofNodes[id].children[0]].hidedNodes);
+                nD = proofNodes[proofNodes[id].children[0]].topHidedNodes?.reduce(
+                    (accumulator, node) => accumulator + node[3],
+                    0,
+                );
+                nH = proofNodes[proofNodes[id].children[0]].topHidedNodes?.reduce(
+                    (accumulator, node) => accumulator + node[4],
+                    0,
+                );
                 delete proofNodes[proofNodes[id].children[0]];
                 proofNodes[id].children = [];
                 proofNodes[id].hideMyChildNode = NaN;
@@ -277,11 +286,9 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 id,
                 proofNodes[id].rule,
                 proofNodes[id].conclusion,
-                proofNodes[id].descendants - 1,
-                1,
+                nD ? nD : 0,
+                nH ? nH : 0,
             ]);
-            const nH = proofNodes[piId].topHidedNodes?.reduce((accumulator, node) => accumulator + node[3], 0);
-            const nD = proofNodes[piId].topHidedNodes?.reduce((accumulator, node) => accumulator + node[4], 0);
             proofNodes[piId].descendants = nD ? nD : 0;
             proofNodes[piId].hidedIn = nH ? nH : 0;
         } else if (proofNodes[id].children.length === 1 && proofNodes[proofNodes[id].children[0]].rule === 'π') {
@@ -294,8 +301,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             proofNodes[piId].descendants = proofNodes[id].descendants;
             const nD = proofNodes[piId].topHidedNodes?.reduce((accumulator, node) => accumulator + node[3], 0);
             const nH = proofNodes[piId].topHidedNodes?.reduce((accumulator, node) => accumulator + node[4], 0);
-            proofNodes[piId].topHidedNodes?.forEach((node) => console.log(node));
-            console.log(nH + ' ' + nD);
             proofNodes[piId].topHidedNodes = [
                 [id, proofNodes[id].rule, proofNodes[id].conclusion, nD ? nD : 0, nH ? nH + 1 : 0],
             ];
