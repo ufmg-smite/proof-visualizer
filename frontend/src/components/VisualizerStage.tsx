@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { Drawer, Position, Classes, Icon, Collapse, Pre } from '@blueprintjs/core';
 import Canvas from './canvas/VisualizerCanvas';
+import { VisualizerTree } from './VisualizerTree';
 import { NodeInterface, stateInterface } from './interfaces';
 
 import '../scss/VisualizerStage.scss';
@@ -424,6 +425,7 @@ const VisualizerStage: React.FC = () => {
                         </table>
                     </div>
                 </div>
+                <VisualizerTree></VisualizerTree>
             </Drawer>
         </div>
     );
