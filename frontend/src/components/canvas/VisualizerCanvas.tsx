@@ -231,6 +231,17 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.setState({ showingNodes, showingEdges });
     };
 
+    ancestors = (id: number): Array<number> => {
+        const { proofNodes } = this.state;
+        const ancestorsId: Array<number> = [];
+        let currentId = id;
+        while (currentId) {
+            currentId = proofNodes[currentId].parent;
+            ancestorsId.push(currentId);
+        }
+        return ancestorsId;
+    };
+
     hideNode = (id: number): void => {
         const { proofNodes } = this.state;
         const parentId = proofNodes[id].parent;
@@ -240,6 +251,13 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             piId = proofNodes[parentId].hidedIn;
             proofNodes[piId].children.push(...proofNodes[id].children);
             proofNodes[piId].children = proofNodes[piId].children.filter((nodeId) => nodeId !== id);
+            if (proofNodes[piId].topHidedNodes) {
+                proofNodes[piId].topHidedNodes = proofNodes[piId].topHidedNodes?.map((node) => {
+                    if (this.ancestors(id).indexOf(node[0]) !== -1)
+                        return [node[0], node[1], node[2], node[3] - 1, node[4] + 1];
+                    return node;
+                });
+            }
         } else if (parentId && proofNodes[parentId].hideMyChildNode) {
             // if the parent node has some node as child that hides node
             piId = proofNodes[parentId].hideMyChildNode;
