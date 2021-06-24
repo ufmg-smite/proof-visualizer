@@ -52,7 +52,7 @@ export default class Node extends React.Component<NodeProps> {
             ' #descendants: ' +
             (rule !== 'π'
                 ? nDescendants - 1
-                : '[' + (topHidedNodes ? topHidedNodes.map((node) => node[3] - 1).join(', ') : '') + ']');
+                : '[' + (topHidedNodes ? topHidedNodes.map((node) => node[3]).join(', ') : '') + ']');
         return (
             <Group
                 draggable
