@@ -292,7 +292,7 @@ const VisualizerStage: React.FC = () => {
         conclusion: string;
         nHided: number;
         nDescendants: number;
-        topHidedNodes?: Array<[string, string, number]>;
+        topHidedNodes?: Array<[string, string, number, number]>;
     }>({
         rule: '',
         args: '',
@@ -308,7 +308,7 @@ const VisualizerStage: React.FC = () => {
         conclusion: string;
         nHided: number;
         nDescendants: number;
-        topHidedNodes?: Array<[string, string, number]>;
+        topHidedNodes?: Array<[string, string, number, number]>;
     }) => {
         setRuleHelperOpen(false);
         setNodeInfo(nodeInfo);
@@ -401,7 +401,13 @@ const VisualizerStage: React.FC = () => {
                                         <td>
                                             <strong>#HIDDEN</strong>
                                         </td>
-                                        <td>{nodeInfo.nHided}</td>
+                                        <td>
+                                            [
+                                            {nodeInfo.topHidedNodes
+                                                ? nodeInfo.topHidedNodes.map((node) => node[3]).join(', ')
+                                                : ''}
+                                            ]
+                                        </td>
                                     </tr>
                                 ) : null}
                                 {nodeInfo.topHidedNodes

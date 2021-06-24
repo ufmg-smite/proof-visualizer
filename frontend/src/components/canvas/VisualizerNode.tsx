@@ -45,7 +45,9 @@ export default class Node extends React.Component<NodeProps> {
             padding: 10,
             width: 300,
         };
-        const nHidedStr = nHided ? '#hidden: ' + nHided : '';
+        const nHidedStr = nHided
+            ? '#hidden: ' + '[' + (topHidedNodes ? topHidedNodes.map((node) => node[3]).join(', ') : '') + ']'
+            : '';
         const nDescendantsStr =
             ' #descendants: ' +
             (rule !== 'π'
