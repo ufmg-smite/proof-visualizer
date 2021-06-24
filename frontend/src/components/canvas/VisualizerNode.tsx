@@ -45,6 +45,12 @@ export default class Node extends React.Component<NodeProps> {
             padding: 10,
             width: 300,
         };
+        const nHidedStr = nHided ? '#hidden: ' + nHided : '';
+        const nDescendantsStr =
+            ' #descendants: ' +
+            (rule !== 'π'
+                ? nDescendants - 1
+                : '[' + (topHidedNodes ? topHidedNodes.map((node) => node[2] - 1).join(', ') : '') + ']');
         return (
             <Group
                 draggable
@@ -109,14 +115,7 @@ export default class Node extends React.Component<NodeProps> {
                 </Label>
                 <Label x={0} y={70}>
                     <Tag {...tagProps} />
-                    <Text
-                        {...textProps}
-                        text={
-                            (nHided ? '#hidden: ' + nHided : '') +
-                            ' #descendants: ' +
-                            (nDescendants - (rule === 'π' ? nHided : 1))
-                        }
-                    />
+                    <Text {...textProps} text={nHidedStr + nDescendantsStr} />
                 </Label>
             </Group>
         );

@@ -292,7 +292,7 @@ const VisualizerStage: React.FC = () => {
         conclusion: string;
         nHided: number;
         nDescendants: number;
-        topHidedNodes?: Array<[string, string]>;
+        topHidedNodes?: Array<[string, string, number]>;
     }>({
         rule: '',
         args: '',
@@ -308,7 +308,7 @@ const VisualizerStage: React.FC = () => {
         conclusion: string;
         nHided: number;
         nDescendants: number;
-        topHidedNodes?: Array<[string, string]>;
+        topHidedNodes?: Array<[string, string, number]>;
     }) => {
         setRuleHelperOpen(false);
         setNodeInfo(nodeInfo);
@@ -381,12 +381,21 @@ const VisualizerStage: React.FC = () => {
                                     </td>
                                     <td>{nodeInfo.conclusion}</td>
                                 </tr>
-                                <tr>
-                                    <td>
-                                        <strong>#DESCENDANTS</strong>
-                                    </td>
-                                    <td>{nodeInfo.nDescendants}</td>
-                                </tr>
+                                {!nodeInfo.topHidedNodes ? (
+                                    <tr>
+                                        <td>
+                                            <strong>#DESCENDANTS</strong>
+                                        </td>
+                                        <td>{nodeInfo.nDescendants}</td>
+                                    </tr>
+                                ) : (
+                                    <tr>
+                                        <td>
+                                            <strong>#DESCENDANTS</strong>
+                                        </td>
+                                        <td>[{nodeInfo.topHidedNodes.map((node) => node[2] - 1).join(', ')}]</td>
+                                    </tr>
+                                )}
                                 {nodeInfo.nHided ? (
                                     <tr>
                                         <td>
@@ -401,13 +410,7 @@ const VisualizerStage: React.FC = () => {
                                               <td>
                                                   <strong>TOP HIDDEN NODE {i}</strong>
                                               </td>
-                                              <td>
-                                                  {nodeInfo.topHidedNodes
-                                                      ? nodeInfo.topHidedNodes[i][0] +
-                                                        ' => ' +
-                                                        nodeInfo.topHidedNodes[i][1]
-                                                      : ''}
-                                              </td>
+                                              <td>{node[0] + ' => ' + node[1]}</td>
                                           </tr>
                                       ))
                                     : null}

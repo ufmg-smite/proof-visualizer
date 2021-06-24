@@ -254,7 +254,11 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             }
             proofNodes[piId].children.push(...proofNodes[id].children);
             proofNodes[piId].descendants += proofNodes[id].descendants;
-            proofNodes[piId].topHidedNodes?.push([proofNodes[id].rule, proofNodes[id].conclusion]);
+            proofNodes[piId].topHidedNodes?.push([
+                proofNodes[id].rule,
+                proofNodes[id].conclusion,
+                proofNodes[id].descendants,
+            ]);
         } else if (proofNodes[id].children.length === 1 && proofNodes[proofNodes[id].children[0]].rule === 'π') {
             piId = proofNodes[id].children[0];
             proofNodes[id].children = [];
@@ -282,7 +286,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 positionCache: false,
                 replace: id,
                 descendants: 0,
-                topHidedNodes: [[proofNodes[id].rule, proofNodes[id].conclusion]],
+                topHidedNodes: [[proofNodes[id].rule, proofNodes[id].conclusion, proofNodes[id].descendants]],
                 rank: proofNodes[parentId].rank + 1,
             };
             proofNodes[parentId].hideMyChildNode = piId;
