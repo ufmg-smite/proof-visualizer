@@ -8,9 +8,9 @@ import { Tooltip2 } from '@blueprintjs/popover2';
 export class VisualizerTree extends React.Component<any, { nodes: TreeNodeInfo[] }> {
     constructor(props: any) {
         super(props);
-
+        console.log(props.content);
         this.state = {
-            nodes: INITIAL_STATE,
+            nodes: props.content,
         };
     }
 
@@ -56,71 +56,69 @@ export class VisualizerTree extends React.Component<any, { nodes: TreeNodeInfo[]
         }
     }
 }
-
-/* tslint:disable:object-literal-sort-keys so childNodes can come last */
-const INITIAL_STATE: TreeNodeInfo[] = [
-    {
-        id: 0,
-        hasCaret: true,
-        icon: 'graph',
-        label: 'ASSUME => ',
-    },
-    {
-        id: 1,
-        icon: 'folder-close',
-        isExpanded: true,
-        label: (
-            <Tooltip2 content="I'm a folder <3" position={Position.RIGHT}>
-                Folder 1
-            </Tooltip2>
-        ),
-        childNodes: [
-            {
-                id: 2,
-                icon: 'document',
-                label: 'Item 0',
-                secondaryLabel: (
-                    <Tooltip2 content="An eye!">
-                        <Icon icon="eye-open" />
-                    </Tooltip2>
-                ),
-            },
-            {
-                id: 3,
-                icon: <Icon icon="tag" intent={Intent.PRIMARY} className={Classes.TREE_NODE_ICON} />,
-                label: 'Organic meditation gluten-free, sriracha VHS drinking vinegar beard man.',
-            },
-            {
-                id: 4,
-                hasCaret: true,
-                icon: 'folder-close',
-                label: (
-                    <Tooltip2 content="foo" position={Position.RIGHT}>
-                        Folder 2
-                    </Tooltip2>
-                ),
-                childNodes: [
-                    { id: 5, label: 'No-Icon Item' },
-                    { id: 6, icon: 'tag', label: 'Item 1' },
-                    {
-                        id: 7,
-                        hasCaret: true,
-                        icon: 'folder-close',
-                        label: 'Folder 3',
-                        childNodes: [
-                            { id: 8, icon: 'document', label: 'Item 0' },
-                            { id: 9, icon: 'tag', label: 'Item 1' },
-                        ],
-                    },
-                ],
-            },
-        ],
-    },
-    {
-        id: 2,
-        hasCaret: true,
-        icon: 'folder-close',
-        label: 'Super secret files',
-        disabled: true,
-    },
-];
+// const INITIAL_STATE: TreeNodeInfo[] = [
+//     {
+//         id: 0,
+//         hasCaret: true,
+//         icon: 'graph',
+//         label: 'ASSUME => ',
+//     },
+//     {
+//         id: 1,
+//         icon: 'folder-close',
+//         isExpanded: true,
+//         label: (
+//             <Tooltip2 content="I'm a folder <3" position={Position.RIGHT}>
+//                 Folder 1
+//             </Tooltip2>
+//         ),
+//         childNodes: [
+//             {
+//                 id: 2,
+//                 icon: 'document',
+//                 label: 'Item 0',
+//                 secondaryLabel: (
+//                     <Tooltip2 content="An eye!">
+//                         <Icon icon="eye-open" />
+//                     </Tooltip2>
+//                 ),
+//             },
+//             {
+//                 id: 3,
+//                 icon: <Icon icon="tag" intent={Intent.PRIMARY} className={Classes.TREE_NODE_ICON} />,
+//                 label: 'Organic meditation gluten-free, sriracha VHS drinking vinegar beard man.',
+//             },
+//             {
+//                 id: 4,
+//                 hasCaret: true,
+//                 icon: 'folder-close',
+//                 label: (
+//                     <Tooltip2 content="foo" position={Position.RIGHT}>
+//                         Folder 2
+//                     </Tooltip2>
+//                 ),
+//                 childNodes: [
+//                     { id: 5, label: 'No-Icon Item' },
+//                     { id: 6, icon: 'tag', label: 'Item 1' },
+//                     {
+//                         id: 7,
+//                         hasCaret: true,
+//                         icon: 'folder-close',
+//                         label: 'Folder 3',
+//                         childNodes: [
+//                             { id: 8, icon: 'document', label: 'Item 0' },
+//                             { id: 9, icon: 'tag', label: 'Item 1' },
+//                         ],
+//                     },
+//                 ],
+//             },
+//         ],
+//     },
+//     {
+//         id: 2,
+//         hasCaret: true,
+//         icon: 'folder-close',
+//         label: 'Super secret files',
+//         disabled: true,
+//     },
+// ];

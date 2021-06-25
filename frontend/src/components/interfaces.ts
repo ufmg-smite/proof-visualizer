@@ -76,6 +76,8 @@ interface NodeInterface {
     topHidedNodes?: Array<[number, string, string, number, number]>;
 
     replace?: number;
+
+    tree?: any;
 }
 
 interface NodeProps {
@@ -99,14 +101,19 @@ interface NodeProps {
     toggleNodeSelection: (id: number) => void;
     updateNodeState: (key: number, x: number, y: number) => void;
     unfoldOnClick: (id: number) => void;
-    openDrawer: (nodeInfo: {
-        rule: string;
-        args: string;
-        conclusion: string;
-        nHided: number;
-        nDescendants: number;
-        topHidedNodes?: Array<[number, string, string, number, number]>;
-    }) => void;
+    openDrawer: (
+        nodeInfo: {
+            rule: string;
+            args: string;
+            conclusion: string;
+            nHided: number;
+            nDescendants: number;
+            topHidedNodes?: Array<[number, string, string, number, number]>;
+        },
+        tree: any,
+    ) => void;
+
+    tree?: any;
 }
 
 interface proof {

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { Drawer, Position, Classes, Icon, Collapse, Pre } from '@blueprintjs/core';
+import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
 import Canvas from './canvas/VisualizerCanvas';
 import { VisualizerTree } from './VisualizerTree';
 import { NodeInterface, stateInterface } from './interfaces';
@@ -302,17 +302,22 @@ const VisualizerStage: React.FC = () => {
         nDescendants: 0,
         topHidedNodes: undefined,
     });
+    const [tree, setTree] = useState<TreeNodeInfo[]>([]);
 
-    const openDrawer = (nodeInfo: {
-        rule: string;
-        args: string;
-        conclusion: string;
-        nHided: number;
-        nDescendants: number;
-        topHidedNodes?: Array<[number, string, string, number, number]>;
-    }) => {
+    const openDrawer = (
+        nodeInfo: {
+            rule: string;
+            args: string;
+            conclusion: string;
+            nHided: number;
+            nDescendants: number;
+            topHidedNodes?: Array<[number, string, string, number, number]>;
+        },
+        tree?: TreeNodeInfo[],
+    ) => {
         setRuleHelperOpen(false);
         setNodeInfo(nodeInfo);
+        setTree(tree ? tree : []);
         setDrawerIsOpen(true);
     };
 
@@ -425,7 +430,7 @@ const VisualizerStage: React.FC = () => {
                         </table>
                     </div>
                 </div>
-                <VisualizerTree></VisualizerTree>
+                <VisualizerTree content={tree}></VisualizerTree>
             </Drawer>
         </div>
     );

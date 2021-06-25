@@ -28,6 +28,7 @@ export default class Node extends React.Component<NodeProps> {
             updateNodeState,
             toggleNodeSelection,
             openDrawer,
+            tree,
         } = this.props;
 
         const bgColor = '#8d99ae';
@@ -68,14 +69,17 @@ export default class Node extends React.Component<NodeProps> {
                         if (e.evt.shiftKey) {
                             toggleNodeSelection(id);
                         } else {
-                            openDrawer({
-                                rule: rule,
-                                args: args,
-                                conclusion: conclusion,
-                                nHided: nHided,
-                                nDescendants: nDescendants - (rule === 'π' ? nHided : 1),
-                                topHidedNodes: topHidedNodes,
-                            });
+                            openDrawer(
+                                {
+                                    rule: rule,
+                                    args: args,
+                                    conclusion: conclusion,
+                                    nHided: nHided,
+                                    nDescendants: nDescendants - (rule === 'π' ? nHided : 1),
+                                    topHidedNodes: topHidedNodes,
+                                },
+                                tree,
+                            );
                         }
                     } else if (e.evt.button === 2) {
                         setNodeOnFocus(id);

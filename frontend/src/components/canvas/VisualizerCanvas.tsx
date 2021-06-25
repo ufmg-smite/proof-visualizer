@@ -166,6 +166,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             nHided: node.hidedNodes.length,
             nDescendants: node.descendants,
             topHidedNodes: node.topHidedNodes ? node.topHidedNodes : undefined,
+            tree: node.tree ? node.tree : null,
         };
     };
 
@@ -337,7 +338,42 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         proofNodes[id].hidedIn = piId;
         proofNodes[parentId].children = proofNodes[parentId].children.filter((nodeId) => nodeId !== id);
         proofNodes[id].hideMyChildNode = NaN;
+        const tree = this.hiddenNodesTree(
+            proofNodes[piId].hidedNodes
+                .sort((a, b) => a - b)
+                .map((nodeId) => {
+                    return {
+                        id: nodeId,
+                        icon: 'graph',
+                        parentId: proofNodes[nodeId].parent,
+                        label: proofNodes[nodeId].rule + ' => ' + proofNodes[nodeId].conclusion,
+                        childNodes: [],
+                    };
+                }),
+        );
+        proofNodes[piId].tree = tree;
         this.setState({ proofNodes });
+    };
+
+    hiddenNodesTree = (list: any): any => {
+        const map: any = {},
+            roots: any = [];
+        let node, i;
+
+        for (i = 0; i < list.length; i += 1) {
+            map[list[i].id] = i;
+            list[i].childNodes = [];
+        }
+
+        for (i = 0; i < list.length; i += 1) {
+            node = list[i];
+            if (node.parentId && list[map[node.parentId]]) {
+                list[map[node.parentId]].childNodes.push(node);
+            } else {
+                roots.push(node);
+            }
+        }
+        return roots;
     };
 
     unhideNode = (id: number): void => {
