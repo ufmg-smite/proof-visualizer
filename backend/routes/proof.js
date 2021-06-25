@@ -73,7 +73,7 @@ router.route('/process-proof/:id').get((req, res) => {
         '--proof-format-mode=dot',
       ].concat(userOptions);
 
-      const cvc5 = spawnSync('cvc5', options);
+      const cvc5 = spawnSync(`${process.cwd()}/cvc5/cvc5`, options);
 
       if (!cvc5.stderr.toString().length) {
         proof.dot = cvc5.stdout;
