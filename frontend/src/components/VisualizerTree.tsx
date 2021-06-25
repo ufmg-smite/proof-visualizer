@@ -39,7 +39,7 @@ export class VisualizerTree extends React.Component<
                       args: nodeData.args ? nodeData.args : '',
                       conclusion: nodeData.conclusion ? nodeData.conclusion : '',
                       nHided: 0,
-                      nDescendants: nodeData.descendants ? nodeData.descendants : '',
+                      nDescendants: nodeData.descendants,
                       topHidedNodes: undefined,
                   }
                 : this.state.originalNodeInfo,

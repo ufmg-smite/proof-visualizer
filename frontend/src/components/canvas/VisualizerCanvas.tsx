@@ -256,7 +256,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             if (proofNodes[piId].topHidedNodes) {
                 proofNodes[piId].topHidedNodes = proofNodes[piId].topHidedNodes?.map((node) => {
                     if (this.ancestors(id).indexOf(node[0]) !== -1)
-                        return [node[0], node[1], node[2], node[3] - 1, node[4] + 1];
+                        return [node[0], node[1], node[2], node[3], node[4] + 1];
                     return node;
                 });
             }
@@ -324,14 +324,12 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 positionCache: false,
                 replace: id,
                 descendants: 0,
-                topHidedNodes: [
-                    [id, proofNodes[id].rule, proofNodes[id].conclusion, proofNodes[id].descendants - 1, 1],
-                ],
+                topHidedNodes: [[id, proofNodes[id].rule, proofNodes[id].conclusion, proofNodes[id].descendants, 1]],
                 rank: proofNodes[parentId].rank + 1,
             };
             proofNodes[parentId].hideMyChildNode = piId;
             proofNodes[parentId].children.push(piId);
-            proofNodes[piId].descendants = proofNodes[id].descendants - 1;
+            proofNodes[piId].descendants = proofNodes[id].descendants;
         }
         proofNodes[piId].hidedNodes.push(id);
         proofNodes[id].hided = true;

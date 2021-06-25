@@ -95,7 +95,7 @@ function processDot(dot: string) {
             nodes[id].rule = removeEscapedCharacters(rule);
             nodes[id].args = removeEscapedCharacters(args);
             nodes[id].views = views;
-            nodes[id].descendants = commentJSON.subProofQty;
+            nodes[id].descendants = commentJSON.subProofQty - 1;
         } else if (line.search('->') !== -1) {
             const [child, parent] = line.split('->').map((x) => parseInt(x.trim()));
             nodes[parent].children.push(child);
@@ -415,7 +415,7 @@ const VisualizerStage: React.FC = () => {
                                         <td>
                                             <strong>#DESCENDANTS</strong>
                                         </td>
-                                        <td>[{nodeInfo.topHidedNodes.map((node) => node[3] - 1).join(', ')}]</td>
+                                        <td>[{nodeInfo.topHidedNodes.map((node) => node[3]).join(', ')}]</td>
                                     </tr>
                                 )}
                                 {nodeInfo.nHided ? (

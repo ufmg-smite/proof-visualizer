@@ -52,7 +52,7 @@ export default class Node extends React.Component<NodeProps> {
         const nDescendantsStr =
             ' #descendants: ' +
             (rule !== 'π'
-                ? nDescendants - 1
+                ? nDescendants
                 : '[' + (topHidedNodes ? topHidedNodes.map((node) => node[3]).join(', ') : '') + ']');
         return (
             <Group
