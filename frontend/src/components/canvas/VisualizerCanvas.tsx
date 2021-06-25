@@ -347,7 +347,11 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                         icon: 'graph',
                         parentId: proofNodes[nodeId].parent,
                         label: proofNodes[nodeId].rule + ' => ' + proofNodes[nodeId].conclusion,
+                        descendants: proofNodes[nodeId].descendants,
                         childNodes: [],
+                        rule: proofNodes[nodeId].rule,
+                        conclusion: proofNodes[nodeId].conclusion,
+                        args: proofNodes[nodeId].args,
                     };
                 }),
         );

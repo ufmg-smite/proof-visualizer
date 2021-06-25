@@ -302,6 +302,21 @@ const VisualizerStage: React.FC = () => {
         nDescendants: 0,
         topHidedNodes: undefined,
     });
+    const [nodeInfoCopy, setNodeInfoCopy] = useState<{
+        rule: string;
+        args: string;
+        conclusion: string;
+        nHided: number;
+        nDescendants: number;
+        topHidedNodes?: Array<[number, string, string, number, number]>;
+    }>({
+        rule: '',
+        args: '',
+        conclusion: '',
+        nHided: 0,
+        nDescendants: 0,
+        topHidedNodes: undefined,
+    });
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
 
     const openDrawer = (
@@ -318,6 +333,7 @@ const VisualizerStage: React.FC = () => {
         setRuleHelperOpen(false);
         setNodeInfo(nodeInfo);
         setTree(tree ? tree : []);
+        setNodeInfoCopy(nodeInfo);
         setDrawerIsOpen(true);
     };
 
@@ -416,21 +432,15 @@ const VisualizerStage: React.FC = () => {
                                         </td>
                                     </tr>
                                 ) : null}
-                                {nodeInfo.topHidedNodes
-                                    ? nodeInfo.topHidedNodes.map((node, i) => (
-                                          <tr key={i}>
-                                              <td>
-                                                  <strong>TOP HIDDEN NODE {i}</strong>
-                                              </td>
-                                              <td>{node[1] + ' => ' + node[2]}</td>
-                                          </tr>
-                                      ))
-                                    : null}
                             </tbody>
                         </table>
                     </div>
                 </div>
-                <VisualizerTree content={tree}></VisualizerTree>
+                <VisualizerTree
+                    content={tree}
+                    setNodeInfo={setNodeInfo}
+                    originalNodeInfo={nodeInfoCopy}
+                ></VisualizerTree>
             </Drawer>
         </div>
     );
