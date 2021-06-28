@@ -50,6 +50,7 @@ function processDot(dot: string) {
             rank: 0,
         },
     ];
+    dot = dot.split('"}}"\n').join('"}}";\n'); // Fix CVC5
     const lines = dot
         .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
         .replace(/(\n|\t)/gm, '')
@@ -361,6 +362,11 @@ const VisualizerStage: React.FC = () => {
                 title="Node info"
             >
                 <div className={Classes.DRAWER_BODY}>
+                    <VisualizerTree
+                        content={tree}
+                        setNodeInfo={setNodeInfo}
+                        originalNodeInfo={nodeInfoCopy}
+                    ></VisualizerTree>
                     <div className={Classes.DIALOG_BODY}>
                         <table
                             id="table-node-info"
@@ -436,11 +442,6 @@ const VisualizerStage: React.FC = () => {
                         </table>
                     </div>
                 </div>
-                <VisualizerTree
-                    content={tree}
-                    setNodeInfo={setNodeInfo}
-                    originalNodeInfo={nodeInfoCopy}
-                ></VisualizerTree>
             </Drawer>
         </div>
     );

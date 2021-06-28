@@ -75,7 +75,7 @@ export default class Node extends React.Component<NodeProps> {
                                     args: args,
                                     conclusion: conclusion,
                                     nHided: nHided,
-                                    nDescendants: nDescendants - (rule === 'π' ? nHided : 1),
+                                    nDescendants: nDescendants - (rule === 'π' ? nHided : 0),
                                     topHidedNodes: topHidedNodes,
                                 },
                                 tree,
