@@ -362,6 +362,11 @@ const VisualizerStage: React.FC = () => {
                 title="Node info"
             >
                 <div className={Classes.DRAWER_BODY}>
+                    <VisualizerTree
+                        content={tree}
+                        setNodeInfo={setNodeInfo}
+                        originalNodeInfo={nodeInfoCopy}
+                    ></VisualizerTree>
                     <div className={Classes.DIALOG_BODY}>
                         <table
                             id="table-node-info"
@@ -437,11 +442,6 @@ const VisualizerStage: React.FC = () => {
                         </table>
                     </div>
                 </div>
-                <VisualizerTree
-                    content={tree}
-                    setNodeInfo={setNodeInfo}
-                    originalNodeInfo={nodeInfoCopy}
-                ></VisualizerTree>
             </Drawer>
         </div>
     );
