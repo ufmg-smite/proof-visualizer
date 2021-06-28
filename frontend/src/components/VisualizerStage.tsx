@@ -50,6 +50,7 @@ function processDot(dot: string) {
             rank: 0,
         },
     ];
+    dot = dot.split('"}}"\n').join('"}}";\n'); // Fix CVC5
     const lines = dot
         .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
         .replace(/(\n|\t)/gm, '')
