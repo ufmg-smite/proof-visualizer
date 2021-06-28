@@ -18,15 +18,23 @@ export class VisualizerTree extends React.Component<
         };
     }
 
+    componentDidUpdate(prevProps: any) {
+        if (this.props.content !== prevProps.content) {
+            this.setState({ nodes: this.props.content });
+        }
+    }
+
     public render(): JSX.Element {
         return (
-            <Tree
-                contents={this.state.nodes}
-                onNodeClick={this.handleNodeClick}
-                onNodeCollapse={this.handleNodeCollapse}
-                onNodeExpand={this.handleNodeExpand}
-                className={Classes.ELEVATION_0}
-            />
+            <div style={{ backgroundColor: '#394b59' }}>
+                <Tree
+                    contents={this.state.nodes}
+                    onNodeClick={this.handleNodeClick}
+                    onNodeCollapse={this.handleNodeCollapse}
+                    onNodeExpand={this.handleNodeExpand}
+                    className={Classes.ELEVATION_0}
+                />
+            </div>
         );
     }
 

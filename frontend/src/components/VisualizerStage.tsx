@@ -282,10 +282,47 @@ function ruleHelper(rule: string) {
     }
 }
 
+const createTree = (list: any): any => {
+    const map: any = {},
+        roots: any = [];
+    let node, i;
+
+    for (i = 0; i < list.length; i += 1) {
+        map[list[i].id] = i;
+        list[i].childNodes = [];
+    }
+
+    for (i = 0; i < list.length; i += 1) {
+        node = list[i];
+        if (node.parentId && list[map[node.parentId]]) {
+            list[map[node.parentId]].childNodes.push(node);
+        } else {
+            roots.push(node);
+        }
+    }
+    return roots;
+};
+
 const VisualizerStage: React.FC = () => {
     const dot = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.dot);
     const view = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.view);
     const proof = processDot(dot ? dot : '');
+    const proofTree = createTree(
+        Array.from(Array(proof.length).keys()).map((nodeId) => {
+            return {
+                id: nodeId,
+                icon: 'graph',
+                parentId: proof[nodeId].parent,
+                label: proof[nodeId].rule + ' => ' + proof[nodeId].conclusion,
+                descendants: proof[nodeId].descendants,
+                childNodes: [],
+                rule: proof[nodeId].rule,
+                conclusion: proof[nodeId].conclusion,
+                args: proof[nodeId].args,
+            };
+        }),
+    );
+
     const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
     const [nodeInfo, setNodeInfo] = useState<{
@@ -339,7 +376,6 @@ const VisualizerStage: React.FC = () => {
     };
 
     return (
-        // <div title={ruleHelper(focusText)}>
         <div>
             {proof.length > 1 ? (
                 <Canvas key={dot} view={view} proofNodes={proof} openDrawer={openDrawer}></Canvas>
