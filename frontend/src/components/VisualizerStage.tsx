@@ -294,7 +294,7 @@ const createTree = (list: any): any => {
 
     for (i = 0; i < list.length; i += 1) {
         node = list[i];
-        if (node.parentId && list[map[node.parentId]]) {
+        if (node.parentId !== NaN && list[map[node.parentId]]) {
             list[map[node.parentId]].childNodes.push(node);
         } else {
             roots.push(node);
