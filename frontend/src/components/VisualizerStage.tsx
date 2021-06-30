@@ -493,7 +493,7 @@ const VisualizerStage: React.FC = () => {
                 )
             ) : null}
             <Drawer
-                className={darkTheme ? '' : 'bp3-dark'}
+                className={darkTheme ? 'bp3-dark' : ''}
                 autoFocus={true}
                 canEscapeKeyClose={true}
                 canOutsideClickClose={true}
@@ -511,6 +511,7 @@ const VisualizerStage: React.FC = () => {
             >
                 <div className={Classes.DRAWER_BODY}>
                     <VisualizerTree
+                        darkTheme={darkTheme}
                         content={tree}
                         setNodeInfo={setNodeInfo}
                         originalNodeInfo={nodeInfoCopy}
