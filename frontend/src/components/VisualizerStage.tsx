@@ -375,11 +375,19 @@ const VisualizerStage: React.FC = () => {
         setNodeInfoCopy(nodeInfo);
         setDrawerIsOpen(true);
     };
-    console.log(style);
+
     return (
         <div>
             {proof.length > 1 ? (
-                <Canvas key={dot} view={view} proofNodes={proof} openDrawer={openDrawer}></Canvas>
+                style === 'tree' ? (
+                    <Canvas key={dot} view={view} proofNodes={proof} openDrawer={openDrawer}></Canvas>
+                ) : (
+                    <VisualizerTree
+                        content={proofTree}
+                        setNodeInfo={setNodeInfo}
+                        originalNodeInfo={nodeInfoCopy}
+                    ></VisualizerTree>
+                )
             ) : null}
             <Drawer
                 className={'bp3-dark'}
