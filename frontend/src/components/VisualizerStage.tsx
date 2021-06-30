@@ -376,17 +376,117 @@ const VisualizerStage: React.FC = () => {
         setDrawerIsOpen(true);
     };
 
+    const nodeInfoTable = () => {
+        return (
+            <table
+                id="table-node-info"
+                className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
+            >
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <strong>RULE </strong>{' '}
+                            <Icon id="rule-icon" icon="help" onClick={() => setRuleHelperOpen(!ruleHelperOpen)}></Icon>
+                        </td>
+                        <td>
+                            {nodeInfo.rule}
+                            <Collapse isOpen={ruleHelperOpen}>
+                                <Pre id="pre-rule">{ruleHelper(nodeInfo.rule)}</Pre>
+                            </Collapse>
+                        </td>
+                    </tr>
+                    {nodeInfo.args ? (
+                        <tr>
+                            <td>
+                                <strong>ARGS</strong>
+                            </td>
+                            <td>{nodeInfo.args}</td>
+                        </tr>
+                    ) : null}
+                    <tr>
+                        <td>
+                            <strong>CONCLUSION</strong>
+                        </td>
+                        <td>{nodeInfo.conclusion}</td>
+                    </tr>
+                    {!nodeInfo.topHidedNodes ? (
+                        <tr>
+                            <td>
+                                <strong>#DESCENDANTS</strong>
+                            </td>
+                            <td>{nodeInfo.nDescendants}</td>
+                        </tr>
+                    ) : (
+                        <tr>
+                            <td>
+                                <strong>#DESCENDANTS</strong>
+                            </td>
+                            <td>[{nodeInfo.topHidedNodes.map((node) => node[3]).join(', ')}]</td>
+                        </tr>
+                    )}
+                    {nodeInfo.nHided ? (
+                        <tr>
+                            <td>
+                                <strong>#HIDDEN</strong>
+                            </td>
+                            <td>
+                                [
+                                {nodeInfo.topHidedNodes ? nodeInfo.topHidedNodes.map((node) => node[4]).join(', ') : ''}
+                                ]
+                            </td>
+                        </tr>
+                    ) : null}
+                </tbody>
+            </table>
+        );
+    };
+
     return (
         <div>
             {proof.length > 1 ? (
                 style === 'tree' ? (
                     <Canvas key={dot} view={view} proofNodes={proof} openDrawer={openDrawer}></Canvas>
                 ) : (
-                    <VisualizerTree
-                        content={proofTree}
-                        setNodeInfo={setNodeInfo}
-                        originalNodeInfo={nodeInfoCopy}
-                    ></VisualizerTree>
+                    <div
+                        style={{
+                            backgroundColor: 'rgb(57, 75, 89)',
+                            height:
+                                window.innerHeight -
+                                (document.getElementsByClassName('bp3-navbar')[0] as HTMLElement).offsetHeight,
+                        }}
+                    >
+                        <div
+                            style={{
+                                width: '50%',
+                                height: '100%',
+                                float: 'left',
+                                clear: 'none',
+                                borderRight: '1px solid black',
+                            }}
+                        >
+                            <VisualizerTree
+                                content={proofTree}
+                                setNodeInfo={setNodeInfo}
+                                originalNodeInfo={nodeInfoCopy}
+                            ></VisualizerTree>
+                        </div>
+                        <div
+                            style={{
+                                width: '50%',
+                                height: '100%',
+                                float: 'left',
+                                clear: 'none',
+                            }}
+                        >
+                            {nodeInfoTable()}
+                        </div>
+                    </div>
                 )
             ) : null}
             <Drawer
@@ -412,80 +512,7 @@ const VisualizerStage: React.FC = () => {
                         setNodeInfo={setNodeInfo}
                         originalNodeInfo={nodeInfoCopy}
                     ></VisualizerTree>
-                    <div className={Classes.DIALOG_BODY}>
-                        <table
-                            id="table-node-info"
-                            className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
-                        >
-                            <thead>
-                                <tr>
-                                    <th>Property</th>
-                                    <th>Value</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <strong>RULE </strong>{' '}
-                                        <Icon
-                                            id="rule-icon"
-                                            icon="help"
-                                            onClick={() => setRuleHelperOpen(!ruleHelperOpen)}
-                                        ></Icon>
-                                    </td>
-                                    <td>
-                                        {nodeInfo.rule}
-                                        <Collapse isOpen={ruleHelperOpen}>
-                                            <Pre id="pre-rule">{ruleHelper(nodeInfo.rule)}</Pre>
-                                        </Collapse>
-                                    </td>
-                                </tr>
-                                {nodeInfo.args ? (
-                                    <tr>
-                                        <td>
-                                            <strong>ARGS</strong>
-                                        </td>
-                                        <td>{nodeInfo.args}</td>
-                                    </tr>
-                                ) : null}
-                                <tr>
-                                    <td>
-                                        <strong>CONCLUSION</strong>
-                                    </td>
-                                    <td>{nodeInfo.conclusion}</td>
-                                </tr>
-                                {!nodeInfo.topHidedNodes ? (
-                                    <tr>
-                                        <td>
-                                            <strong>#DESCENDANTS</strong>
-                                        </td>
-                                        <td>{nodeInfo.nDescendants}</td>
-                                    </tr>
-                                ) : (
-                                    <tr>
-                                        <td>
-                                            <strong>#DESCENDANTS</strong>
-                                        </td>
-                                        <td>[{nodeInfo.topHidedNodes.map((node) => node[3]).join(', ')}]</td>
-                                    </tr>
-                                )}
-                                {nodeInfo.nHided ? (
-                                    <tr>
-                                        <td>
-                                            <strong>#HIDDEN</strong>
-                                        </td>
-                                        <td>
-                                            [
-                                            {nodeInfo.topHidedNodes
-                                                ? nodeInfo.topHidedNodes.map((node) => node[4]).join(', ')
-                                                : ''}
-                                            ]
-                                        </td>
-                                    </tr>
-                                ) : null}
-                            </tbody>
-                        </table>
-                    </div>
+                    <div className={Classes.DIALOG_BODY}>{nodeInfoTable()}</div>
                 </div>
             </Drawer>
         </div>
