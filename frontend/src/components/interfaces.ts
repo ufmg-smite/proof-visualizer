@@ -153,6 +153,9 @@ interface stateInterface {
     darkThemeReducer: {
         darkTheme: boolean;
     };
+    styleReducer: {
+        style: string;
+    };
 }
 
 export type {

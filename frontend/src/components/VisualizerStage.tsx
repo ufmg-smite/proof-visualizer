@@ -306,6 +306,7 @@ const createTree = (list: any): any => {
 const VisualizerStage: React.FC = () => {
     const dot = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.dot);
     const view = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.view);
+    const style = useSelector<stateInterface, string | undefined>((state) => state.styleReducer.style);
     const proof = processDot(dot ? dot : '');
     const proofTree = createTree(
         Array.from(Array(proof.length).keys()).map((nodeId) => {
@@ -374,7 +375,7 @@ const VisualizerStage: React.FC = () => {
         setNodeInfoCopy(nodeInfo);
         setDrawerIsOpen(true);
     };
-
+    console.log(style);
     return (
         <div>
             {proof.length > 1 ? (

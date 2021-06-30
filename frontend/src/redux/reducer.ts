@@ -16,13 +16,18 @@ const initialStateDarkThemeReducer = {
     darkTheme: true,
 };
 
+const initialStateStyleReducer = {
+    style: 'tree',
+};
+
 type Action =
     | { type: 'SET_PROOF'; payload: proof }
     | { type: 'TOGGLE_DARK_THEME' }
     | { type: 'SET_DOT'; payload: proof['dot'] }
     | { type: 'BASIC_VIEW' }
     | { type: 'PROPOSITIONAL_VIEW' }
-    | { type: 'FULL_VIEW' };
+    | { type: 'FULL_VIEW' }
+    | { type: 'SET_STYLE'; payload: string };
 
 const proofReducer = (
     state: stateInterface['proofReducer'] = initialStateProofReducer,
@@ -92,4 +97,19 @@ const darkThemeReducer = (
     }
 };
 
-export default combineReducers({ proofReducer, darkThemeReducer });
+const styleReducer = (
+    state: stateInterface['styleReducer'] = initialStateStyleReducer,
+    action: Action,
+): stateInterface['styleReducer'] => {
+    switch (action.type) {
+        case 'SET_STYLE':
+            return {
+                ...state,
+                style: action.payload,
+            };
+        default:
+            return state;
+    }
+};
+
+export default combineReducers({ proofReducer, darkThemeReducer, styleReducer });

@@ -51,6 +51,10 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
         dispatch({ type: 'TOGGLE_DARK_THEME', payload: {} });
     };
 
+    const setStyle = (style: string) => {
+        dispatch({ type: 'SET_STYLE', payload: style });
+    };
+
     const changeView = (view: string) => {
         switch (view) {
             case 'basic':
@@ -69,6 +73,27 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             dispatch({ type: 'SET_DOT', payload: proof.dot });
         }, 10);
     };
+
+    const styleMenu = (
+        <Menu>
+            <MenuItem
+                icon="diagram-tree"
+                text="Tree"
+                onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                    e.preventDefault();
+                    setStyle('tree');
+                }}
+            />
+            <MenuItem
+                icon="folder-open"
+                text="Folder"
+                onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                    e.preventDefault();
+                    setStyle('folder');
+                }}
+            />
+        </Menu>
+    );
 
     const viewsMenu = (
         <Menu>
@@ -159,16 +184,11 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                         <Navbar.Heading>{proof.label}</Navbar.Heading>
                         <Navbar.Divider />
                         <Popover2
-                            content={proof.label ? exampleMenu : undefined}
+                            content={proof.label ? styleMenu : undefined}
                             placement="bottom-end"
                             disabled={proof.label ? false : true}
                         >
-                            <Button
-                                className="bp3-minimal"
-                                icon="download"
-                                text={windowSize.width >= 900 ? 'Download' : ''}
-                                disabled={proof.label ? false : true}
-                            />
+                            <Button className="bp3-minimal" text="Style" disabled={proof.label ? false : true} />
                         </Popover2>
                         <Popover2
                             content={proof.label ? viewsMenu : undefined}
@@ -179,6 +199,18 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                                 className="bp3-minimal"
                                 icon="diagram-tree"
                                 text={windowSize.width >= 900 ? 'View' : ''}
+                                disabled={proof.label ? false : true}
+                            />
+                        </Popover2>
+                        <Popover2
+                            content={proof.label ? exampleMenu : undefined}
+                            placement="bottom-end"
+                            disabled={proof.label ? false : true}
+                        >
+                            <Button
+                                className="bp3-minimal"
+                                icon="download"
+                                text={windowSize.width >= 900 ? 'Download' : ''}
                                 disabled={proof.label ? false : true}
                             />
                         </Popover2>
