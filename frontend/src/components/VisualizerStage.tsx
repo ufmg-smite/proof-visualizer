@@ -307,6 +307,7 @@ const VisualizerStage: React.FC = () => {
     const dot = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.dot);
     const view = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.view);
     const style = useSelector<stateInterface, string | undefined>((state) => state.styleReducer.style);
+    const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
     const proof = processDot(dot ? dot : '');
     const proofTree = createTree(
         Array.from(Array(proof.length).keys()).map((nodeId) => {
@@ -381,6 +382,7 @@ const VisualizerStage: React.FC = () => {
             <table
                 id="table-node-info"
                 className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
+                style={{ width: '100%' }}
             >
                 <thead>
                     <tr>
@@ -455,7 +457,7 @@ const VisualizerStage: React.FC = () => {
                 ) : (
                     <div
                         style={{
-                            backgroundColor: 'rgb(57, 75, 89)',
+                            backgroundColor: darkTheme ? 'rgb(57, 75, 89)' : 'white',
                             height:
                                 window.innerHeight -
                                 (document.getElementsByClassName('bp3-navbar')[0] as HTMLElement).offsetHeight,
@@ -471,6 +473,7 @@ const VisualizerStage: React.FC = () => {
                             }}
                         >
                             <VisualizerTree
+                                darkTheme={darkTheme}
                                 content={proofTree}
                                 setNodeInfo={setNodeInfo}
                                 originalNodeInfo={nodeInfoCopy}
@@ -490,7 +493,7 @@ const VisualizerStage: React.FC = () => {
                 )
             ) : null}
             <Drawer
-                className={'bp3-dark'}
+                className={darkTheme ? '' : 'bp3-dark'}
                 autoFocus={true}
                 canEscapeKeyClose={true}
                 canOutsideClickClose={true}

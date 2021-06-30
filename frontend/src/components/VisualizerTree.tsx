@@ -26,7 +26,7 @@ export class VisualizerTree extends React.Component<
 
     public render(): JSX.Element {
         return (
-            <div style={{ backgroundColor: '#394b59' }}>
+            <div style={{ backgroundColor: this.props.darkTheme ? '#394b59' : 'white' }}>
                 <Tree
                     contents={this.state.nodes}
                     onNodeClick={this.handleNodeClick}
