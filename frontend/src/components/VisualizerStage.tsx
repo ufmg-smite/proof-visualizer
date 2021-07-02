@@ -1,9 +1,11 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 
 import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
 import Canvas from './canvas/VisualizerCanvas';
 import { VisualizerTree } from './VisualizerTree';
+import VisualizerFolderStyle from './VisualizerFolderStyle';
 import { NodeInterface, stateInterface } from './interfaces';
 
 import '../scss/VisualizerStage.scss';
@@ -455,41 +457,7 @@ const VisualizerStage: React.FC = () => {
                 style === 'tree' ? (
                     <Canvas key={dot} view={view} proofNodes={proof} openDrawer={openDrawer}></Canvas>
                 ) : (
-                    <div
-                        style={{
-                            backgroundColor: darkTheme ? 'rgb(57, 75, 89)' : 'white',
-                            height:
-                                window.innerHeight -
-                                (document.getElementsByClassName('bp3-navbar')[0] as HTMLElement).offsetHeight,
-                        }}
-                    >
-                        <div
-                            style={{
-                                width: '50%',
-                                height: '100%',
-                                float: 'left',
-                                clear: 'none',
-                                borderRight: '1px solid black',
-                            }}
-                        >
-                            <VisualizerTree
-                                darkTheme={darkTheme}
-                                content={proofTree}
-                                setNodeInfo={setNodeInfo}
-                                originalNodeInfo={nodeInfoCopy}
-                            ></VisualizerTree>
-                        </div>
-                        <div
-                            style={{
-                                width: '50%',
-                                height: '100%',
-                                float: 'left',
-                                clear: 'none',
-                            }}
-                        >
-                            {nodeInfoTable()}
-                        </div>
-                    </div>
+                    <VisualizerFolderStyle proofTree={proofTree} ruleHelper={ruleHelper} />
                 )
             ) : null}
             <Drawer
