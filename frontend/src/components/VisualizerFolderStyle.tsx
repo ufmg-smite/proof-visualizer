@@ -52,7 +52,14 @@ const VisualizerFolderStyle: React.FC<{ proofTree: TreeNodeInfo[]; ruleHelper: (
                     darkTheme={darkTheme}
                     content={proofTree}
                     setNodeInfo={setNodeInfo}
-                    originalNodeInfo={proofTree}
+                    originalNodeInfo={{
+                        rule: '',
+                        args: '',
+                        conclusion: '',
+                        nHided: 0,
+                        nDescendants: 0,
+                        topHidedNodes: undefined,
+                    }}
                 ></VisualizerTree>
             </div>
             <div
