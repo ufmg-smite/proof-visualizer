@@ -11,7 +11,7 @@ app.options('*', cors());
 app.use(cors());
 app.use(express.json());
 
-const uri = process.env.ATLAS_URI;
+const uri = "mongodb://mongo:27017/proof-visualizer";
 mongoose.connect(uri, {
   useUnifiedTopology: true,
   useNewUrlParser: true,
