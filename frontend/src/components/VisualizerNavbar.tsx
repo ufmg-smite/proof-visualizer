@@ -188,7 +188,12 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                             placement="bottom-end"
                             disabled={proof.label ? false : true}
                         >
-                            <Button className="bp3-minimal" text="Style" disabled={proof.label ? false : true} />
+                            <Button
+                                icon="presentation"
+                                className="bp3-minimal"
+                                text={windowSize.width >= 900 ? 'Style' : ''}
+                                disabled={proof.label ? false : true}
+                            />
                         </Popover2>
                         <Popover2
                             content={proof.label ? viewsMenu : undefined}

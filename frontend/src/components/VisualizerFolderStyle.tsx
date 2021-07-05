@@ -46,6 +46,7 @@ const VisualizerFolderStyle: React.FC<{ proofTree: TreeNodeInfo[]; ruleHelper: (
                     float: 'left',
                     clear: 'none',
                     borderRight: '1px solid black',
+                    overflow: 'auto',
                 }}
             >
                 <VisualizerTree
