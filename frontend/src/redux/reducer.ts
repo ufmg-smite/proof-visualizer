@@ -20,6 +20,10 @@ const initialStateStyleReducer = {
     style: 'tree',
 };
 
+const initialStateLetMapReducer = {
+    letMap: {},
+};
+
 type Action =
     | { type: 'SET_PROOF'; payload: proof }
     | { type: 'TOGGLE_DARK_THEME' }
@@ -27,7 +31,13 @@ type Action =
     | { type: 'BASIC_VIEW' }
     | { type: 'PROPOSITIONAL_VIEW' }
     | { type: 'FULL_VIEW' }
-    | { type: 'SET_STYLE'; payload: string };
+    | { type: 'SET_STYLE'; payload: string }
+    | {
+          type: 'SET_LET_MAP';
+          payload: {
+              [Key: string]: string;
+          };
+      };
 
 const proofReducer = (
     state: stateInterface['proofReducer'] = initialStateProofReducer,
@@ -112,4 +122,19 @@ const styleReducer = (
     }
 };
 
-export default combineReducers({ proofReducer, darkThemeReducer, styleReducer });
+const letMapReducer = (
+    state: stateInterface['letMapReducer'] = initialStateLetMapReducer,
+    action: Action,
+): stateInterface['letMapReducer'] => {
+    switch (action.type) {
+        case 'SET_LET_MAP':
+            return {
+                ...state,
+                letMap: action.payload,
+            };
+        default:
+            return state;
+    }
+};
+
+export default combineReducers({ proofReducer, darkThemeReducer, styleReducer, letMapReducer });

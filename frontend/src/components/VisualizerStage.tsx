@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 
 import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
 import Canvas from './canvas/VisualizerCanvas';
@@ -53,6 +53,13 @@ function processDot(dot: string) {
         },
     ];
     dot = dot.split('"}}"\n').join('"}}";\n'); // Fix CVC5
+    let comment: any = dot.slice(dot.indexOf('comment='));
+    comment = comment ? JSON.parse(comment.slice(comment.indexOf('=') + 2, comment.indexOf(';') - 1)) : null;
+    if (comment) {
+        const dispatch = useDispatch();
+        dispatch({ type: 'SET_LET_MAP', payload: comment['letMap'] });
+    }
+
     const lines = dot
         .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
         .replace(/(\n|\t)/gm, '')

@@ -156,6 +156,11 @@ interface stateInterface {
     styleReducer: {
         style: string;
     };
+    letMapReducer: {
+        letMap: {
+            [Key: string]: string;
+        };
+    };
 }
 
 export type {

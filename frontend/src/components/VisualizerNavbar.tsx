@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Alignment, Button, Icon, Navbar, Switch, Menu, MenuItem } from '@blueprintjs/core';
+import { Alignment, Button, Icon, Navbar, Switch, Menu, MenuItem, Drawer, Classes, Position } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 
 import '../scss/VisualizerNavbar.scss';
@@ -43,6 +43,13 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     };
     const proof = useSelector<stateInterface, proof>((state: stateInterface) => state.proofReducer.proof);
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
+    const letMap = useSelector<
+        stateInterface,
+        {
+            [Key: string]: string;
+        }
+    >((state: stateInterface) => state.letMapReducer.letMap);
+    const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const windowSize = useWindowSize();
 
     const dispatch = useDispatch();
@@ -120,7 +127,6 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             />
         </Menu>
     );
-
     const exampleMenu = (
         <Menu>
             <MenuItem
@@ -150,7 +156,6 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             />
         </Menu>
     );
-
     return (
         <Navbar>
             <Navbar.Group align={Alignment.LEFT}>
@@ -207,6 +212,13 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                                 disabled={proof.label ? false : true}
                             />
                         </Popover2>
+                        <Button
+                            className="bp3-minimal"
+                            icon="translate"
+                            text={windowSize.width >= 900 ? 'Letification' : ''}
+                            disabled={proof.label ? false : true}
+                            onClick={() => setDrawerIsOpen(true)}
+                        />
                         <Popover2
                             content={proof.label ? exampleMenu : undefined}
                             placement="bottom-end"
@@ -228,6 +240,57 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     <Icon icon={darkTheme ? 'moon' : 'flash'}></Icon>
                 </span>
             </Navbar.Group>
+            <Drawer
+                className={darkTheme ? 'bp3-dark' : ''}
+                style={{ maxHeight: '50%' }}
+                autoFocus={true}
+                canEscapeKeyClose={true}
+                canOutsideClickClose={true}
+                enforceFocus={true}
+                hasBackdrop={false}
+                isOpen={drawerIsOpen}
+                position={Position.RIGHT}
+                usePortal={true}
+                onClose={(e) => {
+                    e.preventDefault();
+                    setDrawerIsOpen(false);
+                }}
+                icon="translate"
+                title="Letification"
+            >
+                <div className={Classes.DRAWER_BODY}>
+                    <div className={Classes.DIALOG_BODY}>
+                        <table
+                            id="table-node-info"
+                            className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
+                            style={{ width: '100%' }}
+                        >
+                            <thead>
+                                <tr>
+                                    <th style={{ width: '30px' }}>Property</th>
+                                    <th>Value</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {Object.keys(letMap).map(function (key) {
+                                    return (
+                                        <tr key={key}>
+                                            <td>
+                                                <strong>{key}</strong>
+                                            </td>
+                                            <td>{letMap[key]}</td>
+                                            <td>
+                                                <Button className="bp3-minimal" icon="translate" text="Translate" />
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </Drawer>
         </Navbar>
     );
 };
