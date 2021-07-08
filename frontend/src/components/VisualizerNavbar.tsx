@@ -6,6 +6,7 @@ import { Popover2 } from '@blueprintjs/popover2';
 
 import '../scss/VisualizerNavbar.scss';
 import { VisualizerNavbarProps, stateInterface, proof } from './interfaces';
+import VisualizerLetDrawer from './VisualizerLetDrawer';
 
 function useWindowSize() {
     // Initialize state with undefined width/height so server and client renders match
@@ -240,57 +241,9 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     <Icon icon={darkTheme ? 'moon' : 'flash'}></Icon>
                 </span>
             </Navbar.Group>
-            <Drawer
-                className={darkTheme ? 'bp3-dark' : ''}
-                style={{ maxHeight: '50%' }}
-                autoFocus={true}
-                canEscapeKeyClose={true}
-                canOutsideClickClose={true}
-                enforceFocus={true}
-                hasBackdrop={false}
-                isOpen={drawerIsOpen}
-                position={Position.RIGHT}
-                usePortal={true}
-                onClose={(e) => {
-                    e.preventDefault();
-                    setDrawerIsOpen(false);
-                }}
-                icon="translate"
-                title="Letification"
-            >
-                <div className={Classes.DRAWER_BODY}>
-                    <div className={Classes.DIALOG_BODY}>
-                        <table
-                            id="table-node-info"
-                            className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
-                            style={{ width: '100%' }}
-                        >
-                            <thead>
-                                <tr>
-                                    <th style={{ width: '30px' }}>Property</th>
-                                    <th>Value</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {Object.keys(letMap).map(function (key) {
-                                    return (
-                                        <tr key={key}>
-                                            <td>
-                                                <strong>{key}</strong>
-                                            </td>
-                                            <td>{letMap[key]}</td>
-                                            <td>
-                                                <Button className="bp3-minimal" icon="translate" text="Translate" />
-                                            </td>
-                                        </tr>
-                                    );
-                                })}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </Drawer>
+            {drawerIsOpen ? (
+                <VisualizerLetDrawer letMap={letMap} drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerIsOpen} />
+            ) : null}
         </Navbar>
     );
 };
