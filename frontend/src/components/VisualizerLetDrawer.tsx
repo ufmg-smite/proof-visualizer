@@ -56,7 +56,7 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ letMap, drawerIsOpen, s
                 setDrawerIsOpen(false);
             }}
             icon="translate"
-            title="Letification"
+            title="Let Map"
         >
             <div className={Classes.DRAWER_BODY}>
                 <div className={Classes.DIALOG_BODY}>

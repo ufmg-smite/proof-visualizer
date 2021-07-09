@@ -437,7 +437,15 @@ const VisualizerStage: React.FC = () => {
                     <tr>
                         <td>
                             <strong>RULE </strong>{' '}
-                            <Icon id="rule-icon" icon="help" onClick={() => setRuleHelperOpen(!ruleHelperOpen)}></Icon>
+                            <Icon
+                                id="rule-icon"
+                                icon="help"
+                                onClick={() => {
+                                    setArgsTranslatorOpen(false);
+                                    setConclusionTranslatorOpen(false);
+                                    setRuleHelperOpen(!ruleHelperOpen);
+                                }}
+                            ></Icon>
                         </td>
                         <td>
                             {nodeInfo.rule}
@@ -454,7 +462,11 @@ const VisualizerStage: React.FC = () => {
                                     <Icon
                                         id="rule-icon"
                                         icon="translate"
-                                        onClick={() => setArgsTranslatorOpen(!argsTranslatorOpen)}
+                                        onClick={() => {
+                                            setConclusionTranslatorOpen(false);
+                                            setRuleHelperOpen(false);
+                                            setArgsTranslatorOpen(!argsTranslatorOpen);
+                                        }}
                                     ></Icon>
                                 ) : null}
                             </td>
@@ -475,7 +487,11 @@ const VisualizerStage: React.FC = () => {
                                 <Icon
                                     id="rule-icon"
                                     icon="translate"
-                                    onClick={() => setConclusionTranslatorOpen(!conclusionTranslatorOpen)}
+                                    onClick={() => {
+                                        setArgsTranslatorOpen(false);
+                                        setRuleHelperOpen(false);
+                                        setConclusionTranslatorOpen(!conclusionTranslatorOpen);
+                                    }}
                                 ></Icon>
                             ) : null}
                         </td>
@@ -526,7 +542,12 @@ const VisualizerStage: React.FC = () => {
                 style === 'tree' ? (
                     <Canvas key={dot} view={view} proofNodes={proof} openDrawer={openDrawer}></Canvas>
                 ) : (
-                    <VisualizerFolderStyle proofTree={proofTree} ruleHelper={ruleHelper} />
+                    <VisualizerFolderStyle
+                        proofTree={proofTree}
+                        ruleHelper={ruleHelper}
+                        ident={ident}
+                        translate={translate}
+                    />
                 )
             ) : null}
             <Drawer

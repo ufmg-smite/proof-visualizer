@@ -6,15 +6,23 @@ import { VisualizerTree } from './VisualizerTree';
 
 import { stateInterface } from './interfaces';
 
-const VisualizerFolderStyle: React.FC<{ proofTree: TreeNodeInfo[]; ruleHelper: (s: string) => string }> = ({
-    proofTree,
-    ruleHelper,
-}: {
+interface folderStyleProps {
     proofTree: TreeNodeInfo[];
     ruleHelper: (s: string) => string;
-}) => {
+    ident: (s: string) => string;
+    translate: (s: string) => string;
+}
+
+const VisualizerFolderStyle: React.FC<folderStyleProps> = ({
+    proofTree,
+    ruleHelper,
+    ident,
+    translate,
+}: folderStyleProps) => {
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
     const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
+    const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);
+    const [conclusionTranslatorOpen, setConclusionTranslatorOpen] = useState(false);
     const [nodeInfo, setNodeInfo] = useState<{
         rule: string;
         args: string;
@@ -89,7 +97,11 @@ const VisualizerFolderStyle: React.FC<{ proofTree: TreeNodeInfo[]; ruleHelper: (
                                 <Icon
                                     id="rule-icon"
                                     icon="help"
-                                    onClick={() => setRuleHelperOpen(!ruleHelperOpen)}
+                                    onClick={() => {
+                                        setArgsTranslatorOpen(false);
+                                        setConclusionTranslatorOpen(false);
+                                        setRuleHelperOpen(!ruleHelperOpen);
+                                    }}
                                 ></Icon>
                             </td>
                             <td>
@@ -101,17 +113,53 @@ const VisualizerFolderStyle: React.FC<{ proofTree: TreeNodeInfo[]; ruleHelper: (
                         </tr>
                         {nodeInfo.args ? (
                             <tr>
-                                <td>
-                                    <strong>ARGS</strong>
+                                <td style={{ maxHeight: '500px', overflow: 'auto' }}>
+                                    <strong>ARGS</strong>{' '}
+                                    {nodeInfo.args.indexOf('let') !== -1 ? (
+                                        <Icon
+                                            id="rule-icon"
+                                            icon="translate"
+                                            onClick={() => {
+                                                setRuleHelperOpen(false);
+                                                setConclusionTranslatorOpen(false);
+                                                setArgsTranslatorOpen(!argsTranslatorOpen);
+                                            }}
+                                        ></Icon>
+                                    ) : null}
                                 </td>
-                                <td>{nodeInfo.args}</td>
+                                <td style={{ maxHeight: '500px', overflow: 'auto' }}>
+                                    {nodeInfo.args}
+                                    {nodeInfo.args.indexOf('let') !== -1 ? (
+                                        <Collapse isOpen={argsTranslatorOpen}>
+                                            <Pre id="pre-rule">{ident(translate(nodeInfo.args))}</Pre>
+                                        </Collapse>
+                                    ) : null}
+                                </td>
                             </tr>
                         ) : null}
                         <tr>
-                            <td>
-                                <strong>CONCLUSION</strong>
+                            <td style={{ maxHeight: '500px', overflow: 'auto' }}>
+                                <strong>CONCLUSION</strong>{' '}
+                                {nodeInfo.conclusion.indexOf('let') !== -1 ? (
+                                    <Icon
+                                        id="rule-icon"
+                                        icon="translate"
+                                        onClick={() => {
+                                            setRuleHelperOpen(false);
+                                            setArgsTranslatorOpen(false);
+                                            setConclusionTranslatorOpen(!conclusionTranslatorOpen);
+                                        }}
+                                    ></Icon>
+                                ) : null}
                             </td>
-                            <td>{nodeInfo.conclusion}</td>
+                            <td style={{ maxHeight: '500px', overflow: 'auto' }}>
+                                {nodeInfo.conclusion}
+                                {nodeInfo.conclusion.indexOf('let') !== -1 ? (
+                                    <Collapse isOpen={conclusionTranslatorOpen}>
+                                        <Pre id="pre-rule">{ident(translate(nodeInfo.conclusion))}</Pre>
+                                    </Collapse>
+                                ) : null}
+                            </td>
                         </tr>
                         {!nodeInfo.topHidedNodes ? (
                             <tr>

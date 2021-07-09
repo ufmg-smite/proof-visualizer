@@ -216,7 +216,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                         <Button
                             className="bp3-minimal"
                             icon="translate"
-                            text={windowSize.width >= 900 ? 'Letification' : ''}
+                            text={windowSize.width >= 900 ? 'Let Map' : ''}
                             disabled={proof.label ? false : true}
                             onClick={() => setDrawerIsOpen(true)}
                         />
