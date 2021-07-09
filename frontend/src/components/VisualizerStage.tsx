@@ -133,8 +133,7 @@ function processDot(dot: string) {
             nodes[child].rank = nodes[parent].rank + 1;
         }
     });
-
-    return nodes;
+    return comment ? [nodes, JSON.parse(comment)['letMap']] : [nodes, {}];
 }
 
 function ruleHelper(rule: string) {
@@ -312,12 +311,33 @@ const createTree = (list: any): any => {
     return roots;
 };
 
+const ident = (s: string) => {
+    let newS = s.split(')').join('\n)').replaceAll(' ', '\n');
+    let i = 0;
+    let pCounter = 0;
+    while (i < newS.length) {
+        if (newS[i] === '(' || newS[i] === '[') pCounter++;
+        else if (newS[i] === ')' || newS[i] === ']') pCounter--;
+        else if (newS[i] === '\n') {
+            if (newS[i + 1] === ')' || newS[i + 1] === ']') {
+                newS = [newS.slice(0, i + 1), '\t'.repeat(pCounter - 1), newS.slice(i + 1)].join('');
+                i += pCounter - 1;
+            } else {
+                newS = [newS.slice(0, i + 1), '\t'.repeat(pCounter), newS.slice(i + 1)].join('');
+                i += pCounter;
+            }
+        }
+        i++;
+    }
+    return newS;
+};
+
 const VisualizerStage: React.FC = () => {
     const dot = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.dot);
     const view = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.view);
     const style = useSelector<stateInterface, string | undefined>((state) => state.styleReducer.style);
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
-    const proof = processDot(dot ? dot : '');
+    const [proof, letMap] = processDot(dot ? dot : '');
     const proofTree = createTree(
         Array.from(Array(proof.length).keys()).map((nodeId) => {
             return {
@@ -336,6 +356,8 @@ const VisualizerStage: React.FC = () => {
 
     const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
+    const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);
+    const [conclusionTranslatorOpen, setConclusionTranslatorOpen] = useState(false);
     const [nodeInfo, setNodeInfo] = useState<{
         rule: string;
         args: string;
@@ -367,6 +389,18 @@ const VisualizerStage: React.FC = () => {
         topHidedNodes: undefined,
     });
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
+    const translate = (s: string) => {
+        console.log(s);
+        let newS = s;
+        let i = newS.indexOf('let');
+        while (i !== -1) {
+            const l = newS.slice(i).split(/[ |)|,]/)[0];
+            console.log(l);
+            newS = newS.replace(l, letMap[l]);
+            i = newS.indexOf('let');
+        }
+        return newS;
+    };
 
     const openDrawer = (
         nodeInfo: {
@@ -415,16 +449,44 @@ const VisualizerStage: React.FC = () => {
                     {nodeInfo.args ? (
                         <tr>
                             <td>
-                                <strong>ARGS</strong>
+                                <strong>ARGS</strong>{' '}
+                                {nodeInfo.args.indexOf('let') !== -1 ? (
+                                    <Icon
+                                        id="rule-icon"
+                                        icon="translate"
+                                        onClick={() => setArgsTranslatorOpen(!argsTranslatorOpen)}
+                                    ></Icon>
+                                ) : null}
                             </td>
-                            <td>{nodeInfo.args}</td>
+                            <td style={{ maxHeight: '300px', overflow: 'auto' }}>
+                                {nodeInfo.args}
+                                {nodeInfo.args.indexOf('let') !== -1 ? (
+                                    <Collapse isOpen={argsTranslatorOpen}>
+                                        <Pre id="pre-rule">{ident(translate(nodeInfo.args))}</Pre>
+                                    </Collapse>
+                                ) : null}
+                            </td>
                         </tr>
                     ) : null}
                     <tr>
-                        <td>
-                            <strong>CONCLUSION</strong>
+                        <td style={{ maxHeight: '300px', overflow: 'auto' }}>
+                            <strong>CONCLUSION</strong>{' '}
+                            {nodeInfo.conclusion.indexOf('let') !== -1 ? (
+                                <Icon
+                                    id="rule-icon"
+                                    icon="translate"
+                                    onClick={() => setConclusionTranslatorOpen(!conclusionTranslatorOpen)}
+                                ></Icon>
+                            ) : null}
                         </td>
-                        <td>{nodeInfo.conclusion}</td>
+                        <td style={{ maxHeight: '300px', overflow: 'auto' }}>
+                            {nodeInfo.conclusion}
+                            {nodeInfo.conclusion.indexOf('let') !== -1 ? (
+                                <Collapse isOpen={conclusionTranslatorOpen}>
+                                    <Pre id="pre-rule">{ident(translate(nodeInfo.conclusion))}</Pre>
+                                </Collapse>
+                            ) : null}
+                        </td>
                     </tr>
                     {!nodeInfo.topHidedNodes ? (
                         <tr>
@@ -480,6 +542,8 @@ const VisualizerStage: React.FC = () => {
                 onClose={(e) => {
                     e.preventDefault();
                     setDrawerIsOpen(false);
+                    setArgsTranslatorOpen(false);
+                    setConclusionTranslatorOpen(false);
                 }}
                 icon="info-sign"
                 title="Node info"

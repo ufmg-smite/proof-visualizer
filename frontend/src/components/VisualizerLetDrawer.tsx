@@ -42,7 +42,7 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ letMap, drawerIsOpen, s
     return (
         <Drawer
             className={darkTheme ? 'bp3-dark' : ''}
-            style={{ maxHeight: '65%' }}
+            style={{ maxHeight: '65%', width: '35%' }}
             autoFocus={true}
             canEscapeKeyClose={true}
             canOutsideClickClose={true}
