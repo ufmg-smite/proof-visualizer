@@ -54,10 +54,10 @@ function processDot(dot: string) {
     ];
     dot = dot.split('"}}"\n').join('"}}";\n'); // Fix CVC5
     let comment: any = dot.slice(dot.indexOf('comment='));
-    comment = comment ? JSON.parse(comment.slice(comment.indexOf('=') + 2, comment.indexOf(';') - 1)) : null;
+    comment = comment ? comment.slice(comment.indexOf('=') + 2, comment.indexOf(';') - 1) : null;
     if (comment) {
         const dispatch = useDispatch();
-        dispatch({ type: 'SET_LET_MAP', payload: comment['letMap'] });
+        dispatch({ type: 'SET_LET_MAP', payload: JSON.parse(comment)['letMap'] });
     }
 
     const lines = dot
