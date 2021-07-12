@@ -31,13 +31,6 @@ interface DialogProps {
     title: React.ReactNode;
 }
 
-interface ElementProofListProps {
-    proof: proof;
-    deleteProof: (id: ObjectID | undefined, name: string) => void;
-    editProof: (proof: proof) => void;
-    setProof: (proof: proof) => void;
-}
-
 interface FormNewProofProps {
     proof: proof;
     setProof: Dispatch<SetStateAction<proof>>;
@@ -125,20 +118,12 @@ interface proof {
     view?: string;
 }
 
-interface ProofListProps {
-    addDeleteToast: (err: string) => void;
-    setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
-    setDialogContent: Dispatch<SetStateAction<string>>;
-    setProof: Dispatch<SetStateAction<proof>>;
-}
-
 interface VisualizerDialogProps {
     dialogIsOpen: boolean;
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
     dialogContent: string;
     setDialogContent: Dispatch<SetStateAction<string>>;
     addErrorToast: (err: string) => void;
-    addDeleteToast: (err: string) => void;
 }
 
 interface VisualizerNavbarProps {
@@ -167,13 +152,11 @@ export type {
     CanvasProps,
     CanvasState,
     DialogProps,
-    ElementProofListProps,
     FormNewProofProps,
     LineProps,
     NodeInterface,
     NodeProps,
     proof,
-    ProofListProps,
     VisualizerDialogProps,
     VisualizerNavbarProps,
     stateInterface,

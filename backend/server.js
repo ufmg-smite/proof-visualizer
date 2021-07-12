@@ -1,8 +1,5 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
-
-require('dotenv').config();
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -10,17 +7,6 @@ const port = process.env.PORT || 5000;
 app.options('*', cors());
 app.use(cors());
 app.use(express.json());
-
-const uri = "mongodb://mongo:27017/proof-visualizer";
-mongoose.connect(uri, {
-  useUnifiedTopology: true,
-  useNewUrlParser: true,
-  useCreateIndex: true,
-});
-const { connection } = mongoose;
-connection.once('open', () => {
-  console.log('MongoDB database connection established successfully');
-});
 
 const proofRouter = require('./routes/proof');
 

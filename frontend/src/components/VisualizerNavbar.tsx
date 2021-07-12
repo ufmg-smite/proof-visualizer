@@ -94,10 +94,10 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             />
             <MenuItem
                 icon="folder-open"
-                text="Folder"
+                text="Directory"
                 onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                     e.preventDefault();
-                    setStyle('folder');
+                    setStyle('directory');
                 }}
             />
         </Menu>
@@ -164,15 +164,6 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     <b>{windowSize.width >= 900 ? 'Proof Visualizer' : 'PV'}</b>
                 </Navbar.Heading>
                 <Navbar.Divider />
-                <Button
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        openDialog('proof-list');
-                    }}
-                    className="bp3-minimal"
-                    icon="list"
-                    text={windowSize.width >= 900 ? 'Proof list' : ''}
-                />
                 <Button
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                         e.preventDefault();

@@ -23,9 +23,6 @@ const App: React.FC = () => {
     const addErrorToast = (err: string) => {
         toaster.show({ icon: 'warning-sign', intent: Intent.DANGER, message: err });
     };
-    const addDeleteToast = (proofName: string) => {
-        toaster.show({ icon: 'trash', intent: Intent.DANGER, message: '"' + proofName + '" was deleted.' });
-    };
 
     return (
         <div className={darkTheme ? ' bp3-dark' : ''}>
@@ -37,7 +34,6 @@ const App: React.FC = () => {
                 dialogContent={dialogContent}
                 setDialogContent={setDialogContent}
                 addErrorToast={addErrorToast}
-                addDeleteToast={addDeleteToast}
             ></VisualizerDialog>
             <VisualizerStage></VisualizerStage>
         </div>
