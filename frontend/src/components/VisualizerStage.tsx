@@ -311,8 +311,8 @@ const createTree = (list: any): any => {
     return roots;
 };
 
-const ident = (s: string) => {
-    let newS = s.split(')').join('\n)').replaceAll(' ', '\n');
+const indent = (s: string) => {
+    let newS = s.replaceAll(' ', '\n');
     let i = 0;
     let pCounter = 0;
     while (i < newS.length) {
@@ -320,10 +320,10 @@ const ident = (s: string) => {
         else if (newS[i] === ')' || newS[i] === ']') pCounter--;
         else if (newS[i] === '\n') {
             if (newS[i + 1] === ')' || newS[i + 1] === ']') {
-                newS = [newS.slice(0, i + 1), '\t'.repeat(pCounter - 1), newS.slice(i + 1)].join('');
+                newS = [newS.slice(0, i + 1), '  '.repeat(pCounter - 1), newS.slice(i + 1)].join('');
                 i += pCounter - 1;
             } else {
-                newS = [newS.slice(0, i + 1), '\t'.repeat(pCounter), newS.slice(i + 1)].join('');
+                newS = [newS.slice(0, i + 1), '  '.repeat(pCounter), newS.slice(i + 1)].join('');
                 i += pCounter;
             }
         }
@@ -474,7 +474,7 @@ const VisualizerStage: React.FC = () => {
                                 {nodeInfo.args}
                                 {nodeInfo.args.indexOf('let') !== -1 ? (
                                     <Collapse isOpen={argsTranslatorOpen}>
-                                        <Pre id="pre-rule">{ident(translate(nodeInfo.args))}</Pre>
+                                        <Pre id="pre-rule">{indent(translate(nodeInfo.args))}</Pre>
                                     </Collapse>
                                 ) : null}
                             </td>
@@ -499,7 +499,7 @@ const VisualizerStage: React.FC = () => {
                             {nodeInfo.conclusion}
                             {nodeInfo.conclusion.indexOf('let') !== -1 ? (
                                 <Collapse isOpen={conclusionTranslatorOpen}>
-                                    <Pre id="pre-rule">{ident(translate(nodeInfo.conclusion))}</Pre>
+                                    <Pre id="pre-rule">{indent(translate(nodeInfo.conclusion))}</Pre>
                                 </Collapse>
                             ) : null}
                         </td>
@@ -545,7 +545,7 @@ const VisualizerStage: React.FC = () => {
                     <VisualizerFolderStyle
                         proofTree={proofTree}
                         ruleHelper={ruleHelper}
-                        ident={ident}
+                        ident={indent}
                         translate={translate}
                     />
                 )

@@ -14,7 +14,7 @@ interface letDrawerProps {
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const ident = (s: string) => {
+const indent = (s: string) => {
     let newS = s.replaceAll(' ', '\n');
     let i = 0;
     let pCounter = 0;
@@ -23,10 +23,10 @@ const ident = (s: string) => {
         else if (newS[i] === ')') pCounter--;
         else if (newS[i] === '\n') {
             if (newS[i + 1] === ')') {
-                newS = [newS.slice(0, i + 1), '\t'.repeat(pCounter - 1), newS.slice(i + 1)].join('');
+                newS = [newS.slice(0, i + 1), '    '.repeat(pCounter - 1), newS.slice(i + 1)].join('');
                 i += pCounter - 1;
             } else {
-                newS = [newS.slice(0, i + 1), '\t'.repeat(pCounter), newS.slice(i + 1)].join('');
+                newS = [newS.slice(0, i + 1), '    '.repeat(pCounter), newS.slice(i + 1)].join('');
                 i += pCounter;
             }
         }
@@ -79,7 +79,7 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ letMap, drawerIsOpen, s
                                         <td>
                                             <strong>{key}</strong>
                                         </td>
-                                        <td style={{ whiteSpace: 'pre-wrap' }}>{ident(letMapS[key])}</td>
+                                        <td style={{ whiteSpace: 'pre-wrap' }}>{indent(letMapS[key])}</td>
                                         <td>
                                             <Button
                                                 onClick={() => {
