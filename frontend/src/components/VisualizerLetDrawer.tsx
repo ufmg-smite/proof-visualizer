@@ -94,7 +94,7 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ letMap, drawerIsOpen, s
                                                 }}
                                                 className="bp3-minimal"
                                                 icon="translate"
-                                                text="Translate"
+                                                text="Expand"
                                             />
                                             <Button
                                                 onClick={() => {
