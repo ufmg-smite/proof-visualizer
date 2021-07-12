@@ -15,7 +15,7 @@ interface letDrawerProps {
 }
 
 const ident = (s: string) => {
-    let newS = s.split(')').join('\n)').replaceAll(' ', '\n');
+    let newS = s.replaceAll(' ', '\n');
     let i = 0;
     let pCounter = 0;
     while (i < newS.length) {
