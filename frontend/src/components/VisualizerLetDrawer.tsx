@@ -3,7 +3,6 @@ import { useSelector } from 'react-redux';
 import { Dispatch, SetStateAction } from 'react';
 import { Button, Drawer, Classes, Position } from '@blueprintjs/core';
 
-import '../scss/VisualizerNavbar.scss';
 import { stateInterface } from './interfaces';
 
 interface letDrawerProps {
