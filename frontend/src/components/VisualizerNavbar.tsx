@@ -167,15 +167,6 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                 <Button
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                         e.preventDefault();
-                        openDialog('proof-list');
-                    }}
-                    className="bp3-minimal"
-                    icon="list"
-                    text={windowSize.width >= 900 ? 'Proof list' : ''}
-                />
-                <Button
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
                         openDialog('new-proof');
                     }}
                     className="bp3-minimal"

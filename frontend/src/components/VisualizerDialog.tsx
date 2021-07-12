@@ -1,12 +1,11 @@
 import React, { Dispatch, SetStateAction, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 
 import axios from 'axios';
 import { Button, Classes, Dialog, Intent, Spinner } from '@blueprintjs/core';
 import { Icon } from '@blueprintjs/core/lib/esm/components/icon/icon';
 
 import FormNewProof from './FormNewProof';
-import ProofList from './ProofList';
 
 import '../scss/VisualizerDialog.scss';
 import { proof, VisualizerDialogProps, DialogProps, stateInterface } from './interfaces';
@@ -68,7 +67,6 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     setDialogContent,
     setDialogIsOpen,
     addErrorToast,
-    addDeleteToast,
 }: VisualizerDialogProps) => {
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
 
@@ -79,14 +77,16 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     const [proof, setProof] = useState<proof>({ _id: undefined, label: '', options: '', problem: '' });
     const [processingProof, setProcessingProof] = useState(false);
     const [proofProcessed, setProofProcessed] = useState(false);
+    const dispatch = useDispatch();
+
     const handleSubmit = async (proof: proof) => {
         setProcessingProof(true);
         await axios
             .post('http://localhost:5000/proof/new-proof/', proof)
             .then(async (res) => {
                 setProofProcessed(true);
-                console.log(res.data);
-                return res.data;
+                proof.dot = res.data;
+                dispatch({ type: 'SET_PROOF', payload: proof });
             })
             .catch((err) => {
                 setProcessingProof(false);
@@ -101,20 +101,8 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 <div className="welcome-menu">
                     <h2>Welcome to Proof Visualizer</h2>
                     <p>Open or create a proof to begin exploring the app.</p>
-                    <Button icon="list" large text="Proof list" onClick={() => setDialogContent('proof-list')} />
                     <Button icon="add" large text="New proof" onClick={() => setDialogContent('new-proof')} />
                 </div>
-            );
-            break;
-        case 'proof-list':
-            dialogProps = { icon: 'list', title: 'Proof List' };
-            dialogBody = (
-                <ProofList
-                    addDeleteToast={addDeleteToast}
-                    setDialogIsOpen={setDialogIsOpen}
-                    setDialogContent={setDialogContent}
-                    setProof={setProof}
-                ></ProofList>
             );
             break;
         case 'new-proof':
