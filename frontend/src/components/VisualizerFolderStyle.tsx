@@ -6,6 +6,8 @@ import { VisualizerTree } from './VisualizerTree';
 
 import { stateInterface } from './interfaces';
 
+import '../scss/VisualizerFolderStyle.scss';
+
 interface folderStyleProps {
     proofTree: TreeNodeInfo[];
     ruleHelper: (s: string) => string;
@@ -104,7 +106,7 @@ const VisualizerFolderStyle: React.FC<folderStyleProps> = ({
                                     }}
                                 ></Icon>
                             </td>
-                            <td>
+                            <td className="value">
                                 {nodeInfo.rule}
                                 <Collapse isOpen={ruleHelperOpen}>
                                     <Pre id="pre-rule">{ruleHelper(nodeInfo.rule)}</Pre>
@@ -113,7 +115,7 @@ const VisualizerFolderStyle: React.FC<folderStyleProps> = ({
                         </tr>
                         {nodeInfo.args ? (
                             <tr>
-                                <td style={{ maxHeight: '500px', overflow: 'auto' }}>
+                                <td>
                                     <strong>ARGS</strong>{' '}
                                     {nodeInfo.args.indexOf('let') !== -1 ? (
                                         <Icon
@@ -127,7 +129,7 @@ const VisualizerFolderStyle: React.FC<folderStyleProps> = ({
                                         ></Icon>
                                     ) : null}
                                 </td>
-                                <td style={{ maxHeight: '500px', overflow: 'auto' }}>
+                                <td className="value">
                                     {nodeInfo.args}
                                     {nodeInfo.args.indexOf('let') !== -1 ? (
                                         <Collapse isOpen={argsTranslatorOpen}>
@@ -138,7 +140,7 @@ const VisualizerFolderStyle: React.FC<folderStyleProps> = ({
                             </tr>
                         ) : null}
                         <tr>
-                            <td style={{ maxHeight: '500px', overflow: 'auto' }}>
+                            <td>
                                 <strong>CONCLUSION</strong>{' '}
                                 {nodeInfo.conclusion.indexOf('let') !== -1 ? (
                                     <Icon
@@ -152,7 +154,7 @@ const VisualizerFolderStyle: React.FC<folderStyleProps> = ({
                                     ></Icon>
                                 ) : null}
                             </td>
-                            <td style={{ maxHeight: '500px', overflow: 'auto' }}>
+                            <td className="value">
                                 {nodeInfo.conclusion}
                                 {nodeInfo.conclusion.indexOf('let') !== -1 ? (
                                     <Collapse isOpen={conclusionTranslatorOpen}>
