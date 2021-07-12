@@ -6,21 +6,21 @@ import { VisualizerTree } from './VisualizerTree';
 
 import { stateInterface } from './interfaces';
 
-import '../scss/VisualizerFolderStyle.scss';
+import '../scss/VisualizerDirectoryStyle.scss';
 
-interface folderStyleProps {
+interface directoryStyleProps {
     proofTree: TreeNodeInfo[];
     ruleHelper: (s: string) => string;
     ident: (s: string) => string;
     translate: (s: string) => string;
 }
 
-const VisualizerFolderStyle: React.FC<folderStyleProps> = ({
+const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
     proofTree,
     ruleHelper,
     ident,
     translate,
-}: folderStyleProps) => {
+}: directoryStyleProps) => {
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
     const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
     const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);
@@ -199,4 +199,4 @@ const VisualizerFolderStyle: React.FC<folderStyleProps> = ({
     );
 };
 
-export default VisualizerFolderStyle;
+export default VisualizerDirectoryStyle;

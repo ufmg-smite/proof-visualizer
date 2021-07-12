@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
 import Canvas from './canvas/VisualizerCanvas';
 import { VisualizerTree } from './VisualizerTree';
-import VisualizerFolderStyle from './VisualizerFolderStyle';
+import VisualizerDirectoryStyle from './VisualizerDirectoryStyle';
 import { NodeInterface, stateInterface } from './interfaces';
 
 import '../scss/VisualizerStage.scss';
@@ -542,7 +542,7 @@ const VisualizerStage: React.FC = () => {
                 style === 'tree' ? (
                     <Canvas key={dot} view={view} proofNodes={proof} openDrawer={openDrawer}></Canvas>
                 ) : (
-                    <VisualizerFolderStyle
+                    <VisualizerDirectoryStyle
                         proofTree={proofTree}
                         ruleHelper={ruleHelper}
                         ident={indent}

@@ -94,10 +94,10 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             />
             <MenuItem
                 icon="folder-open"
-                text="Folder"
+                text="Directory"
                 onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                     e.preventDefault();
-                    setStyle('folder');
+                    setStyle('directory');
                 }}
             />
         </Menu>
