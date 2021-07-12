@@ -6,6 +6,7 @@ import { Popover2 } from '@blueprintjs/popover2';
 
 import '../scss/VisualizerNavbar.scss';
 import { VisualizerNavbarProps, stateInterface, proof } from './interfaces';
+import VisualizerLetDrawer from './VisualizerLetDrawer';
 
 function useWindowSize() {
     // Initialize state with undefined width/height so server and client renders match
@@ -43,6 +44,13 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     };
     const proof = useSelector<stateInterface, proof>((state: stateInterface) => state.proofReducer.proof);
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
+    const letMap = useSelector<
+        stateInterface,
+        {
+            [Key: string]: string;
+        }
+    >((state: stateInterface) => state.letMapReducer.letMap);
+    const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const windowSize = useWindowSize();
 
     const dispatch = useDispatch();
@@ -120,7 +128,6 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             />
         </Menu>
     );
-
     const exampleMenu = (
         <Menu>
             <MenuItem
@@ -150,7 +157,6 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             />
         </Menu>
     );
-
     return (
         <Navbar>
             <Navbar.Group align={Alignment.LEFT}>
@@ -207,6 +213,13 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                                 disabled={proof.label ? false : true}
                             />
                         </Popover2>
+                        <Button
+                            className="bp3-minimal"
+                            icon="translate"
+                            text={windowSize.width >= 900 ? 'Let Map' : ''}
+                            disabled={proof.label ? false : true}
+                            onClick={() => setDrawerIsOpen(true)}
+                        />
                         <Popover2
                             content={proof.label ? exampleMenu : undefined}
                             placement="bottom-end"
@@ -228,6 +241,9 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     <Icon icon={darkTheme ? 'moon' : 'flash'}></Icon>
                 </span>
             </Navbar.Group>
+            {drawerIsOpen ? (
+                <VisualizerLetDrawer letMap={letMap} drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerIsOpen} />
+            ) : null}
         </Navbar>
     );
 };
