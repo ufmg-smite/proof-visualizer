@@ -79,16 +79,15 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     const [proof, setProof] = useState<proof>({ _id: undefined, label: '', options: '', problem: '' });
     const [processingProof, setProcessingProof] = useState(false);
     const [proofProcessed, setProofProcessed] = useState(false);
-    const handleSubmit = async (proof: proof, edit: boolean) => {
+    const handleSubmit = async (proof: proof) => {
+        setProcessingProof(true);
         await axios
-            .post('http://localhost:5000/proof/' + (edit ? 'edit/' + proof._id : 'add'), proof)
+            .post('http://localhost:5000/proof/new-proof/', proof)
             .then(async (res) => {
-                setProcessingProof(true);
-                await axios.get(`http://localhost:5000/proof/process-proof/${res.data}`);
                 setProofProcessed(true);
+                console.log(res.data);
                 return res.data;
             })
-            .then(() => setProofProcessed(true))
             .catch((err) => {
                 setProcessingProof(false);
                 addErrorToast(err.response ? err.response.data.message : 'Error! =(');
