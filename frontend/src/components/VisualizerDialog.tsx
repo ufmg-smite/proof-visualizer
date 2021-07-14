@@ -33,34 +33,6 @@ function dialogBodyNewEditProof(
     );
 }
 
-function succesButtonNewEditProof(
-    edit: boolean,
-    proofProcessed: boolean,
-    processingProof: boolean,
-    setProcessingProof: Dispatch<SetStateAction<boolean>>,
-    proof: proof,
-    handleSubmit: (proof: proof, edit: boolean) => void,
-) {
-    return processingProof || proofProcessed ? (
-        <></>
-    ) : (
-        <Button
-            onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                e.preventDefault();
-                setProcessingProof(!processingProof);
-                handleSubmit(
-                    { _id: proof._id, label: proof.label, options: proof.options, problem: proof.problem },
-                    edit,
-                );
-            }}
-            intent={Intent.SUCCESS}
-            disabled={processingProof || proof.label === '' || proof.problem === ''}
-        >
-            {edit ? 'Edit' : 'Generate'} Proof
-        </Button>
-    );
-}
-
 const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     dialogIsOpen,
     dialogContent,
@@ -108,25 +80,23 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
         case 'new-proof':
             dialogProps = { icon: 'add', title: 'New Proof' };
             dialogBody = dialogBodyNewEditProof(proofProcessed, processingProof, proof, setProof);
-            succesButton = succesButtonNewEditProof(
-                false,
-                proofProcessed,
-                processingProof,
-                setProcessingProof,
-                proof,
-                handleSubmit,
-            );
-            break;
-        case 'edit-proof':
-            dialogProps = { icon: 'edit', title: 'Edit Proof' };
-            dialogBody = dialogBodyNewEditProof(proofProcessed, processingProof, proof, setProof);
-            succesButton = succesButtonNewEditProof(
-                true,
-                proofProcessed,
-                processingProof,
-                setProcessingProof,
-                proof,
-                handleSubmit,
+            succesButton = (
+                <Button
+                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                        e.preventDefault();
+                        setProcessingProof(!processingProof);
+                        handleSubmit({
+                            _id: proof._id,
+                            label: proof.label,
+                            options: proof.options,
+                            problem: proof.problem,
+                        });
+                    }}
+                    intent={Intent.SUCCESS}
+                    disabled={processingProof || proof.label === '' || proof.problem === ''}
+                >
+                    Generate Proof
+                </Button>
             );
             break;
     }
