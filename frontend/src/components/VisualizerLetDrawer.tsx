@@ -78,8 +78,10 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ letMap, drawerIsOpen, s
                                         <td>
                                             <strong>{key}</strong>
                                         </td>
-                                        <td style={{ whiteSpace: 'pre-wrap' }}>{indent(letMapS[key])}</td>
-                                        <td>
+                                        <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>
+                                            {indent(letMapS[key])}
+                                        </td>
+                                        <td style={{ width: '150px', display: 'flex', flexDirection: 'column' }}>
                                             <Button
                                                 onClick={() => {
                                                     const newLetMap = { ...letMapS };
