@@ -173,6 +173,15 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     icon="add"
                     text={windowSize.width >= 900 ? 'New Proof' : ''}
                 />
+                <Button
+                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                        e.preventDefault();
+                        openDialog('upload-proof');
+                    }}
+                    className="bp3-minimal"
+                    icon="upload"
+                    text={windowSize.width >= 900 ? 'Upload Proof' : ''}
+                />
             </Navbar.Group>
 
             <Navbar.Group align={Alignment.RIGHT}>

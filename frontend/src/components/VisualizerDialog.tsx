@@ -2,7 +2,7 @@ import React, { Dispatch, SetStateAction, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import axios from 'axios';
-import { Button, Classes, Dialog, Intent, Spinner } from '@blueprintjs/core';
+import { Button, Classes, Dialog, FileInput, Intent, Spinner } from '@blueprintjs/core';
 import { Icon } from '@blueprintjs/core/lib/esm/components/icon/icon';
 
 import FormNewProof from './FormNewProof';
@@ -10,7 +10,7 @@ import FormNewProof from './FormNewProof';
 import '../scss/VisualizerDialog.scss';
 import { proof, VisualizerDialogProps, DialogProps, stateInterface } from './interfaces';
 
-function dialogBodyNewEditProof(
+function dialogBodyNewProof(
     proofProcessed: boolean,
     processingProof: boolean,
     proof: proof,
@@ -30,6 +30,24 @@ function dialogBodyNewEditProof(
         </div>
     ) : (
         <FormNewProof proof={proof} setProof={setProof}></FormNewProof>
+    );
+}
+
+function dialogBodyUploadProof(proofProcessed: boolean, processingProof: boolean) {
+    return proofProcessed ? (
+        <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
+            <Icon icon="tick" intent={Intent.SUCCESS} iconSize={40}></Icon>
+            <br></br>
+            <br></br>
+            <p>Your proof is ready to be visualized!</p>
+        </div>
+    ) : processingProof ? (
+        <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
+            <p>Processing your proof...</p>
+            <Spinner size={30} />
+        </div>
+    ) : (
+        <FileInput fill={true} text="Choose file..." />
     );
 }
 
@@ -79,7 +97,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
             break;
         case 'new-proof':
             dialogProps = { icon: 'add', title: 'New Proof' };
-            dialogBody = dialogBodyNewEditProof(proofProcessed, processingProof, proof, setProof);
+            dialogBody = dialogBodyNewProof(proofProcessed, processingProof, proof, setProof);
             succesButton = (
                 <Button
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
@@ -96,6 +114,15 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                     disabled={processingProof || proof.label === '' || proof.problem === ''}
                 >
                     Generate Proof
+                </Button>
+            );
+            break;
+        case 'upload-proof':
+            dialogProps = { icon: 'upload', title: 'Upload Proof' };
+            dialogBody = dialogBodyUploadProof(proofProcessed, processingProof);
+            succesButton = (
+                <Button intent={Intent.SUCCESS} disabled={true}>
+                    Upload Proof
                 </Button>
             );
             break;
