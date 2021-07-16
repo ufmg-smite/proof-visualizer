@@ -20,9 +20,6 @@ const App: React.FC = () => {
     const refHandlers = {
         toaster: (ref: Toaster) => (toaster = ref),
     };
-    const addErrorToast = (err: string) => {
-        toaster.show({ icon: 'warning-sign', intent: Intent.DANGER, message: err });
-    };
 
     return (
         <div className={darkTheme ? ' bp3-dark' : ''}>
@@ -33,7 +30,6 @@ const App: React.FC = () => {
                 setDialogIsOpen={setDialogIsOpen}
                 dialogContent={dialogContent}
                 setDialogContent={setDialogContent}
-                addErrorToast={addErrorToast}
             ></VisualizerDialog>
             <VisualizerStage></VisualizerStage>
         </div>

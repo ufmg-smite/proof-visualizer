@@ -123,7 +123,6 @@ interface VisualizerDialogProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
     dialogContent: string;
     setDialogContent: Dispatch<SetStateAction<string>>;
-    addErrorToast: (err: string) => void;
 }
 
 interface VisualizerNavbarProps {
