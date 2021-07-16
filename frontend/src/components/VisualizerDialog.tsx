@@ -4,7 +4,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { Button, Classes, Dialog, FileInput, Intent, Spinner } from '@blueprintjs/core';
 import { Icon } from '@blueprintjs/core/lib/esm/components/icon/icon';
-
 import FormNewProof from './FormNewProof';
 
 import '../scss/VisualizerDialog.scss';
@@ -33,23 +32,21 @@ function dialogBodyNewProof(
     );
 }
 
-function dialogBodyUploadProof(proofProcessed: boolean, processingProof: boolean) {
-    return proofProcessed ? (
-        <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
-            <Icon icon="tick" intent={Intent.SUCCESS} iconSize={40}></Icon>
-            <br></br>
-            <br></br>
-            <p>Your proof is ready to be visualized!</p>
-        </div>
-    ) : processingProof ? (
-        <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
-            <p>Processing your proof...</p>
-            <Spinner size={30} />
-        </div>
-    ) : (
-        <FileInput fill={true} text="Choose file..." />
-    );
-}
+const readUploadedFileAsText = (inputFile: File) => {
+    const temporaryFileReader = new FileReader();
+
+    return new Promise((resolve, reject) => {
+        temporaryFileReader.onerror = () => {
+            temporaryFileReader.abort();
+            reject(new DOMException('Problem parsing input file.'));
+        };
+
+        temporaryFileReader.onload = () => {
+            resolve(temporaryFileReader.result);
+        };
+        temporaryFileReader.readAsText(inputFile);
+    });
+};
 
 const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     dialogIsOpen,
@@ -67,6 +64,8 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     const [proof, setProof] = useState<proof>({ _id: undefined, label: '', options: '', problem: '' });
     const [processingProof, setProcessingProof] = useState(false);
     const [proofProcessed, setProofProcessed] = useState(false);
+    const [fileName, changeFileName] = useState('Choose file...');
+    const [file, changeFile] = useState('');
     const dispatch = useDispatch();
 
     const handleSubmit = async (proof: proof) => {
@@ -91,14 +90,27 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 <div className="welcome-menu">
                     <h2>Welcome to Proof Visualizer</h2>
                     <p>Open or create a proof to begin exploring the app.</p>
-                    <Button icon="add" large text="New proof" onClick={() => setDialogContent('new-proof')} />
+                    <Button
+                        style={{ width: '155px' }}
+                        icon="add"
+                        large
+                        text="New proof"
+                        onClick={() => setDialogContent('new-proof')}
+                    />
+                    <Button
+                        style={{ width: '155px' }}
+                        icon="upload"
+                        large
+                        text="Upload proof"
+                        onClick={() => setDialogContent('upload-proof')}
+                    />
                 </div>
             );
             break;
         case 'new-proof':
             dialogProps = { icon: 'add', title: 'New Proof' };
             dialogBody = dialogBodyNewProof(proofProcessed, processingProof, proof, setProof);
-            succesButton = (
+            succesButton = !proofProcessed ? (
                 <Button
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                         e.preventDefault();
@@ -115,15 +127,64 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 >
                     Generate Proof
                 </Button>
+            ) : (
+                <></>
             );
             break;
         case 'upload-proof':
             dialogProps = { icon: 'upload', title: 'Upload Proof' };
-            dialogBody = dialogBodyUploadProof(proofProcessed, processingProof);
-            succesButton = (
-                <Button intent={Intent.SUCCESS} disabled={true}>
+            dialogBody = proofProcessed ? (
+                <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
+                    <Icon icon="tick" intent={Intent.SUCCESS} iconSize={40}></Icon>
+                    <br></br>
+                    <br></br>
+                    <p>Your proof is ready to be visualized!</p>
+                </div>
+            ) : processingProof ? (
+                <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
+                    <p>Processing your proof...</p>
+                    <Spinner size={30} />
+                </div>
+            ) : (
+                <FileInput
+                    text={fileName}
+                    hasSelection={fileName !== 'Choose file...'}
+                    onInputChange={async (e) => {
+                        const file = (e as any).target.files[0];
+                        console.log((e as any).target.files[0]);
+                        try {
+                            const fileContents = await readUploadedFileAsText(file);
+                            console.log(fileContents);
+                            changeFile(fileContents as string);
+                            setProof({
+                                _id: undefined,
+                                label: (e as any).target.files[0].name.split('.')[0],
+                                options: '',
+                                problem: '',
+                            });
+                        } catch (er) {
+                            console.warn(er.message);
+                        }
+                        changeFileName((e as any).target.files[0].name);
+                    }}
+                    fill={true}
+                />
+            );
+            succesButton = !proofProcessed ? (
+                <Button
+                    onClick={() => {
+                        dispatch({ type: 'SET_PROOF', payload: proof });
+                        setProcessingProof(true);
+                        dispatch({ type: 'SET_DOT', payload: file });
+                        setProofProcessed(true);
+                    }}
+                    intent={Intent.SUCCESS}
+                    disabled={fileName === 'Choose file...'}
+                >
                     Upload Proof
                 </Button>
+            ) : (
+                <></>
             );
             break;
     }
@@ -138,6 +199,8 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                     setProcessingProof(false);
                     setProofProcessed(false);
                     setDialogIsOpen(false);
+                    changeFileName('Choose file...');
+                    changeFile('');
                 }}
                 usePortal={true}
                 {...dialogProps}
@@ -152,6 +215,9 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                                 setProof({ label: '', options: '', problem: '' });
                                 setProcessingProof(false);
                                 setProofProcessed(false);
+                                setDialogIsOpen(false);
+                                changeFileName('Choose file...');
+                                changeFile('');
                             }}
                         >
                             Close
