@@ -1,36 +1,11 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import axios from 'axios';
 import { Button, Classes, Dialog, FileInput, Intent, Spinner } from '@blueprintjs/core';
 import { Icon } from '@blueprintjs/core/lib/esm/components/icon/icon';
-import FormNewProof from './FormNewProof';
 
 import '../scss/VisualizerDialog.scss';
 import { proof, VisualizerDialogProps, DialogProps, stateInterface } from './interfaces';
-
-function dialogBodyNewProof(
-    proofProcessed: boolean,
-    processingProof: boolean,
-    proof: proof,
-    setProof: Dispatch<SetStateAction<proof>>,
-) {
-    return proofProcessed ? (
-        <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
-            <Icon icon="tick" intent={Intent.SUCCESS} iconSize={40}></Icon>
-            <br></br>
-            <br></br>
-            <p>Your proof is ready to be visualized!</p>
-        </div>
-    ) : processingProof ? (
-        <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
-            <p>Processing your proof...</p>
-            <Spinner size={30} />
-        </div>
-    ) : (
-        <FormNewProof proof={proof} setProof={setProof}></FormNewProof>
-    );
-}
 
 const readUploadedFileAsText = (inputFile: File) => {
     const temporaryFileReader = new FileReader();
@@ -53,7 +28,6 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     dialogContent,
     setDialogContent,
     setDialogIsOpen,
-    addErrorToast,
 }: VisualizerDialogProps) => {
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
 
@@ -68,21 +42,6 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     const [file, changeFile] = useState('');
     const dispatch = useDispatch();
 
-    const handleSubmit = async (proof: proof) => {
-        setProcessingProof(true);
-        await axios
-            .post('http://localhost:5000/proof/new-proof/', proof)
-            .then(async (res) => {
-                setProofProcessed(true);
-                proof.dot = res.data;
-                dispatch({ type: 'SET_PROOF', payload: proof });
-            })
-            .catch((err) => {
-                setProcessingProof(false);
-                addErrorToast(err.response ? err.response.data.message : 'Error! =(');
-            });
-    };
-
     switch (dialogContent) {
         case 'welcome':
             dialogProps = { icon: 'graph', title: 'Welcome' };
@@ -92,43 +51,12 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                     <p>Open or create a proof to begin exploring the app.</p>
                     <Button
                         style={{ width: '155px' }}
-                        icon="add"
-                        large
-                        text="New proof"
-                        onClick={() => setDialogContent('new-proof')}
-                    />
-                    <Button
-                        style={{ width: '155px' }}
                         icon="upload"
                         large
                         text="Upload proof"
                         onClick={() => setDialogContent('upload-proof')}
                     />
                 </div>
-            );
-            break;
-        case 'new-proof':
-            dialogProps = { icon: 'add', title: 'New Proof' };
-            dialogBody = dialogBodyNewProof(proofProcessed, processingProof, proof, setProof);
-            succesButton = !proofProcessed ? (
-                <Button
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        setProcessingProof(!processingProof);
-                        handleSubmit({
-                            _id: proof._id,
-                            label: proof.label,
-                            options: proof.options,
-                            problem: proof.problem,
-                        });
-                    }}
-                    intent={Intent.SUCCESS}
-                    disabled={processingProof || proof.label === '' || proof.problem === ''}
-                >
-                    Generate Proof
-                </Button>
-            ) : (
-                <></>
             );
             break;
         case 'upload-proof':
@@ -154,7 +82,6 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                         console.log((e as any).target.files[0]);
                         try {
                             const fileContents = await readUploadedFileAsText(file);
-                            console.log(fileContents);
                             changeFile(fileContents as string);
                             setProof({
                                 _id: undefined,

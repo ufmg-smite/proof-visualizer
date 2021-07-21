@@ -160,6 +160,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             toggleNodeSelection: this.toggleNodeSelection,
             unfoldOnClick: this.unfoldOnClick,
             openDrawer: openDrawer,
+            color: '#8d99ae',
             x: node.x,
             y: node.y,
             selected: false,

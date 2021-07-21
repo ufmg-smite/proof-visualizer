@@ -57,7 +57,10 @@ function processDot(dot: string) {
     comment = comment ? comment.slice(comment.indexOf('=') + 2, comment.indexOf(';') - 1) : null;
     if (comment) {
         const dispatch = useDispatch();
-        dispatch({ type: 'SET_LET_MAP', payload: JSON.parse(comment)['letMap'] });
+        dispatch({
+            type: 'SET_LET_MAP',
+            payload: JSON.parse(removeEscapedCharacters(removeEscapedCharacters(comment)))['letMap'],
+        });
     }
 
     const lines = dot
@@ -133,7 +136,9 @@ function processDot(dot: string) {
             nodes[child].rank = nodes[parent].rank + 1;
         }
     });
-    return comment ? [nodes, JSON.parse(comment)['letMap']] : [nodes, {}];
+    return comment
+        ? [nodes, JSON.parse(removeEscapedCharacters(removeEscapedCharacters(comment)))['letMap']]
+        : [nodes, {}];
 }
 
 function ruleHelper(rule: string) {

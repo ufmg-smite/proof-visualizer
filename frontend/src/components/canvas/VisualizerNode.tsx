@@ -24,6 +24,7 @@ export default class Node extends React.Component<NodeProps> {
             nHided,
             nDescendants,
             topHidedNodes,
+            color,
             setNodeOnFocus,
             updateNodeState,
             toggleNodeSelection,
@@ -31,7 +32,7 @@ export default class Node extends React.Component<NodeProps> {
             tree,
         } = this.props;
 
-        const bgColor = '#8d99ae';
+        const bgColor = color;
 
         const tagProps = {
             fill: bgColor,

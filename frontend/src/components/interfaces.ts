@@ -90,6 +90,8 @@ interface NodeProps {
 
     topHidedNodes?: Array<[number, string, string, number, number]>;
 
+    color: string;
+
     setNodeOnFocus: (id: number) => void;
     toggleNodeSelection: (id: number) => void;
     updateNodeState: (key: number, x: number, y: number) => void;
@@ -123,7 +125,6 @@ interface VisualizerDialogProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
     dialogContent: string;
     setDialogContent: Dispatch<SetStateAction<string>>;
-    addErrorToast: (err: string) => void;
 }
 
 interface VisualizerNavbarProps {
