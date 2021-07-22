@@ -80,7 +80,10 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                     hasSelection={fileName !== 'Choose file...'}
                     onInputChange={async (e) => {
                         const file = (e as any).target.files[0];
-                        if ((e as any).target.files[0].name.split('.').slice(-1)[0] !== 'dot') {
+                        if (
+                            (e as any).target.files[0] &&
+                            (e as any).target.files[0].name.split('.').slice(-1)[0] !== 'dot'
+                        ) {
                             addErrorToast('Sorry! Our app only support DOT files.');
                             return;
                         }
