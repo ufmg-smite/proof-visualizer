@@ -48,7 +48,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
             dialogBody = (
                 <div className="welcome-menu">
                     <h2>Welcome to Proof Visualizer</h2>
-                    <p>Open or create a proof to begin exploring the app.</p>
+                    <p>Upload the DOT file.</p>
                     <Button
                         style={{ width: '155px' }}
                         icon="upload"
