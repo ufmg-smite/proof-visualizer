@@ -28,6 +28,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     dialogContent,
     setDialogContent,
     setDialogIsOpen,
+    addErrorToast,
 }: VisualizerDialogProps) => {
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
 
@@ -79,7 +80,10 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                     hasSelection={fileName !== 'Choose file...'}
                     onInputChange={async (e) => {
                         const file = (e as any).target.files[0];
-                        console.log((e as any).target.files[0]);
+                        if ((e as any).target.files[0].name.split('.').slice(-1)[0] !== 'dot') {
+                            addErrorToast('Sorry! Our app only support DOT files.');
+                            return;
+                        }
                         try {
                             const fileContents = await readUploadedFileAsText(file);
                             changeFile(fileContents as string);
@@ -90,7 +94,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                                 problem: '',
                             });
                         } catch (er) {
-                            console.warn(er.message);
+                            addErrorToast(er.message);
                         }
                         changeFileName((e as any).target.files[0].name);
                     }}
