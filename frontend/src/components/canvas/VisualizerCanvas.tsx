@@ -476,6 +476,12 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         );
     };
 
+    changeNodeColor = (color: string): void => {
+        const { nodeOnFocus, showingNodes } = this.state;
+        showingNodes[nodeOnFocus] = new Node({ ...showingNodes[nodeOnFocus].props, color: color });
+        this.setState({ showingNodes });
+    };
+
     render(): JSX.Element {
         const { canvasSize, stage, showingNodes, showingEdges, nodesSelected, nodeOnFocus, proofNodes } = this.state;
         return (
@@ -484,6 +490,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                     unfold={this.unfold}
                     foldSelectedNodes={this.foldSelectedNodes}
                     foldAllDescendants={this.foldAllDescendants}
+                    changeNodeColor={this.changeNodeColor}
                     options={{
                         unfold: proofNodes[nodeOnFocus] ? proofNodes[nodeOnFocus].rule === 'π' : false,
                         foldSelected: nodesSelected.length && nodesSelected.includes(nodeOnFocus) ? true : false,
