@@ -79,7 +79,32 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ letMap, drawerIsOpen, s
                                             <strong>{key}</strong>
                                         </td>
                                         <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>
-                                            {indent(letMapS[key])}
+                                            {indent(letMapS[key])
+                                                .split('\n')
+                                                .map((e) => {
+                                                    if (e.indexOf(' let') === -1) {
+                                                        return <span>{e + '\n'}</span>;
+                                                    } else {
+                                                        return (
+                                                            <span
+                                                                onClick={() => {
+                                                                    const newLetMap = { ...letMapS };
+                                                                    const i = newLetMap[key].indexOf(
+                                                                        e.replace(/^\s+|\s+$/g, ''),
+                                                                    );
+                                                                    const l = newLetMap[key].slice(i).split(/[ |)]/)[0];
+                                                                    newLetMap[key] = newLetMap[key].replace(
+                                                                        l,
+                                                                        letMap[l],
+                                                                    );
+                                                                    setLetMapS(newLetMap);
+                                                                }}
+                                                            >
+                                                                {e + '\n'}
+                                                            </span>
+                                                        );
+                                                    }
+                                                })}
                                         </td>
                                         <td style={{ width: '150px', display: 'flex', flexDirection: 'column' }}>
                                             <Button
