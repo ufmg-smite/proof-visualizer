@@ -6,9 +6,6 @@ import { Button, Drawer, Classes, Position } from '@blueprintjs/core';
 import { stateInterface } from './interfaces';
 
 interface letDrawerProps {
-    letMap: {
-        [Key: string]: string;
-    };
     drawerIsOpen: boolean;
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
 }
@@ -34,8 +31,14 @@ const indent = (s: string) => {
     return newS;
 };
 
-const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ letMap, drawerIsOpen, setDrawerIsOpen }: letDrawerProps) => {
+const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: letDrawerProps) => {
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
+    const letMap = useSelector<
+        stateInterface,
+        {
+            [Key: string]: string;
+        }
+    >((state: stateInterface) => state.letMapReducer.letMap);
     const [letMapS, setLetMapS] = useState(letMap);
 
     return (
@@ -44,12 +47,12 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ letMap, drawerIsOpen, s
             style={{ maxHeight: '65%', width: '35%' }}
             autoFocus={true}
             canEscapeKeyClose={true}
-            canOutsideClickClose={true}
+            canOutsideClickClose={false}
             enforceFocus={true}
             hasBackdrop={false}
             isOpen={drawerIsOpen}
             position={Position.RIGHT}
-            usePortal={true}
+            usePortal={false}
             onClose={(e) => {
                 e.preventDefault();
                 setDrawerIsOpen(false);

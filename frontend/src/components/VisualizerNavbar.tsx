@@ -6,7 +6,6 @@ import { Popover2 } from '@blueprintjs/popover2';
 
 import '../scss/VisualizerNavbar.scss';
 import { VisualizerNavbarProps, stateInterface, proof } from './interfaces';
-import VisualizerLetDrawer from './VisualizerLetDrawer';
 
 function useWindowSize() {
     // Initialize state with undefined width/height so server and client renders match
@@ -37,6 +36,7 @@ function useWindowSize() {
 const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     setDialogIsOpen,
     setDialogContent,
+    setDrawerIsOpen,
 }: VisualizerNavbarProps) => {
     const openDialog = (content: string): void => {
         setDialogIsOpen(true);
@@ -44,13 +44,6 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     };
     const proof = useSelector<stateInterface, proof>((state: stateInterface) => state.proofReducer.proof);
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
-    const letMap = useSelector<
-        stateInterface,
-        {
-            [Key: string]: string;
-        }
-    >((state: stateInterface) => state.letMapReducer.letMap);
-    const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const windowSize = useWindowSize();
 
     const dispatch = useDispatch();
@@ -232,9 +225,6 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     <Icon icon={darkTheme ? 'moon' : 'flash'}></Icon>
                 </span>
             </Navbar.Group>
-            {drawerIsOpen ? (
-                <VisualizerLetDrawer letMap={letMap} drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerIsOpen} />
-            ) : null}
         </Navbar>
     );
 };

@@ -131,6 +131,7 @@ interface VisualizerDialogProps {
 interface VisualizerNavbarProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
     setDialogContent: Dispatch<SetStateAction<string>>;
+    setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 interface stateInterface {
