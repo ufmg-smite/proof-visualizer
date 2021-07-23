@@ -395,12 +395,10 @@ const VisualizerStage: React.FC = () => {
     });
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
     const translate = (s: string) => {
-        console.log(s);
         let newS = s;
         let i = newS.indexOf('let');
         while (i !== -1) {
             const l = newS.slice(i).split(/[ |)|,]/)[0];
-            console.log(l);
             newS = newS.replace(l, letMap[l]);
             i = newS.indexOf('let');
         }
