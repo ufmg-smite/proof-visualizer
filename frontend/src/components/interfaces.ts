@@ -151,6 +151,18 @@ interface stateInterface {
     };
 }
 
+interface TreeNode {
+    id: number;
+    icon: 'graph';
+    parentId: number;
+    label: string;
+    descendants: number;
+    childNodes: TreeNode[];
+    rule: string;
+    conclusion: string;
+    args: string;
+}
+
 export type {
     CanvasProps,
     CanvasState,
@@ -163,4 +175,5 @@ export type {
     VisualizerDialogProps,
     VisualizerNavbarProps,
     stateInterface,
+    TreeNode,
 };

@@ -6,7 +6,7 @@ import Node from './VisualizerNode';
 import Line from './VisualizerLine';
 import Menu from './VisualizerMenu';
 
-import { NodeInterface, NodeProps, LineProps } from '../interfaces';
+import { NodeInterface, NodeProps, LineProps, TreeNode } from '../interfaces';
 
 import '../../scss/VisualizerCanvas.scss';
 
@@ -358,9 +358,9 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.setState({ proofNodes });
     };
 
-    hiddenNodesTree = (list: any): any => {
-        const map: any = {},
-            roots: any = [];
+    hiddenNodesTree = (list: Array<TreeNode>): Array<TreeNode> => {
+        const map: { [n: number]: number } = {},
+            roots: Array<TreeNode> = [];
         let node, i;
 
         for (i = 0; i < list.length; i += 1) {
