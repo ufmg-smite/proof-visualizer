@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { ControlGroup, Button, InputGroup } from '@blueprintjs/core';
 
 const Menu = ({
     unfold,
@@ -13,6 +14,7 @@ const Menu = ({
     changeNodeColor: (color: string) => void;
     options: { unfold: boolean; foldSelected: boolean; foldAllDescendants: boolean };
 }): JSX.Element => {
+    const [color, setColor] = useState('');
     return (
         <div className="bp3-popover2-content">
             <ul id="menu" className="bp3-menu">
@@ -57,6 +59,33 @@ const Menu = ({
                                 <span onClick={() => changeNodeColor('#464646')}> ⬛</span>
                                 <span onClick={() => changeNodeColor('#f0f0f0')}> ⬜</span>
                             </span>
+                        </div>
+                    </a>
+                </li>
+                <li className="">
+                    <a className="bp3-menu-item">
+                        <div className="bp3-text-overflow-ellipsis bp3-fill">
+                            <ControlGroup
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                }}
+                                fill={true}
+                                vertical={false}
+                            >
+                                <InputGroup
+                                    placeholder="#fff"
+                                    value={color}
+                                    onChange={(e) => setColor(e.target.value)}
+                                />
+                                <Button
+                                    icon="style"
+                                    onClick={() => {
+                                        changeNodeColor(color);
+                                        setColor('');
+                                    }}
+                                    disabled={color.match(/^(#[a-f0-9]{6})|(#[a-f0-9]{3})$/i) === null}
+                                ></Button>
+                            </ControlGroup>
                         </div>
                     </a>
                 </li>
