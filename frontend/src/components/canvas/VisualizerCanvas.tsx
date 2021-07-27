@@ -167,7 +167,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             nHided: node.hidedNodes.length,
             nDescendants: node.descendants,
             topHidedNodes: node.topHidedNodes ? node.topHidedNodes : undefined,
-            tree: node.tree ? node.tree : null,
+            tree: node.tree ? node.tree : undefined,
         };
     };
 

@@ -70,7 +70,7 @@ interface NodeInterface {
 
     replace?: number;
 
-    tree?: any;
+    tree?: Array<TreeNode>;
 }
 
 interface NodeProps {
@@ -105,10 +105,10 @@ interface NodeProps {
             nDescendants: number;
             topHidedNodes?: Array<[number, string, string, number, number]>;
         },
-        tree: any,
+        tree?: Array<TreeNode>,
     ) => void;
 
-    tree?: any;
+    tree?: Array<TreeNode>;
 }
 
 interface proof {
