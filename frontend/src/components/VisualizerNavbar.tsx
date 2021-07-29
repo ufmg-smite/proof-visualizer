@@ -37,6 +37,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     setDialogIsOpen,
     setDialogContent,
     setDrawerIsOpen,
+    downloadProof,
 }: VisualizerNavbarProps) => {
     const openDialog = (content: string): void => {
         setDialogIsOpen(true);
@@ -123,6 +124,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     );
     const exampleMenu = (
         <Menu>
+            <MenuItem icon="graph" text="Proof" onClick={() => downloadProof(proof.dot ? proof.dot : '')} />
             <MenuItem
                 icon="manually-entered-data"
                 text="Problem"

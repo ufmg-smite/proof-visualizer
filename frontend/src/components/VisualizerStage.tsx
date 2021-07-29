@@ -337,7 +337,11 @@ const indent = (s: string) => {
     return newS;
 };
 
-const VisualizerStage: React.FC = () => {
+const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
+    canvasRef,
+}: {
+    canvasRef: React.RefObject<Canvas>;
+}) => {
     const dot = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.dot);
     const view = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.view);
     const style = useSelector<stateInterface, string | undefined>((state) => state.styleReducer.style);
@@ -543,7 +547,7 @@ const VisualizerStage: React.FC = () => {
         <div>
             {proof.length > 1 ? (
                 style === 'tree' ? (
-                    <Canvas key={dot} view={view} proofNodes={proof} openDrawer={openDrawer}></Canvas>
+                    <Canvas ref={canvasRef} key={dot} view={view} proofNodes={proof} openDrawer={openDrawer}></Canvas>
                 ) : (
                     <VisualizerDirectoryStyle
                         proofTree={proofTree}

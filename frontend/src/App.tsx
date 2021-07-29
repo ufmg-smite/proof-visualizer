@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import Canvas from './components/canvas/VisualizerCanvas';
 import { useSelector } from 'react-redux';
 
 import { Intent, Position, Toaster } from '@blueprintjs/core';
@@ -18,6 +19,10 @@ const App: React.FC = () => {
 
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
 
+    const canvasRef = useRef<Canvas>(null);
+    const downloadProof = (dot: string) => {
+        canvasRef.current ? canvasRef.current.downloadProof(dot) : null;
+    };
     // Toaster
     let toaster: Toaster;
     const refHandlers = {
@@ -41,6 +46,7 @@ const App: React.FC = () => {
                 setDialogIsOpen={setDialogIsOpen}
                 setDialogContent={setDialogContent}
                 setDrawerIsOpen={setDrawerIsOpen}
+                downloadProof={downloadProof}
             ></VisualizerNavbar>
             <VisualizerDialog
                 dialogIsOpen={dialogIsOpen}
@@ -49,7 +55,7 @@ const App: React.FC = () => {
                 setDialogContent={setDialogContent}
                 addErrorToast={addErrorToast}
             ></VisualizerDialog>
-            <VisualizerStage></VisualizerStage>
+            <VisualizerStage canvasRef={canvasRef}></VisualizerStage>
             {drawerIsOpen ? (
                 <VisualizerLetDrawer drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerIsOpen} />
             ) : null}

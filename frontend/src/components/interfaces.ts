@@ -132,6 +132,7 @@ interface VisualizerNavbarProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
     setDialogContent: Dispatch<SetStateAction<string>>;
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
+    downloadProof: (dot: string) => void;
 }
 
 interface stateInterface {
