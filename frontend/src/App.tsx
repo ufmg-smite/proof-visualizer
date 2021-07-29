@@ -20,8 +20,8 @@ const App: React.FC = () => {
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
 
     const canvasRef = useRef<Canvas>(null);
-    const downloadProof = (dot: string) => {
-        canvasRef.current ? canvasRef.current.downloadProof(dot) : null;
+    const downloadProof = (dot: string, proofName: string) => {
+        canvasRef.current ? canvasRef.current.downloadProof(dot, proofName) : null;
     };
     // Toaster
     let toaster: Toaster;

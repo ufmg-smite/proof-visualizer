@@ -485,9 +485,9 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.setState({ showingNodes, nodesSelected: [] });
     };
 
-    downloadProof = (dot: string): void => {
+    downloadProof = (dot: string, proofName: string): void => {
         const link = document.createElement('a');
-        link.download = 'a.json';
+        link.download = proofName + '.json';
         link.href = `data:attachment/text,${encodeURIComponent(JSON.stringify({ dot: dot }))}`;
         link.click();
     };
