@@ -547,7 +547,24 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
         <div>
             {proof.length > 1 ? (
                 style === 'tree' ? (
-                    <Canvas ref={canvasRef} key={dot} view={view} proofNodes={proof} openDrawer={openDrawer}></Canvas>
+                    <Canvas
+                        ref={canvasRef}
+                        key={dot}
+                        view={view}
+                        proofNodes={proof}
+                        openDrawer={openDrawer}
+                        importedData={{
+                            nodes: [
+                                {
+                                    id: 0,
+                                    color: '#000',
+                                    x: undefined,
+                                    y: undefined,
+                                },
+                            ],
+                            hidden: [],
+                        }}
+                    ></Canvas>
                 ) : (
                     <VisualizerDirectoryStyle
                         proofTree={proofTree}

@@ -73,7 +73,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
 
     componentDidMount(): void {
         const { showingNodes, proofNodes } = this.state;
-        const { view } = this.props;
+        const { view, importedData } = this.props;
 
         this.applyView(view);
 
@@ -82,6 +82,10 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.addNodes(0);
 
         const [width, height] = [window.innerWidth, window.innerHeight - 50];
+
+        importedData.nodes.forEach((node) => {
+            showingNodes[node.id] = new Node({ ...showingNodes[node.id].props, color: node.color });
+        });
 
         this.setState({
             showingNodes,

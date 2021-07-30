@@ -14,6 +14,10 @@ interface CanvasProps {
         nDescendants: number;
     }) => void;
     view?: string;
+    importedData: {
+        nodes: Array<{ id: number; color: string; x?: number; y?: number }>;
+        hidden: Array<Array<number>>;
+    };
 }
 
 interface CanvasState {
