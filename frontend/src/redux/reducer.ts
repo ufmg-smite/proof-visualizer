@@ -24,6 +24,13 @@ const initialStateLetMapReducer = {
     letMap: {},
 };
 
+const initialStateImportedDataReducer = {
+    importedData: {
+        nodes: [],
+        hidden: [],
+    },
+};
+
 type Action =
     | { type: 'SET_PROOF'; payload: proof }
     | { type: 'TOGGLE_DARK_THEME' }
@@ -36,6 +43,13 @@ type Action =
           type: 'SET_LET_MAP';
           payload: {
               [Key: string]: string;
+          };
+      }
+    | {
+          type: 'SET_IMPORTED_DATA';
+          payload: {
+              nodes: Array<{ id: number; color: string; x: number; y: number }>;
+              hidden: Array<Array<number>>;
           };
       };
 
@@ -137,4 +151,24 @@ const letMapReducer = (
     }
 };
 
-export default combineReducers({ proofReducer, darkThemeReducer, styleReducer, letMapReducer });
+const importedDataReducer = (
+    state: {
+        importedData: {
+            nodes: Array<{ id: number; color: string; x: number; y: number }>;
+            hidden: Array<Array<number>>;
+        };
+    } = initialStateImportedDataReducer,
+    action: Action,
+): stateInterface['importedDataReducer'] => {
+    switch (action.type) {
+        case 'SET_IMPORTED_DATA':
+            return {
+                ...state,
+                importedData: action.payload,
+            };
+        default:
+            return state;
+    }
+};
+
+export default combineReducers({ proofReducer, darkThemeReducer, styleReducer, letMapReducer, importedDataReducer });

@@ -15,7 +15,7 @@ interface CanvasProps {
     }) => void;
     view?: string;
     importedData: {
-        nodes: Array<{ id: number; color: string; x?: number; y?: number }>;
+        nodes: Array<{ id: number; color: string; x: number; y: number }>;
         hidden: Array<Array<number>>;
     };
 }
@@ -152,6 +152,12 @@ interface stateInterface {
     letMapReducer: {
         letMap: {
             [Key: string]: string;
+        };
+    };
+    importedDataReducer: {
+        importedData: {
+            nodes: Array<{ id: number; color: string; x: number; y: number }>;
+            hidden: Array<Array<number>>;
         };
     };
 }

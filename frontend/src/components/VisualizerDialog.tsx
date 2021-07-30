@@ -122,6 +122,11 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                             dispatch({ type: 'SET_PROOF', payload: proof });
                             setProcessingProof(true);
                             dispatch({ type: 'SET_DOT', payload: json.dot });
+                            dispatch({ type: 'FULL_VIEW', payload: json.dot });
+                            dispatch({
+                                type: 'SET_IMPORTED_DATA',
+                                payload: { nodes: json.nodes, hidden: json.hidden },
+                            });
                             setProofProcessed(true);
                         }
                     }}

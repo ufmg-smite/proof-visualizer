@@ -346,6 +346,9 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
     const view = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.view);
     const style = useSelector<stateInterface, string | undefined>((state) => state.styleReducer.style);
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
+    const importedData = useSelector<stateInterface, stateInterface['importedDataReducer']['importedData']>(
+        (state: stateInterface) => state.importedDataReducer.importedData,
+    );
     const [proof, letMap] = processDot(dot ? dot : '');
     const proofTree = createTree(
         Array.from(Array(proof.length).keys()).map((nodeId) => {
@@ -553,17 +556,7 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                         view={view}
                         proofNodes={proof}
                         openDrawer={openDrawer}
-                        importedData={{
-                            nodes: [
-                                {
-                                    id: 0,
-                                    color: '#000',
-                                    x: undefined,
-                                    y: undefined,
-                                },
-                            ],
-                            hidden: [],
-                        }}
+                        importedData={importedData}
                     ></Canvas>
                 ) : (
                     <VisualizerDirectoryStyle

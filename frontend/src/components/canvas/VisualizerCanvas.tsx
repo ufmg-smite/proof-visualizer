@@ -84,7 +84,13 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const [width, height] = [window.innerWidth, window.innerHeight - 50];
 
         importedData.nodes.forEach((node) => {
-            showingNodes[node.id] = new Node({ ...showingNodes[node.id].props, color: node.color });
+            if (showingNodes[node.id]) {
+                showingNodes[node.id] = new Node({
+                    ...showingNodes[node.id].props,
+                    color: node.color,
+                });
+                this.updateNodeState(node.id, node.x, node.y);
+            }
         });
 
         this.setState({
@@ -435,13 +441,17 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const xOffset = g.node(id.toString()).x - (proofNodes[id].x ? proofNodes[id].x : 0);
         const yOffset = g.node(id.toString()).y - (proofNodes[id].y ? proofNodes[id].y : 0);
         g.nodes().forEach(function (v) {
-            const { x, y } = g.node(v);
-            if (!proofNodes[parseInt(v)].hided) {
-                proofNodes[parseInt(v)].x = x - xOffset;
-                proofNodes[parseInt(v)].y = y - yOffset;
-            } else {
-                proofNodes[proofNodes[parseInt(v)].hidedIn].x = x - xOffset;
-                proofNodes[proofNodes[parseInt(v)].hidedIn].y = y - yOffset;
+            try {
+                const { x, y } = g.node(v);
+                if (!proofNodes[parseInt(v)].hided) {
+                    proofNodes[parseInt(v)].x = x - xOffset;
+                    proofNodes[parseInt(v)].y = y - yOffset;
+                } else {
+                    proofNodes[proofNodes[parseInt(v)].hidedIn].x = x - xOffset;
+                    proofNodes[proofNodes[parseInt(v)].hidedIn].y = y - yOffset;
+                }
+            } catch (e) {
+                console.log(e);
             }
         });
         this.setState({ proofNodes });
@@ -496,25 +506,21 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         link.href = `data:attachment/text,${encodeURIComponent(
             JSON.stringify({
                 dot: dot,
-                nodes: [
-                    Object.keys(showingNodes)
-                        .filter((node) => showingNodes[parseInt(node)].props.rule !== 'π')
-                        .map((node) => {
-                            return {
-                                id: parseInt(node),
-                                color: showingNodes[parseInt(node)].props.color,
-                                x: showingNodes[parseInt(node)].props.x,
-                                y: showingNodes[parseInt(node)].props.y,
-                            };
-                        }),
-                ],
-                hidden: [
-                    Object.keys(showingNodes)
-                        .filter((node) => showingNodes[parseInt(node)].props.rule === 'π')
-                        .map((node) => {
-                            return proofNodes[parseInt(node)].hidedNodes;
-                        }),
-                ],
+                nodes: Object.keys(showingNodes)
+                    .filter((node) => showingNodes[parseInt(node)].props.rule !== 'π')
+                    .map((node) => {
+                        return {
+                            id: parseInt(node),
+                            color: showingNodes[parseInt(node)].props.color,
+                            x: showingNodes[parseInt(node)].props.x,
+                            y: showingNodes[parseInt(node)].props.y,
+                        };
+                    }),
+                hidden: Object.keys(showingNodes)
+                    .filter((node) => showingNodes[parseInt(node)].props.rule === 'π')
+                    .map((node) => {
+                        return proofNodes[parseInt(node)].hidedNodes.filter((nodeId) => proofNodes[nodeId].hided);
+                    }),
             }),
         )}`;
         link.click();
