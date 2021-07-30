@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Alignment, Button, Icon, Navbar, Switch, Menu, MenuItem } from '@blueprintjs/core';
+import { Alignment, Button, Icon, Navbar, Switch, Menu, MenuItem, MenuDivider } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 
 import '../scss/VisualizerNavbar.scss';
@@ -126,18 +126,12 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
         <Menu>
             <MenuItem
                 icon="layout"
-                text="Proof visualization"
+                text="JSON"
                 onClick={() => downloadProof(proof.dot ? proof.dot : '', proof.label ? proof.label : '')}
             />
             <MenuItem
-                icon="manually-entered-data"
-                text="Problem"
-                href={`data:attachment/text,${encodeURIComponent(proof.problem)}`}
-                download={proof.label ? `${proof.label.replaceAll(' ', '_')}.smt2` : null}
-            />
-            <MenuItem
                 icon="graph"
-                text="Dot"
+                text="DOT"
                 href={`data:attachment/text,${encodeURIComponent(proof.dot ? proof.dot : '')}`}
                 download={proof.label ? `${proof.label.replaceAll(' ', '_')}.dot` : ''}
             />
@@ -153,6 +147,13 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     ).toDataURL('image/png');
                     link.click();
                 }}
+            />
+            <MenuDivider></MenuDivider>
+            <MenuItem
+                icon="manually-entered-data"
+                text="Problem"
+                href={`data:attachment/text,${encodeURIComponent(proof.problem)}`}
+                download={proof.label ? `${proof.label.replaceAll(' ', '_')}.smt2` : null}
             />
         </Menu>
     );
