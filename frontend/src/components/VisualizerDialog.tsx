@@ -41,6 +41,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     const [proofProcessed, setProofProcessed] = useState(false);
     const [fileName, changeFileName] = useState('Choose file...');
     const [file, changeFile] = useState('');
+    const [ext, changeExt] = useState('');
     const dispatch = useDispatch();
 
     switch (dialogContent) {
@@ -81,8 +82,14 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                     onInputChange={async (e) => {
                         const target = e.target as HTMLInputElement;
                         const file = target.files ? target.files[0] : new File([''], 'filename');
-                        if (target.files && target.files[0] && target.files[0].name.split('.').slice(-1)[0] !== 'dot') {
-                            addErrorToast('Sorry! Our app only support DOT files.');
+                        changeExt(target.files && target.files[0] ? target.files[0].name.split('.').slice(-1)[0] : '');
+                        if (
+                            target.files &&
+                            target.files[0] &&
+                            target.files[0].name.split('.').slice(-1)[0] !== 'dot' &&
+                            target.files[0].name.split('.').slice(-1)[0] !== 'json'
+                        ) {
+                            addErrorToast('Sorry! Our app only support DOT and JSON files.');
                             return;
                         }
                         try {
@@ -105,10 +112,18 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
             succesButton = !proofProcessed ? (
                 <Button
                     onClick={() => {
-                        dispatch({ type: 'SET_PROOF', payload: proof });
-                        setProcessingProof(true);
-                        dispatch({ type: 'SET_DOT', payload: file });
-                        setProofProcessed(true);
+                        if (ext === 'dot') {
+                            dispatch({ type: 'SET_PROOF', payload: proof });
+                            setProcessingProof(true);
+                            dispatch({ type: 'SET_DOT', payload: file });
+                            setProofProcessed(true);
+                        } else if (ext === 'json') {
+                            const json = JSON.parse(file);
+                            dispatch({ type: 'SET_PROOF', payload: proof });
+                            setProcessingProof(true);
+                            dispatch({ type: 'SET_DOT', payload: json.dot });
+                            setProofProcessed(true);
+                        }
                     }}
                     intent={Intent.SUCCESS}
                     disabled={fileName === 'Choose file...'}
