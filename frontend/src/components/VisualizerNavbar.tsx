@@ -125,8 +125,8 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     const exampleMenu = (
         <Menu>
             <MenuItem
-                icon="graph"
-                text="Proof"
+                icon="layout"
+                text="Proof visualization"
                 onClick={() => downloadProof(proof.dot ? proof.dot : '', proof.label ? proof.label : '')}
             />
             <MenuItem

@@ -486,9 +486,33 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     };
 
     downloadProof = (dot: string, proofName: string): void => {
+        const { showingNodes, proofNodes } = this.state;
         const link = document.createElement('a');
         link.download = proofName + '.json';
-        link.href = `data:attachment/text,${encodeURIComponent(JSON.stringify({ dot: dot }))}`;
+        link.href = `data:attachment/text,${encodeURIComponent(
+            JSON.stringify({
+                dot: dot,
+                nodes: [
+                    Object.keys(showingNodes)
+                        .filter((node) => showingNodes[parseInt(node)].props.rule !== 'π')
+                        .map((node) => {
+                            return {
+                                id: parseInt(node),
+                                color: showingNodes[parseInt(node)].props.color,
+                                x: showingNodes[parseInt(node)].props.x,
+                                y: showingNodes[parseInt(node)].props.y,
+                            };
+                        }),
+                ],
+                hidden: [
+                    Object.keys(showingNodes)
+                        .filter((node) => showingNodes[parseInt(node)].props.rule === 'π')
+                        .map((node) => {
+                            return proofNodes[parseInt(node)].hidedNodes;
+                        }),
+                ],
+            }),
+        )}`;
         link.click();
     };
 
