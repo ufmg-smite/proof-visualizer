@@ -460,7 +460,9 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                         <td>
                             {nodeInfo.rule}
                             <Collapse isOpen={ruleHelperOpen}>
-                                <Pre id="pre-rule">{ruleHelper(nodeInfo.rule)}</Pre>
+                                <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
+                                    {ruleHelper(nodeInfo.rule)}
+                                </Pre>
                             </Collapse>
                         </td>
                     </tr>
@@ -484,7 +486,9 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                                 {nodeInfo.args}
                                 {nodeInfo.args.indexOf('let') !== -1 ? (
                                     <Collapse isOpen={argsTranslatorOpen}>
-                                        <Pre id="pre-rule">{indent(translate(nodeInfo.args))}</Pre>
+                                        <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
+                                            {indent(translate(nodeInfo.args))}
+                                        </Pre>
                                     </Collapse>
                                 ) : null}
                             </td>
@@ -509,7 +513,9 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                             {nodeInfo.conclusion}
                             {nodeInfo.conclusion.indexOf('let') !== -1 ? (
                                 <Collapse isOpen={conclusionTranslatorOpen}>
-                                    <Pre id="pre-rule">{indent(translate(nodeInfo.conclusion))}</Pre>
+                                    <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
+                                        {indent(translate(nodeInfo.conclusion))}
+                                    </Pre>
                                 </Collapse>
                             ) : null}
                         </td>
