@@ -37,6 +37,7 @@ type Action =
     | { type: 'BASIC_VIEW' }
     | { type: 'PROPOSITIONAL_VIEW' }
     | { type: 'FULL_VIEW' }
+    | { type: 'IMPORTED_DATA_VIEW' }
     | { type: 'SET_STYLE'; payload: string }
     | {
           type: 'SET_LET_MAP';
@@ -98,6 +99,14 @@ const proofReducer = (
                 proof: {
                     ...state.proof,
                     view: 'full',
+                },
+            };
+        case 'IMPORTED_DATA_VIEW':
+            return {
+                ...state,
+                proof: {
+                    ...state.proof,
+                    view: 'imported_data',
                 },
             };
         default:

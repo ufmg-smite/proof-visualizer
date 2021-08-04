@@ -68,6 +68,9 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             case 'full':
                 dispatch({ type: 'FULL_VIEW', payload: proof.dot });
                 break;
+            case 'imported_data':
+                dispatch({ type: 'IMPORTED_DATA_VIEW', payload: proof.dot });
+                break;
             default:
         }
         dispatch({ type: 'SET_DOT', payload: '' });
@@ -118,6 +121,14 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                 onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                     e.preventDefault();
                     changeView('full');
+                }}
+            />
+            <MenuDivider></MenuDivider>
+            <MenuItem
+                text="Imported"
+                onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                    e.preventDefault();
+                    changeView('imported_data');
                 }}
             />
         </Menu>

@@ -75,7 +75,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const { showingNodes, proofNodes } = this.state;
         const { view, importedData } = this.props;
 
-        if (!importedData.nodes.length) {
+        if (view !== 'imported_data') {
             this.applyView(view);
 
             this.updatePosition(0);
