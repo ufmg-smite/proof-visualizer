@@ -6,15 +6,17 @@ const Menu = ({
     foldSelectedNodes,
     foldAllDescendants,
     changeNodeColor,
+    currentColor,
     options,
 }: {
     unfold: () => void;
     foldSelectedNodes: () => void;
     foldAllDescendants: () => void;
     changeNodeColor: (color: string) => void;
+    currentColor: string;
     options: { unfold: boolean; foldSelected: boolean; foldAllDescendants: boolean };
 }): JSX.Element => {
-    const [color, setColor] = useState('');
+    const [color, setColor] = useState(currentColor);
     return (
         <div className="bp3-popover2-content">
             <ul id="menu" className="bp3-menu">

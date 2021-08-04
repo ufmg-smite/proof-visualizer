@@ -528,6 +528,8 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
 
     render(): JSX.Element {
         const { canvasSize, stage, showingNodes, showingEdges, nodesSelected, nodeOnFocus, proofNodes } = this.state;
+        const color = showingNodes[nodeOnFocus] ? showingNodes[nodeOnFocus].props.color : '';
+
         return (
             <>
                 <Menu
@@ -540,6 +542,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                         foldSelected: nodesSelected.length && nodesSelected.includes(nodeOnFocus) ? true : false,
                         foldAllDescendants: proofNodes[nodeOnFocus] && proofNodes[nodeOnFocus].children.length > 0,
                     }}
+                    currentColor={color}
                 ></Menu>
                 <Stage
                     draggable
