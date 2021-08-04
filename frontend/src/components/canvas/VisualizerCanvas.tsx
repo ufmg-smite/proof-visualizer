@@ -75,26 +75,70 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const { showingNodes, proofNodes } = this.state;
         const { view, importedData } = this.props;
 
-        this.applyView(view);
+        if (!importedData.nodes.length) {
+            this.applyView(view);
 
-        this.updatePosition(0);
-        showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
-        this.addNodes(0);
+            this.updatePosition(0);
+            showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
+            this.addNodes(0);
 
-        const [width, height] = [window.innerWidth, window.innerHeight - 50];
+            const [width, height] = [window.innerWidth, window.innerHeight - 50];
 
-        this.setState({
-            showingNodes,
-            canvasSize: {
-                width,
-                height,
-            },
-            stage: {
-                stageScale: 1,
-                stageX: width / 2 - (showingNodes[0].props.x + 300 / 2),
-                stageY: height / 10 - (showingNodes[0].props.y + 30 / 2),
-            },
-        });
+            this.setState({
+                showingNodes,
+                canvasSize: {
+                    width,
+                    height,
+                },
+                stage: {
+                    stageScale: 1,
+                    stageX: width / 2 - (showingNodes[0].props.x + 300 / 2),
+                    stageY: height / 10 - (showingNodes[0].props.y + 30 / 2),
+                },
+            });
+        } else {
+            importedData.nodes.forEach((node) => {
+                if (node.hidden.length) {
+                    node.hidden.forEach((nodeId) => {
+                        this.hideNode(nodeId);
+                    });
+                }
+            });
+
+            this.updatePosition(0);
+            showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
+            this.addNodes(0);
+
+            const [width, height] = [window.innerWidth, window.innerHeight - 50];
+
+            importedData.nodes.forEach((node) => {
+                if (showingNodes[node.id]) {
+                    showingNodes[node.id] = new Node({
+                        ...showingNodes[node.id].props,
+                        color: node.color,
+                    });
+                }
+            });
+
+            this.setState({
+                showingNodes,
+                canvasSize: {
+                    width,
+                    height,
+                },
+                stage: {
+                    stageScale: 1,
+                    stageX: width / 2 - (showingNodes[0].props.x + 300 / 2),
+                    stageY: height / 10 - (showingNodes[0].props.y + 30 / 2),
+                },
+            });
+
+            importedData.nodes.forEach((node) => {
+                if (showingNodes[node.id]) {
+                    this.updateNodeState(node.id, node.x, node.y);
+                }
+            });
+        }
     }
 
     applyView = (view: string | undefined): void => {

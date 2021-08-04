@@ -16,7 +16,6 @@ interface CanvasProps {
     view?: string;
     importedData: {
         nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
-        hidden: Array<Array<number>>;
     };
 }
 
@@ -157,7 +156,6 @@ interface stateInterface {
     importedDataReducer: {
         importedData: {
             nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
-            hidden: Array<Array<number>>;
         };
     };
 }

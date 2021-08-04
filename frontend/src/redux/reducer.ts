@@ -27,7 +27,6 @@ const initialStateLetMapReducer = {
 const initialStateImportedDataReducer = {
     importedData: {
         nodes: [],
-        hidden: [],
     },
 };
 
@@ -155,7 +154,6 @@ const importedDataReducer = (
     state: {
         importedData: {
             nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
-            hidden: Array<Array<number>>;
         };
     } = initialStateImportedDataReducer,
     action: Action,
