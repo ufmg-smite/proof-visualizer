@@ -83,16 +83,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
 
         const [width, height] = [window.innerWidth, window.innerHeight - 50];
 
-        importedData.nodes.forEach((node) => {
-            if (showingNodes[node.id]) {
-                showingNodes[node.id] = new Node({
-                    ...showingNodes[node.id].props,
-                    color: node.color,
-                });
-                this.updateNodeState(node.id, node.x, node.y);
-            }
-        });
-
         this.setState({
             showingNodes,
             canvasSize: {
@@ -506,21 +496,15 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         link.href = `data:attachment/text,${encodeURIComponent(
             JSON.stringify({
                 dot: dot,
-                nodes: Object.keys(showingNodes)
-                    .filter((node) => showingNodes[parseInt(node)].props.rule !== 'π')
-                    .map((node) => {
-                        return {
-                            id: parseInt(node),
-                            color: showingNodes[parseInt(node)].props.color,
-                            x: showingNodes[parseInt(node)].props.x,
-                            y: showingNodes[parseInt(node)].props.y,
-                        };
-                    }),
-                hidden: Object.keys(showingNodes)
-                    .filter((node) => showingNodes[parseInt(node)].props.rule === 'π')
-                    .map((node) => {
-                        return proofNodes[parseInt(node)].hidedNodes.filter((nodeId) => proofNodes[nodeId].hided);
-                    }),
+                nodes: Object.keys(showingNodes).map((node) => {
+                    return {
+                        id: parseInt(node),
+                        color: showingNodes[parseInt(node)].props.color,
+                        x: showingNodes[parseInt(node)].props.x,
+                        y: showingNodes[parseInt(node)].props.y,
+                        hidden: proofNodes[parseInt(node)].hidedNodes.filter((nodeId) => proofNodes[nodeId].hided),
+                    };
+                }),
             }),
         )}`;
         link.click();

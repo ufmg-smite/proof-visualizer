@@ -48,7 +48,7 @@ type Action =
     | {
           type: 'SET_IMPORTED_DATA';
           payload: {
-              nodes: Array<{ id: number; color: string; x: number; y: number }>;
+              nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
               hidden: Array<Array<number>>;
           };
       };
@@ -154,7 +154,7 @@ const letMapReducer = (
 const importedDataReducer = (
     state: {
         importedData: {
-            nodes: Array<{ id: number; color: string; x: number; y: number }>;
+            nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
             hidden: Array<Array<number>>;
         };
     } = initialStateImportedDataReducer,
