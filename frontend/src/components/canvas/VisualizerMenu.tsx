@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ControlGroup, Button, InputGroup } from '@blueprintjs/core';
 
 const Menu = ({
@@ -17,6 +17,11 @@ const Menu = ({
     options: { unfold: boolean; foldSelected: boolean; foldAllDescendants: boolean };
 }): JSX.Element => {
     const [color, setColor] = useState(currentColor);
+
+    useEffect(() => {
+        setColor(currentColor);
+    }, [currentColor]);
+
     return (
         <div className="bp3-popover2-content">
             <ul id="menu" className="bp3-menu">
@@ -75,7 +80,7 @@ const Menu = ({
                                 vertical={false}
                             >
                                 <InputGroup
-                                    placeholder="#fff"
+                                    placeholder={currentColor}
                                     value={color}
                                     onChange={(e) => setColor(e.target.value)}
                                 />
