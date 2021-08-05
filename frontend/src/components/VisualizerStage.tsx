@@ -52,14 +52,17 @@ function processDot(dot: string) {
             rank: 0,
         },
     ];
-    dot = dot.split('"}}"\n').join('"}}";\n'); // Fix CVC5
     let comment: any = dot.slice(dot.indexOf('comment='));
-    comment = comment ? comment.slice(comment.indexOf('=') + 2, comment.indexOf(';') - 1) : null;
+    comment = comment
+        ? removeEscapedCharacters(
+              removeEscapedCharacters(comment.slice(comment.indexOf('=') + 2, comment.indexOf(';') - 1)),
+          )
+        : null;
     if (comment) {
         const dispatch = useDispatch();
         dispatch({
             type: 'SET_LET_MAP',
-            payload: JSON.parse(removeEscapedCharacters(removeEscapedCharacters(comment)))['letMap'],
+            payload: JSON.parse(comment)['letMap'],
         });
     }
 
@@ -81,7 +84,7 @@ function processDot(dot: string) {
             attributes = attributes.slice(attributes.indexOf(', class = ') + ', class = '.length);
             attributes = attributes.slice(attributes.indexOf('"') + 1, attributes.slice(1).indexOf('"') + 1);
             const views = attributes.trim().split(' ');
-            const comment: string = line.slice(line.indexOf('comment'), line.lastIndexOf('"'));
+            const comment: string = removeEscapedCharacters(line.slice(line.indexOf('comment'), line.lastIndexOf('"')));
             const commentJSON = JSON.parse(comment.slice(comment.indexOf('"') + 1).replace(/'/g, '"'));
 
             if (!nodes[id]) {
@@ -136,9 +139,7 @@ function processDot(dot: string) {
             nodes[child].rank = nodes[parent].rank + 1;
         }
     });
-    return comment
-        ? [nodes, JSON.parse(removeEscapedCharacters(removeEscapedCharacters(comment)))['letMap']]
-        : [nodes, {}];
+    return comment ? [nodes, JSON.parse(comment)['letMap']] : [nodes, {}];
 }
 
 function ruleHelper(rule: string) {
