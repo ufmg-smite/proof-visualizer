@@ -12,10 +12,6 @@ interface letDrawerProps {
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
-const indent = (s: string) => {
-    return Sexprs().stringify(Sexprs().parse(s));
-};
-
 const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: letDrawerProps) => {
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
     const letMap = useSelector<
@@ -96,6 +92,8 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
                                                         }
                                                     }),
                                                 ),
+                                                [],
+                                                true,
                                             )}
                                         </td>
                                         <td style={{ width: '150px', display: 'flex', flexDirection: 'column' }}>

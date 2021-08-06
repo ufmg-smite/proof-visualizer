@@ -469,7 +469,7 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                                 {nodeInfo.args.indexOf('let') !== -1 ? (
                                     <Collapse isOpen={argsTranslatorOpen}>
                                         <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
-                                            {Sexprs().stringify(Sexprs().parse(translate(nodeInfo.args)))}
+                                            {Sexprs().stringify(Sexprs().parse(translate(nodeInfo.args)), [], true)}
                                         </Pre>
                                     </Collapse>
                                 ) : null}
@@ -496,7 +496,7 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                             {nodeInfo.conclusion.indexOf('let') !== -1 ? (
                                 <Collapse isOpen={conclusionTranslatorOpen}>
                                     <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
-                                        {Sexprs().stringify(Sexprs().parse(translate(nodeInfo.conclusion)))}
+                                        {Sexprs().stringify(Sexprs().parse(translate(nodeInfo.conclusion)), [], true)}
                                     </Pre>
                                 </Collapse>
                             ) : null}
@@ -550,7 +550,7 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                     <VisualizerDirectoryStyle
                         proofTree={proofTree}
                         ruleHelper={ruleHelper}
-                        ident={(e) => Sexprs().stringify(Sexprs().parse(e))}
+                        ident={(e) => Sexprs().stringify(Sexprs().parse(e), [], true)}
                         translate={translate}
                     />
                 )
