@@ -526,11 +526,13 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     };
 
     changeNodeColor = (color: string): void => {
-        const { showingNodes, nodesSelected, nodeOnFocus } = this.state;
+        const { proofNodes, showingNodes, nodesSelected, nodeOnFocus } = this.state;
         nodesSelected.forEach((nodeId) => {
             showingNodes[nodeId] = new Node({ ...showingNodes[nodeId].props, selected: false, color: color });
+            proofNodes[nodeId].color = color;
         });
         showingNodes[nodeOnFocus] = new Node({ ...showingNodes[nodeOnFocus].props, color: color });
+        proofNodes[nodeOnFocus].color = color;
         this.setState({ showingNodes, nodesSelected: [] });
     };
 
