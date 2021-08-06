@@ -5,30 +5,15 @@ import { Button, Drawer, Classes, Position } from '@blueprintjs/core';
 
 import { stateInterface } from './interfaces';
 
+import Sexprs from './functions/sFormatter';
+
 interface letDrawerProps {
     drawerIsOpen: boolean;
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 const indent = (s: string) => {
-    let newS = s.replaceAll(' ', '\n');
-    let i = 0;
-    let pCounter = 0;
-    while (i < newS.length) {
-        if (newS[i] === '(') pCounter++;
-        else if (newS[i] === ')') pCounter--;
-        else if (newS[i] === '\n') {
-            if (newS[i + 1] === ')') {
-                newS = [newS.slice(0, i + 1), '    '.repeat(pCounter - 1), newS.slice(i + 1)].join('');
-                i += pCounter - 1;
-            } else {
-                newS = [newS.slice(0, i + 1), '    '.repeat(pCounter), newS.slice(i + 1)].join('');
-                i += pCounter;
-            }
-        }
-        i++;
-    }
-    return newS;
+    return Sexprs().stringify(Sexprs().parse(s));
 };
 
 const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: letDrawerProps) => {
@@ -82,32 +67,36 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
                                             <strong>{key}</strong>
                                         </td>
                                         <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>
-                                            {indent(letMapS[key])
-                                                .split('\n')
-                                                .map((e) => {
-                                                    if (e.indexOf(' let') === -1) {
-                                                        return <span>{e + '\n'}</span>;
-                                                    } else {
-                                                        return (
-                                                            <span
-                                                                onClick={() => {
-                                                                    const newLetMap = { ...letMapS };
-                                                                    const i = newLetMap[key].indexOf(
-                                                                        e.replace(/^\s+|\s+$/g, ''),
-                                                                    );
-                                                                    const l = newLetMap[key].slice(i).split(/[ |)]/)[0];
-                                                                    newLetMap[key] = newLetMap[key].replace(
-                                                                        l,
-                                                                        letMap[l],
-                                                                    );
-                                                                    setLetMapS(newLetMap);
-                                                                }}
-                                                            >
-                                                                {e + '\n'}
-                                                            </span>
-                                                        );
-                                                    }
-                                                })}
+                                            {Sexprs().stringify(
+                                                Sexprs().parse(
+                                                    letMapS[key].split('\n').map((e: string) => {
+                                                        if (e.indexOf(' let') === -1) {
+                                                            return <span>{e + '\n'}</span>;
+                                                        } else {
+                                                            return (
+                                                                <span
+                                                                    onClick={() => {
+                                                                        const newLetMap = { ...letMapS };
+                                                                        const i = newLetMap[key].indexOf(
+                                                                            e.replace(/^\s+|\s+$/g, ''),
+                                                                        );
+                                                                        const l = newLetMap[key]
+                                                                            .slice(i)
+                                                                            .split(/[ |)]/)[0];
+                                                                        newLetMap[key] = newLetMap[key].replace(
+                                                                            l,
+                                                                            letMap[l],
+                                                                        );
+                                                                        setLetMapS(newLetMap);
+                                                                    }}
+                                                                >
+                                                                    {e + '\n'}
+                                                                </span>
+                                                            );
+                                                        }
+                                                    }),
+                                                ),
+                                            )}
                                         </td>
                                         <td style={{ width: '150px', display: 'flex', flexDirection: 'column' }}>
                                             <Button
