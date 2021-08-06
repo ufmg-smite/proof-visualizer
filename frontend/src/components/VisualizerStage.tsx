@@ -10,6 +10,8 @@ import { NodeInterface, stateInterface } from './interfaces';
 
 import '../scss/VisualizerStage.scss';
 
+import Sexprs from './functions/sFormatter';
+
 function removeEscapedCharacters(s: string): string {
     let newS = '';
     for (let i = 0; i < s.length; i += 1) {
@@ -317,27 +319,6 @@ const createTree = (list: any): any => {
     return roots;
 };
 
-const indent = (s: string) => {
-    let newS = s.replaceAll(' ', '\n');
-    let i = 0;
-    let pCounter = 0;
-    while (i < newS.length) {
-        if (newS[i] === '(' || newS[i] === '[') pCounter++;
-        else if (newS[i] === ')' || newS[i] === ']') pCounter--;
-        else if (newS[i] === '\n') {
-            if (newS[i + 1] === ')' || newS[i + 1] === ']') {
-                newS = [newS.slice(0, i + 1), '  '.repeat(pCounter - 1), newS.slice(i + 1)].join('');
-                i += pCounter - 1;
-            } else {
-                newS = [newS.slice(0, i + 1), '  '.repeat(pCounter), newS.slice(i + 1)].join('');
-                i += pCounter;
-            }
-        }
-        i++;
-    }
-    return newS;
-};
-
 const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
     canvasRef,
 }: {
@@ -488,7 +469,7 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                                 {nodeInfo.args.indexOf('let') !== -1 ? (
                                     <Collapse isOpen={argsTranslatorOpen}>
                                         <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
-                                            {indent(translate(nodeInfo.args))}
+                                            {Sexprs().stringify(Sexprs().parse(translate(nodeInfo.args)), [], true)}
                                         </Pre>
                                     </Collapse>
                                 ) : null}
@@ -515,7 +496,7 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                             {nodeInfo.conclusion.indexOf('let') !== -1 ? (
                                 <Collapse isOpen={conclusionTranslatorOpen}>
                                     <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
-                                        {indent(translate(nodeInfo.conclusion))}
+                                        {Sexprs().stringify(Sexprs().parse(translate(nodeInfo.conclusion)), [], true)}
                                     </Pre>
                                 </Collapse>
                             ) : null}
@@ -569,7 +550,7 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                     <VisualizerDirectoryStyle
                         proofTree={proofTree}
                         ruleHelper={ruleHelper}
-                        ident={indent}
+                        ident={(e) => Sexprs().stringify(Sexprs().parse(e), [], true)}
                         translate={translate}
                     />
                 )
