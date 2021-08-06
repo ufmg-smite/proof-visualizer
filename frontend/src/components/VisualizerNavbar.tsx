@@ -159,13 +159,6 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                     link.click();
                 }}
             />
-            <MenuDivider></MenuDivider>
-            <MenuItem
-                icon="manually-entered-data"
-                text="Problem"
-                href={`data:attachment/text,${encodeURIComponent(proof.problem)}`}
-                download={proof.label ? `${proof.label.replaceAll(' ', '_')}.smt2` : null}
-            />
         </Menu>
     );
     return (
