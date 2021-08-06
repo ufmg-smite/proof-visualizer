@@ -52,6 +52,7 @@ function processDot(dot: string) {
             positionCache: false,
             descendants: 0,
             rank: 0,
+            color: '#8d99ae',
         },
     ];
     let comment: any = dot.slice(dot.indexOf('comment='));
@@ -107,6 +108,7 @@ function processDot(dot: string) {
                     positionCache: false,
                     descendants: 0,
                     rank: 0,
+                    color: '#8d99ae',
                 };
             }
             nodes[id].conclusion = removeEscapedCharacters(conclusion);
@@ -135,6 +137,7 @@ function processDot(dot: string) {
                     positionCache: false,
                     descendants: 0,
                     rank: nodes[parent].rank + 1,
+                    color: '#8d99ae',
                 };
             }
             nodes[child].parent = parent;

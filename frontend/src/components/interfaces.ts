@@ -74,6 +74,8 @@ interface NodeInterface {
     replace?: number;
 
     tree?: Array<TreeNode>;
+
+    color: string;
 }
 
 interface NodeProps {

@@ -204,7 +204,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             toggleNodeSelection: this.toggleNodeSelection,
             unfoldOnClick: this.unfoldOnClick,
             openDrawer: openDrawer,
-            color: '#8d99ae',
+            color: node.color,
             x: node.x,
             y: node.y,
             selected: false,
@@ -371,6 +371,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 descendants: 0,
                 topHidedNodes: [[id, proofNodes[id].rule, proofNodes[id].conclusion, proofNodes[id].descendants, 1]],
                 rank: proofNodes[parentId].rank + 1,
+                color: proofNodes[id].color,
             };
             proofNodes[parentId].hideMyChildNode = piId;
             proofNodes[parentId].children.push(piId);
