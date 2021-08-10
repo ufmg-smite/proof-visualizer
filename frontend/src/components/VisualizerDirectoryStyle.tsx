@@ -11,14 +11,14 @@ import '../scss/VisualizerDirectoryStyle.scss';
 interface directoryStyleProps {
     proofTree: TreeNodeInfo[];
     ruleHelper: (s: string) => string;
-    ident: (s: string) => string;
+    indent: (s: string) => string;
     translate: (s: string) => string;
 }
 
 const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
     proofTree,
     ruleHelper,
-    ident,
+    indent,
     translate,
 }: directoryStyleProps) => {
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
@@ -133,7 +133,7 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
                                     {nodeInfo.args}
                                     {nodeInfo.args.indexOf('let') !== -1 ? (
                                         <Collapse isOpen={argsTranslatorOpen}>
-                                            <Pre id="pre-rule">{ident(translate(nodeInfo.args))}</Pre>
+                                            <Pre id="pre-rule">{indent(translate(nodeInfo.args))}</Pre>
                                         </Collapse>
                                     ) : null}
                                 </td>
@@ -158,7 +158,7 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
                                 {nodeInfo.conclusion}
                                 {nodeInfo.conclusion.indexOf('let') !== -1 ? (
                                     <Collapse isOpen={conclusionTranslatorOpen}>
-                                        <Pre id="pre-rule">{ident(translate(nodeInfo.conclusion))}</Pre>
+                                        <Pre id="pre-rule">{indent(translate(nodeInfo.conclusion))}</Pre>
                                     </Collapse>
                                 ) : null}
                             </td>
