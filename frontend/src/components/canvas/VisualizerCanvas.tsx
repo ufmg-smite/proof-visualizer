@@ -290,7 +290,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     };
 
     hideNode = (id: number): void => {
-        const { proofNodes } = this.state;
+        const { proofNodes, nodeOnFocus } = this.state;
         const parentId = proofNodes[id].parent;
         let piId: number;
         if (parentId && proofNodes[parentId].hided) {
@@ -371,7 +371,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 descendants: 0,
                 topHidedNodes: [[id, proofNodes[id].rule, proofNodes[id].conclusion, proofNodes[id].descendants, 1]],
                 rank: proofNodes[parentId].rank + 1,
-                color: proofNodes[id].color,
+                color: proofNodes[nodeOnFocus] ? proofNodes[nodeOnFocus].color : '#8d99ae',
             };
             proofNodes[parentId].hideMyChildNode = piId;
             proofNodes[parentId].children.push(piId);
