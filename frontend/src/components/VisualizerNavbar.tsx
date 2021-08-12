@@ -184,6 +184,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             <Navbar.Group align={Alignment.RIGHT}>
                 {proof.label ? (
                     <>
+                        <Navbar.Heading>{proof.label}</Navbar.Heading>
                         <Navbar.Divider />
                         <InputGroup
                             id="text-input"
@@ -199,8 +200,6 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                                 setCommand('');
                             }}
                         />
-                        <Navbar.Divider />
-                        <Navbar.Heading>{proof.label}</Navbar.Heading>
                         <Navbar.Divider />
                         <Popover2
                             content={proof.label ? styleMenu : undefined}
