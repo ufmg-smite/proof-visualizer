@@ -39,6 +39,10 @@ const App: React.FC = () => {
             : null;
     }, [drawerIsOpen]);
 
+    const runCommands = (command: string) => {
+        canvasRef.current ? canvasRef.current.runCommands(command) : null;
+    };
+
     return (
         <div className={darkTheme ? ' bp3-dark' : ''}>
             <Toaster position={Position.TOP} ref={refHandlers.toaster} />
@@ -47,6 +51,7 @@ const App: React.FC = () => {
                 setDialogContent={setDialogContent}
                 setDrawerIsOpen={setDrawerIsOpen}
                 downloadProof={downloadProof}
+                runCommands={runCommands}
             ></VisualizerNavbar>
             <VisualizerDialog
                 dialogIsOpen={dialogIsOpen}

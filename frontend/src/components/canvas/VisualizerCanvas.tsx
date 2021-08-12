@@ -531,8 +531,10 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             showingNodes[nodeId] = new Node({ ...showingNodes[nodeId].props, selected: false, color: color });
             proofNodes[nodeId].color = color;
         });
-        showingNodes[nodeOnFocus] = new Node({ ...showingNodes[nodeOnFocus].props, color: color });
-        proofNodes[nodeOnFocus].color = color;
+        if (showingNodes[nodeOnFocus]) {
+            showingNodes[nodeOnFocus] = new Node({ ...showingNodes[nodeOnFocus].props, color: color });
+            proofNodes[nodeOnFocus].color = color;
+        }
         this.setState({ showingNodes, nodesSelected: [] });
     };
 
@@ -555,6 +557,43 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             }),
         )}`;
         link.click();
+    };
+
+    runCommands = (command: string): void => {
+        const { showingNodes, proofNodes } = this.state;
+        let nodes: Array<number> = [];
+        if (command.split(' ')[0] == '\\search' || command.split(' ')[0] == '\\color') {
+            nodes = Object.keys(showingNodes)
+                .map((nodeId) => parseInt(nodeId))
+                .filter((nodeId) => {
+                    return (
+                        (showingNodes[nodeId].props.rule.indexOf(command.split(' ')[1]) !== -1 ||
+                            showingNodes[nodeId].props.conclusion.indexOf(command.split(' ')[1]) !== -1 ||
+                            proofNodes[nodeId].hidedNodes.some((hiddenNodeId) => {
+                                return (
+                                    proofNodes[hiddenNodeId].rule.indexOf(command.split(' ')[1]) !== -1 ||
+                                    proofNodes[hiddenNodeId].conclusion.indexOf(command.split(' ')[1]) !== -1
+                                );
+                            })) &&
+                        showingNodes[nodeId]
+                    );
+                });
+        }
+        switch (command.split(' ')[0]) {
+            case '\\search':
+                nodes.forEach((nodeId) => {
+                    showingNodes[nodeId] = new Node({ ...showingNodes[nodeId].props, selected: true });
+                });
+                this.setState({ showingNodes, nodesSelected: nodes });
+                break;
+            case '\\color':
+                const color = command.split(' ')[2];
+                nodes.forEach((nodeId) => {
+                    showingNodes[nodeId] = new Node({ ...showingNodes[nodeId].props, color: color });
+                    proofNodes[nodeId].color = color;
+                });
+                this.setState({ showingNodes });
+        }
     };
 
     render(): JSX.Element {

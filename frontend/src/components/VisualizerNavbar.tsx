@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Alignment, Button, Icon, Navbar, Switch, Menu, MenuItem, MenuDivider } from '@blueprintjs/core';
+import { Alignment, Button, Icon, InputGroup, Navbar, Switch, Menu, MenuItem, MenuDivider } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 
 import '../scss/VisualizerNavbar.scss';
@@ -38,6 +38,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     setDialogContent,
     setDrawerIsOpen,
     downloadProof,
+    runCommands,
 }: VisualizerNavbarProps) => {
     const openDialog = (content: string): void => {
         setDialogIsOpen(true);
@@ -46,6 +47,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     const proof = useSelector<stateInterface, proof>((state: stateInterface) => state.proofReducer.proof);
     const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
     const windowSize = useWindowSize();
+    const [command, setCommand] = useState('');
 
     const dispatch = useDispatch();
 
@@ -182,6 +184,22 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             <Navbar.Group align={Alignment.RIGHT}>
                 {proof.label ? (
                     <>
+                        <Navbar.Divider />
+                        <InputGroup
+                            id="text-input"
+                            placeholder="\command"
+                            value={command}
+                            onChange={(e) => setCommand(e.target.value)}
+                        />
+                        <Button
+                            style={{ marginLeft: '5px' }}
+                            icon="play"
+                            onClick={() => {
+                                runCommands(command);
+                                setCommand('');
+                            }}
+                        />
+                        <Navbar.Divider />
                         <Navbar.Heading>{proof.label}</Navbar.Heading>
                         <Navbar.Divider />
                         <Popover2
