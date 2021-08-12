@@ -39,6 +39,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     setDrawerIsOpen,
     downloadProof,
     runCommands,
+    canvasRef,
 }: VisualizerNavbarProps) => {
     const openDialog = (content: string): void => {
         setDialogIsOpen(true);
@@ -56,6 +57,15 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     };
 
     const setStyle = (style: string) => {
+        if (style !== 'tree') {
+            dispatch({
+                type: 'SET_IMPORTED_DATA',
+                payload: canvasRef.current ? canvasRef.current.exportProof() : { nodes: [], hidden: [] },
+            });
+        } else {
+            dispatch({ type: 'IMPORTED_DATA_VIEW', payload: proof.dot });
+        }
+
         dispatch({ type: 'SET_STYLE', payload: style });
     };
 

@@ -52,6 +52,7 @@ const App: React.FC = () => {
                 setDrawerIsOpen={setDrawerIsOpen}
                 downloadProof={downloadProof}
                 runCommands={runCommands}
+                canvasRef={canvasRef}
             ></VisualizerNavbar>
             <VisualizerDialog
                 dialogIsOpen={dialogIsOpen}

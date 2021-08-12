@@ -539,24 +539,28 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     };
 
     downloadProof = (dot: string, proofName: string): void => {
-        const { showingNodes, proofNodes } = this.state;
         const link = document.createElement('a');
         link.download = proofName + '.json';
-        link.href = `data:attachment/text,${encodeURIComponent(
-            JSON.stringify({
-                dot: dot,
-                nodes: Object.keys(showingNodes).map((node) => {
-                    return {
-                        id: parseInt(node),
-                        color: showingNodes[parseInt(node)].props.color,
-                        x: showingNodes[parseInt(node)].props.x,
-                        y: showingNodes[parseInt(node)].props.y,
-                        hidden: proofNodes[parseInt(node)].hidedNodes.filter((nodeId) => proofNodes[nodeId].hided),
-                    };
-                }),
-            }),
-        )}`;
+        link.href = `data:attachment/text,${encodeURIComponent(JSON.stringify(this.exportProof(dot)))}`;
         link.click();
+    };
+
+    exportProof = (
+        dot = '',
+    ): { dot: string; nodes: { id: number; color: string; x: number; y: number; hidden: Array<number> }[] } => {
+        const { showingNodes, proofNodes } = this.state;
+        return {
+            dot: dot,
+            nodes: Object.keys(showingNodes).map((node) => {
+                return {
+                    id: parseInt(node),
+                    color: showingNodes[parseInt(node)].props.color,
+                    x: showingNodes[parseInt(node)].props.x,
+                    y: showingNodes[parseInt(node)].props.y,
+                    hidden: proofNodes[parseInt(node)].hidedNodes.filter((nodeId) => proofNodes[nodeId].hided),
+                };
+            }),
+        };
     };
 
     runCommands = (command: string): void => {

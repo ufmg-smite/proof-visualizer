@@ -369,7 +369,6 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
             };
         }),
     );
-
     const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
     const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);

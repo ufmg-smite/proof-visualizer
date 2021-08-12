@@ -3,6 +3,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
 import { IconName } from '@blueprintjs/core/lib/esm/components/icon/icon';
 import Node from '../components/canvas/VisualizerNode';
+import Canvas from '../components/canvas/VisualizerCanvas';
 
 interface CanvasProps {
     proofNodes: Array<NodeInterface>;
@@ -139,6 +140,7 @@ interface VisualizerNavbarProps {
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
     downloadProof: (dot: string, proofName: string) => void;
     runCommands: (command: string) => void;
+    canvasRef: React.RefObject<Canvas>;
 }
 
 interface stateInterface {
