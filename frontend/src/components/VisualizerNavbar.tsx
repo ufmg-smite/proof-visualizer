@@ -197,7 +197,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                         <Navbar.Heading>{proof.label}</Navbar.Heading>
                         <Navbar.Divider />
                         <InputGroup
-                            id="text-input"
+                            id="command"
                             placeholder="\command"
                             value={command}
                             onChange={(e) => setCommand(e.target.value)}
