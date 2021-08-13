@@ -519,10 +519,16 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     };
 
     foldAllDescendants = (): void => {
-        const { nodeOnFocus } = this.state;
-        this.setState({ nodesSelected: [nodeOnFocus, ...this.recursivelyGetChildren(nodeOnFocus)] }, () =>
-            this.foldSelectedNodes(),
-        );
+        const { nodeOnFocus, nodesSelected } = this.state;
+        const nodes = (
+            nodesSelected
+                ? nodesSelected.reduce<number[]>(
+                      (accumulator, currentValue) => accumulator.concat(this.recursivelyGetChildren(currentValue)),
+                      [],
+                  )
+                : []
+        ).concat(...[nodeOnFocus, ...this.recursivelyGetChildren(nodeOnFocus)]);
+        this.setState({ nodesSelected: nodes }, () => this.foldSelectedNodes());
     };
 
     changeNodeColor = (color: string): void => {
