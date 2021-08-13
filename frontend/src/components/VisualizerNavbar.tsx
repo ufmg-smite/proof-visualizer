@@ -118,21 +118,21 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                 text="Basic"
                 onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                     e.preventDefault();
-                    changeView('basic');
+                    runCommands('\\view basic');
                 }}
             />
             <MenuItem
                 text="Propositional"
                 onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                     e.preventDefault();
-                    changeView('propositional');
+                    runCommands('\\view propositional');
                 }}
             />
             <MenuItem
                 text="Full"
                 onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                     e.preventDefault();
-                    changeView('full');
+                    runCommands('\\view full');
                 }}
             />
             <MenuDivider></MenuDivider>
