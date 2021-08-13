@@ -567,21 +567,25 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const { showingNodes, proofNodes } = this.state;
         let nodes: Array<number> = [];
         if (command.split(' ')[0] == '\\search' || command.split(' ')[0] == '\\color') {
-            nodes = Object.keys(showingNodes)
-                .map((nodeId) => parseInt(nodeId))
-                .filter((nodeId) => {
-                    return (
-                        (showingNodes[nodeId].props.rule.indexOf(command.split(' ')[1]) !== -1 ||
-                            showingNodes[nodeId].props.conclusion.indexOf(command.split(' ')[1]) !== -1 ||
-                            proofNodes[nodeId].hidedNodes.some((hiddenNodeId) => {
-                                return (
-                                    proofNodes[hiddenNodeId].rule.indexOf(command.split(' ')[1]) !== -1 ||
-                                    proofNodes[hiddenNodeId].conclusion.indexOf(command.split(' ')[1]) !== -1
-                                );
-                            })) &&
-                        showingNodes[nodeId]
-                    );
-                });
+            if (command.split(' ')[1] == '*') {
+                nodes = Object.keys(showingNodes).map((nodeId) => parseInt(nodeId));
+            } else {
+                nodes = Object.keys(showingNodes)
+                    .map((nodeId) => parseInt(nodeId))
+                    .filter((nodeId) => {
+                        return (
+                            (showingNodes[nodeId].props.rule.indexOf(command.split(' ')[1]) !== -1 ||
+                                showingNodes[nodeId].props.conclusion.indexOf(command.split(' ')[1]) !== -1 ||
+                                proofNodes[nodeId].hidedNodes.some((hiddenNodeId) => {
+                                    return (
+                                        proofNodes[hiddenNodeId].rule.indexOf(command.split(' ')[1]) !== -1 ||
+                                        proofNodes[hiddenNodeId].conclusion.indexOf(command.split(' ')[1]) !== -1
+                                    );
+                                })) &&
+                            showingNodes[nodeId]
+                        );
+                    });
+            }
         }
         switch (command.split(' ')[0]) {
             case '\\search':
