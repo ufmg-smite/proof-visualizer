@@ -153,8 +153,13 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                     return false;
             }
         });
+        proofNodes.forEach((node) => {
+            if (proofNodes[node.id] && !(proofNodes[node.id].rule === 'π' || node.id === 0) && node.hided) {
+                this.unhideNode(node.id);
+            }
+        });
         nodesToHide.forEach((node) => {
-            if (!(proofNodes[node.id].rule === 'π' || node.id === 0)) {
+            if (proofNodes[node.id] && !(proofNodes[node.id].rule === 'π' || node.id === 0)) {
                 this.hideNode(node.id);
             }
         });
@@ -164,7 +169,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         const { proofNodes, nodesSelected, showingNodes } = this.state;
         this.removeNodes(0);
         nodesSelected
-            .sort((a, b) => b - a)
+            .sort((a, b) => a - b)
             .forEach((nodeId) => {
                 if (!(proofNodes[nodeId].rule === 'π' || nodeId === 0)) {
                     this.hideNode(nodeId);
@@ -607,6 +612,21 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                     proofNodes[nodeId].color = color;
                 });
                 this.setState({ showingNodes });
+                break;
+            case '\\view':
+                this.removeNodes(0);
+                this.applyView(command.split(' ')[1]);
+
+                this.exportProof().nodes.forEach((node) => {
+                    if (showingNodes[node.id]) {
+                        showingNodes[node.id] = new Node({
+                            ...showingNodes[node.id].props,
+                            color: node.color,
+                        });
+                    }
+                });
+                this.updatePosition(0);
+                this.addNodes(0);
         }
     };
 
