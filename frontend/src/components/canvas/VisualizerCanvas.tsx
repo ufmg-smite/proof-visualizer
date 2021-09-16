@@ -577,7 +577,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     runCommands = (command: string): void => {
         const { showingNodes, proofNodes } = this.state;
         let nodes: Array<number> = [];
-        if (command.split(' ')[0] == '\\search' || command.split(' ')[0] == '\\color') {
+        if (command.split(' ')[0] == '/select' || command.split(' ')[0] == '/color') {
             if (command.split(' ')[1] == '*') {
                 nodes = Object.keys(showingNodes).map((nodeId) => parseInt(nodeId));
             } else {
@@ -599,13 +599,13 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             }
         }
         switch (command.split(' ')[0]) {
-            case '\\search':
+            case '/select':
                 nodes.forEach((nodeId) => {
                     showingNodes[nodeId] = new Node({ ...showingNodes[nodeId].props, selected: true });
                 });
                 this.setState({ showingNodes, nodesSelected: nodes });
                 break;
-            case '\\color':
+            case '/color':
                 const color = command.split(' ')[2];
                 nodes.forEach((nodeId) => {
                     showingNodes[nodeId] = new Node({ ...showingNodes[nodeId].props, color: color });
@@ -613,7 +613,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                 });
                 this.setState({ showingNodes });
                 break;
-            case '\\view':
+            case '/view':
                 this.removeNodes(0);
                 this.applyView(command.split(' ')[1]);
 
