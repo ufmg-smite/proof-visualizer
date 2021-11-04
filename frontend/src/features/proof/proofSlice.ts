@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../app/store';
-import { processDot, piNodeChildren, piNodeParents, descendants } from './aux';
+import { processDot, piNodeChildren, piNodeParents, descendants } from './auxi';
 
 export interface NodeInterface {
     id: number;
