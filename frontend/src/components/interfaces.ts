@@ -3,7 +3,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
 import { IconName } from '@blueprintjs/core/lib/esm/components/icon/icon';
 import Node from '../components/canvas/VisualizerNode';
-import Canvas from '../components/canvas/VisualizerCanvas';
+import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 
 interface CanvasProps {
     proofNodes: Array<NodeInterface>;
@@ -28,6 +28,18 @@ interface CanvasState {
     showingEdges: { [id: string]: JSX.Element };
     nodeOnFocus: number;
     nodesSelected: Array<number>;
+    myProofState: NodeInterfaceT[];
+}
+
+interface NodeInterfaceT {
+    id: number;
+    conclusion: string;
+    rule: string;
+    args: string;
+    views: Array<string>;
+    children: number[];
+    parents: number[];
+    hiddenNodes?: Array<NodeInterfaceT>;
 }
 
 interface DialogProps {
@@ -99,7 +111,7 @@ interface NodeProps {
     color: string;
 
     setNodeOnFocus: (id: number) => void;
-    toggleNodeSelection: (id: number) => void;
+    toggleNodeSelection: (id: number, props: any) => void;
     updateNodeState: (key: number, x: number, y: number) => void;
     unfoldOnClick: (id: number) => void;
     openDrawer: (
@@ -140,7 +152,6 @@ interface VisualizerNavbarProps {
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
     downloadProof: (dot: string, proofName: string) => void;
     runCommands: (command: string) => void;
-    canvasRef: React.RefObject<Canvas>;
 }
 
 interface stateInterface {
@@ -177,6 +188,37 @@ interface TreeNode {
     args: string;
 }
 
+interface NodeInterfaceT {
+    id: number;
+    conclusion: string;
+    rule: string;
+    args: string;
+    views: Array<string>;
+    children: number[];
+    parents: number[];
+    hiddenNodes?: Array<NodeInterfaceT>;
+}
+
+interface CanvasPropsAndRedux {
+    myProof: NodeInterfaceT[];
+    myView: 'basic' | 'propositional' | 'full';
+    proofNodes: NodeInterface[];
+    openDrawer: (nodeInfo: {
+        rule: string;
+        args: string;
+        conclusion: string;
+        nHided: number;
+        nDescendants: number;
+    }) => void;
+    view: string | undefined;
+    importedData: {
+        nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
+    };
+    hideNodes: ActionCreatorWithPayload<number[], string>;
+    unhideNodes: ActionCreatorWithPayload<number[], string>;
+    foldAllDescendants: ActionCreatorWithPayload<number>;
+}
+
 export type {
     CanvasProps,
     CanvasState,
@@ -190,4 +232,6 @@ export type {
     VisualizerNavbarProps,
     stateInterface,
     TreeNode,
+    CanvasPropsAndRedux,
+    NodeInterfaceT,
 };

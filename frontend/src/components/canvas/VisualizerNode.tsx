@@ -52,6 +52,7 @@ export default class Node extends React.Component<NodeProps> {
             updateNodeState,
             toggleNodeSelection,
             openDrawer,
+            unfoldOnClick,
             tree,
         } = this.props;
 
@@ -70,9 +71,7 @@ export default class Node extends React.Component<NodeProps> {
             padding: 10,
             width: 300,
         };
-        const nHidedStr = nHided
-            ? '#hidden: ' + '[' + (topHidedNodes ? topHidedNodes.map((node) => node[4]).join(', ') : '') + ']'
-            : '';
+        const nHidedStr = nHided ? '#hidden: ' + nHided : '';
         const nDescendantsStr =
             ' #descendants: ' +
             (rule !== 'π'
@@ -91,7 +90,7 @@ export default class Node extends React.Component<NodeProps> {
                 onClick={(e) => {
                     if (e.evt.button === 0) {
                         if (e.evt.shiftKey) {
-                            toggleNodeSelection(id);
+                            toggleNodeSelection(id, this.props);
                         } else {
                             openDrawer(
                                 {

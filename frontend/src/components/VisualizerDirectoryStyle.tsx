@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import { Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
 import { VisualizerTree } from './VisualizerTree';
 
-import { stateInterface } from './interfaces';
-
 import '../scss/VisualizerDirectoryStyle.scss';
+import { useAppSelector } from '../app/hooks';
+import { selectTheme } from '../features/theme/themeSlice';
 
 interface directoryStyleProps {
     proofTree: TreeNodeInfo[];
@@ -21,7 +20,7 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
     indent,
     translate,
 }: directoryStyleProps) => {
-    const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
+    const darkTheme = useAppSelector(selectTheme);
     const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
     const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);
     const [conclusionTranslatorOpen, setConclusionTranslatorOpen] = useState(false);

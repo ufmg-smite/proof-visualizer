@@ -1,11 +1,28 @@
 import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { Dispatch, SetStateAction } from 'react';
+import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
+import { IconName } from '@blueprintjs/icons';
 
-import { Button, Classes, Dialog, FileInput, Intent, Spinner } from '@blueprintjs/core';
-import { Icon } from '@blueprintjs/core/lib/esm/components/icon/icon';
+import { Button, Classes, Dialog, FileInput, Icon, Intent, Spinner } from '@blueprintjs/core';
 
 import '../scss/VisualizerDialog.scss';
-import { proof, VisualizerDialogProps, DialogProps, stateInterface } from './interfaces';
+import { selectTheme } from '../features/theme/themeSlice';
+import { set } from '../features/file/fileSlice';
+import { process } from '../features/proof/proofSlice';
+
+interface DialogProps {
+    icon: IconName | MaybeElement;
+    title: React.ReactNode;
+}
+
+interface VisualizerDialogProps {
+    dialogIsOpen: boolean;
+    setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
+    dialogContent: string;
+    setDialogContent: Dispatch<SetStateAction<string>>;
+    addErrorToast: (err: string) => void;
+}
 
 const readUploadedFileAsText = (inputFile: File) => {
     const temporaryFileReader = new FileReader();
@@ -30,19 +47,17 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     setDialogIsOpen,
     addErrorToast,
 }: VisualizerDialogProps) => {
-    const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
+    const darkTheme = useAppSelector(selectTheme);
 
     let dialogProps: DialogProps = { icon: 'error', title: 'Error' };
     let dialogBody = <p>This wasn&apos;t supposed to happen. Please contact the developers.</p>;
     let succesButton = <></>;
 
-    const [proof, setProof] = useState<proof>({ _id: undefined, label: '', options: '', problem: '' });
     const [processingProof, setProcessingProof] = useState(false);
     const [proofProcessed, setProofProcessed] = useState(false);
     const [fileName, changeFileName] = useState('Choose file...');
     const [file, changeFile] = useState('');
-    const [ext, changeExt] = useState('');
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     switch (dialogContent) {
         case 'welcome':
@@ -82,7 +97,6 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                     onInputChange={async (e) => {
                         const target = e.target as HTMLInputElement;
                         const file = target.files ? target.files[0] : new File([''], 'filename');
-                        changeExt(target.files && target.files[0] ? target.files[0].name.split('.').slice(-1)[0] : '');
                         if (
                             target.files &&
                             target.files[0] &&
@@ -95,14 +109,8 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                         try {
                             const fileContents = await readUploadedFileAsText(file);
                             changeFile(fileContents as string);
-                            setProof({
-                                _id: undefined,
-                                label: file.name.split('.')[0],
-                                options: '',
-                                problem: '',
-                            });
                             changeFileName(file.name);
-                        } catch (er) {
+                        } catch (er: any) {
                             addErrorToast(er.message);
                         }
                     }}
@@ -112,23 +120,9 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
             succesButton = !proofProcessed ? (
                 <Button
                     onClick={() => {
-                        if (ext === 'dot') {
-                            dispatch({ type: 'SET_PROOF', payload: proof });
-                            setProcessingProof(true);
-                            dispatch({ type: 'SET_DOT', payload: file });
-                            setProofProcessed(true);
-                        } else if (ext === 'json') {
-                            const json = JSON.parse(file);
-                            dispatch({ type: 'SET_PROOF', payload: proof });
-                            setProcessingProof(true);
-                            dispatch({ type: 'SET_DOT', payload: json.dot });
-                            dispatch({ type: 'IMPORTED_DATA_VIEW', payload: json.dot });
-                            dispatch({
-                                type: 'SET_IMPORTED_DATA',
-                                payload: { nodes: json.nodes, hidden: json.hidden },
-                            });
-                            setProofProcessed(true);
-                        }
+                        dispatch(set({ name: fileName, value: file }));
+                        setProofProcessed(true);
+                        dispatch(process(file));
                     }}
                     intent={Intent.SUCCESS}
                     disabled={fileName === 'Choose file...'}
@@ -147,7 +141,6 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 className={darkTheme ? ' bp3-dark' : ''}
                 isOpen={dialogIsOpen}
                 onClose={(): void => {
-                    setProof({ label: '', options: '', problem: '' });
                     setProcessingProof(false);
                     setProofProcessed(false);
                     setDialogIsOpen(false);
@@ -164,7 +157,6 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                             onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                                 e.preventDefault();
                                 setDialogIsOpen(false);
-                                setProof({ label: '', options: '', problem: '' });
                                 setProcessingProof(false);
                                 setProofProcessed(false);
                                 setDialogIsOpen(false);

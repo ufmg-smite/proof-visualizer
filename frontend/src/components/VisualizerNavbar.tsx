@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useEffect, useState, Dispatch, SetStateAction } from 'react';
 
-import { Alignment, Button, Icon, InputGroup, Navbar, Switch, Menu, MenuItem, MenuDivider } from '@blueprintjs/core';
-import { Popover2 } from '@blueprintjs/popover2';
+import { useAppSelector, useAppDispatch } from '../app/hooks';
+import { selectFile, selectFileName } from '../features/file/fileSlice';
+import { applyView, changeStyle } from '../features/proof/proofSlice';
 
 import '../scss/VisualizerNavbar.scss';
-import { VisualizerNavbarProps, stateInterface, proof } from './interfaces';
+
+import { Alignment, Button, Icon, InputGroup, Navbar, Switch, Menu, MenuItem } from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
+import { selectTheme, toggle } from '../features/theme/themeSlice';
 
 function useWindowSize() {
     // Initialize state with undefined width/height so server and client renders match
@@ -33,72 +36,37 @@ function useWindowSize() {
     return windowSize;
 }
 
+interface VisualizerNavbarProps {
+    setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
+    setDialogContent: Dispatch<SetStateAction<string>>;
+    setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
+}
+
 const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
     setDialogIsOpen,
     setDialogContent,
     setDrawerIsOpen,
-    downloadProof,
-    runCommands,
-    canvasRef,
 }: VisualizerNavbarProps) => {
     const openDialog = (content: string): void => {
         setDialogIsOpen(true);
         setDialogContent(content);
     };
-    const proof = useSelector<stateInterface, proof>((state: stateInterface) => state.proofReducer.proof);
-    const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
+    const file = useAppSelector(selectFile);
+    const fileName = useAppSelector(selectFileName);
+    const darkTheme = useAppSelector(selectTheme);
     const windowSize = useWindowSize();
     const [command, setCommand] = useState('');
 
-    const dispatch = useDispatch();
-
-    const setDarkTheme = () => {
-        dispatch({ type: 'TOGGLE_DARK_THEME', payload: {} });
-    };
-
-    const setStyle = (style: string) => {
-        if (style !== 'tree') {
-            dispatch({
-                type: 'SET_IMPORTED_DATA',
-                payload: canvasRef.current ? canvasRef.current.exportProof() : { nodes: [], hidden: [] },
-            });
-        } else {
-            dispatch({ type: 'IMPORTED_DATA_VIEW', payload: proof.dot });
-        }
-
-        dispatch({ type: 'SET_STYLE', payload: style });
-    };
-
-    const changeView = (view: string) => {
-        switch (view) {
-            case 'basic':
-                dispatch({ type: 'BASIC_VIEW', payload: proof.dot });
-                break;
-            case 'propositional':
-                dispatch({ type: 'PROPOSITIONAL_VIEW', payload: proof.dot });
-                break;
-            case 'full':
-                dispatch({ type: 'FULL_VIEW', payload: proof.dot });
-                break;
-            case 'imported_data':
-                dispatch({ type: 'IMPORTED_DATA_VIEW', payload: proof.dot });
-                break;
-            default:
-        }
-        dispatch({ type: 'SET_DOT', payload: '' });
-        setTimeout(function () {
-            dispatch({ type: 'SET_DOT', payload: proof.dot });
-        }, 10);
-    };
+    const dispatch = useAppDispatch();
 
     const styleMenu = (
         <Menu>
             <MenuItem
                 icon="diagram-tree"
-                text="Tree"
+                text="Graph"
                 onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                     e.preventDefault();
-                    setStyle('tree');
+                    dispatch(changeStyle('graph'));
                 }}
             />
             <MenuItem
@@ -106,7 +74,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                 text="Directory"
                 onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                     e.preventDefault();
-                    setStyle('directory');
+                    dispatch(changeStyle('directory'));
                 }}
             />
         </Menu>
@@ -118,45 +86,40 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                 text="Basic"
                 onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                     e.preventDefault();
-                    runCommands('/view basic');
+                    dispatch(applyView('basic'));
                 }}
             />
             <MenuItem
                 text="Propositional"
                 onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                     e.preventDefault();
-                    runCommands('/view propositional');
+                    dispatch(applyView('propositional'));
                 }}
             />
             <MenuItem
                 text="Full"
                 onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                     e.preventDefault();
-                    runCommands('/view full');
-                }}
-            />
-            <MenuDivider></MenuDivider>
-            <MenuItem
-                text="Imported"
-                onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                    e.preventDefault();
-                    changeView('imported_data');
+                    dispatch(applyView('full'));
                 }}
             />
         </Menu>
     );
+
     const exampleMenu = (
         <Menu>
             <MenuItem
                 icon="layout"
                 text="JSON"
-                onClick={() => downloadProof(proof.dot ? proof.dot : '', proof.label ? proof.label : '')}
+                onClick={() => {
+                    // TODO
+                }}
             />
             <MenuItem
                 icon="graph"
                 text="DOT"
-                href={`data:attachment/text,${encodeURIComponent(proof.dot ? proof.dot : '')}`}
-                download={proof.label ? `${proof.label.replaceAll(' ', '_')}.dot` : ''}
+                href={`data:attachment/text,${encodeURIComponent(file ? file : '')}`}
+                download={fileName ? `${fileName.replaceAll(' ', '_')}.dot` : ''}
             />
             <MenuItem
                 icon="square"
@@ -164,7 +127,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                 onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                     e.preventDefault();
                     const link = document.createElement('a');
-                    link.download = proof.label ? `${proof.label.replaceAll(' ', '_')}.png` : '';
+                    link.download = fileName ? `${fileName.replaceAll(' ', '_')}.png` : '';
                     link.href = (
                         document.getElementsByClassName('konvajs-content')[0].children[0] as HTMLCanvasElement
                     ).toDataURL('image/png');
@@ -173,6 +136,25 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             />
         </Menu>
     );
+
+    const runCommands = (command: string): void => {
+        switch (command.split(' ')[0]) {
+            case '/view':
+                switch (command.split(' ')[1]) {
+                    case 'basic':
+                        dispatch(applyView('basic'));
+                        break;
+                    case 'propositional':
+                        dispatch(applyView('propositional'));
+                        break;
+                    case 'full':
+                        dispatch(applyView('full'));
+                        break;
+                }
+                break;
+        }
+    };
+
     return (
         <Navbar>
             <Navbar.Group align={Alignment.LEFT}>
@@ -192,9 +174,9 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
             </Navbar.Group>
 
             <Navbar.Group align={Alignment.RIGHT}>
-                {proof.label ? (
+                {fileName ? (
                     <>
-                        <Navbar.Heading>{proof.label}</Navbar.Heading>
+                        <Navbar.Heading>{fileName}</Navbar.Heading>
                         <Navbar.Divider />
                         <InputGroup
                             id="command"
@@ -212,46 +194,46 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                         />
                         <Navbar.Divider />
                         <Popover2
-                            content={proof.label ? styleMenu : undefined}
+                            content={fileName ? styleMenu : undefined}
                             placement="bottom-end"
-                            disabled={proof.label ? false : true}
+                            disabled={fileName ? false : true}
                         >
                             <Button
                                 icon="presentation"
                                 className="bp3-minimal"
                                 text={windowSize.width >= 900 ? 'Style' : ''}
-                                disabled={proof.label ? false : true}
+                                disabled={fileName ? false : true}
                             />
                         </Popover2>
                         <Popover2
-                            content={proof.label ? viewsMenu : undefined}
+                            content={fileName ? viewsMenu : undefined}
                             placement="bottom-end"
-                            disabled={proof.label ? false : true}
+                            disabled={fileName ? false : true}
                         >
                             <Button
                                 className="bp3-minimal"
                                 icon="diagram-tree"
                                 text={windowSize.width >= 900 ? 'View' : ''}
-                                disabled={proof.label ? false : true}
+                                disabled={fileName ? false : true}
                             />
                         </Popover2>
                         <Button
                             className="bp3-minimal"
                             icon="translate"
                             text={windowSize.width >= 900 ? 'Let Map' : ''}
-                            disabled={proof.label ? false : true}
+                            disabled={fileName ? false : true}
                             onClick={() => setDrawerIsOpen(true)}
                         />
                         <Popover2
-                            content={proof.label ? exampleMenu : undefined}
+                            content={fileName ? exampleMenu : undefined}
                             placement="bottom-end"
-                            disabled={proof.label ? false : true}
+                            disabled={fileName ? false : true}
                         >
                             <Button
                                 className="bp3-minimal"
                                 icon="download"
                                 text={windowSize.width >= 900 ? 'Download' : ''}
-                                disabled={proof.label ? false : true}
+                                disabled={fileName ? false : true}
                             />
                         </Popover2>
                         <Navbar.Divider />
@@ -259,7 +241,7 @@ const VisualizerNavbar: React.FC<VisualizerNavbarProps> = ({
                 ) : null}
 
                 <span id="switch-button-dark-theme">
-                    <Switch checked={darkTheme} onChange={() => setDarkTheme()} />
+                    <Switch checked={useAppSelector(selectTheme)} onChange={() => dispatch(toggle())} />
                     <Icon icon={darkTheme ? 'moon' : 'flash'}></Icon>
                 </span>
             </Navbar.Group>

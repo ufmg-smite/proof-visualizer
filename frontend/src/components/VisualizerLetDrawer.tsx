@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 import { Dispatch, SetStateAction } from 'react';
 import { Button, Drawer, Classes, Position } from '@blueprintjs/core';
 
-import { stateInterface } from './interfaces';
+import { useAppSelector } from '../app/hooks';
+import { selectTheme } from '../features/theme/themeSlice';
+import { selectLetMap } from '../features/proof/proofSlice';
 
 interface letDrawerProps {
     drawerIsOpen: boolean;
@@ -32,13 +33,8 @@ const indent = (s: string) => {
 };
 
 const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: letDrawerProps) => {
-    const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
-    const letMap = useSelector<
-        stateInterface,
-        {
-            [Key: string]: string;
-        }
-    >((state: stateInterface) => state.letMapReducer.letMap);
+    const darkTheme = useAppSelector(selectTheme);
+    const letMap = useAppSelector(selectLetMap);
     const [letMapS, setLetMapS] = useState(letMap);
 
     return (

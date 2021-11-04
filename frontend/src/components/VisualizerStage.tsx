@@ -1,14 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 
 import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
 import Canvas from './canvas/VisualizerCanvas';
 import { VisualizerTree } from './VisualizerTree';
 import VisualizerDirectoryStyle from './VisualizerDirectoryStyle';
-import { NodeInterface, stateInterface } from './interfaces';
+import { NodeInterface } from './interfaces';
 
 import '../scss/VisualizerStage.scss';
+import { useAppSelector } from '../app/hooks';
+import { selectFile } from '../features/file/fileSlice';
+import { selectStyle, selectView } from '../features/proof/proofSlice';
+import { selectTheme } from '../features/theme/themeSlice';
 
 function removeEscapedCharacters(s: string): string {
     let newS = '';
@@ -341,18 +345,13 @@ const indent = (s: string) => {
     return newS;
 };
 
-const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
-    canvasRef,
-}: {
-    canvasRef: React.RefObject<Canvas>;
-}) => {
-    const dot = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.dot);
-    const view = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.view);
-    const style = useSelector<stateInterface, string | undefined>((state) => state.styleReducer.style);
-    const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
-    const importedData = useSelector<stateInterface, stateInterface['importedDataReducer']['importedData']>(
-        (state: stateInterface) => state.importedDataReducer.importedData,
-    );
+const VisualizerStage: React.FC = () => {
+    const dot = useAppSelector(selectFile);
+    const style = useAppSelector(selectStyle);
+    const darkTheme = useAppSelector(selectTheme);
+    const importedData = {
+        nodes: [],
+    };
     const [proof, letMap] = processDot(dot ? dot : '');
     const proofTree = createTree(
         Array.from(Array(proof.length).keys()).map((nodeId) => {
@@ -558,11 +557,10 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
     return (
         <div>
             {proof.length > 1 ? (
-                style === 'tree' ? (
+                style === 'graph' ? (
                     <Canvas
-                        ref={canvasRef}
                         key={dot}
-                        view={view}
+                        view={useAppSelector(selectView)}
                         proofNodes={proof}
                         openDrawer={openDrawer}
                         importedData={importedData}

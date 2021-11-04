@@ -6,11 +6,17 @@ import Node from './VisualizerNode';
 import Line from './VisualizerLine';
 import Menu from './VisualizerMenu';
 
-import { NodeInterface, NodeProps, LineProps, TreeNode } from '../interfaces';
+import { NodeProps, LineProps, TreeNode, CanvasPropsAndRedux, NodeInterfaceT } from '../interfaces';
 
 import '../../scss/VisualizerCanvas.scss';
 
 import { CanvasProps, CanvasState } from '../interfaces';
+
+import { connect } from 'react-redux';
+import { FileState } from '../../features/file/fileSlice';
+import { ProofState, selectProof } from '../../features/proof/proofSlice';
+import { ThemeState } from '../../features/theme/themeSlice';
+import { hideNodes, unhideNodes, foldAllDescendants, applyView } from '../../features/proof/proofSlice';
 
 function handleWheel(e: Konva.KonvaEventObject<WheelEvent>): { stageScale: number; stageX: number; stageY: number } {
     e.evt.preventDefault();
@@ -48,9 +54,10 @@ function handleWheel(e: Konva.KonvaEventObject<WheelEvent>): { stageScale: numbe
     };
 }
 
-export default class Canvas extends Component<CanvasProps, CanvasState> {
-    constructor(props: CanvasProps) {
+class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
+    constructor(props: CanvasPropsAndRedux) {
         super(props);
+        this.componentDidUpdate = this.componentDidUpdate.bind(this);
 
         const { proofNodes } = this.props;
         this.state = {
@@ -68,156 +75,144 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
             showingEdges: {},
             nodeOnFocus: NaN,
             nodesSelected: [],
+            myProofState: [],
         };
     }
 
     componentDidMount(): void {
-        const { showingNodes, proofNodes } = this.state;
-        const { view, importedData } = this.props;
+        const { showingNodes } = this.state;
+        const { view, myProof } = this.props;
 
-        if (view !== 'imported_data') {
-            this.applyView(view);
+        this.setState({ myProofState: myProof });
 
-            this.updatePosition(0);
-            showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
-            this.addNodes(0);
+        this.setState({
+            showingNodes: myProof.reduce(
+                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node))), ac),
+                {},
+            ),
+        });
 
-            const [width, height] = [window.innerWidth, window.innerHeight - 50];
+        if (showingNodes[0]) {
+            if (view !== 'imported_data') {
+                const [width, height] = [window.innerWidth, window.innerHeight - 50];
 
-            this.setState({
-                showingNodes,
-                canvasSize: {
-                    width,
-                    height,
-                },
-                stage: {
-                    stageScale: 1,
-                    stageX: width / 2 - (showingNodes[0].props.x + 300 / 2),
-                    stageY: height / 10 - (showingNodes[0].props.y + 30 / 2),
-                },
-            });
-        } else {
-            importedData.nodes.forEach((node) => {
-                if (node.hidden.length) {
-                    node.hidden.forEach((nodeId) => {
-                        this.hideNode(nodeId);
-                    });
-                }
-            });
-
-            this.updatePosition(0);
-            showingNodes[0] = new Node(this.nodeProps(proofNodes[0]));
-            this.addNodes(0);
-
-            const [width, height] = [window.innerWidth, window.innerHeight - 50];
-
-            importedData.nodes.forEach((node) => {
-                if (showingNodes[node.id]) {
-                    showingNodes[node.id] = new Node({
-                        ...showingNodes[node.id].props,
-                        color: node.color,
-                    });
-                }
-            });
-
-            this.setState({
-                showingNodes,
-                canvasSize: {
-                    width,
-                    height,
-                },
-                stage: {
-                    stageScale: 1,
-                    stageX: width / 2 - (showingNodes[0].props.x + 300 / 2),
-                    stageY: height / 10 - (showingNodes[0].props.y + 30 / 2),
-                },
-            });
-
-            importedData.nodes.forEach((node) => {
-                if (showingNodes[node.id]) {
-                    this.updateNodeState(node.id, node.x, node.y);
-                }
-            });
+                this.setState({
+                    showingNodes,
+                    canvasSize: {
+                        width,
+                        height,
+                    },
+                    stage: {
+                        stageScale: 1,
+                        stageX: width / 2 - (showingNodes[0].props.x + 300 / 2),
+                        stageY: height / 10 - (showingNodes[0].props.y + 30 / 2),
+                    },
+                });
+            }
         }
     }
 
-    applyView = (view: string | undefined): void => {
-        const { proofNodes } = this.state;
-        const nodesToHide = proofNodes.filter((node) => {
-            switch (view) {
-                case 'basic':
-                    return node.views.indexOf('basic') === -1;
-                case 'propositional':
-                    return node.views.indexOf('basic') === -1 && node.views.indexOf('propositional') === -1;
-                default:
-                    return false;
-            }
-        });
-        proofNodes.forEach((node) => {
-            if (proofNodes[node.id] && !(proofNodes[node.id].rule === 'π' || node.id === 0) && node.hided) {
-                this.unhideNode(node.id);
-            }
-        });
-        nodesToHide.forEach((node) => {
-            if (proofNodes[node.id] && !(proofNodes[node.id].rule === 'π' || node.id === 0)) {
-                this.hideNode(node.id);
-            }
-        });
-    };
-
-    foldSelectedNodes = (): void => {
-        const { proofNodes, nodesSelected, showingNodes } = this.state;
-        this.removeNodes(0);
-        nodesSelected
-            .sort((a, b) => a - b)
-            .forEach((nodeId) => {
-                if (!(proofNodes[nodeId].rule === 'π' || nodeId === 0)) {
-                    this.hideNode(nodeId);
-                }
-            });
-        this.updatePosition(0);
-        showingNodes[0] = new Node({ ...showingNodes[0].props, selected: false });
-        this.addNodes(0);
-        this.setState({ nodesSelected: [] });
-    };
-
-    unfold = (): void => {
-        const { proofNodes, nodeOnFocus } = this.state;
-        this.removeNodes(0);
-        const nodesToUnhide = [...proofNodes[nodeOnFocus].hidedNodes];
-        nodesToUnhide.forEach((nodeId) => this.unhideNode(nodeId));
-        this.updatePosition(0);
-        this.addNodes(0);
-        this.setNodeOnFocus(0);
-        this.setState({ nodesSelected: [] });
-    };
-
-    unfoldOnClick = (id: number): void => {
-        this.setNodeOnFocus(id);
-        setTimeout(() => this.unfold(), 10);
-    };
-
-    nodeProps = (node: NodeInterface): NodeProps => {
-        const { openDrawer } = this.props;
+    static newNodeProps = (node: NodeInterfaceT): NodeProps => {
         return {
             id: node.id,
-            rule: node.rule,
             conclusion: node.conclusion,
+            rule: node.rule,
             args: node.args,
-            updateNodeState: this.updateNodeState,
-            setNodeOnFocus: this.setNodeOnFocus,
-            toggleNodeSelection: this.toggleNodeSelection,
-            unfoldOnClick: this.unfoldOnClick,
-            openDrawer: openDrawer,
-            color: node.color,
-            x: node.x,
-            y: node.y,
+            x: 0,
+            y: 0,
+            nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
+            nDescendants: 0, //TODO
             selected: false,
-            nHided: node.hidedNodes.length,
-            nDescendants: node.descendants,
-            topHidedNodes: node.topHidedNodes ? node.topHidedNodes : undefined,
-            tree: node.tree ? node.tree : undefined,
+            color: '#fff',
+            setNodeOnFocus: () => undefined,
+            toggleNodeSelection: () => undefined,
+            updateNodeState: () => undefined,
+            unfoldOnClick: () => undefined,
+            openDrawer: () => undefined,
         };
+    };
+
+    LineProps = (key: string, from: NodeProps, to: NodeProps): LineProps => ({
+        key,
+        points: [from.x + 150, from.y, to.x + 150, to.y + 105],
+    });
+
+    static getDerivedStateFromProps(props: CanvasPropsAndRedux, current_state: CanvasState) {
+        if (current_state.myProofState !== props.myProof) {
+            const showingNodes = props.myProof.reduce(
+                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node))), ac),
+                {},
+            );
+            if (showingNodes[0]) {
+                const g = new dagre.graphlib.Graph();
+                g.setGraph({ rankdir: 'BT', ranker: 'tight-tree' });
+                g.setDefaultEdgeLabel(function () {
+                    return {};
+                });
+                props.myProof.forEach((node) => {
+                    g.setNode(node.id.toString(), { width: 300, height: 130 });
+                    node.children.forEach((child) => {
+                        g.setEdge(child.toString(), node.id.toString());
+                    });
+                });
+                dagre.layout(g);
+                const xOffset = g.node('0').x - (showingNodes[0].props.x ? showingNodes[0].props.x : 0);
+                const yOffset = g.node('0').y - (showingNodes[0].props.y ? showingNodes[0].props.y : 0);
+                g.nodes().forEach(function (v) {
+                    try {
+                        const { x, y } = g.node(v);
+                        showingNodes[parseInt(v)] = new Node({
+                            ...showingNodes[parseInt(v)].props,
+                            x: x - xOffset,
+                            y: y - yOffset,
+                        });
+                    } catch (e) {
+                        console.log(e);
+                    }
+                });
+            }
+
+            return {
+                showingNodes: showingNodes,
+                showingEdges: {},
+                myProofState: props.myProof,
+            };
+        }
+        return null;
+    }
+
+    componentDidUpdate(prevProps: CanvasPropsAndRedux) {
+        const { showingNodes, showingEdges } = this.state;
+        const { openDrawer } = this.props;
+        if (prevProps.myProof !== this.props.myProof) {
+            this.props.myProof.forEach((node) => {
+                if (showingNodes[node.parents[0]]) {
+                    showingEdges[`${node.id}->${node.parents[0]}`] = Line(
+                        this.LineProps(
+                            `${node.id}->${parent[0]}`,
+                            showingNodes[node.id].props,
+                            showingNodes[node.parents[0]].props,
+                        ),
+                    );
+                }
+            });
+            Object.keys(showingNodes).forEach((nodeId: string) => {
+                showingNodes[parseInt(nodeId)] = new Node({
+                    ...showingNodes[parseInt(nodeId)].props,
+                    setNodeOnFocus: this.setNodeOnFocus,
+                    toggleNodeSelection: this.toggleNodeSelection,
+                    updateNodeState: this.updateNodeState,
+                    unfoldOnClick: this.unfoldOnClick,
+                    openDrawer: openDrawer,
+                });
+            });
+
+            this.setState({ showingEdges: showingEdges });
+        }
+    }
+
+    setNodeOnFocus = (id: number): void => {
+        this.setState({ nodeOnFocus: id });
     };
 
     toggleNodeSelection = (id: number): void => {
@@ -233,161 +228,48 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         this.setState({ showingNodes, nodesSelected });
     };
 
-    setNodeOnFocus = (id: number): void => {
-        this.setState({ nodeOnFocus: id });
-    };
-
-    LineProps = (key: string, from: NodeProps, to: NodeProps): LineProps => ({
-        key,
-        points: [from.x + 150, from.y, to.x + 150, to.y + 105],
-    });
-
-    addNodes = (id: number): void => {
-        const { proofNodes, showingNodes } = this.state;
-        proofNodes[id].children.forEach((child) => {
-            this.addNode(proofNodes[child], proofNodes[id]);
-            this.addNodes(child);
-        });
-        this.setState({ proofNodes, showingNodes });
-    };
-
-    addNode = (node: NodeInterface, parent: NodeInterface): void => {
+    updateNodeState = (key: number, x: number, y: number): void => {
         const { showingNodes, showingEdges } = this.state;
+        showingNodes[key] = new Node({ ...showingNodes[key].props, x, y });
 
-        showingNodes[node.id] = new Node(this.nodeProps(node));
-        showingEdges[`${node.id}->${parent.id}`] = Line(
-            this.LineProps(`${node.id}->${parent.id}`, showingNodes[node.id].props, showingNodes[parent.id].props),
-        );
-    };
-
-    removeNodes = (id: number): void => {
-        const { proofNodes, showingNodes } = this.state;
-        this.recursivelyGetChildren(id).forEach((node) => {
-            this.removeNode(node);
-        });
-        this.setState({ showingNodes, proofNodes });
-    };
-
-    removeNode = (id: number): void => {
-        const { showingNodes, showingEdges } = this.state;
         Object.keys(showingEdges)
-            .filter((edgeKey) => {
-                const edges = edgeKey.split('->');
-                return id === parseInt(edges[0]) || id === parseInt(edges[1]);
-            })
+            .filter((edgeKey) => edgeKey.indexOf(key.toString()) !== -1)
             .forEach((edge) => {
-                delete showingEdges[edge];
+                const [from, to] = edge.split('->').map((x) => parseInt(x));
+                showingEdges[edge] = Line(this.LineProps(edge, showingNodes[from].props, showingNodes[to].props));
             });
-
-        delete showingNodes[id];
         this.setState({ showingNodes, showingEdges });
     };
 
-    ancestors = (id: number): Array<number> => {
-        const { proofNodes } = this.state;
-        const ancestorsId: Array<number> = [];
-        let currentId = id;
-        while (currentId) {
-            currentId = proofNodes[currentId].parent;
-            ancestorsId.push(currentId);
-        }
-        return ancestorsId;
+    unfoldOnClick = (id: number): void => {
+        const { unhideNodes } = this.props;
+        const { myProofState } = this.state;
+        const hiddenNodess = myProofState[id].hiddenNodes ? myProofState[id].hiddenNodes : [];
+        console.log(hiddenNodess);
+        unhideNodes(hiddenNodess ? hiddenNodess.map((node) => node.id) : []);
     };
 
-    hideNode = (id: number): void => {
-        const { proofNodes, nodeOnFocus } = this.state;
-        const parentId = proofNodes[id].parent;
-        let piId: number;
-        if (parentId && proofNodes[parentId].hided) {
-            // if the parent node is hided in some node
-            piId = proofNodes[parentId].hidedIn;
-            proofNodes[piId].children.push(...proofNodes[id].children);
-            proofNodes[piId].children = proofNodes[piId].children.filter((nodeId) => nodeId !== id);
-            if (proofNodes[piId].topHidedNodes) {
-                proofNodes[piId].topHidedNodes = proofNodes[piId].topHidedNodes?.map((node) => {
-                    if (this.ancestors(id).indexOf(node[0]) !== -1)
-                        return [node[0], node[1], node[2], node[3], node[4] + 1];
-                    return node;
-                });
-            }
-        } else if (parentId && proofNodes[parentId].hideMyChildNode) {
-            // if the parent node has some node as child that hides node
-            piId = proofNodes[parentId].hideMyChildNode;
-            let nH: number | undefined = 1,
-                nD: number | undefined = 0;
-            if (proofNodes[id].children.length === 1 && proofNodes[proofNodes[id].children[0]].rule === 'π') {
-                proofNodes[proofNodes[id].children[0]].hidedNodes.forEach(
-                    (child) => (proofNodes[child].hidedIn = piId),
-                );
-                proofNodes[piId].hidedNodes.push(...proofNodes[proofNodes[id].children[0]].hidedNodes);
-                nD = proofNodes[proofNodes[id].children[0]].topHidedNodes?.reduce(
-                    (accumulator, node) => accumulator + node[3],
-                    0,
-                );
-                nH = proofNodes[proofNodes[id].children[0]].topHidedNodes?.reduce(
-                    (accumulator, node) => accumulator + node[4],
-                    0,
-                );
-                delete proofNodes[proofNodes[id].children[0]];
-                proofNodes[id].children = [];
-                proofNodes[id].hideMyChildNode = NaN;
-            }
-            proofNodes[piId].children.push(...proofNodes[id].children);
-            proofNodes[piId].topHidedNodes?.push([
-                id,
-                proofNodes[id].rule,
-                proofNodes[id].conclusion,
-                nD ? nD : 0,
-                nH ? nH : 0,
-            ]);
-            proofNodes[piId].descendants = nD ? nD : 0;
-            proofNodes[piId].hidedIn = nH ? nH : 0;
-        } else if (proofNodes[id].children.length === 1 && proofNodes[proofNodes[id].children[0]].rule === 'π') {
-            piId = proofNodes[id].children[0];
-            proofNodes[id].children = [];
-            proofNodes[parentId].children.push(piId);
-            proofNodes[parentId].hideMyChildNode = piId;
-            proofNodes[piId].parent = parentId;
-            proofNodes[piId].replace = id;
-            proofNodes[piId].descendants = proofNodes[id].descendants;
-            const nD = proofNodes[piId].topHidedNodes?.reduce((accumulator, node) => accumulator + node[3], 0);
-            const nH = proofNodes[piId].topHidedNodes?.reduce((accumulator, node) => accumulator + node[4], 0);
-            proofNodes[piId].topHidedNodes = [
-                [id, proofNodes[id].rule, proofNodes[id].conclusion, nD ? nD : 0, nH ? nH + 1 : 0],
-            ];
-        } else {
-            piId = proofNodes.length;
-            proofNodes[piId] = {
-                id: piId,
-                conclusion: '∴',
-                rule: 'π',
-                args: '',
-                children: [...proofNodes[id].children],
-                x: NaN,
-                y: NaN,
-                parent: parentId,
-                hided: false,
-                hidedNodes: [],
-                views: [],
-                hideMyChildNode: NaN,
-                hidedIn: NaN,
-                positionCache: false,
-                replace: id,
-                descendants: 0,
-                topHidedNodes: [[id, proofNodes[id].rule, proofNodes[id].conclusion, proofNodes[id].descendants, 1]],
-                rank: proofNodes[parentId].rank + 1,
-                color: proofNodes[nodeOnFocus] ? proofNodes[nodeOnFocus].color : '#8d99ae',
-            };
-            proofNodes[parentId].hideMyChildNode = piId;
-            proofNodes[parentId].children.push(piId);
-            proofNodes[piId].descendants = proofNodes[id].descendants;
-        }
-        proofNodes[piId].hidedNodes.push(id);
-        proofNodes[id].hided = true;
-        proofNodes[id].hidedIn = piId;
-        proofNodes[parentId].children = proofNodes[parentId].children.filter((nodeId) => nodeId !== id);
-        proofNodes[id].hideMyChildNode = NaN;
-        const tree = this.hiddenNodesTree(
+    foldSelectedNodes = (): void => {
+        const { nodesSelected } = this.state;
+        const { hideNodes } = this.props;
+        hideNodes(nodesSelected);
+    };
+
+    unfold = (): void => {
+        const { nodeOnFocus, myProofState } = this.state;
+        const { unhideNodes } = this.props;
+
+        const obj = myProofState.find((o) => o.id === nodeOnFocus);
+
+        const hiddenNodess = obj ? (obj.hiddenNodes ? obj.hiddenNodes : []) : [];
+        unhideNodes(hiddenNodess ? hiddenNodess.map((node) => node.id) : []);
+        this.setState({ nodesSelected: [] });
+    };
+
+    newTree = (piId: number): TreeNode[] => {
+        const { proofNodes } = this.state;
+
+        return this.hiddenNodesTree(
             proofNodes[piId].hidedNodes
                 .sort((a, b) => a - b)
                 .map((nodeId) => {
@@ -404,8 +286,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                     };
                 }),
         );
-        proofNodes[piId].tree = tree;
-        this.setState({ proofNodes });
     };
 
     hiddenNodesTree = (list: Array<TreeNode>): Array<TreeNode> => {
@@ -429,90 +309,6 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         return roots;
     };
 
-    unhideNode = (id: number): void => {
-        const { proofNodes } = this.state;
-        const parentId = proofNodes[id].parent;
-        const piId = proofNodes[id].hidedIn;
-        proofNodes[id].hided = false;
-        proofNodes[parentId].children.push(id);
-        proofNodes[piId].hidedNodes = proofNodes[piId].hidedNodes.filter((nodeId) => nodeId !== id);
-        proofNodes[piId].children = proofNodes[piId].children.filter(
-            (nodeId) => !proofNodes[id].children.some((child) => child === nodeId),
-        );
-        if (proofNodes[piId].hidedNodes.length === 0) {
-            proofNodes[proofNodes[piId].parent].children = proofNodes[proofNodes[piId].parent].children.filter(
-                (nodeId) => nodeId !== piId,
-            );
-            proofNodes[proofNodes[piId].parent].hideMyChildNode = NaN;
-            delete proofNodes[piId];
-        }
-    };
-
-    updatePosition = (id: number): void => {
-        const { proofNodes } = this.state;
-        const g = new dagre.graphlib.Graph();
-        g.setGraph({ rankdir: 'BT', ranker: 'tight-tree' });
-        g.setDefaultEdgeLabel(function () {
-            return {};
-        });
-        proofNodes.forEach((node) => {
-            if (!node.hided) {
-                if (node.rule !== 'π') {
-                    g.setNode(node.id.toString(), { width: 300, height: 130 });
-                    proofNodes[node.id].children.sort().forEach((child) => {
-                        if (proofNodes[child].rule !== 'π') g.setEdge(child.toString(), node.id.toString());
-                        else {
-                            const childNode = proofNodes[child];
-                            g.setEdge(
-                                (childNode.replace ? childNode.replace : childNode.id).toString(),
-                                node.id.toString(),
-                            );
-                        }
-                    });
-                } else {
-                    g.setNode((node.replace ? node.replace : node.id).toString(), { width: 300, height: 130 });
-                    proofNodes[node.id].children.forEach((child) => {
-                        g.setEdge(child.toString(), (node.replace ? node.replace : node.id).toString());
-                    });
-                }
-            }
-        });
-        dagre.layout(g);
-        const xOffset = g.node(id.toString()).x - (proofNodes[id].x ? proofNodes[id].x : 0);
-        const yOffset = g.node(id.toString()).y - (proofNodes[id].y ? proofNodes[id].y : 0);
-        g.nodes().forEach(function (v) {
-            try {
-                const { x, y } = g.node(v);
-                if (!proofNodes[parseInt(v)].hided) {
-                    proofNodes[parseInt(v)].x = x - xOffset;
-                    proofNodes[parseInt(v)].y = y - yOffset;
-                } else {
-                    proofNodes[proofNodes[parseInt(v)].hidedIn].x = x - xOffset;
-                    proofNodes[proofNodes[parseInt(v)].hidedIn].y = y - yOffset;
-                }
-            } catch (e) {
-                console.log(e);
-            }
-        });
-        this.setState({ proofNodes });
-    };
-
-    updateNodeState = (key: number, x: number, y: number): void => {
-        const { showingNodes, showingEdges, proofNodes } = this.state;
-        showingNodes[key] = new Node({ ...showingNodes[key].props, x, y });
-
-        proofNodes[key].positionCache = true;
-        proofNodes[key] = { ...proofNodes[key], x, y };
-
-        Object.keys(showingEdges)
-            .filter((edgeKey) => edgeKey.indexOf(key.toString()) !== -1)
-            .forEach((edge) => {
-                const [from, to] = edge.split('->').map((x) => parseInt(x));
-                showingEdges[edge] = Line(this.LineProps(edge, showingNodes[from].props, showingNodes[to].props));
-            });
-        this.setState({ showingNodes, showingEdges });
-    };
-
     recursivelyGetChildren = (nodeId: number): Array<number> => {
         const { proofNodes } = this.state;
         let nodes: Array<number> = [];
@@ -524,27 +320,18 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
     };
 
     foldAllDescendants = (): void => {
-        const { nodeOnFocus, nodesSelected } = this.state;
-        const nodes = (
-            nodesSelected
-                ? nodesSelected.reduce<number[]>(
-                      (accumulator, currentValue) => accumulator.concat(this.recursivelyGetChildren(currentValue)),
-                      [],
-                  )
-                : []
-        ).concat(...[nodeOnFocus, ...this.recursivelyGetChildren(nodeOnFocus)]);
-        this.setState({ nodesSelected: nodes }, () => this.foldSelectedNodes());
+        const { nodeOnFocus } = this.state;
+        const { foldAllDescendants } = this.props;
+        foldAllDescendants(nodeOnFocus);
     };
 
     changeNodeColor = (color: string): void => {
-        const { proofNodes, showingNodes, nodesSelected, nodeOnFocus } = this.state;
+        const { showingNodes, nodesSelected, nodeOnFocus } = this.state;
         nodesSelected.forEach((nodeId) => {
             showingNodes[nodeId] = new Node({ ...showingNodes[nodeId].props, selected: false, color: color });
-            proofNodes[nodeId].color = color;
         });
         if (showingNodes[nodeOnFocus]) {
             showingNodes[nodeOnFocus] = new Node({ ...showingNodes[nodeOnFocus].props, color: color });
-            proofNodes[nodeOnFocus].color = color;
         }
         this.setState({ showingNodes, nodesSelected: [] });
     };
@@ -556,78 +343,11 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         link.click();
     };
 
-    exportProof = (
-        dot = '',
-    ): { dot: string; nodes: { id: number; color: string; x: number; y: number; hidden: Array<number> }[] } => {
-        const { showingNodes, proofNodes } = this.state;
+    exportProof = (dot = ''): { dot: string } => {
+        // TODO
         return {
             dot: dot,
-            nodes: Object.keys(showingNodes).map((node) => {
-                return {
-                    id: parseInt(node),
-                    color: showingNodes[parseInt(node)].props.color,
-                    x: showingNodes[parseInt(node)].props.x,
-                    y: showingNodes[parseInt(node)].props.y,
-                    hidden: proofNodes[parseInt(node)].hidedNodes.filter((nodeId) => proofNodes[nodeId].hided),
-                };
-            }),
         };
-    };
-
-    runCommands = (command: string): void => {
-        const { showingNodes, proofNodes } = this.state;
-        let nodes: Array<number> = [];
-        if (command.split(' ')[0] == '/select' || command.split(' ')[0] == '/color') {
-            if (command.split(' ')[1] == '*') {
-                nodes = Object.keys(showingNodes).map((nodeId) => parseInt(nodeId));
-            } else {
-                nodes = Object.keys(showingNodes)
-                    .map((nodeId) => parseInt(nodeId))
-                    .filter((nodeId) => {
-                        return (
-                            (showingNodes[nodeId].props.rule.indexOf(command.split(' ')[1]) !== -1 ||
-                                showingNodes[nodeId].props.conclusion.indexOf(command.split(' ')[1]) !== -1 ||
-                                proofNodes[nodeId].hidedNodes.some((hiddenNodeId) => {
-                                    return (
-                                        proofNodes[hiddenNodeId].rule.indexOf(command.split(' ')[1]) !== -1 ||
-                                        proofNodes[hiddenNodeId].conclusion.indexOf(command.split(' ')[1]) !== -1
-                                    );
-                                })) &&
-                            showingNodes[nodeId]
-                        );
-                    });
-            }
-        }
-        switch (command.split(' ')[0]) {
-            case '/select':
-                nodes.forEach((nodeId) => {
-                    showingNodes[nodeId] = new Node({ ...showingNodes[nodeId].props, selected: true });
-                });
-                this.setState({ showingNodes, nodesSelected: nodes });
-                break;
-            case '/color':
-                const color = command.split(' ')[2];
-                nodes.forEach((nodeId) => {
-                    showingNodes[nodeId] = new Node({ ...showingNodes[nodeId].props, color: color });
-                    proofNodes[nodeId].color = color;
-                });
-                this.setState({ showingNodes });
-                break;
-            case '/view':
-                this.removeNodes(0);
-                this.applyView(command.split(' ')[1]);
-
-                this.exportProof().nodes.forEach((node) => {
-                    if (showingNodes[node.id]) {
-                        showingNodes[node.id] = new Node({
-                            ...showingNodes[node.id].props,
-                            color: node.color,
-                        });
-                    }
-                });
-                this.updatePosition(0);
-                this.addNodes(0);
-        }
     };
 
     render(): JSX.Element {
@@ -642,7 +362,7 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
                     foldAllDescendants={this.foldAllDescendants}
                     changeNodeColor={this.changeNodeColor}
                     options={{
-                        unfold: proofNodes[nodeOnFocus] ? proofNodes[nodeOnFocus].rule === 'π' : false,
+                        unfold: showingNodes[nodeOnFocus] ? showingNodes[nodeOnFocus].props.rule === 'π' : false,
                         foldSelected: nodesSelected.length && nodesSelected.includes(nodeOnFocus) ? true : false,
                         foldAllDescendants: proofNodes[nodeOnFocus] && proofNodes[nodeOnFocus].children.length > 0,
                     }}
@@ -674,3 +394,18 @@ export default class Canvas extends Component<CanvasProps, CanvasState> {
         );
     }
 }
+
+function mapStateToProps(state: { file: FileState; proof: ProofState; theme: ThemeState }, ownProps: CanvasProps) {
+    return {
+        myProof: selectProof(state),
+        myView: state.proof.view,
+        proofNodes: ownProps.proofNodes,
+        openDrawer: ownProps.openDrawer,
+        view: ownProps.view ? ownProps.view : undefined,
+        importedData: ownProps.importedData,
+    };
+}
+
+const mapDispatchToProps = { hideNodes, unhideNodes, foldAllDescendants, applyView };
+
+export default connect(mapStateToProps, mapDispatchToProps)(Canvas);
