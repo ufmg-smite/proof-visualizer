@@ -1,6 +1,6 @@
 import { combineReducers } from 'redux';
 
-import { proof, stateInterface } from '../components/interfaces';
+import { proof, stateInterface } from '../components/interfaces/interfaces';
 
 const initialStateProofReducer = {
     proof: {

@@ -6,17 +6,17 @@ import Node from './VisualizerNode';
 import Line from './VisualizerLine';
 import Menu from './VisualizerMenu';
 
-import { NodeProps, LineProps, TreeNode, CanvasPropsAndRedux, NodeInterfaceT } from '../interfaces';
+import { NodeProps, LineProps, TreeNode, CanvasPropsAndRedux, NodeInterfaceT } from '../../interfaces/interfaces';
 
-import '../../scss/VisualizerCanvas.scss';
+import '../../../scss/VisualizerCanvas.scss';
 
-import { CanvasProps, CanvasState } from '../interfaces';
+import { CanvasProps, CanvasState } from '../../interfaces/interfaces';
 
 import { connect } from 'react-redux';
-import { FileState } from '../../features/file/fileSlice';
-import { ProofState, selectProof } from '../../features/proof/proofSlice';
-import { ThemeState } from '../../features/theme/themeSlice';
-import { hideNodes, unhideNodes, foldAllDescendants, applyView } from '../../features/proof/proofSlice';
+import { FileState } from '../../../store/features/file/fileSlice';
+import { ProofState, selectProof } from '../../../store/features/proof/proofSlice';
+import { ThemeState } from '../../../store/features/theme/themeSlice';
+import { hideNodes, unhideNodes, foldAllDescendants, applyView } from '../../../store/features/proof/proofSlice';
 
 function handleWheel(e: Konva.KonvaEventObject<WheelEvent>): { stageScale: number; stageX: number; stageY: number } {
     e.evt.preventDefault();
@@ -242,11 +242,11 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     unfoldOnClick = (id: number): void => {
-        const { unhideNodes } = this.props;
-        const { myProofState } = this.state;
-        const hiddenNodess = myProofState[id].hiddenNodes ? myProofState[id].hiddenNodes : [];
-        console.log(hiddenNodess);
-        unhideNodes(hiddenNodess ? hiddenNodess.map((node) => node.id) : []);
+        // const { unhideNodes } = this.props;
+        // const { myProofState } = this.state;
+        // const hiddenNodess = myProofState[id].hiddenNodes ? myProofState[id].hiddenNodes : [];
+        // console.log(hiddenNodess);
+        // unhideNodes(hiddenNodess ? hiddenNodess.map((node) => node.id) : []);
     };
 
     foldSelectedNodes = (): void => {
@@ -309,6 +309,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         return roots;
     };
 
+    //Apg
     recursivelyGetChildren = (nodeId: number): Array<number> => {
         const { proofNodes } = this.state;
         let nodes: Array<number> = [];
@@ -337,6 +338,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     downloadProof = (dot: string, proofName: string): void => {
+        // Cv dps
         const link = document.createElement('a');
         link.download = proofName + '.json';
         link.href = `data:attachment/text,${encodeURIComponent(JSON.stringify(this.exportProof(dot)))}`;
@@ -344,6 +346,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     exportProof = (dot = ''): { dot: string } => {
+        //Apg
         // TODO
         return {
             dot: dot,

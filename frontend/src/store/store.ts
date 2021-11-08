@@ -1,7 +1,7 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import fileReducer from '../features/file/fileSlice';
-import proofReducer from '../features/proof/proofSlice';
-import themeReducer from '../features/theme/themeSlice';
+import fileReducer from './features/file/fileSlice';
+import proofReducer from './features/proof/proofSlice';
+import themeReducer from './features/theme/themeSlice';
 
 export const store = configureStore({
     reducer: {

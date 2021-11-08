@@ -33,3 +33,7 @@ backend/proof_files/proof.smt2
 /frontend/npm-debug.log*
 /frontend/yarn-debug.log*
 /frontend/yarn-error.log*
+
+# development folders
+/.vscode
+/.vscode/*

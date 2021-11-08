@@ -2,9 +2,10 @@ import { ObjectID } from 'mongodb';
 import { Dispatch, SetStateAction } from 'react';
 import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
 import { IconName } from '@blueprintjs/core/lib/esm/components/icon/icon';
-import Node from '../components/canvas/VisualizerNode';
+import Node from '../VisualizerStage/Canvas/VisualizerNode';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 
+// Dividir essas interfaces em funções
 interface CanvasProps {
     proofNodes: Array<NodeInterface>;
     openDrawer: (nodeInfo: {

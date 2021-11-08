@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { useAppDispatch, useAppSelector } from '../app/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { Dispatch, SetStateAction } from 'react';
 import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
 import { IconName } from '@blueprintjs/icons';
 
 import { Button, Classes, Dialog, FileInput, Icon, Intent, Spinner } from '@blueprintjs/core';
 
-import '../scss/VisualizerDialog.scss';
-import { selectTheme } from '../features/theme/themeSlice';
-import { set } from '../features/file/fileSlice';
-import { process } from '../features/proof/proofSlice';
+import '../../scss/VisualizerDialog.scss';
+import { selectTheme } from '../../store/features/theme/themeSlice';
+import { set } from '../../store/features/file/fileSlice';
+import { process } from '../../store/features/proof/proofSlice';
 
 interface DialogProps {
     icon: IconName | MaybeElement;

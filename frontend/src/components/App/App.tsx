@@ -2,13 +2,13 @@ import React, { useEffect, useState } from 'react';
 
 import { Intent, Position, Toaster } from '@blueprintjs/core';
 
-import VisualizerNavbar from './components/VisualizerNavbar';
-import VisualizerDialog from './components/VisualizerDialog';
-import VisualizerStage from './components/VisualizerStage';
-import VisualizerLetDrawer from './components/VisualizerLetDrawer';
+import VisualizerNavbar from '../VisualizerNavbar/VisualizerNavbar';
+import VisualizerDialog from '../VisualizerDialog/VisualizerDialog';
+import VisualizerStage from '../VisualizerStage/VisualizerStage';
+import VisualizerLetDrawer from '../VisualizerLetDrawer';
 
-import { useAppSelector } from './app/hooks';
-import { selectTheme } from './features/theme/themeSlice';
+import { useAppSelector } from '../../store/hooks';
+import { selectTheme } from '../../store/features/theme/themeSlice';
 
 const App: React.FC = () => {
     const [dialogIsOpen, setDialogIsOpen] = useState(true);

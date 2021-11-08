@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { Dispatch, SetStateAction } from 'react';
 import { Button, Drawer, Classes, Position } from '@blueprintjs/core';
 
-import { useAppSelector } from '../app/hooks';
-import { selectTheme } from '../features/theme/themeSlice';
-import { selectLetMap } from '../features/proof/proofSlice';
+import { useAppSelector } from '../store/hooks';
+import { selectTheme } from '../store/features/theme/themeSlice';
+import { selectLetMap } from '../store/features/proof/proofSlice';
 
 interface letDrawerProps {
     drawerIsOpen: boolean;

@@ -1,14 +1,14 @@
 import React, { useEffect, useState, Dispatch, SetStateAction } from 'react';
 
-import { useAppSelector, useAppDispatch } from '../app/hooks';
-import { selectFile, selectFileName } from '../features/file/fileSlice';
-import { applyView, changeStyle } from '../features/proof/proofSlice';
+import { useAppSelector, useAppDispatch } from '../../store/hooks';
+import { selectFile, selectFileName } from '../../store/features/file/fileSlice';
+import { applyView, changeStyle } from '../../store/features/proof/proofSlice';
 
-import '../scss/VisualizerNavbar.scss';
+import '../../scss/VisualizerNavbar.scss';
 
 import { Alignment, Button, Icon, InputGroup, Navbar, Switch, Menu, MenuItem } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
-import { selectTheme, toggle } from '../features/theme/themeSlice';
+import { selectTheme, toggle } from '../../store/features/theme/themeSlice';
 
 function useWindowSize() {
     // Initialize state with undefined width/height so server and client renders match

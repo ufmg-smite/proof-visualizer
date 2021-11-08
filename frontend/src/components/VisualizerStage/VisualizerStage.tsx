@@ -3,16 +3,16 @@ import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
-import Canvas from './canvas/VisualizerCanvas';
-import { VisualizerTree } from './VisualizerTree';
-import VisualizerDirectoryStyle from './VisualizerDirectoryStyle';
-import { NodeInterface } from './interfaces';
+import Canvas from './Canvas/VisualizerCanvas';
+import { VisualizerTree } from '../VisualizerTree';
+import VisualizerDirectoryStyle from '../VisualizerDirectoryStyle/VisualizerDirectoryStyle';
+import { NodeInterface } from '../interfaces/interfaces';
 
-import '../scss/VisualizerStage.scss';
-import { useAppSelector } from '../app/hooks';
-import { selectFile } from '../features/file/fileSlice';
-import { selectStyle, selectView } from '../features/proof/proofSlice';
-import { selectTheme } from '../features/theme/themeSlice';
+import '../../scss/VisualizerStage.scss';
+import { useAppSelector } from '../../store/hooks';
+import { selectFile } from '../../store/features/file/fileSlice';
+import { selectStyle, selectView } from '../../store/features/proof/proofSlice';
+import { selectTheme } from '../../store/features/theme/themeSlice';
 
 function removeEscapedCharacters(s: string): string {
     let newS = '';
