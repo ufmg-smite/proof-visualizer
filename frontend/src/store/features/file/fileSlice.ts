@@ -16,7 +16,7 @@ export const fileSlice = createSlice({
     initialState,
     // The `reducers` field lets us define reducers and generate associated actions
     reducers: {
-        set: (state, action: PayloadAction<{ name: string; value: string }>) => {
+        set: (state, action: PayloadAction<FileState>) => {
             state.name = action.payload.name;
             state.value = action.payload.value;
         },

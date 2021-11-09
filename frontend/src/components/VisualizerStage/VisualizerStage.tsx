@@ -4,9 +4,9 @@ import { useDispatch } from 'react-redux';
 
 import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
 import Canvas from './Canvas/VisualizerCanvas';
-import { VisualizerTree } from '../VisualizerTree';
-import VisualizerDirectoryStyle from '../VisualizerDirectoryStyle/VisualizerDirectoryStyle';
-import { NodeInterface } from '../interfaces/interfaces';
+import { VisualizerTree } from '../VisualizerTree/VisualizerTree';
+import VisualizerDirectoryStyle from './VisualizerDirectoryStyle/VisualizerDirectoryStyle';
+import { NodeInterface } from '../../interfaces/interfaces';
 
 import '../../scss/VisualizerStage.scss';
 import { useAppSelector } from '../../store/hooks';
@@ -36,6 +36,8 @@ function removeEscapedCharacters(s: string): string {
 }
 
 function processDot(dot: string) {
+    // TODO fazer isso aq entrar com NodeInterface e fazer sair um node com
+    //   infos visuais
     const nodes: Array<NodeInterface> = [
         {
             id: 0,

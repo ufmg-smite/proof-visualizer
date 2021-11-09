@@ -2,36 +2,10 @@ import { ObjectID } from 'mongodb';
 import { Dispatch, SetStateAction } from 'react';
 import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
 import { IconName } from '@blueprintjs/core/lib/esm/components/icon/icon';
-import Node from '../VisualizerStage/Canvas/VisualizerNode';
+import Node from '../components/VisualizerStage/Canvas/VisualizerNode';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 
-// Dividir essas interfaces em funções
-interface CanvasProps {
-    proofNodes: Array<NodeInterface>;
-    openDrawer: (nodeInfo: {
-        rule: string;
-        args: string;
-        conclusion: string;
-        nHided: number;
-        nDescendants: number;
-    }) => void;
-    view?: string;
-    importedData: {
-        nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
-    };
-}
-
-interface CanvasState {
-    canvasSize: { width: number; height: number };
-    stage: { stageScale: number; stageX: number; stageY: number };
-    proofNodes: Array<NodeInterface>;
-    showingNodes: { [id: number]: Node };
-    showingEdges: { [id: string]: JSX.Element };
-    nodeOnFocus: number;
-    nodesSelected: Array<number>;
-    myProofState: NodeInterfaceT[];
-}
-
+// NODES
 interface NodeInterfaceT {
     id: number;
     conclusion: string;
@@ -41,21 +15,6 @@ interface NodeInterfaceT {
     children: number[];
     parents: number[];
     hiddenNodes?: Array<NodeInterfaceT>;
-}
-
-interface DialogProps {
-    icon: IconName | MaybeElement;
-    title: React.ReactNode;
-}
-
-interface FormNewProofProps {
-    proof: proof;
-    setProof: Dispatch<SetStateAction<proof>>;
-}
-
-interface LineProps {
-    key: string;
-    points: Array<number>;
 }
 
 // Mudar nome
@@ -130,13 +89,58 @@ interface NodeProps {
     tree?: Array<TreeNode>;
 }
 
-interface proof {
-    _id?: ObjectID;
-    label: string;
-    options?: string;
-    problem: string;
-    dot?: string;
+// CANVAS
+// Dividir essas interfaces em funções
+interface CanvasProps {
+    proofNodes: Array<NodeInterface>;
+    openDrawer: (nodeInfo: {
+        rule: string;
+        args: string;
+        conclusion: string;
+        nHided: number;
+        nDescendants: number;
+    }) => void;
     view?: string;
+    importedData: {
+        nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
+    };
+}
+
+interface CanvasState {
+    canvasSize: { width: number; height: number };
+    stage: { stageScale: number; stageX: number; stageY: number };
+    proofNodes: Array<NodeInterface>;
+    showingNodes: { [id: number]: Node };
+    showingEdges: { [id: string]: JSX.Element };
+    nodeOnFocus: number;
+    nodesSelected: Array<number>;
+    myProofState: NodeInterfaceT[];
+}
+
+interface CanvasPropsAndRedux {
+    myProof: NodeInterfaceT[];
+    myView: 'basic' | 'propositional' | 'full';
+    proofNodes: NodeInterface[];
+    openDrawer: (nodeInfo: {
+        rule: string;
+        args: string;
+        conclusion: string;
+        nHided: number;
+        nDescendants: number;
+    }) => void;
+    view: string | undefined;
+    importedData: {
+        nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
+    };
+    hideNodes: ActionCreatorWithPayload<number[], string>;
+    unhideNodes: ActionCreatorWithPayload<number[], string>;
+    foldAllDescendants: ActionCreatorWithPayload<number>;
+}
+
+// DIALOG
+interface DialogProps {
+    icon: IconName | MaybeElement;
+    title: React.ReactNode;
 }
 
 interface VisualizerDialogProps {
@@ -147,12 +151,46 @@ interface VisualizerDialogProps {
     addErrorToast: (err: string) => void;
 }
 
+// PROOFS
+interface FormNewProofProps {
+    proof: proof;
+    setProof: Dispatch<SetStateAction<proof>>;
+}
+
+interface proof {
+    _id?: ObjectID;
+    label: string;
+    options?: string;
+    problem: string;
+    dot?: string;
+    view?: string;
+}
+
+// NAVBAR
 interface VisualizerNavbarProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
     setDialogContent: Dispatch<SetStateAction<string>>;
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
     downloadProof: (dot: string, proofName: string) => void;
     runCommands: (command: string) => void;
+}
+
+// TREENODE
+interface TreeNode {
+    id: number;
+    icon: 'graph';
+    parentId: number;
+    label: string;
+    descendants: number;
+    childNodes: TreeNode[];
+    rule: string;
+    conclusion: string;
+    args: string;
+}
+
+interface LineProps {
+    key: string;
+    points: Array<number>;
 }
 
 interface stateInterface {
@@ -175,49 +213,6 @@ interface stateInterface {
             nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
         };
     };
-}
-
-interface TreeNode {
-    id: number;
-    icon: 'graph';
-    parentId: number;
-    label: string;
-    descendants: number;
-    childNodes: TreeNode[];
-    rule: string;
-    conclusion: string;
-    args: string;
-}
-
-interface NodeInterfaceT {
-    id: number;
-    conclusion: string;
-    rule: string;
-    args: string;
-    views: Array<string>;
-    children: number[];
-    parents: number[];
-    hiddenNodes?: Array<NodeInterfaceT>;
-}
-
-interface CanvasPropsAndRedux {
-    myProof: NodeInterfaceT[];
-    myView: 'basic' | 'propositional' | 'full';
-    proofNodes: NodeInterface[];
-    openDrawer: (nodeInfo: {
-        rule: string;
-        args: string;
-        conclusion: string;
-        nHided: number;
-        nDescendants: number;
-    }) => void;
-    view: string | undefined;
-    importedData: {
-        nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
-    };
-    hideNodes: ActionCreatorWithPayload<number[], string>;
-    unhideNodes: ActionCreatorWithPayload<number[], string>;
-    foldAllDescendants: ActionCreatorWithPayload<number>;
 }
 
 export type {

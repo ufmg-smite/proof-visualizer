@@ -1,7 +1,7 @@
 import React from 'react';
 import { Label, Text, Tag, Group } from 'react-konva';
 
-import { NodeProps } from '../../interfaces/interfaces';
+import { NodeProps } from '../../../interfaces/interfaces';
 
 function textColorFromBg(bgColor: string) {
     const r = parseInt(bgColor.substring(0, 2), 16);
