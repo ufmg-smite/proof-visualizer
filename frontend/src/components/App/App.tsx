@@ -5,7 +5,7 @@ import { Intent, Position, Toaster } from '@blueprintjs/core';
 import VisualizerNavbar from '../VisualizerNavbar/VisualizerNavbar';
 import VisualizerDialog from '../VisualizerDialog/VisualizerDialog';
 import VisualizerStage from '../VisualizerStage/VisualizerStage';
-import VisualizerLetDrawer from '../VisualizerLetDrawer';
+import VisualizerLetDrawer from '../VisualizerLetDrawer/VisualizerLetDrawer';
 
 import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';

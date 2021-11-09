@@ -6,11 +6,11 @@ import Node from './VisualizerNode';
 import Line from './VisualizerLine';
 import Menu from './VisualizerMenu';
 
-import { NodeProps, LineProps, TreeNode, CanvasPropsAndRedux, NodeInterfaceT } from '../../interfaces/interfaces';
+import { NodeProps, LineProps, TreeNode, CanvasPropsAndRedux, NodeInterfaceT } from '../../../interfaces/interfaces';
 
 import '../../../scss/VisualizerCanvas.scss';
 
-import { CanvasProps, CanvasState } from '../../interfaces/interfaces';
+import { CanvasProps, CanvasState } from '../../../interfaces/interfaces';
 
 import { connect } from 'react-redux';
 import { FileState } from '../../../store/features/file/fileSlice';
@@ -241,6 +241,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         this.setState({ showingNodes, showingEdges });
     };
 
+    // Apg
     unfoldOnClick = (id: number): void => {
         // const { unhideNodes } = this.props;
         // const { myProofState } = this.state;
@@ -309,17 +310,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         return roots;
     };
 
-    //Apg
-    recursivelyGetChildren = (nodeId: number): Array<number> => {
-        const { proofNodes } = this.state;
-        let nodes: Array<number> = [];
-        proofNodes[nodeId].children.forEach((node) => {
-            nodes = nodes.concat([node]);
-            nodes = nodes.concat(this.recursivelyGetChildren(node));
-        });
-        return nodes;
-    };
-
     foldAllDescendants = (): void => {
         const { nodeOnFocus } = this.state;
         const { foldAllDescendants } = this.props;
@@ -337,6 +327,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         this.setState({ showingNodes, nodesSelected: [] });
     };
 
+    // CV sobre isso
     downloadProof = (dot: string, proofName: string): void => {
         // Cv dps
         const link = document.createElement('a');

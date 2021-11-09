@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 
 import { Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
-import { VisualizerTree } from '../VisualizerTree';
+import { VisualizerTree } from '../../VisualizerTree/VisualizerTree';
 
-import '../../scss/VisualizerDirectoryStyle.scss';
-import { useAppSelector } from '../../store/hooks';
-import { selectTheme } from '../../store/features/theme/themeSlice';
+import '../../../scss/VisualizerDirectoryStyle.scss';
+import { useAppSelector } from '../../../store/hooks';
+import { selectTheme } from '../../../store/features/theme/themeSlice';
 
 interface directoryStyleProps {
     proofTree: TreeNodeInfo[];

@@ -4,9 +4,9 @@ import { useDispatch } from 'react-redux';
 
 import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
 import Canvas from './Canvas/VisualizerCanvas';
-import { VisualizerTree } from '../VisualizerTree';
-import VisualizerDirectoryStyle from '../VisualizerDirectoryStyle/VisualizerDirectoryStyle';
-import { NodeInterface } from '../interfaces/interfaces';
+import { VisualizerTree } from '../VisualizerTree/VisualizerTree';
+import VisualizerDirectoryStyle from './VisualizerDirectoryStyle/VisualizerDirectoryStyle';
+import { NodeInterface } from '../../interfaces/interfaces';
 
 import '../../scss/VisualizerStage.scss';
 import { useAppSelector } from '../../store/hooks';

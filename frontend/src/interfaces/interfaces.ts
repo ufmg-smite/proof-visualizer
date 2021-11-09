@@ -2,7 +2,7 @@ import { ObjectID } from 'mongodb';
 import { Dispatch, SetStateAction } from 'react';
 import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
 import { IconName } from '@blueprintjs/core/lib/esm/components/icon/icon';
-import Node from '../VisualizerStage/Canvas/VisualizerNode';
+import Node from '../components/VisualizerStage/Canvas/VisualizerNode';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 
 // Dividir essas interfaces em funções
@@ -187,17 +187,6 @@ interface TreeNode {
     rule: string;
     conclusion: string;
     args: string;
-}
-
-interface NodeInterfaceT {
-    id: number;
-    conclusion: string;
-    rule: string;
-    args: string;
-    views: Array<string>;
-    children: number[];
-    parents: number[];
-    hiddenNodes?: Array<NodeInterfaceT>;
 }
 
 interface CanvasPropsAndRedux {
