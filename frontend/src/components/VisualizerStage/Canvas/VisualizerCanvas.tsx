@@ -11,7 +11,7 @@ import {
     LineProps,
     TreeNode,
     CanvasPropsAndRedux,
-    NodeInterfaceT,
+    NodeInterface,
     ProofState,
 } from '../../../interfaces/interfaces';
 
@@ -67,7 +67,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
         this.setNodeOnFocus = this.setNodeOnFocus.bind(this);
 
-        const { proofNodes } = this.props;
         this.state = {
             canvasSize: {
                 width: 520,
@@ -78,7 +77,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 stageX: 0,
                 stageY: 0,
             },
-            proofNodes,
             showingNodes: {},
             showingEdges: {},
             nodeOnFocus: NaN,
@@ -124,7 +122,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         this.setState({ nodeOnFocus: id });
     };
 
-    static newNodeProps = (node: NodeInterfaceT): NodeProps => {
+    static newNodeProps = (node: NodeInterface): NodeProps => {
         return {
             id: node.id,
             conclusion: node.conclusion,
@@ -355,7 +353,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     render(): JSX.Element {
-        const { canvasSize, stage, showingNodes, showingEdges, nodesSelected, nodeOnFocus, proofNodes } = this.state;
+        const { canvasSize, stage, showingNodes, showingEdges, nodesSelected, nodeOnFocus, myProofState } = this.state;
         const color = showingNodes[nodeOnFocus] ? showingNodes[nodeOnFocus].props.color : '';
 
         return (
@@ -368,8 +366,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                     options={{
                         unfold: showingNodes[nodeOnFocus] ? showingNodes[nodeOnFocus].props.rule === 'π' : false,
                         foldSelected: nodesSelected.length && nodesSelected.includes(nodeOnFocus) ? true : false,
-                        foldAllDescendants: false,
-                        // foldAllDescendants: proofNodes[nodeOnFocus] && proofNodes[nodeOnFocus].children.length > 0,
+                        foldAllDescendants: Boolean(myProofState.find((o) => o.id === nodeOnFocus)?.children.length),
                     }}
                     currentColor={color}
                 ></Menu>

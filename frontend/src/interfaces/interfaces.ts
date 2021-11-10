@@ -6,16 +6,17 @@ import Node from '../components/VisualizerStage/Canvas/VisualizerNode';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 
 // NODES
-interface NodeInterfaceT {
-    id: number;
-    conclusion: string;
-    rule: string;
-    args: string;
-    views: Array<string>;
-    children: number[];
-    parents: number[];
-    hiddenNodes?: Array<NodeInterfaceT>;
-}
+// interface NodeInterfaceT {
+//     id: number;
+//     conclusion: string;
+//     rule: string;
+//     args: string;
+//     views: Array<string>;
+//     children: number[];
+//     parents: number[];
+//     hiddenNodes?: Array<NodeInterfaceT>;
+// }
+
 // Isso aqui veio de proofSlice, entao mudar o nome disso aq
 interface NodeInterface {
     id: number;
@@ -87,16 +88,16 @@ interface CanvasProps {
 interface CanvasState {
     canvasSize: { width: number; height: number };
     stage: { stageScale: number; stageX: number; stageY: number };
-    proofNodes: Array<NodeInterface>;
+
     showingNodes: { [id: number]: Node };
     showingEdges: { [id: string]: JSX.Element };
     nodeOnFocus: number;
     nodesSelected: Array<number>;
-    myProofState: NodeInterfaceT[];
+    myProofState: NodeInterface[];
 }
 
 interface CanvasPropsAndRedux {
-    myProof: NodeInterfaceT[];
+    myProof: NodeInterface[];
     myView: 'basic' | 'propositional' | 'full';
     proofNodes: NodeInterface[];
     openDrawer: (nodeInfo: {
@@ -170,5 +171,4 @@ export type {
     VisualizerNavbarProps,
     TreeNode,
     CanvasPropsAndRedux,
-    NodeInterfaceT,
 };
