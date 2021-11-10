@@ -1,6 +1,5 @@
 import React from 'react';
 import { Label, Text, Tag, Group } from 'react-konva';
-import Konva from 'konva';
 
 import { NodeProps } from '../../../interfaces/interfaces';
 
@@ -35,24 +34,6 @@ function sixDigitColor(bgColor: string): string {
     return '000000';
 }
 
-// function handleClick(e: Konva.KonvaEventObject<MouseEvent>): void {
-//     // e.evt.stopPropagation();
-//     const {
-//         toggleNodeSelection,
-//         openDrawer,
-//         setNodeOnFocus,
-//         id,
-//         rule,
-//         args,
-//         conclusion,
-//         nHided,
-//         nDescendants,
-//         topHidedNodes,
-//         tree,
-//     } = this.props;
-
-// }
-
 export default class Node extends React.Component<NodeProps> {
     render(): JSX.Element {
         const {
@@ -76,7 +57,6 @@ export default class Node extends React.Component<NodeProps> {
         } = this.props;
 
         const bgColor = color;
-
         const tagProps = {
             fill: bgColor,
             stroke: selected ? 'red' : 'black',
@@ -107,9 +87,6 @@ export default class Node extends React.Component<NodeProps> {
                 }}
                 x={x}
                 y={y}
-                onContextMenu={(e) => {
-                    e.evt.preventDefault();
-                }}
                 onClick={(e) => {
                     if (e.evt.button === 0) {
                         if (e.evt.shiftKey) {

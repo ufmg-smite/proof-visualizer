@@ -419,7 +419,7 @@ const VisualizerStage: React.FC = () => {
     };
 
     return (
-        <div>
+        <div onContextMenu={(e) => e.preventDefault()}>
             {proof.length > 1 ? (
                 style === 'graph' ? (
                     <Canvas
