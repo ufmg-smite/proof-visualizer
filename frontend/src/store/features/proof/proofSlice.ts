@@ -1,34 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
 import { processDot, piNodeChildren, piNodeParents, descendants } from './auxi';
-
-export interface NodeInterface {
-    id: number;
-    conclusion: string;
-    rule: string;
-    args: string;
-    views: string[];
-    children: number[];
-    parents: number[];
-    hiddenNodes?: NodeInterface[];
-    descendants: number;
-}
-
-export interface ProofState {
-    proof: NodeInterface[];
-    view: 'basic' | 'propositional' | 'full';
-    style: 'graph' | 'directory';
-    hiddenNodes: number[][];
-    letMap: {
-        [Key: string]: string;
-    };
-    visualInfo: {
-        id: number;
-        color: string;
-        x: number;
-        y: number;
-    }[];
-}
+import { NodeInterface, ProofState } from '../../../interfaces/interfaces';
 
 const initialState: ProofState = {
     proof: [],

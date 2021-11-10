@@ -16,39 +16,17 @@ interface NodeInterfaceT {
     parents: number[];
     hiddenNodes?: Array<NodeInterfaceT>;
 }
-
-// Mudar nome
+// Isso aqui veio de proofSlice, entao mudar o nome disso aq
 interface NodeInterface {
     id: number;
-
     conclusion: string;
     rule: string;
     args: string;
-    views: Array<string>;
-    children: Array<number>;
-    parent: number;
+    views: string[];
+    children: number[];
+    parents: number[];
+    hiddenNodes?: NodeInterface[];
     descendants: number;
-    rank: number;
-
-    positionCache: boolean;
-    x: number;
-    y: number;
-
-    hided: boolean;
-    hidedIn: number;
-
-    // The node that hide its children
-    hideMyChildNode: number;
-
-    hidedNodes: Array<number>;
-
-    topHidedNodes?: Array<[number, string, string, number, number]>;
-
-    replace?: number;
-
-    tree?: Array<TreeNode>;
-
-    color: string;
 }
 
 interface NodeProps {
@@ -137,33 +115,23 @@ interface CanvasPropsAndRedux {
     foldAllDescendants: ActionCreatorWithPayload<number>;
 }
 
-// DIALOG
-interface DialogProps {
-    icon: IconName | MaybeElement;
-    title: React.ReactNode;
-}
-
-interface VisualizerDialogProps {
-    dialogIsOpen: boolean;
-    setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
-    dialogContent: string;
-    setDialogContent: Dispatch<SetStateAction<string>>;
-    addErrorToast: (err: string) => void;
-}
-
 // PROOFS
-interface FormNewProofProps {
-    proof: proof;
-    setProof: Dispatch<SetStateAction<proof>>;
-}
 
-interface proof {
-    _id?: ObjectID;
-    label: string;
-    options?: string;
-    problem: string;
-    dot?: string;
-    view?: string;
+// Isso veio de proof slice, mudar o nome
+export interface ProofState {
+    proof: NodeInterface[];
+    view: 'basic' | 'propositional' | 'full';
+    style: 'graph' | 'directory';
+    hiddenNodes: number[][];
+    letMap: {
+        [Key: string]: string;
+    };
+    visualInfo: {
+        id: number;
+        color: string;
+        x: number;
+        y: number;
+    }[];
 }
 
 // NAVBAR
@@ -193,40 +161,13 @@ interface LineProps {
     points: Array<number>;
 }
 
-interface stateInterface {
-    proofReducer: {
-        proof: proof;
-    };
-    darkThemeReducer: {
-        darkTheme: boolean;
-    };
-    styleReducer: {
-        style: string;
-    };
-    letMapReducer: {
-        letMap: {
-            [Key: string]: string;
-        };
-    };
-    importedDataReducer: {
-        importedData: {
-            nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
-        };
-    };
-}
-
 export type {
     CanvasProps,
     CanvasState,
-    DialogProps,
-    FormNewProofProps,
     LineProps,
     NodeInterface,
     NodeProps,
-    proof,
-    VisualizerDialogProps,
     VisualizerNavbarProps,
-    stateInterface,
     TreeNode,
     CanvasPropsAndRedux,
     NodeInterfaceT,

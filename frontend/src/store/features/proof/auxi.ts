@@ -1,4 +1,4 @@
-import { NodeInterface } from './proofSlice';
+import { NodeInterface } from '../../../interfaces/interfaces';
 
 function removeEscapedCharacters(s: string): string {
     let newS = '';

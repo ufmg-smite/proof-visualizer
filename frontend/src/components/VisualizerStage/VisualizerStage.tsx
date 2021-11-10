@@ -1,155 +1,17 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
 
 import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
 import Canvas from './Canvas/VisualizerCanvas';
 import { VisualizerTree } from '../VisualizerTree/VisualizerTree';
 import VisualizerDirectoryStyle from './VisualizerDirectoryStyle/VisualizerDirectoryStyle';
-import { NodeInterface } from '../../interfaces/interfaces';
+import { processDot } from '../../store/features/proof/auxi';
 
 import '../../scss/VisualizerStage.scss';
 import { useAppSelector } from '../../store/hooks';
 import { selectFile } from '../../store/features/file/fileSlice';
 import { selectStyle, selectView } from '../../store/features/proof/proofSlice';
 import { selectTheme } from '../../store/features/theme/themeSlice';
-
-function removeEscapedCharacters(s: string): string {
-    let newS = '';
-    for (let i = 0; i < s.length; i += 1) {
-        if (
-            !(
-                s[i] === '\\' &&
-                (s[i + 1] === '"' ||
-                    s[i + 1] === '>' ||
-                    s[i + 1] === '<' ||
-                    s[i + 1] === '{' ||
-                    s[i + 1] === '}' ||
-                    s[i + 1] === '|')
-            )
-        ) {
-            newS += s[i];
-        }
-    }
-
-    return newS;
-}
-
-function processDot(dot: string) {
-    // TODO fazer isso aq entrar com NodeInterface e fazer sair um node com
-    //   infos visuais
-    const nodes: Array<NodeInterface> = [
-        {
-            id: 0,
-            conclusion: '',
-            rule: '',
-            args: '',
-            views: [],
-            children: [],
-            parent: NaN,
-            x: NaN,
-            y: NaN,
-            hideMyChildNode: NaN,
-            hided: false,
-            hidedNodes: [],
-            hidedIn: NaN,
-            positionCache: false,
-            descendants: 0,
-            rank: 0,
-            color: '#8d99ae',
-        },
-    ];
-    let comment: any = dot.slice(dot.indexOf('comment='));
-    comment = comment
-        ? removeEscapedCharacters(
-              removeEscapedCharacters(comment.slice(comment.indexOf('=') + 2, comment.indexOf(';') - 1)),
-          )
-        : null;
-    if (comment) {
-        const dispatch = useDispatch();
-        dispatch({
-            type: 'SET_LET_MAP',
-            payload: JSON.parse(comment)['letMap'],
-        });
-    }
-
-    const lines = dot
-        .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
-        .replace(/(\n|\t)/gm, '')
-        .split(';');
-    lines.forEach((line) => {
-        if (line.search('label') !== -1) {
-            const id = parseInt(line.slice(0, line.indexOf('[')).trim());
-            let attributes = line.slice(line.indexOf('[') + 1, line.lastIndexOf(']')).trim();
-
-            let label = attributes.slice(attributes.search(/(?<!\\)"/) + 2);
-            label = label.slice(0, label.search(/(?<!\\)"/) - 1);
-            let [conclusion, rule, args] = ['', '', ''];
-            [conclusion, rule] = label.split(/(?<!\\)\|/);
-            [rule, args] = rule.indexOf(':args') != -1 ? rule.split(':args') : [rule, ''];
-
-            attributes = attributes.slice(attributes.indexOf(', class = ') + ', class = '.length);
-            attributes = attributes.slice(attributes.indexOf('"') + 1, attributes.slice(1).indexOf('"') + 1);
-            const views = attributes.trim().split(' ');
-            const comment: string = removeEscapedCharacters(line.slice(line.indexOf('comment'), line.lastIndexOf('"')));
-            const commentJSON = JSON.parse(comment.slice(comment.indexOf('"') + 1).replace(/'/g, '"'));
-
-            if (!nodes[id]) {
-                nodes[id] = {
-                    id: id,
-                    conclusion: '',
-                    rule: '',
-                    args: '',
-                    views: [],
-                    children: [],
-                    parent: NaN,
-                    x: NaN,
-                    y: NaN,
-                    hideMyChildNode: NaN,
-                    hided: false,
-                    hidedNodes: [],
-                    hidedIn: NaN,
-                    positionCache: false,
-                    descendants: 0,
-                    rank: 0,
-                    color: '#8d99ae',
-                };
-            }
-            nodes[id].conclusion = removeEscapedCharacters(conclusion);
-            nodes[id].rule = removeEscapedCharacters(rule);
-            nodes[id].args = removeEscapedCharacters(args);
-            nodes[id].views = views;
-            nodes[id].descendants = commentJSON.subProofQty - 1;
-        } else if (line.search('->') !== -1) {
-            const [child, parent] = line.split('->').map((x) => parseInt(x.trim()));
-            nodes[parent].children.push(child);
-            if (!nodes[child]) {
-                nodes[child] = {
-                    id: child,
-                    conclusion: '',
-                    rule: '',
-                    args: '',
-                    views: [],
-                    children: [],
-                    parent: parent,
-                    x: NaN,
-                    y: NaN,
-                    hideMyChildNode: NaN,
-                    hided: false,
-                    hidedNodes: [],
-                    hidedIn: NaN,
-                    positionCache: false,
-                    descendants: 0,
-                    rank: nodes[parent].rank + 1,
-                    color: '#8d99ae',
-                };
-            }
-            nodes[child].parent = parent;
-            nodes[child].rank = nodes[parent].rank + 1;
-        }
-    });
-    return comment ? [nodes, JSON.parse(comment)['letMap']] : [nodes, {}];
-}
 
 function ruleHelper(rule: string) {
     switch (rule.split(' ')[0]) {
@@ -360,7 +222,7 @@ const VisualizerStage: React.FC = () => {
             return {
                 id: nodeId,
                 icon: 'graph',
-                parentId: proof[nodeId].parent,
+                // parentId: proof[nodeId].parent,
                 label: proof[nodeId].rule + ' => ' + proof[nodeId].conclusion,
                 descendants: proof[nodeId].descendants,
                 childNodes: [],

@@ -6,7 +6,14 @@ import Node from './VisualizerNode';
 import Line from './VisualizerLine';
 import Menu from './VisualizerMenu';
 
-import { NodeProps, LineProps, TreeNode, CanvasPropsAndRedux, NodeInterfaceT } from '../../../interfaces/interfaces';
+import {
+    NodeProps,
+    LineProps,
+    TreeNode,
+    CanvasPropsAndRedux,
+    NodeInterfaceT,
+    ProofState,
+} from '../../../interfaces/interfaces';
 
 import '../../../scss/VisualizerCanvas.scss';
 
@@ -14,7 +21,7 @@ import { CanvasProps, CanvasState } from '../../../interfaces/interfaces';
 
 import { connect } from 'react-redux';
 import { FileState } from '../../../store/features/file/fileSlice';
-import { ProofState, selectProof } from '../../../store/features/proof/proofSlice';
+import { selectProof } from '../../../store/features/proof/proofSlice';
 import { ThemeState } from '../../../store/features/theme/themeSlice';
 import { hideNodes, unhideNodes, foldAllDescendants, applyView } from '../../../store/features/proof/proofSlice';
 
@@ -58,6 +65,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     constructor(props: CanvasPropsAndRedux) {
         super(props);
         this.componentDidUpdate = this.componentDidUpdate.bind(this);
+        this.setNodeOnFocus = this.setNodeOnFocus.bind(this);
 
         const { proofNodes } = this.props;
         this.state = {
@@ -112,6 +120,10 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         }
     }
 
+    setNodeOnFocus = (id: number): void => {
+        this.setState({ nodeOnFocus: id });
+    };
+
     static newNodeProps = (node: NodeInterfaceT): NodeProps => {
         return {
             id: node.id,
@@ -131,11 +143,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             openDrawer: () => undefined,
         };
     };
-
-    LineProps = (key: string, from: NodeProps, to: NodeProps): LineProps => ({
-        key,
-        points: [from.x + 150, from.y, to.x + 150, to.y + 105],
-    });
 
     static getDerivedStateFromProps(props: CanvasPropsAndRedux, current_state: CanvasState) {
         if (current_state.myProofState !== props.myProof) {
@@ -181,6 +188,11 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         return null;
     }
 
+    LineProps = (key: string, from: NodeProps, to: NodeProps): LineProps => ({
+        key,
+        points: [from.x + 150, from.y, to.x + 150, to.y + 105],
+    });
+
     componentDidUpdate(prevProps: CanvasPropsAndRedux) {
         const { showingNodes, showingEdges } = this.state;
         const { openDrawer } = this.props;
@@ -197,23 +209,21 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 }
             });
             Object.keys(showingNodes).forEach((nodeId: string) => {
-                showingNodes[parseInt(nodeId)] = new Node({
-                    ...showingNodes[parseInt(nodeId)].props,
-                    setNodeOnFocus: this.setNodeOnFocus,
-                    toggleNodeSelection: this.toggleNodeSelection,
-                    updateNodeState: this.updateNodeState,
-                    unfoldOnClick: this.unfoldOnClick,
-                    openDrawer: openDrawer,
-                });
+                if (!showingNodes[parseInt(nodeId)].props.setNodeOnFocus.length) {
+                    showingNodes[parseInt(nodeId)] = new Node({
+                        ...showingNodes[parseInt(nodeId)].props,
+                        setNodeOnFocus: this.setNodeOnFocus,
+                        toggleNodeSelection: this.toggleNodeSelection,
+                        updateNodeState: this.updateNodeState,
+                        unfoldOnClick: this.unfoldOnClick,
+                        openDrawer: openDrawer,
+                    });
+                }
             });
 
             this.setState({ showingEdges: showingEdges });
         }
     }
-
-    setNodeOnFocus = (id: number): void => {
-        this.setState({ nodeOnFocus: id });
-    };
 
     toggleNodeSelection = (id: number): void => {
         const { showingNodes } = this.state;
@@ -267,27 +277,27 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         this.setState({ nodesSelected: [] });
     };
 
-    newTree = (piId: number): TreeNode[] => {
-        const { proofNodes } = this.state;
+    // newTree = (piId: number): TreeNode[] => {
+    //     const { proofNodes } = this.state;
 
-        return this.hiddenNodesTree(
-            proofNodes[piId].hidedNodes
-                .sort((a, b) => a - b)
-                .map((nodeId) => {
-                    return {
-                        id: nodeId,
-                        icon: 'graph',
-                        parentId: proofNodes[nodeId].parent,
-                        label: proofNodes[nodeId].rule + ' => ' + proofNodes[nodeId].conclusion,
-                        descendants: proofNodes[nodeId].descendants,
-                        childNodes: [],
-                        rule: proofNodes[nodeId].rule,
-                        conclusion: proofNodes[nodeId].conclusion,
-                        args: proofNodes[nodeId].args,
-                    };
-                }),
-        );
-    };
+    //     return this.hiddenNodesTree(
+    //         proofNodes[piId].hidedNodes
+    //             .sort((a, b) => a - b)
+    //             .map((nodeId) => {
+    //                 return {
+    //                     id: nodeId,
+    //                     icon: 'graph',
+    //                     parentId: proofNodes[nodeId].parent,
+    //                     label: proofNodes[nodeId].rule + ' => ' + proofNodes[nodeId].conclusion,
+    //                     descendants: proofNodes[nodeId].descendants,
+    //                     childNodes: [],
+    //                     rule: proofNodes[nodeId].rule,
+    //                     conclusion: proofNodes[nodeId].conclusion,
+    //                     args: proofNodes[nodeId].args,
+    //                 };
+    //             }),
+    //     );
+    // };
 
     hiddenNodesTree = (list: Array<TreeNode>): Array<TreeNode> => {
         const map: { [n: number]: number } = {},
@@ -358,7 +368,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                     options={{
                         unfold: showingNodes[nodeOnFocus] ? showingNodes[nodeOnFocus].props.rule === 'π' : false,
                         foldSelected: nodesSelected.length && nodesSelected.includes(nodeOnFocus) ? true : false,
-                        foldAllDescendants: proofNodes[nodeOnFocus] && proofNodes[nodeOnFocus].children.length > 0,
+                        foldAllDescendants: false,
+                        // foldAllDescendants: proofNodes[nodeOnFocus] && proofNodes[nodeOnFocus].children.length > 0,
                     }}
                     currentColor={color}
                 ></Menu>

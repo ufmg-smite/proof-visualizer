@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { Dispatch, SetStateAction } from 'react';
 import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
-import { IconName } from '@blueprintjs/icons';
+import { IconName } from '@blueprintjs/core/lib/esm/components/icon/icon';
 
 import { Button, Classes, Dialog, FileInput, Icon, Intent, Spinner } from '@blueprintjs/core';
 
