@@ -81,46 +81,9 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             showingEdges: {},
             nodeOnFocus: NaN,
             nodesSelected: [],
-            myProofState: [],
+            proof: [],
         };
     }
-
-    componentDidMount(): void {
-        const { showingNodes } = this.state;
-        const { view, myProof } = this.props;
-
-        this.setState({ myProofState: myProof });
-
-        this.setState({
-            showingNodes: myProof.reduce(
-                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node))), ac),
-                {},
-            ),
-        });
-
-        if (showingNodes[0]) {
-            if (view !== 'imported_data') {
-                const [width, height] = [window.innerWidth, window.innerHeight - 50];
-
-                this.setState({
-                    showingNodes,
-                    canvasSize: {
-                        width,
-                        height,
-                    },
-                    stage: {
-                        stageScale: 1,
-                        stageX: width / 2 - (showingNodes[0].props.x + 300 / 2),
-                        stageY: height / 10 - (showingNodes[0].props.y + 30 / 2),
-                    },
-                });
-            }
-        }
-    }
-
-    setNodeOnFocus = (id: number): void => {
-        this.setState({ nodeOnFocus: id });
-    };
 
     static newNodeProps = (node: NodeInterface): NodeProps => {
         return {
@@ -143,7 +106,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     static getDerivedStateFromProps(props: CanvasPropsAndRedux, current_state: CanvasState) {
-        if (current_state.myProofState !== props.myProof) {
+        if (JSON.stringify(current_state.proof) !== JSON.stringify(props.myProof)) {
             const showingNodes = props.myProof.reduce(
                 (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node))), ac),
                 {},
@@ -180,16 +143,44 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             return {
                 showingNodes: showingNodes,
                 showingEdges: {},
-                myProofState: props.myProof,
+                proof: props.myProof,
             };
         }
         return null;
     }
 
-    LineProps = (key: string, from: NodeProps, to: NodeProps): LineProps => ({
-        key,
-        points: [from.x + 150, from.y, to.x + 150, to.y + 105],
-    });
+    componentDidMount(): void {
+        const { showingNodes } = this.state;
+        const { view, myProof } = this.props;
+
+        this.setState({ proof: myProof });
+
+        this.setState({
+            showingNodes: myProof.reduce(
+                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node))), ac),
+                {},
+            ),
+        });
+
+        if (showingNodes[0]) {
+            if (view !== 'imported_data') {
+                const [width, height] = [window.innerWidth, window.innerHeight - 50];
+
+                this.setState({
+                    showingNodes,
+                    canvasSize: {
+                        width,
+                        height,
+                    },
+                    stage: {
+                        stageScale: 1,
+                        stageX: width / 2 - (showingNodes[0].props.x + 300 / 2),
+                        stageY: height / 10 - (showingNodes[0].props.y + 30 / 2),
+                    },
+                });
+            }
+        }
+    }
 
     componentDidUpdate(prevProps: CanvasPropsAndRedux) {
         const { showingNodes, showingEdges } = this.state;
@@ -207,6 +198,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 }
             });
             Object.keys(showingNodes).forEach((nodeId: string) => {
+                // Make sure a function is updated once
                 if (!showingNodes[parseInt(nodeId)].props.setNodeOnFocus.length) {
                     showingNodes[parseInt(nodeId)] = new Node({
                         ...showingNodes[parseInt(nodeId)].props,
@@ -222,6 +214,15 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             this.setState({ showingEdges: showingEdges });
         }
     }
+
+    setNodeOnFocus = (id: number): void => {
+        this.setState({ nodeOnFocus: id });
+    };
+
+    LineProps = (key: string, from: NodeProps, to: NodeProps): LineProps => ({
+        key,
+        points: [from.x + 150, from.y, to.x + 150, to.y + 105],
+    });
 
     toggleNodeSelection = (id: number): void => {
         const { showingNodes } = this.state;
@@ -252,8 +253,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     // Apg
     unfoldOnClick = (id: number): void => {
         // const { unhideNodes } = this.props;
-        // const { myProofState } = this.state;
-        // const hiddenNodess = myProofState[id].hiddenNodes ? myProofState[id].hiddenNodes : [];
+        // const { proof } = this.state;
+        // const hiddenNodess = proof[id].hiddenNodes ? proof[id].hiddenNodes : [];
         // console.log(hiddenNodess);
         // unhideNodes(hiddenNodess ? hiddenNodess.map((node) => node.id) : []);
     };
@@ -265,10 +266,10 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     unfold = (): void => {
-        const { nodeOnFocus, myProofState } = this.state;
+        const { nodeOnFocus, proof } = this.state;
         const { unhideNodes } = this.props;
 
-        const obj = myProofState.find((o) => o.id === nodeOnFocus);
+        const obj = proof.find((o) => o.id === nodeOnFocus);
 
         const hiddenNodess = obj ? (obj.hiddenNodes ? obj.hiddenNodes : []) : [];
         unhideNodes(hiddenNodess ? hiddenNodess.map((node) => node.id) : []);
@@ -353,7 +354,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     render(): JSX.Element {
-        const { canvasSize, stage, showingNodes, showingEdges, nodesSelected, nodeOnFocus, myProofState } = this.state;
+        const { canvasSize, stage, showingNodes, showingEdges, nodesSelected, nodeOnFocus, proof } = this.state;
         const color = showingNodes[nodeOnFocus] ? showingNodes[nodeOnFocus].props.color : '';
 
         return (
@@ -366,7 +367,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                     options={{
                         unfold: showingNodes[nodeOnFocus] ? showingNodes[nodeOnFocus].props.rule === 'π' : false,
                         foldSelected: nodesSelected.length && nodesSelected.includes(nodeOnFocus) ? true : false,
-                        foldAllDescendants: Boolean(myProofState.find((o) => o.id === nodeOnFocus)?.children.length),
+                        foldAllDescendants: Boolean(proof.find((o) => o.id === nodeOnFocus)?.children.length),
                     }}
                     currentColor={color}
                 ></Menu>

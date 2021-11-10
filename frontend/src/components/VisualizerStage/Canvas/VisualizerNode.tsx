@@ -1,5 +1,6 @@
 import React from 'react';
 import { Label, Text, Tag, Group } from 'react-konva';
+import Konva from 'konva';
 
 import { NodeProps } from '../../../interfaces/interfaces';
 
@@ -33,6 +34,24 @@ function sixDigitColor(bgColor: string): string {
     }
     return '000000';
 }
+
+// function handleClick(e: Konva.KonvaEventObject<MouseEvent>): void {
+//     // e.evt.stopPropagation();
+//     const {
+//         toggleNodeSelection,
+//         openDrawer,
+//         setNodeOnFocus,
+//         id,
+//         rule,
+//         args,
+//         conclusion,
+//         nHided,
+//         nDescendants,
+//         topHidedNodes,
+//         tree,
+//     } = this.props;
+
+// }
 
 export default class Node extends React.Component<NodeProps> {
     render(): JSX.Element {
@@ -77,6 +96,7 @@ export default class Node extends React.Component<NodeProps> {
             (rule !== 'π'
                 ? nDescendants
                 : '[' + (topHidedNodes ? topHidedNodes.map((node) => node[3]).join(', ') : '') + ']');
+
         return (
             <Group
                 draggable
@@ -87,6 +107,9 @@ export default class Node extends React.Component<NodeProps> {
                 }}
                 x={x}
                 y={y}
+                onContextMenu={(e) => {
+                    e.evt.preventDefault();
+                }}
                 onClick={(e) => {
                     if (e.evt.button === 0) {
                         if (e.evt.shiftKey) {
