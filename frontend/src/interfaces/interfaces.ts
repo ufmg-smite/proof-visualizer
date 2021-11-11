@@ -1,7 +1,4 @@
-import { ObjectID } from 'mongodb';
 import { Dispatch, SetStateAction } from 'react';
-import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
-import { IconName } from '@blueprintjs/core/lib/esm/components/icon/icon';
 import Node from '../components/VisualizerStage/Canvas/VisualizerNode';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 
@@ -85,7 +82,8 @@ interface CanvasState {
 }
 
 interface CanvasPropsAndRedux {
-    myProof: NodeInterface[];
+    proof: NodeInterface[];
+    visualInfo: ProofState['visualInfo'];
     myView: 'basic' | 'propositional' | 'full';
     proofNodes: NodeInterface[];
     openDrawer: (nodeInfo: {
@@ -105,7 +103,7 @@ interface CanvasPropsAndRedux {
 }
 
 // PROOFS
-export interface ProofState {
+interface ProofState {
     proof: NodeInterface[];
     view: 'basic' | 'propositional' | 'full';
     style: 'graph' | 'directory';
@@ -118,6 +116,7 @@ export interface ProofState {
         color: string;
         x: number;
         y: number;
+        selected: boolean;
     }[];
 }
 
@@ -154,6 +153,7 @@ export type {
     LineProps,
     NodeInterface,
     NodeProps,
+    ProofState,
     VisualizerNavbarProps,
     TreeNode,
     CanvasPropsAndRedux,

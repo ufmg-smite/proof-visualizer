@@ -110,7 +110,9 @@ const ancestors = (proof: NodeInterface[], nodeId: number): number[] => {
 };
 
 export const piNodeParents = (proof: NodeInterface[], hiddenNodesArray: number[]): number[] => {
+    // Gets all the parents of the nodes in the list
     const parents = hiddenNodesArray.reduce((acc: number[], hiddenNode) => acc.concat(proof[hiddenNode].parents), []);
+    // Gets the pi node parent
     return parents.filter((nodeId) => !ancestors(proof, nodeId).some((ancestor) => parents.includes(ancestor)));
 };
 
@@ -121,6 +123,8 @@ export const descendants = (proof: NodeInterface[], nodeId: number): number[] =>
 };
 
 export const piNodeChildren = (proof: NodeInterface[], hiddenNodesArray: number[]): number[] => {
+    // Gets all the hidden nodes childrens
     const children = hiddenNodesArray.reduce((acc: number[], hiddenNode) => acc.concat(proof[hiddenNode].children), []);
+    // Go recursively find all the descendants
     return children.filter((nodeId) => !descendants(proof, nodeId).some((descendant) => children.includes(descendant)));
 };

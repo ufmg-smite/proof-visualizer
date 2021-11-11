@@ -23,6 +23,15 @@ export const proofSlice = createSlice({
             state.view = 'full';
             state.hiddenNodes = [];
             state.letMap = letMap;
+            state.visualInfo = state.proof.map((proofNode) => {
+                return {
+                    id: proofNode.id,
+                    color: '#fff',
+                    x: 0,
+                    y: 0,
+                    selected: false,
+                };
+            });
         },
         hideNodes: (state, action: PayloadAction<number[]>) => {
             state.hiddenNodes = state.hiddenNodes

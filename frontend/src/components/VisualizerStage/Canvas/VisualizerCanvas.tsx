@@ -21,7 +21,7 @@ import { CanvasProps, CanvasState } from '../../../interfaces/interfaces';
 
 import { connect } from 'react-redux';
 import { FileState } from '../../../store/features/file/fileSlice';
-import { selectProof } from '../../../store/features/proof/proofSlice';
+import { selectProof, selectVisualInfo } from '../../../store/features/proof/proofSlice';
 import { ThemeState } from '../../../store/features/theme/themeSlice';
 import { hideNodes, unhideNodes, foldAllDescendants, applyView } from '../../../store/features/proof/proofSlice';
 
@@ -85,18 +85,19 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         };
     }
 
-    static newNodeProps = (node: NodeInterface): NodeProps => {
+    static newNodeProps = (node: NodeInterface, VisualInfos: ProofState['visualInfo']): NodeProps => {
+        const visualInfo = VisualInfos[node.id];
         return {
             id: node.id,
             conclusion: node.conclusion,
             rule: node.rule,
             args: node.args,
-            x: 0,
-            y: 0,
+            x: visualInfo.x,
+            y: visualInfo.y,
             nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
             nDescendants: 0, //TODO
-            selected: false,
-            color: '#fff',
+            selected: visualInfo.selected,
+            color: visualInfo.color,
             setNodeOnFocus: () => undefined,
             toggleNodeSelection: () => undefined,
             updateNodeState: () => undefined,
@@ -106,9 +107,9 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     static getDerivedStateFromProps(props: CanvasPropsAndRedux, current_state: CanvasState) {
-        if (JSON.stringify(current_state.proof) !== JSON.stringify(props.myProof)) {
-            const showingNodes = props.myProof.reduce(
-                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node))), ac),
+        if (JSON.stringify(current_state.proof) !== JSON.stringify(props.proof)) {
+            const showingNodes = props.proof.reduce(
+                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node, props.visualInfo))), ac),
                 {},
             );
             if (showingNodes[0]) {
@@ -117,7 +118,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 g.setDefaultEdgeLabel(function () {
                     return {};
                 });
-                props.myProof.forEach((node) => {
+                props.proof.forEach((node) => {
                     g.setNode(node.id.toString(), { width: 300, height: 130 });
                     node.children.forEach((child) => {
                         g.setEdge(child.toString(), node.id.toString());
@@ -143,7 +144,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             return {
                 showingNodes: showingNodes,
                 showingEdges: {},
-                proof: props.myProof,
+                proof: props.proof,
             };
         }
         return null;
@@ -151,13 +152,13 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     componentDidMount(): void {
         const { showingNodes } = this.state;
-        const { view, myProof } = this.props;
+        const { view, proof } = this.props;
 
-        this.setState({ proof: myProof });
+        this.setState({ proof: proof });
 
         this.setState({
-            showingNodes: myProof.reduce(
-                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node))), ac),
+            showingNodes: proof.reduce(
+                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node, this.props.visualInfo))), ac),
                 {},
             ),
         });
@@ -185,8 +186,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     componentDidUpdate(prevProps: CanvasPropsAndRedux) {
         const { showingNodes, showingEdges } = this.state;
         const { openDrawer } = this.props;
-        if (prevProps.myProof !== this.props.myProof) {
-            this.props.myProof.forEach((node) => {
+        if (prevProps.proof !== this.props.proof) {
+            this.props.proof.forEach((node) => {
                 if (showingNodes[node.parents[0]]) {
                     showingEdges[`${node.id}->${node.parents[0]}`] = Line(
                         this.LineProps(
@@ -400,7 +401,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
 function mapStateToProps(state: { file: FileState; proof: ProofState; theme: ThemeState }, ownProps: CanvasProps) {
     return {
-        myProof: selectProof(state),
+        proof: selectProof(state),
+        visualInfo: selectVisualInfo(state),
         myView: state.proof.view,
         proofNodes: ownProps.proofNodes,
         openDrawer: ownProps.openDrawer,
