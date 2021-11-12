@@ -112,12 +112,13 @@ interface ProofState {
         [Key: string]: string;
     };
     visualInfo: {
-        id: number;
-        color: string;
-        x: number;
-        y: number;
-        selected: boolean;
-    }[];
+        [id: number]: {
+            color: string;
+            x: number;
+            y: number;
+            selected: boolean;
+        };
+    };
 }
 
 // NAVBAR

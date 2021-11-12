@@ -23,15 +23,18 @@ export const proofSlice = createSlice({
             state.view = 'full';
             state.hiddenNodes = [];
             state.letMap = letMap;
-            state.visualInfo = state.proof.map((proofNode) => {
-                return {
-                    id: proofNode.id,
-                    color: '#fff',
-                    x: 0,
-                    y: 0,
-                    selected: false,
-                };
-            });
+            state.visualInfo = state.proof.reduce(
+                (ac: any, proofNode) => (
+                    (ac[proofNode.id] = {
+                        color: '#fff',
+                        x: 0,
+                        y: 0,
+                        selected: false,
+                    }),
+                    ac
+                ),
+                {},
+            );
         },
         hideNodes: (state, action: PayloadAction<number[]>) => {
             state.hiddenNodes = state.hiddenNodes
@@ -128,6 +131,7 @@ export const selectProof = (state: RootState): NodeInterface[] => {
             hiddenNodes: hiddenNodesArray.map((hiddenNode) => proof[hiddenNode]),
             descendants: 0,
         });
+
         children.forEach(
             (childId) =>
                 (proof[childId] = {
@@ -168,7 +172,9 @@ export const selectLetMap = (state: RootState): { [Key: string]: string } => {
 };
 
 export const selectVisualInfo = (state: RootState): ProofState['visualInfo'] => {
-    return state.proof.visualInfo;
+    if (state.proof.proof.length) return state.proof.visualInfo;
+    // If there is no proof node
+    return { 0: { color: '#f8f', x: 0, y: 0, selected: false } };
 };
 
 export default proofSlice.reducer;

@@ -23,7 +23,13 @@ import { connect } from 'react-redux';
 import { FileState } from '../../../store/features/file/fileSlice';
 import { selectProof, selectVisualInfo } from '../../../store/features/proof/proofSlice';
 import { ThemeState } from '../../../store/features/theme/themeSlice';
-import { hideNodes, unhideNodes, foldAllDescendants, applyView } from '../../../store/features/proof/proofSlice';
+import {
+    hideNodes,
+    unhideNodes,
+    foldAllDescendants,
+    applyView,
+    setVisualInfo,
+} from '../../../store/features/proof/proofSlice';
 
 function handleWheel(e: Konva.KonvaEventObject<WheelEvent>): { stageScale: number; stageX: number; stageY: number } {
     e.evt.preventDefault();
@@ -85,8 +91,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         };
     }
 
-    static newNodeProps = (node: NodeInterface, VisualInfos: ProofState['visualInfo']): NodeProps => {
-        const visualInfo = VisualInfos[node.id];
+    static newNodeProps = (node: NodeInterface, visualInfos: ProofState['visualInfo']): NodeProps => {
+        const visualInfo = visualInfos[node.id];
         return {
             id: node.id,
             conclusion: node.conclusion,
@@ -104,12 +110,43 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             unfoldOnClick: () => undefined,
             openDrawer: () => undefined,
         };
+        // return {
+        //     id: node.id,
+        //     conclusion: node.conclusion,
+        //     rule: node.rule,
+        //     args: node.args,
+        //     x: 0,
+        //     y: 0,
+        //     nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
+        //     nDescendants: 0, //TODO
+        //     selected: false,
+        //     color: '#fff',
+        //     setNodeOnFocus: () => undefined,
+        //     toggleNodeSelection: () => undefined,
+        //     updateNodeState: () => undefined,
+        //     unfoldOnClick: () => undefined,
+        //     openDrawer: () => undefined,
+        // };
     };
 
     static getDerivedStateFromProps(props: CanvasPropsAndRedux, current_state: CanvasState) {
         if (JSON.stringify(current_state.proof) !== JSON.stringify(props.proof)) {
+            let visualInfo: ProofState['visualInfo'] = props.visualInfo;
+            // Verify if a new pi node was added
+            if (current_state.proof.length !== props.proof.length && props.proof[props.proof.length - 1].rule === 'π') {
+                visualInfo = {
+                    ...visualInfo,
+                    [props.proof[props.proof.length - 1].id]: {
+                        color: '#992',
+                        x: 0,
+                        y: 0,
+                        selected: true,
+                    },
+                };
+                setVisualInfo(visualInfo);
+            }
             const showingNodes = props.proof.reduce(
-                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node, props.visualInfo))), ac),
+                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node, visualInfo))), ac),
                 {},
             );
             if (showingNodes[0]) {
@@ -411,6 +448,6 @@ function mapStateToProps(state: { file: FileState; proof: ProofState; theme: The
     };
 }
 
-const mapDispatchToProps = { hideNodes, unhideNodes, foldAllDescendants, applyView };
+const mapDispatchToProps = { hideNodes, unhideNodes, foldAllDescendants, applyView, setVisualInfo };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Canvas);
