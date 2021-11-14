@@ -88,6 +88,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             nodeOnFocus: NaN,
             nodesSelected: [],
             proof: [],
+            visualInfo: {},
         };
     }
 
@@ -110,43 +111,15 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             unfoldOnClick: () => undefined,
             openDrawer: () => undefined,
         };
-        // return {
-        //     id: node.id,
-        //     conclusion: node.conclusion,
-        //     rule: node.rule,
-        //     args: node.args,
-        //     x: 0,
-        //     y: 0,
-        //     nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
-        //     nDescendants: 0, //TODO
-        //     selected: false,
-        //     color: '#fff',
-        //     setNodeOnFocus: () => undefined,
-        //     toggleNodeSelection: () => undefined,
-        //     updateNodeState: () => undefined,
-        //     unfoldOnClick: () => undefined,
-        //     openDrawer: () => undefined,
-        // };
     };
 
     static getDerivedStateFromProps(props: CanvasPropsAndRedux, current_state: CanvasState) {
-        if (JSON.stringify(current_state.proof) !== JSON.stringify(props.proof)) {
-            let visualInfo: ProofState['visualInfo'] = props.visualInfo;
-            // Verify if a new pi node was added
-            if (current_state.proof.length !== props.proof.length && props.proof[props.proof.length - 1].rule === 'π') {
-                visualInfo = {
-                    ...visualInfo,
-                    [props.proof[props.proof.length - 1].id]: {
-                        color: '#992',
-                        x: 0,
-                        y: 0,
-                        selected: true,
-                    },
-                };
-                setVisualInfo(visualInfo);
-            }
+        if (
+            JSON.stringify(current_state.proof) !== JSON.stringify(props.proof) ||
+            JSON.stringify(current_state.visualInfo) !== JSON.stringify(props.visualInfo)
+        ) {
             const showingNodes = props.proof.reduce(
-                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node, visualInfo))), ac),
+                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node, props.visualInfo))), ac),
                 {},
             );
             if (showingNodes[0]) {
@@ -182,6 +155,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 showingNodes: showingNodes,
                 showingEdges: {},
                 proof: props.proof,
+                visualInfo: props.visualInfo,
             };
         }
         return null;
@@ -299,18 +273,21 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     foldSelectedNodes = (): void => {
         const { nodesSelected } = this.state;
-        const { hideNodes } = this.props;
-        hideNodes(nodesSelected);
+        // TODO: talvez será preciso alterar o visualInfo dentro do hide nodes
+        this.props.hideNodes(nodesSelected);
     };
 
     unfold = (): void => {
         const { nodeOnFocus, proof } = this.state;
         const { unhideNodes } = this.props;
 
+        // Get the pi node (to be unfold)
         const obj = proof.find((o) => o.id === nodeOnFocus);
+        // Get the hidden nodes and their ids
+        const hiddenNodes = obj ? (obj.hiddenNodes ? obj.hiddenNodes : []) : [];
+        const ids = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
 
-        const hiddenNodess = obj ? (obj.hiddenNodes ? obj.hiddenNodes : []) : [];
-        unhideNodes(hiddenNodess ? hiddenNodess.map((node) => node.id) : []);
+        unhideNodes({ pi: nodeOnFocus, hiddens: ids });
         this.setState({ nodesSelected: [] });
     };
 
@@ -359,19 +336,28 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     foldAllDescendants = (): void => {
         const { nodeOnFocus } = this.state;
-        const { foldAllDescendants } = this.props;
-        foldAllDescendants(nodeOnFocus);
+        this.props.foldAllDescendants(nodeOnFocus);
     };
 
     changeNodeColor = (color: string): void => {
         const { showingNodes, nodesSelected, nodeOnFocus } = this.state;
         nodesSelected.forEach((nodeId) => {
-            showingNodes[nodeId] = new Node({ ...showingNodes[nodeId].props, selected: false, color: color });
+            const obj = {
+                ...this.props.visualInfo,
+                [nodeId]: { ...this.props.visualInfo[nodeId], color: color },
+            };
+            this.props.setVisualInfo(obj);
+            // showingNodes[nodeId] = new Node({ ...showingNodes[nodeId].props, selected: false, color: color });
         });
         if (showingNodes[nodeOnFocus]) {
-            showingNodes[nodeOnFocus] = new Node({ ...showingNodes[nodeOnFocus].props, color: color });
+            const obj = {
+                ...this.props.visualInfo,
+                [nodeOnFocus]: { ...this.props.visualInfo[nodeOnFocus], color: color },
+            };
+            this.props.setVisualInfo(obj);
+            // showingNodes[nodeOnFocus] = new Node({ ...showingNodes[nodeOnFocus].props, color: color });
         }
-        this.setState({ showingNodes, nodesSelected: [] });
+        this.setState({ nodesSelected: [] });
     };
 
     // CV sobre isso

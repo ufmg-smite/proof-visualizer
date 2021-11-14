@@ -3,7 +3,6 @@ import Node from '../components/VisualizerStage/Canvas/VisualizerNode';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 
 // NODES
-// Isso aqui veio de proofSlice, entao mudar o nome disso aq
 interface NodeInterface {
     id: number;
     conclusion: string;
@@ -79,6 +78,7 @@ interface CanvasState {
     nodeOnFocus: number;
     nodesSelected: Array<number>;
     proof: NodeInterface[];
+    visualInfo: ProofState['visualInfo'];
 }
 
 interface CanvasPropsAndRedux {
@@ -98,8 +98,9 @@ interface CanvasPropsAndRedux {
         nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
     };
     hideNodes: ActionCreatorWithPayload<number[], string>;
-    unhideNodes: ActionCreatorWithPayload<number[], string>;
+    unhideNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
     foldAllDescendants: ActionCreatorWithPayload<number>;
+    setVisualInfo: ActionCreatorWithPayload<ProofState['visualInfo']>;
 }
 
 // PROOFS
