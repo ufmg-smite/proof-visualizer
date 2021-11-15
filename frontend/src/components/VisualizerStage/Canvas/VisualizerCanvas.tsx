@@ -102,7 +102,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             x: visualInfo.x,
             y: visualInfo.y,
             nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
-            nDescendants: 0, //TODO
+            nDescendants: node.descendants, //TODO
+            hiddenNodes: node.hiddenNodes ? node.hiddenNodes.map((node) => node.id) : [],
             selected: visualInfo.selected,
             color: visualInfo.color,
             setNodeOnFocus: () => undefined,

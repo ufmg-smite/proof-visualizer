@@ -1,3 +1,4 @@
+import { KonvaEventObject } from 'konva/types/Node';
 import React from 'react';
 import { Label, Text, Tag, Group } from 'react-konva';
 
@@ -35,26 +36,59 @@ function sixDigitColor(bgColor: string): string {
 }
 
 export default class Node extends React.Component<NodeProps> {
-    render(): JSX.Element {
+    constructor(props: NodeProps) {
+        super(props);
+        this.handleClick = this.handleClick.bind(this);
+    }
+
+    handleClick(e: KonvaEventObject<MouseEvent>): void {
         const {
             rule,
             conclusion,
             args,
             id,
-            x,
-            y,
-            selected,
             nHided,
             nDescendants,
-            topHidedNodes,
-            color,
+            hiddenNodes,
             setNodeOnFocus,
-            updateNodeState,
             toggleNodeSelection,
             openDrawer,
-            unfoldOnClick,
             tree,
         } = this.props;
+
+        if (e.evt.button === 0) {
+            if (e.evt.shiftKey) {
+                toggleNodeSelection(id, this.props);
+            } else {
+                openDrawer(
+                    {
+                        rule: rule,
+                        args: args,
+                        conclusion: conclusion,
+                        nHided: nHided,
+                        nDescendants: nDescendants - (rule === 'π' ? nHided : 0),
+                        hiddenNodes: hiddenNodes,
+                    },
+                    tree,
+                );
+            }
+        } else if (e.evt.button === 2) {
+            setNodeOnFocus(id);
+            const menuNode = document.getElementById('menu');
+            if (menuNode) {
+                menuNode.style.top = `${e.evt.clientY}px`;
+                menuNode.style.left = `${e.evt.clientX}px`;
+                menuNode.style.display = 'initial';
+                window.addEventListener('click', () => {
+                    menuNode.style.display = 'none';
+                });
+            }
+        }
+    }
+
+    render(): JSX.Element {
+        const { rule, conclusion, id, x, y, selected, nHided, nDescendants, hiddenNodes, color, updateNodeState } =
+            this.props;
 
         const bgColor = color;
         const tagProps = {
@@ -71,11 +105,7 @@ export default class Node extends React.Component<NodeProps> {
             width: 300,
         };
         const nHidedStr = nHided ? '#hidden: ' + nHided : '';
-        const nDescendantsStr =
-            ' #descendants: ' +
-            (rule !== 'π'
-                ? nDescendants
-                : '[' + (topHidedNodes ? topHidedNodes.map((node) => node[3]).join(', ') : '') + ']');
+        const nDescendantsStr = ' #descendants: ' + (rule !== 'π' ? nDescendants : `[${hiddenNodes}]`);
 
         return (
             <Group
@@ -87,60 +117,15 @@ export default class Node extends React.Component<NodeProps> {
                 }}
                 x={x}
                 y={y}
-                onClick={(e) => {
-                    if (e.evt.button === 0) {
-                        if (e.evt.shiftKey) {
-                            toggleNodeSelection(id, this.props);
-                        } else {
-                            openDrawer(
-                                {
-                                    rule: rule,
-                                    args: args,
-                                    conclusion: conclusion,
-                                    nHided: nHided,
-                                    nDescendants: nDescendants - (rule === 'π' ? nHided : 0),
-                                    topHidedNodes: topHidedNodes,
-                                },
-                                tree,
-                            );
-                        }
-                    } else if (e.evt.button === 2) {
-                        setNodeOnFocus(id);
-                        const menuNode = document.getElementById('menu');
-                        if (menuNode) {
-                            menuNode.style.top = `${e.evt.clientY}px`;
-                            menuNode.style.left = `${e.evt.clientX}px`;
-                            menuNode.style.display = 'initial';
-                            window.addEventListener('click', () => {
-                                menuNode.style.display = 'none';
-                            });
-                        }
-                    }
-                }}
+                onClick={this.handleClick}
             >
                 <Label x={0} y={0}>
                     <Tag {...tagProps} />
-                    <Text
-                        {...textProps}
-                        text={
-                            conclusion +
-                            (conclusion === '∴' && topHidedNodes
-                                ? '[' + topHidedNodes.map((e) => e[2].trim()).join(',') + ']'
-                                : '')
-                        }
-                    />
+                    <Text {...textProps} text={conclusion} />
                 </Label>
                 <Label x={0} y={35}>
                     <Tag {...tagProps} />
-                    <Text
-                        {...textProps}
-                        text={
-                            rule +
-                            (rule === 'π' && topHidedNodes
-                                ? '[' + topHidedNodes.map((e) => e[1].trim()).join(',') + ']'
-                                : '')
-                        }
-                    />
+                    <Text {...textProps} text={rule} />
                 </Label>
                 <Label x={0} y={70}>
                     <Tag {...tagProps} />

@@ -12,6 +12,7 @@ import { useAppSelector } from '../../store/hooks';
 import { selectFile } from '../../store/features/file/fileSlice';
 import { selectStyle, selectView } from '../../store/features/proof/proofSlice';
 import { selectTheme } from '../../store/features/theme/themeSlice';
+import { NodeInfo } from '../../interfaces/interfaces';
 
 function ruleHelper(rule: string) {
     switch (rule.split(' ')[0]) {
@@ -236,35 +237,19 @@ const VisualizerStage: React.FC = () => {
     const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
     const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);
     const [conclusionTranslatorOpen, setConclusionTranslatorOpen] = useState(false);
-    const [nodeInfo, setNodeInfo] = useState<{
-        rule: string;
-        args: string;
-        conclusion: string;
-        nHided: number;
-        nDescendants: number;
-        topHidedNodes?: Array<[number, string, string, number, number]>;
-    }>({
+    const [nodeInfo, setNodeInfo] = useState<NodeInfo>({
         rule: '',
         args: '',
         conclusion: '',
         nHided: 0,
         nDescendants: 0,
-        topHidedNodes: undefined,
     });
-    const [nodeInfoCopy, setNodeInfoCopy] = useState<{
-        rule: string;
-        args: string;
-        conclusion: string;
-        nHided: number;
-        nDescendants: number;
-        topHidedNodes?: Array<[number, string, string, number, number]>;
-    }>({
+    const [nodeInfoCopy, setNodeInfoCopy] = useState<NodeInfo>({
         rule: '',
         args: '',
         conclusion: '',
         nHided: 0,
         nDescendants: 0,
-        topHidedNodes: undefined,
     });
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
     const translate = (s: string) => {
@@ -278,17 +263,7 @@ const VisualizerStage: React.FC = () => {
         return newS;
     };
 
-    const openDrawer = (
-        nodeInfo: {
-            rule: string;
-            args: string;
-            conclusion: string;
-            nHided: number;
-            nDescendants: number;
-            topHidedNodes?: Array<[number, string, string, number, number]>;
-        },
-        tree?: TreeNodeInfo[],
-    ) => {
+    const openDrawer = (nodeInfo: NodeInfo, tree?: TreeNodeInfo[]) => {
         setRuleHelperOpen(false);
         setNodeInfo(nodeInfo);
         setTree(tree ? tree : []);
@@ -386,31 +361,20 @@ const VisualizerStage: React.FC = () => {
                             ) : null}
                         </td>
                     </tr>
-                    {!nodeInfo.topHidedNodes ? (
-                        <tr>
-                            <td>
-                                <strong>#DESCENDANTS</strong>
-                            </td>
-                            <td>{nodeInfo.nDescendants}</td>
-                        </tr>
-                    ) : (
-                        <tr>
-                            <td>
-                                <strong>#DESCENDANTS</strong>
-                            </td>
-                            <td>[{nodeInfo.topHidedNodes.map((node) => node[3]).join(', ')}]</td>
-                        </tr>
-                    )}
+                    <tr>
+                        <td>
+                            <strong>#DESCENDANTS</strong>
+                        </td>
+                        <td>
+                            {nodeInfo.hiddenNodes !== [] ? `${nodeInfo.nDescendants}` : `[${nodeInfo.hiddenNodes}]`}
+                        </td>
+                    </tr>
                     {nodeInfo.nHided ? (
                         <tr>
                             <td>
                                 <strong>#HIDDEN</strong>
                             </td>
-                            <td>
-                                [
-                                {nodeInfo.topHidedNodes ? nodeInfo.topHidedNodes.map((node) => node[4]).join(', ') : ''}
-                                ]
-                            </td>
+                            <td>[{nodeInfo.hiddenNodes ? `${nodeInfo.hiddenNodes}` : ''}]</td>
                         </tr>
                     ) : null}
                 </tbody>

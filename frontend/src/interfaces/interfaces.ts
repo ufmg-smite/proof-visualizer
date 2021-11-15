@@ -27,10 +27,9 @@ interface NodeProps {
 
     nHided: number;
     nDescendants: number;
+    hiddenNodes: number[];
 
     selected: boolean;
-
-    topHidedNodes?: Array<[number, string, string, number, number]>;
 
     color: string;
 
@@ -38,19 +37,19 @@ interface NodeProps {
     toggleNodeSelection: (id: number, props: any) => void;
     updateNodeState: (key: number, x: number, y: number) => void;
     unfoldOnClick: (id: number) => void;
-    openDrawer: (
-        nodeInfo: {
-            rule: string;
-            args: string;
-            conclusion: string;
-            nHided: number;
-            nDescendants: number;
-            topHidedNodes?: Array<[number, string, string, number, number]>;
-        },
-        tree?: Array<TreeNode>,
-    ) => void;
+    openDrawer: (nodeInfo: NodeInfo, tree?: Array<TreeNode>) => void;
 
     tree?: Array<TreeNode>;
+}
+
+// Info passed to the info drawer
+interface NodeInfo {
+    rule: string;
+    args: string;
+    conclusion: string;
+    nHided: number;
+    nDescendants: number;
+    hiddenNodes?: number[];
 }
 
 // CANVAS
@@ -155,6 +154,7 @@ export type {
     LineProps,
     NodeInterface,
     NodeProps,
+    NodeInfo,
     ProofState,
     VisualizerNavbarProps,
     TreeNode,
