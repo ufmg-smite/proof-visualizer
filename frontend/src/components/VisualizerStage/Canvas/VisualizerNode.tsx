@@ -66,7 +66,7 @@ export default class Node extends React.Component<NodeProps> {
                         args: args,
                         conclusion: conclusion,
                         nHided: nHided,
-                        nDescendants: nDescendants - (rule === 'π' ? nHided : 0),
+                        nDescendants: nDescendants - (rule === 'π' ? 0 : 0),
                         hiddenNodes: hiddenNodes,
                     },
                     tree,
@@ -87,7 +87,7 @@ export default class Node extends React.Component<NodeProps> {
     }
 
     render(): JSX.Element {
-        const { rule, conclusion, id, x, y, selected, nHided, nDescendants, hiddenNodes, color, updateNodeState } =
+        const { rule, conclusion, id, x, y, selected, nHided, nDescendants, hiddenNodes, color, updateNodePosition } =
             this.props;
 
         const bgColor = color;
@@ -104,8 +104,8 @@ export default class Node extends React.Component<NodeProps> {
             padding: 10,
             width: 300,
         };
-        const nHidedStr = nHided ? '#hidden: ' + nHided : '';
-        const nDescendantsStr = ' #descendants: ' + (rule !== 'π' ? nDescendants : `[${hiddenNodes}]`);
+        const nHidedStr = nHided ? `#hidden: ${nHided}` : '';
+        const nDescendantsStr = ` #descendants: ${rule === 'π' ? `[${hiddenNodes}]` : nDescendants}`;
 
         return (
             <Group
@@ -113,7 +113,7 @@ export default class Node extends React.Component<NodeProps> {
                 id={id.toString()}
                 key={id}
                 onDragMove={(e) => {
-                    updateNodeState(id, e.target.attrs.x, e.target.attrs.y);
+                    updateNodePosition(id, e.target.attrs.x, e.target.attrs.y);
                 }}
                 x={x}
                 y={y}

@@ -35,7 +35,7 @@ interface NodeProps {
 
     setNodeOnFocus: (id: number) => void;
     toggleNodeSelection: (id: number, props: any) => void;
-    updateNodeState: (key: number, x: number, y: number) => void;
+    updateNodePosition: (key: number, x: number, y: number) => void;
     unfoldOnClick: (id: number) => void;
     openDrawer: (nodeInfo: NodeInfo, tree?: Array<TreeNode>) => void;
 
@@ -49,20 +49,14 @@ interface NodeInfo {
     conclusion: string;
     nHided: number;
     nDescendants: number;
-    hiddenNodes?: number[];
+    hiddenNodes: number[];
 }
 
 // CANVAS
 // Dividir essas interfaces em funções
 interface CanvasProps {
     proofNodes: Array<NodeInterface>;
-    openDrawer: (nodeInfo: {
-        rule: string;
-        args: string;
-        conclusion: string;
-        nHided: number;
-        nDescendants: number;
-    }) => void;
+    openDrawer: (nodeInfo: NodeInfo) => void;
     view?: string;
     importedData: {
         nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
@@ -85,13 +79,7 @@ interface CanvasPropsAndRedux {
     visualInfo: ProofState['visualInfo'];
     myView: 'basic' | 'propositional' | 'full';
     proofNodes: NodeInterface[];
-    openDrawer: (nodeInfo: {
-        rule: string;
-        args: string;
-        conclusion: string;
-        nHided: number;
-        nDescendants: number;
-    }) => void;
+    openDrawer: (nodeInfo: NodeInfo) => void;
     view: string | undefined;
     importedData: {
         nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;

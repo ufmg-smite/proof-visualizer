@@ -243,6 +243,7 @@ const VisualizerStage: React.FC = () => {
         conclusion: '',
         nHided: 0,
         nDescendants: 0,
+        hiddenNodes: [],
     });
     const [nodeInfoCopy, setNodeInfoCopy] = useState<NodeInfo>({
         rule: '',
@@ -250,6 +251,7 @@ const VisualizerStage: React.FC = () => {
         conclusion: '',
         nHided: 0,
         nDescendants: 0,
+        hiddenNodes: [],
     });
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
     const translate = (s: string) => {
@@ -307,7 +309,7 @@ const VisualizerStage: React.FC = () => {
                             </Collapse>
                         </td>
                     </tr>
-                    {nodeInfo.args ? (
+                    {nodeInfo.args && (
                         <tr>
                             <td>
                                 <strong>ARGS</strong>{' '}
@@ -334,7 +336,7 @@ const VisualizerStage: React.FC = () => {
                                 ) : null}
                             </td>
                         </tr>
-                    ) : null}
+                    )}
                     <tr>
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                             <strong>CONCLUSION</strong>{' '}
@@ -365,9 +367,7 @@ const VisualizerStage: React.FC = () => {
                         <td>
                             <strong>#DESCENDANTS</strong>
                         </td>
-                        <td>
-                            {nodeInfo.hiddenNodes !== [] ? `${nodeInfo.nDescendants}` : `[${nodeInfo.hiddenNodes}]`}
-                        </td>
+                        <td>{nodeInfo.nHided ? `[${nodeInfo.hiddenNodes}]` : `${nodeInfo.nDescendants}`}</td>
                     </tr>
                     {nodeInfo.nHided ? (
                         <tr>

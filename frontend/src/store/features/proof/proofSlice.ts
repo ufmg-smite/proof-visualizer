@@ -47,13 +47,24 @@ export const proofSlice = createSlice({
                     ),
                 ])
                 .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
+
+            // Set the visual info for the new pi node
+            const piNodeId = Object.keys(state.visualInfo).length;
+            state.visualInfo = {
+                ...state.visualInfo,
+                [piNodeId]: {
+                    color: '#555',
+                    x: 0,
+                    y: 0,
+                    selected: false,
+                },
+            };
         },
         unhideNodes: (state, action: PayloadAction<{ pi: number; hiddens: number[] }>) => {
             const { pi, hiddens } = action.payload;
             state.hiddenNodes = state.hiddenNodes
                 .map((hiddenNodesArray) => hiddenNodesArray.filter((id) => hiddens.indexOf(id) === -1))
                 .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
-            console.log(state.visualInfo);
 
             // Make sure the ids are realocated
             const size = Object.keys(state.visualInfo).length;
