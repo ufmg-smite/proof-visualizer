@@ -91,6 +91,33 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             visualInfo: {},
         };
     }
+    // TODO: achar uma maneira melhor de fazer esse firstRender
+    static firstRender = 0;
+    static reRenderCount = 0;
+
+    static saveNewPosition = (
+        props: CanvasPropsAndRedux,
+        showingNodes: CanvasState['showingNodes'],
+    ): ProofState['visualInfo'] => {
+        // Get the current position of the nodes and create a proofState with them included
+        const newVisualInfo: ProofState['visualInfo'] = {};
+        Object.keys(props.visualInfo).forEach((id) => {
+            const key = Number(id);
+
+            if (showingNodes[key]) {
+                newVisualInfo[key] = {
+                    ...props.visualInfo[key],
+                    x: showingNodes[key].props.x,
+                    y: showingNodes[key].props.y,
+                };
+            } else {
+                newVisualInfo[key] = {
+                    ...props.visualInfo[key],
+                };
+            }
+        });
+        return newVisualInfo;
+    };
 
     static newNodeProps = (node: NodeInterface, visualInfos: ProofState['visualInfo']): NodeProps => {
         const visualInfo = visualInfos[node.id];
@@ -109,7 +136,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             setNodeOnFocus: () => undefined,
             toggleNodeSelection: () => undefined,
             updateNodePosition: () => undefined,
-            unfoldOnClick: () => undefined,
             openDrawer: () => undefined,
         };
     };
@@ -123,7 +149,9 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node, props.visualInfo))), ac),
                 {},
             );
-            if (showingNodes[0]) {
+            if (showingNodes[0] && Canvas.reRenderCount < 2) {
+                Canvas.reRenderCount++;
+
                 const g = new dagre.graphlib.Graph();
                 g.setGraph({ rankdir: 'BT', ranker: 'tight-tree' });
                 g.setDefaultEdgeLabel(function () {
@@ -136,14 +164,15 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                     });
                 });
                 dagre.layout(g);
+
                 const xOffset = g.node('0').x - (showingNodes[0].props.x ? showingNodes[0].props.x : 0);
                 const yOffset = g.node('0').y - (showingNodes[0].props.y ? showingNodes[0].props.y : 0);
                 g.nodes().forEach((v) => {
                     try {
                         const { x, y } = g.node(v);
-                        const id = parseInt(v);
-                        showingNodes[id] = new Node({
-                            ...showingNodes[id].props,
+                        const key = parseInt(v);
+                        showingNodes[key] = new Node({
+                            ...showingNodes[key].props,
                             x: x - xOffset,
                             y: y - yOffset,
                         });
@@ -151,6 +180,12 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                         console.log(e);
                     }
                 });
+
+                // Make sure that the first layout is saved in the visual info
+                if (!Canvas.firstRender) {
+                    Canvas.firstRender++;
+                    props.setVisualInfo(Canvas.saveNewPosition(props, showingNodes));
+                }
             }
 
             return {
@@ -223,7 +258,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                         setNodeOnFocus: this.setNodeOnFocus,
                         toggleNodeSelection: this.toggleNodeSelection,
                         updateNodePosition: this.updateNodePosition,
-                        unfoldOnClick: this.unfoldOnClick,
                         openDrawer: openDrawer,
                     });
                 }
@@ -233,61 +267,41 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         }
     }
 
-    setNodeOnFocus = (id: number): void => {
-        this.setState({ nodeOnFocus: id });
-    };
+    hiddenNodesTree = (list: Array<TreeNode>): Array<TreeNode> => {
+        const map: { [n: number]: number } = {},
+            roots: Array<TreeNode> = [];
+        let node, i;
 
-    LineProps = (key: string, from: NodeProps, to: NodeProps): LineProps => ({
-        key,
-        points: [from.x + 150, from.y, to.x + 150, to.y + 105],
-    });
-
-    toggleNodeSelection = (id: number): void => {
-        let { nodesSelected } = this.state;
-
-        if (this.props.visualInfo[id].selected) {
-            nodesSelected = nodesSelected.filter((nodeId) => nodeId !== id);
-        } else {
-            nodesSelected.push(id);
+        for (i = 0; i < list.length; i += 1) {
+            map[list[i].id] = i;
+            list[i].childNodes = [];
         }
 
-        this.props.setVisualInfo({
-            ...this.props.visualInfo,
-            [id]: {
-                ...this.props.visualInfo[id],
-                selected: !this.props.visualInfo[id].selected,
-            },
-        });
-
-        this.setState({ nodesSelected });
+        for (i = 0; i < list.length; i += 1) {
+            node = list[i];
+            if (node.parentId !== NaN && list[map[node.parentId]]) {
+                list[map[node.parentId]].childNodes.push(node);
+            } else {
+                roots.push(node);
+            }
+        }
+        return roots;
     };
 
-    updateNodePosition = (key: number, x: number, y: number): void => {
-        const { showingNodes, showingEdges } = this.state;
+    /* NODE MENU ACTIONS */
+    foldAllDescendants = (): void => {
+        const { nodeOnFocus, showingNodes } = this.state;
 
-        showingNodes[key] = new Node({ ...showingNodes[key].props, x, y });
-
-        Object.keys(showingEdges)
-            .filter((edgeKey) => edgeKey.indexOf(key.toString()) !== -1)
-            .forEach((edge) => {
-                const [from, to] = edge.split('->').map((x) => parseInt(x));
-                showingEdges[edge] = Line(this.LineProps(edge, showingNodes[from].props, showingNodes[to].props));
-            });
-        this.setState({ showingNodes, showingEdges });
-    };
-
-    // Apg
-    unfoldOnClick = (id: number): void => {
-        // const { unhideNodes } = this.props;
-        // const { proof } = this.state;
-        // const hiddenNodess = proof[id].hiddenNodes ? proof[id].hiddenNodes : [];
-        // console.log(hiddenNodess);
-        // unhideNodes(hiddenNodess ? hiddenNodess.map((node) => node.id) : []);
+        Canvas.reRenderCount = 0;
+        this.props.setVisualInfo(Canvas.saveNewPosition(this.props, showingNodes));
+        this.props.foldAllDescendants(nodeOnFocus);
     };
 
     foldSelectedNodes = (): void => {
         const { nodesSelected } = this.state;
+
         // TODO: talvez será preciso alterar o visualInfo dentro do hide nodes
+        Canvas.reRenderCount = 0;
         this.props.hideNodes(nodesSelected);
     };
 
@@ -301,8 +315,95 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const hiddenNodes = obj ? (obj.hiddenNodes ? obj.hiddenNodes : []) : [];
         const hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
 
+        Canvas.reRenderCount = 0;
         unhideNodes({ pi: nodeOnFocus, hiddens: hiddenIds });
         this.setState({ nodesSelected: [] });
+    };
+
+    changeNodeColor = (color: string): void => {
+        const { showingNodes, nodesSelected, nodeOnFocus } = this.state;
+        // Save the current position
+        const newVisualInfo = Canvas.saveNewPosition(this.props, showingNodes);
+
+        nodesSelected.forEach((nodeId) => {
+            this.props.setVisualInfo({
+                ...newVisualInfo,
+                [nodeId]: { ...newVisualInfo[nodeId], color: color },
+            });
+        });
+        if (showingNodes[nodeOnFocus]) {
+            this.props.setVisualInfo({
+                ...newVisualInfo,
+                [nodeOnFocus]: { ...newVisualInfo[nodeOnFocus], color: color },
+            });
+        }
+        // this.props.setVisualInfo();
+        this.setState({ nodesSelected: [] });
+    };
+
+    toggleNodeSelection = (id: number): void => {
+        let { nodesSelected } = this.state;
+        const { showingNodes } = this.state;
+
+        if (this.props.visualInfo[id].selected) {
+            nodesSelected = nodesSelected.filter((nodeId) => nodeId !== id);
+        } else {
+            nodesSelected.push(id);
+        }
+
+        // Save the current position
+        const newVisualInfo = Canvas.saveNewPosition(this.props, showingNodes);
+        this.props.setVisualInfo({
+            ...newVisualInfo,
+            [id]: {
+                ...newVisualInfo[id],
+                selected: !newVisualInfo[id].selected,
+            },
+        });
+
+        this.setState({ nodesSelected });
+    };
+
+    /* PROOF I/O */
+    // CV sobre isso
+    downloadProof = (dot: string, proofName: string): void => {
+        // Cv dps
+        const link = document.createElement('a');
+        link.download = proofName + '.json';
+        link.href = `data:attachment/text,${encodeURIComponent(JSON.stringify(this.exportProof(dot)))}`;
+        link.click();
+    };
+
+    exportProof = (dot = ''): { dot: string } => {
+        //Apg
+        // TODO
+        return {
+            dot: dot,
+        };
+    };
+
+    /* UTILS */
+    setNodeOnFocus = (id: number): void => {
+        this.setState({ nodeOnFocus: id });
+    };
+
+    LineProps = (key: string, from: NodeProps, to: NodeProps): LineProps => ({
+        key,
+        points: [from.x + 150, from.y, to.x + 150, to.y + 105],
+    });
+
+    updateNodePosition = (key: number, x: number, y: number): void => {
+        const { showingNodes, showingEdges } = this.state;
+
+        showingNodes[key] = new Node({ ...showingNodes[key].props, x, y });
+
+        Object.keys(showingEdges)
+            .filter((edgeKey) => edgeKey.indexOf(key.toString()) !== -1)
+            .forEach((edge) => {
+                const [from, to] = edge.split('->').map((x) => parseInt(x));
+                showingEdges[edge] = Line(this.LineProps(edge, showingNodes[from].props, showingNodes[to].props));
+            });
+        this.setState({ showingNodes, showingEdges });
     };
 
     // newTree = (piId: number): TreeNode[] => {
@@ -326,80 +427,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     //             }),
     //     );
     // };
-
-    hiddenNodesTree = (list: Array<TreeNode>): Array<TreeNode> => {
-        const map: { [n: number]: number } = {},
-            roots: Array<TreeNode> = [];
-        let node, i;
-
-        for (i = 0; i < list.length; i += 1) {
-            map[list[i].id] = i;
-            list[i].childNodes = [];
-        }
-
-        for (i = 0; i < list.length; i += 1) {
-            node = list[i];
-            if (node.parentId !== NaN && list[map[node.parentId]]) {
-                list[map[node.parentId]].childNodes.push(node);
-            } else {
-                roots.push(node);
-            }
-        }
-        return roots;
-    };
-
-    foldAllDescendants = (): void => {
-        const { nodeOnFocus, showingNodes, visualInfo } = this.state;
-
-        //
-        const newVisualInfo = Object.keys(showingNodes).reduce(
-            (ac: ProofState['visualInfo'], id: string) => (
-                (ac[Number(id)] = {
-                    ...visualInfo[Number(id)],
-                    x: showingNodes[Number(id)].props.x,
-                    y: showingNodes[Number(id)].props.y,
-                }),
-                ac
-            ),
-            {},
-        );
-        // this.props.setVisualInfo(newVisualInfo);
-        this.props.foldAllDescendants(nodeOnFocus);
-    };
-
-    changeNodeColor = (color: string): void => {
-        const { showingNodes, nodesSelected, nodeOnFocus } = this.state;
-        nodesSelected.forEach((nodeId) => {
-            this.props.setVisualInfo({
-                ...this.props.visualInfo,
-                [nodeId]: { ...this.props.visualInfo[nodeId], color: color },
-            });
-        });
-        if (showingNodes[nodeOnFocus]) {
-            this.props.setVisualInfo({
-                ...this.props.visualInfo,
-                [nodeOnFocus]: { ...this.props.visualInfo[nodeOnFocus], color: color },
-            });
-        }
-        this.setState({ nodesSelected: [] });
-    };
-
-    // CV sobre isso
-    downloadProof = (dot: string, proofName: string): void => {
-        // Cv dps
-        const link = document.createElement('a');
-        link.download = proofName + '.json';
-        link.href = `data:attachment/text,${encodeURIComponent(JSON.stringify(this.exportProof(dot)))}`;
-        link.click();
-    };
-
-    exportProof = (dot = ''): { dot: string } => {
-        //Apg
-        // TODO
-        return {
-            dot: dot,
-        };
-    };
 
     render(): JSX.Element {
         const { canvasSize, stage, showingNodes, showingEdges, nodesSelected, nodeOnFocus, proof } = this.state;
