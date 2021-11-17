@@ -104,6 +104,11 @@ export default class Node extends React.Component<NodeProps> {
             padding: 10,
             width: 300,
         };
+        const conclusionText = {
+            ...textProps,
+            width: 250,
+        };
+
         const nHidedStr = nHided ? `#hidden: ${nHided}` : '';
         const nDescendantsStr = ` #descendants: ${rule === 'π' ? `[${hiddenNodes}]` : nDescendants}`;
 
@@ -119,10 +124,15 @@ export default class Node extends React.Component<NodeProps> {
                 y={y}
                 onClick={this.handleClick}
             >
-                <Label x={0} y={0}>
+                <Label x={0} y={0} {...{ align: 'right' }}>
                     <Tag {...tagProps} />
-                    <Text {...textProps} text={conclusion} />
+                    <Text {...{ ...conclusionText, width: 50 }} text={id.toString()} />
                 </Label>
+                <Label x={50} y={0}>
+                    <Tag {...tagProps} />
+                    <Text {...conclusionText} text={conclusion} />
+                </Label>
+
                 <Label x={0} y={35}>
                     <Tag {...tagProps} />
                     <Text {...textProps} text={rule} />

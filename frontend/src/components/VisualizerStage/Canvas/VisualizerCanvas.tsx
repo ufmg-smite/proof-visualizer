@@ -202,9 +202,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const { showingNodes } = this.state;
         const { view, proof } = this.props;
 
-        this.setState({ proof: proof });
-
         this.setState({
+            proof: proof,
             showingNodes: proof.reduce(
                 (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node, this.props.visualInfo))), ac),
                 {},
@@ -216,7 +215,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 const [width, height] = [window.innerWidth, window.innerHeight - 50];
 
                 this.setState({
-                    showingNodes,
                     canvasSize: {
                         width,
                         height,
@@ -317,28 +315,33 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
         Canvas.reRenderCount = 0;
         unhideNodes({ pi: nodeOnFocus, hiddens: hiddenIds });
+
         this.setState({ nodesSelected: [] });
     };
 
     changeNodeColor = (color: string): void => {
         const { showingNodes, nodesSelected, nodeOnFocus } = this.state;
         // Save the current position
-        const newVisualInfo = Canvas.saveNewPosition(this.props, showingNodes);
+        let newVisualInfo = Canvas.saveNewPosition(this.props, showingNodes);
 
         nodesSelected.forEach((nodeId) => {
-            this.props.setVisualInfo({
+            newVisualInfo = {
                 ...newVisualInfo,
-                [nodeId]: { ...newVisualInfo[nodeId], color: color },
-            });
+                [nodeId]: {
+                    ...newVisualInfo[nodeId],
+                    color: color,
+                    selected: false,
+                },
+            };
         });
-        if (showingNodes[nodeOnFocus]) {
-            this.props.setVisualInfo({
+        if (!nodesSelected.length && showingNodes[nodeOnFocus]) {
+            newVisualInfo = {
                 ...newVisualInfo,
-                [nodeOnFocus]: { ...newVisualInfo[nodeOnFocus], color: color },
-            });
+                [nodeOnFocus]: { ...newVisualInfo[nodeOnFocus], color: color, selected: false },
+            };
         }
-        // this.props.setVisualInfo();
-        this.setState({ nodesSelected: [] });
+
+        this.props.setVisualInfo({ ...newVisualInfo });
     };
 
     toggleNodeSelection = (id: number): void => {

@@ -73,6 +73,15 @@ export const proofSlice = createSlice({
             }
             // Delete the last position
             delete state.visualInfo[size - 1];
+
+            // Unselect the hidden nodes
+            hiddens.forEach(
+                (id) =>
+                    (state.visualInfo[id] = {
+                        ...state.visualInfo[id],
+                        selected: false,
+                    }),
+            );
         },
         applyView: (state, action: PayloadAction<'basic' | 'propositional' | 'full'>) => {
             switch (action.payload) {
