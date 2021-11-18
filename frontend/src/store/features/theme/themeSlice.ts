@@ -1,9 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
-
-export interface ThemeState {
-    value: boolean;
-}
+import { ThemeState } from '../../../interfaces/interfaces';
 
 const initialState: ThemeState = {
     value: true,

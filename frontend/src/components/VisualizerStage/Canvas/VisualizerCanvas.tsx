@@ -13,6 +13,7 @@ import {
     CanvasPropsAndRedux,
     NodeInterface,
     ProofState,
+    ReduxState,
 } from '../../../interfaces/interfaces';
 
 import '../../../scss/VisualizerCanvas.scss';
@@ -20,9 +21,7 @@ import '../../../scss/VisualizerCanvas.scss';
 import { CanvasProps, CanvasState } from '../../../interfaces/interfaces';
 
 import { connect } from 'react-redux';
-import { FileState } from '../../../store/features/file/fileSlice';
 import { selectProof, selectVisualInfo } from '../../../store/features/proof/proofSlice';
-import { ThemeState } from '../../../store/features/theme/themeSlice';
 import {
     hideNodes,
     unhideNodes,
@@ -308,7 +307,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const { unhideNodes } = this.props;
 
         // Get the pi node (to be unfold)
-        const obj = proof.find((o) => o.id === nodeOnFocus);
+        const obj = proof.find((node) => node.id === nodeOnFocus);
         // Get the hidden nodes and their ids
         const hiddenNodes = obj ? (obj.hiddenNodes ? obj.hiddenNodes : []) : [];
         const hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
@@ -476,15 +475,13 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     }
 }
 
-function mapStateToProps(state: { file: FileState; proof: ProofState; theme: ThemeState }, ownProps: CanvasProps) {
+function mapStateToProps(state: ReduxState, ownProps: CanvasProps) {
     return {
         proof: selectProof(state),
         visualInfo: selectVisualInfo(state),
         myView: state.proof.view,
-        proofNodes: ownProps.proofNodes,
-        openDrawer: ownProps.openDrawer,
+        ...ownProps,
         view: ownProps.view ? ownProps.view : undefined,
-        importedData: ownProps.importedData,
     };
 }
 

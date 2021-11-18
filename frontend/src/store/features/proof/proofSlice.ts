@@ -60,6 +60,30 @@ export const proofSlice = createSlice({
                 },
             };
         },
+        foldAllDescendants: (state, action: PayloadAction<number>) => {
+            state.hiddenNodes = state.hiddenNodes
+                .concat([
+                    [action.payload, ...descendants(state.proof, action.payload)].filter(
+                        (id) =>
+                            id > 0 &&
+                            id < state.proof.length &&
+                            state.hiddenNodes.every((hiddenNodesArray) => hiddenNodesArray.indexOf(id) === -1),
+                    ),
+                ])
+                .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
+
+            // Set the visual info for the new pi node
+            const piNodeId = Object.keys(state.visualInfo).length;
+            state.visualInfo = {
+                ...state.visualInfo,
+                [piNodeId]: {
+                    color: '#555',
+                    x: 0,
+                    y: 0,
+                    selected: false,
+                },
+            };
+        },
         unhideNodes: (state, action: PayloadAction<{ pi: number; hiddens: number[] }>) => {
             const { pi, hiddens } = action.payload;
             state.hiddenNodes = state.hiddenNodes
@@ -82,6 +106,26 @@ export const proofSlice = createSlice({
                         selected: false,
                     }),
             );
+        },
+        setVisualInfo: (state, action: PayloadAction<ProofState['visualInfo']>) => {
+            state.visualInfo = action.payload;
+        },
+        selectNodes: (state, action: PayloadAction<number[]>) => {
+            action.payload.forEach((id) => {
+                if (id >= 0 && id < Object.keys(state.visualInfo).length) {
+                    state.visualInfo[id].selected = true;
+                }
+            });
+        },
+        changeStyle: (state, action: PayloadAction<'graph' | 'directory'>) => {
+            switch (action.payload) {
+                case 'graph':
+                    state.style = 'graph';
+                    break;
+                case 'directory':
+                    state.style = 'directory';
+                    break;
+            }
         },
         applyView: (state, action: PayloadAction<'basic' | 'propositional' | 'full'>) => {
             switch (action.payload) {
@@ -111,48 +155,29 @@ export const proofSlice = createSlice({
                     break;
             }
         },
-        changeStyle: (state, action: PayloadAction<'graph' | 'directory'>) => {
-            switch (action.payload) {
-                case 'graph':
-                    state.style = 'graph';
-                    break;
-                case 'directory':
-                    state.style = 'directory';
-                    break;
-            }
+        applyColor: (state, action: PayloadAction<string>) => {
+            Object.keys(state.visualInfo).forEach((id) => {
+                if (state.visualInfo[Number(id)].selected) {
+                    state.visualInfo[Number(id)].color = action.payload;
+                    state.visualInfo[Number(id)].selected = false;
+                }
+            });
         },
-        foldAllDescendants: (state, action: PayloadAction<number>) => {
-            state.hiddenNodes = state.hiddenNodes
-                .concat([
-                    [action.payload, ...descendants(state.proof, action.payload)].filter(
-                        (id) =>
-                            id > 0 &&
-                            id < state.proof.length &&
-                            state.hiddenNodes.every((hiddenNodesArray) => hiddenNodesArray.indexOf(id) === -1),
-                    ),
-                ])
-                .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
-
-            // Set the visual info for the new pi node
-            const piNodeId = Object.keys(state.visualInfo).length;
-            state.visualInfo = {
-                ...state.visualInfo,
-                [piNodeId]: {
-                    color: '#555',
-                    x: 0,
-                    y: 0,
-                    selected: false,
-                },
-            };
-        },
-        setVisualInfo: (state, action: PayloadAction<ProofState['visualInfo']>) => {
-            state.visualInfo = action.payload;
-        },
+        // applyHide: (state, action: PayloadAction<'fold' | 'hide'>) => {},
     },
 });
 
-export const { process, hideNodes, unhideNodes, foldAllDescendants, applyView, changeStyle, setVisualInfo } =
-    proofSlice.actions;
+export const {
+    process,
+    hideNodes,
+    unhideNodes,
+    foldAllDescendants,
+    applyView,
+    changeStyle,
+    setVisualInfo,
+    selectNodes,
+    applyColor,
+} = proofSlice.actions;
 
 export const selectProof = (state: RootState): NodeInterface[] => {
     let proof = state.proof.proof;

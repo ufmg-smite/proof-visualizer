@@ -54,12 +54,22 @@ interface NodeInfo {
 // CANVAS
 // Dividir essas interfaces em funções
 interface CanvasProps {
-    proofNodes: Array<NodeInterface>;
+    proofNodes: NodeInterface[];
     openDrawer: (nodeInfo: NodeInfo) => void;
-    view?: string;
+    view: string | undefined;
     importedData: {
-        nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
+        nodes: Array<{ id: number; color: string; x: number; y: number; hidden: number[] }>;
     };
+}
+
+interface CanvasPropsAndRedux extends CanvasProps {
+    proof: NodeInterface[];
+    visualInfo: ProofState['visualInfo'];
+    myView: 'basic' | 'propositional' | 'full';
+    hideNodes: ActionCreatorWithPayload<number[], string>;
+    unhideNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
+    foldAllDescendants: ActionCreatorWithPayload<number>;
+    setVisualInfo: ActionCreatorWithPayload<ProofState['visualInfo'], string>;
 }
 
 interface CanvasState {
@@ -73,48 +83,17 @@ interface CanvasState {
     visualInfo: ProofState['visualInfo'];
 }
 
-interface CanvasPropsAndRedux {
-    proof: NodeInterface[];
-    visualInfo: ProofState['visualInfo'];
-    myView: 'basic' | 'propositional' | 'full';
-    proofNodes: NodeInterface[];
-    openDrawer: (nodeInfo: NodeInfo) => void;
-    view: string | undefined;
-    importedData: {
-        nodes: Array<{ id: number; color: string; x: number; y: number; hidden: Array<number> }>;
-    };
-    hideNodes: ActionCreatorWithPayload<number[], string>;
-    unhideNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
-    foldAllDescendants: ActionCreatorWithPayload<number>;
-    setVisualInfo: ActionCreatorWithPayload<ProofState['visualInfo']>;
-}
-
-// PROOFS
-interface ProofState {
-    proof: NodeInterface[];
-    view: 'basic' | 'propositional' | 'full';
-    style: 'graph' | 'directory';
-    hiddenNodes: number[][];
-    letMap: {
-        [Key: string]: string;
-    };
-    visualInfo: {
-        [id: number]: {
-            color: string;
-            x: number;
-            y: number;
-            selected: boolean;
-        };
-    };
-}
-
 // NAVBAR
-interface VisualizerNavbarProps {
+interface NavbarProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
     setDialogContent: Dispatch<SetStateAction<string>>;
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
-    downloadProof: (dot: string, proofName: string) => void;
-    runCommands: (command: string) => void;
+}
+
+interface NavbarPropsAndRedux extends NavbarProps {
+    proof: ProofState['proof'];
+    visualInfo: ProofState['visualInfo'];
+    hideNodes: ActionCreatorWithPayload<number[], string>;
 }
 
 // TREENODE
@@ -135,15 +114,53 @@ interface LineProps {
     points: Array<number>;
 }
 
+// REDUX STATES
+interface ReduxState {
+    file: FileState;
+    proof: ProofState;
+    theme: ThemeState;
+}
+// PROOFS
+interface ProofState {
+    proof: NodeInterface[];
+    view: 'basic' | 'propositional' | 'full';
+    style: 'graph' | 'directory';
+    hiddenNodes: number[][];
+    letMap: {
+        [Key: string]: string;
+    };
+    visualInfo: {
+        [id: number]: {
+            color: string;
+            x: number;
+            y: number;
+            selected: boolean;
+        };
+    };
+}
+// FILE
+interface FileState {
+    name: string;
+    value: string;
+}
+//THEME
+interface ThemeState {
+    value: boolean;
+}
+
 export type {
-    CanvasProps,
-    CanvasState,
-    LineProps,
     NodeInterface,
     NodeProps,
     NodeInfo,
-    ProofState,
-    VisualizerNavbarProps,
-    TreeNode,
+    CanvasProps,
     CanvasPropsAndRedux,
+    CanvasState,
+    NavbarProps,
+    NavbarPropsAndRedux,
+    TreeNode,
+    LineProps,
+    ReduxState,
+    ProofState,
+    FileState,
+    ThemeState,
 };

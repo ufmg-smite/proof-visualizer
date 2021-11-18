@@ -1,10 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
-
-export interface FileState {
-    name: string;
-    value: string;
-}
+import { FileState } from '../../../interfaces/interfaces';
 
 const initialState: FileState = {
     name: 'ex.smt2',
