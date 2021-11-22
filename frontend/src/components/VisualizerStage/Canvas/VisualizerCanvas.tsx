@@ -91,27 +91,29 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         };
     }
     // TODO: achar uma maneira melhor de fazer esse firstRender
-    static firstRender = 0;
-    static reRenderCount = 0;
+    static renderData = { firstRender: false, count: 0 };
+
+    // Allow to reRender the tree
+    static reRender = () => (Canvas.renderData.count = 0);
 
     static saveNewPosition = (
-        props: CanvasPropsAndRedux,
+        visualInfo: ProofState['visualInfo'],
         showingNodes: CanvasState['showingNodes'],
     ): ProofState['visualInfo'] => {
         // Get the current position of the nodes and create a proofState with them included
         const newVisualInfo: ProofState['visualInfo'] = {};
-        Object.keys(props.visualInfo).forEach((id) => {
+        Object.keys(visualInfo).forEach((id) => {
             const key = Number(id);
 
             if (showingNodes[key]) {
                 newVisualInfo[key] = {
-                    ...props.visualInfo[key],
+                    ...visualInfo[key],
                     x: showingNodes[key].props.x,
                     y: showingNodes[key].props.y,
                 };
             } else {
                 newVisualInfo[key] = {
-                    ...props.visualInfo[key],
+                    ...visualInfo[key],
                 };
             }
         });
@@ -148,8 +150,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node, props.visualInfo))), ac),
                 {},
             );
-            if (showingNodes[0] && Canvas.reRenderCount < 2) {
-                Canvas.reRenderCount++;
+            if (showingNodes[0] && Canvas.renderData.count < 2) {
+                Canvas.renderData.count++;
 
                 const g = new dagre.graphlib.Graph();
                 g.setGraph({ rankdir: 'BT', ranker: 'tight-tree' });
@@ -181,9 +183,9 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 });
 
                 // Make sure that the first layout is saved in the visual info
-                if (!Canvas.firstRender) {
-                    Canvas.firstRender++;
-                    props.setVisualInfo(Canvas.saveNewPosition(props, showingNodes));
+                if (!Canvas.renderData.firstRender) {
+                    Canvas.renderData.firstRender = true;
+                    props.setVisualInfo(Canvas.saveNewPosition(props.visualInfo, showingNodes));
                 }
             }
 
@@ -289,8 +291,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     foldAllDescendants = (): void => {
         const { nodeOnFocus, showingNodes } = this.state;
 
-        Canvas.reRenderCount = 0;
-        this.props.setVisualInfo(Canvas.saveNewPosition(this.props, showingNodes));
+        Canvas.reRender();
+        this.props.setVisualInfo(Canvas.saveNewPosition(this.props.visualInfo, showingNodes));
         this.props.foldAllDescendants(nodeOnFocus);
     };
 
@@ -298,7 +300,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const { nodesSelected } = this.state;
 
         // TODO: talvez será preciso alterar o visualInfo dentro do hide nodes
-        Canvas.reRenderCount = 0;
+        Canvas.reRender();
         this.props.hideNodes(nodesSelected);
     };
 
@@ -312,7 +314,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const hiddenNodes = obj ? (obj.hiddenNodes ? obj.hiddenNodes : []) : [];
         const hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
 
-        Canvas.reRenderCount = 0;
+        Canvas.reRender();
         unhideNodes({ pi: nodeOnFocus, hiddens: hiddenIds });
 
         this.setState({ nodesSelected: [] });
@@ -321,7 +323,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     changeNodeColor = (color: string): void => {
         const { showingNodes, nodesSelected, nodeOnFocus } = this.state;
         // Save the current position
-        let newVisualInfo = Canvas.saveNewPosition(this.props, showingNodes);
+        let newVisualInfo = Canvas.saveNewPosition(this.props.visualInfo, showingNodes);
 
         nodesSelected.forEach((nodeId) => {
             newVisualInfo = {
@@ -354,7 +356,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         }
 
         // Save the current position
-        const newVisualInfo = Canvas.saveNewPosition(this.props, showingNodes);
+        const newVisualInfo = Canvas.saveNewPosition(this.props.visualInfo, showingNodes);
         this.props.setVisualInfo({
             ...newVisualInfo,
             [id]: {

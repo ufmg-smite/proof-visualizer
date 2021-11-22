@@ -104,7 +104,7 @@ export default class Node extends React.Component<NodeProps> {
             padding: 10,
             width: 300,
         };
-        const conclusionText = {
+        const metaInfoText = {
             ...textProps,
             width: 250,
         };
@@ -124,22 +124,22 @@ export default class Node extends React.Component<NodeProps> {
                 y={y}
                 onClick={this.handleClick}
             >
-                <Label x={0} y={0} {...{ align: 'right' }}>
+                <Label x={0} y={0}>
                     <Tag {...tagProps} />
-                    <Text {...{ ...conclusionText, width: 50 }} text={id.toString()} />
-                </Label>
-                <Label x={50} y={0}>
-                    <Tag {...tagProps} />
-                    <Text {...conclusionText} text={conclusion} />
+                    <Text {...textProps} text={conclusion} />
                 </Label>
 
                 <Label x={0} y={35}>
                     <Tag {...tagProps} />
                     <Text {...textProps} text={rule} />
                 </Label>
-                <Label x={0} y={70}>
+                <Label x={0} y={70} {...{ align: 'right' }}>
                     <Tag {...tagProps} />
-                    <Text {...textProps} text={nHidedStr + nDescendantsStr} />
+                    <Text {...{ ...metaInfoText, width: 50 }} text={id.toString()} />
+                </Label>
+                <Label x={50} y={70}>
+                    <Tag {...tagProps} />
+                    <Text {...metaInfoText} text={nHidedStr + nDescendantsStr} />
                 </Label>
             </Group>
         );

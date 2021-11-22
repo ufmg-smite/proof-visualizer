@@ -163,7 +163,6 @@ export const proofSlice = createSlice({
                 }
             });
         },
-        // applyHide: (state, action: PayloadAction<'fold' | 'hide'>) => {},
     },
 });
 
