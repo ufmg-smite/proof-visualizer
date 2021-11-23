@@ -19,7 +19,7 @@ import { Alignment, Button, Icon, InputGroup, Navbar, Switch, Menu, MenuItem } f
 import { Popover2 } from '@blueprintjs/popover2';
 import { selectTheme, toggle } from '../../store/features/theme/themeSlice';
 import '../../scss/VisualizerNavbar.scss';
-import { isWhiteSpaceLike } from 'typescript';
+import Canvas from '../VisualizerStage/Canvas/VisualizerCanvas';
 
 function useWindowSize() {
     // Initialize state with undefined width/height so server and client renders match
@@ -222,14 +222,22 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     .map((id) => Number(id))
                     .filter((id) => visualInfo[id].selected);
                 // Make sure there are nodes selected
-                if (hiddenIds.length > 1) dispatch(hideNodes(hiddenIds));
+                if (hiddenIds.length > 1) {
+                    // Re-render the canvas and update the store
+                    Canvas.reRender();
+                    dispatch(hideNodes(hiddenIds));
+                }
                 break;
             case '/fold':
                 // Fold all children if there is only one node selected
                 hiddenIds = Object.keys(visualInfo)
                     .map((id) => Number(id))
                     .filter((id) => visualInfo[id].selected);
-                if (hiddenIds.length === 1) dispatch(foldAllDescendants(hiddenIds[0]));
+                if (hiddenIds.length === 1) {
+                    // Re-render the canvas and update the store
+                    Canvas.reRender();
+                    dispatch(foldAllDescendants(hiddenIds[0]));
+                }
                 break;
             case '/unfold':
                 // If there is a number argument
@@ -241,6 +249,8 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                         // Get the hidden nodes and their ids
                         const hiddenNodes = obj.hiddenNodes ? obj.hiddenNodes : [];
                         hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
+                        // Re-render the canvas and update the store
+                        Canvas.reRender();
                         dispatch(unhideNodes({ pi: id, hiddens: hiddenIds }));
                     }
                 }
