@@ -37,6 +37,7 @@ interface NodeProps {
     toggleNodeSelection: (id: number, props: any) => void;
     updateNodePosition: (key: number, x: number, y: number) => void;
     openDrawer: (nodeInfo: NodeInfo, tree?: Array<TreeNode>) => void;
+    onDragEnd: () => void;
 
     tree?: Array<TreeNode>;
 }

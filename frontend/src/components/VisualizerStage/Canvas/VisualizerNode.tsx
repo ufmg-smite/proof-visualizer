@@ -120,6 +120,7 @@ export default class Node extends React.Component<NodeProps> {
                 onDragMove={(e) => {
                     updateNodePosition(id, e.target.attrs.x, e.target.attrs.y);
                 }}
+                onDragEnd={this.props.onDragEnd}
                 x={x}
                 y={y}
                 onClick={this.handleClick}

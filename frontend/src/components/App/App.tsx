@@ -13,9 +13,7 @@ import { selectTheme } from '../../store/features/theme/themeSlice';
 const App: React.FC = () => {
     const [dialogIsOpen, setDialogIsOpen] = useState(true);
     const [dialogContent, setDialogContent] = useState('welcome');
-
     const [drawerIsOpen, setDrawerIsOpen] = useState(false);
-
     const darkTheme = useAppSelector(selectTheme);
 
     // Toaster

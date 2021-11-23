@@ -91,12 +91,12 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         };
     }
     // TODO: achar uma maneira melhor de fazer esse firstRender
-    static renderData = { firstRender: false, count: 0 };
+    private static renderData = { count: 0 };
 
     // Allow to reRender the tree
     static reRender = () => (Canvas.renderData.count = 0);
 
-    static saveNewPosition = (
+    static copyNodePosition = (
         visualInfo: ProofState['visualInfo'],
         showingNodes: CanvasState['showingNodes'],
     ): ProofState['visualInfo'] => {
@@ -138,6 +138,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             toggleNodeSelection: () => undefined,
             updateNodePosition: () => undefined,
             openDrawer: () => undefined,
+            onDragEnd: () => undefined,
         };
     };
 
@@ -182,11 +183,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                     }
                 });
 
-                // Make sure that the first layout is saved in the visual info
-                if (!Canvas.renderData.firstRender) {
-                    Canvas.renderData.firstRender = true;
-                    props.setVisualInfo(Canvas.saveNewPosition(props.visualInfo, showingNodes));
-                }
+                props.setVisualInfo(Canvas.copyNodePosition(props.visualInfo, showingNodes));
             }
 
             return {
@@ -258,6 +255,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                         toggleNodeSelection: this.toggleNodeSelection,
                         updateNodePosition: this.updateNodePosition,
                         openDrawer: openDrawer,
+                        onDragEnd: this.saveNodePosition,
                     });
                 }
             });
@@ -289,19 +287,21 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     /* NODE MENU ACTIONS */
     foldAllDescendants = (): void => {
-        const { nodeOnFocus, showingNodes } = this.state;
+        const { nodeOnFocus } = this.state;
+        const { foldAllDescendants } = this.props;
 
         Canvas.reRender();
-        this.props.setVisualInfo(Canvas.saveNewPosition(this.props.visualInfo, showingNodes));
-        this.props.foldAllDescendants(nodeOnFocus);
+        foldAllDescendants(nodeOnFocus);
+        this.setState({ nodesSelected: [] });
     };
 
     foldSelectedNodes = (): void => {
         const { nodesSelected } = this.state;
+        const { hideNodes } = this.props;
 
-        // TODO: talvez será preciso alterar o visualInfo dentro do hide nodes
         Canvas.reRender();
-        this.props.hideNodes(nodesSelected);
+        hideNodes(nodesSelected);
+        this.setState({ nodesSelected: [] });
     };
 
     unfold = (): void => {
@@ -322,32 +322,33 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     changeNodeColor = (color: string): void => {
         const { showingNodes, nodesSelected, nodeOnFocus } = this.state;
-        // Save the current position
-        let newVisualInfo = Canvas.saveNewPosition(this.props.visualInfo, showingNodes);
+        let { visualInfo } = this.props;
 
+        // Save the current position
         nodesSelected.forEach((nodeId) => {
-            newVisualInfo = {
-                ...newVisualInfo,
+            visualInfo = {
+                ...visualInfo,
                 [nodeId]: {
-                    ...newVisualInfo[nodeId],
+                    ...visualInfo[nodeId],
                     color: color,
                     selected: false,
                 },
             };
         });
         if (!nodesSelected.length && showingNodes[nodeOnFocus]) {
-            newVisualInfo = {
-                ...newVisualInfo,
-                [nodeOnFocus]: { ...newVisualInfo[nodeOnFocus], color: color, selected: false },
+            visualInfo = {
+                ...visualInfo,
+                [nodeOnFocus]: { ...visualInfo[nodeOnFocus], color: color, selected: false },
             };
         }
 
-        this.props.setVisualInfo({ ...newVisualInfo });
+        this.props.setVisualInfo(visualInfo);
+        this.setState({ nodesSelected: [] });
     };
 
     toggleNodeSelection = (id: number): void => {
         let { nodesSelected } = this.state;
-        const { showingNodes } = this.state;
+        const { visualInfo } = this.props;
 
         if (this.props.visualInfo[id].selected) {
             nodesSelected = nodesSelected.filter((nodeId) => nodeId !== id);
@@ -356,12 +357,11 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         }
 
         // Save the current position
-        const newVisualInfo = Canvas.saveNewPosition(this.props.visualInfo, showingNodes);
         this.props.setVisualInfo({
-            ...newVisualInfo,
+            ...visualInfo,
             [id]: {
-                ...newVisualInfo[id],
-                selected: !newVisualInfo[id].selected,
+                ...visualInfo[id],
+                selected: !visualInfo[id].selected,
             },
         });
 
@@ -395,6 +395,14 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         key,
         points: [from.x + 150, from.y, to.x + 150, to.y + 105],
     });
+
+    saveNodePosition = (): void => {
+        const { visualInfo, setVisualInfo } = this.props;
+        const { showingNodes } = this.state;
+
+        // Get the current position of the nodes and create a proofState with them included
+        setVisualInfo(Canvas.copyNodePosition(visualInfo, showingNodes));
+    };
 
     updateNodePosition = (key: number, x: number, y: number): void => {
         const { showingNodes, showingEdges } = this.state;
@@ -437,7 +445,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const color = showingNodes[nodeOnFocus] ? showingNodes[nodeOnFocus].props.color : '';
 
         return (
-            <>
+            <div>
                 <Menu
                     unfold={this.unfold}
                     foldSelectedNodes={this.foldSelectedNodes}
@@ -472,7 +480,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                             )}
                     </Layer>
                 </Stage>
-            </>
+            </div>
         );
     }
 }

@@ -169,12 +169,12 @@ export const proofSlice = createSlice({
 export const {
     process,
     hideNodes,
-    unhideNodes,
     foldAllDescendants,
-    applyView,
-    changeStyle,
+    unhideNodes,
     setVisualInfo,
     selectNodes,
+    changeStyle,
+    applyView,
     applyColor,
 } = proofSlice.actions;
 
