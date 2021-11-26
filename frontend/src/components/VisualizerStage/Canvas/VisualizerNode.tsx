@@ -1,7 +1,6 @@
 import { KonvaEventObject } from 'konva/types/Node';
 import React from 'react';
 import { Label, Text, Tag, Group } from 'react-konva';
-
 import { NodeProps } from '../../../interfaces/interfaces';
 
 function textColorFromBg(bgColor: string) {
@@ -104,13 +103,13 @@ export default class Node extends React.Component<NodeProps> {
             padding: 10,
             width: 300,
         };
-        const metaInfoText = {
+        const metaInfoProps = {
             ...textProps,
             width: 250,
         };
 
         const nHidedStr = nHided ? `#hidden: ${nHided}` : '';
-        const nDescendantsStr = ` #descendants: ${rule === 'π' ? `[${hiddenNodes}]` : nDescendants}`;
+        const nDescendantsStr = ` #descendants: ${nDescendants}`;
 
         return (
             <Group
@@ -129,18 +128,17 @@ export default class Node extends React.Component<NodeProps> {
                     <Tag {...tagProps} />
                     <Text {...textProps} text={conclusion} />
                 </Label>
-
                 <Label x={0} y={35}>
                     <Tag {...tagProps} />
                     <Text {...textProps} text={rule} />
                 </Label>
                 <Label x={0} y={70} {...{ align: 'right' }}>
                     <Tag {...tagProps} />
-                    <Text {...{ ...metaInfoText, width: 50 }} text={id.toString()} />
+                    <Text {...{ ...metaInfoProps, width: 50 }} text={id.toString()} />
                 </Label>
                 <Label x={50} y={70}>
                     <Tag {...tagProps} />
-                    <Text {...metaInfoText} text={nHidedStr + nDescendantsStr} />
+                    <Text {...metaInfoProps} text={nHidedStr + nDescendantsStr} />
                 </Label>
             </Group>
         );

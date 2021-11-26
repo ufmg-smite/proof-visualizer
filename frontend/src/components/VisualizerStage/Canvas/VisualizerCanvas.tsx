@@ -443,6 +443,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     render(): JSX.Element {
         const { canvasSize, stage, showingNodes, showingEdges, nodesSelected, nodeOnFocus, proof } = this.state;
         const color = showingNodes[nodeOnFocus] ? showingNodes[nodeOnFocus].props.color : '';
+        const found = proof.find((o) => o.id === nodeOnFocus);
 
         return (
             <div>
@@ -454,7 +455,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                     options={{
                         unfold: showingNodes[nodeOnFocus] ? showingNodes[nodeOnFocus].props.rule === 'π' : false,
                         foldSelected: nodesSelected.length && nodesSelected.includes(nodeOnFocus) ? true : false,
-                        foldAllDescendants: Boolean(proof.find((o) => o.id === nodeOnFocus)?.children.length),
+                        foldAllDescendants: Boolean(found?.children.length) && found?.rule !== 'π',
                     }}
                     currentColor={color}
                 ></Menu>
