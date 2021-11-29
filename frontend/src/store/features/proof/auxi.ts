@@ -128,3 +128,45 @@ export const piNodeChildren = (proof: NodeInterface[], hiddenNodesArray: number[
     // Go recursively find all the descendants
     return children.filter((nodeId) => !descendants(proof, nodeId).some((descendant) => children.includes(descendant)));
 };
+
+export const findNodesClusters = (proof: NodeInterface[], hiddenNodesArray: number[]): number[] => {
+    const hiddenNodes = [...hiddenNodesArray];
+    // [ [11], [11], [8], [7], [6] ]
+    const clusters: number[][] = [];
+    let clusteredNodes = 0;
+    const parents = hiddenNodes.map((hiddenNode) => proof[hiddenNode].parents);
+
+    // Cluster the nodes based on similiar parents
+    parents.forEach((parent, clusterID) => {
+        // If not all of the nodes where clustered
+        if (clusteredNodes !== parents.length) {
+            clusters.push([]);
+            parents.forEach((p, hiddenID) => {
+                // If those nodes have some parent in commom and they weren't verified yet
+                if (parents[hiddenID].length && parent.some((_p) => p.indexOf(_p) !== -1)) {
+                    clusters[clusterID].push(hiddenNodes[hiddenID]);
+                    // Removes these parents from the array, making shure they will not get verified again (already clustered)
+                    parents[hiddenID] = [];
+                    // Increases the number o clustered nodes
+                    clusteredNodes++;
+                }
+            });
+        }
+    });
+
+    const singleIDs = [];
+    const singleClusters = clusters.filter((cluster, id) => {
+        if()
+        return cluster.length === 1;
+    });
+
+    // For each cluster with len = 1
+    singleClusters.forEach((singleCluster) => {
+        clusters.forEach((cluster) => {
+            // If this single cluster parent is one of other cluster
+            const test = proof[singleCluster[0]].parents.some((parent) => cluster.indexOf(parent));
+        });
+    });
+
+    return [0];
+};

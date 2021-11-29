@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
-import { processDot, piNodeChildren, piNodeParents, descendants } from './auxi';
+import { processDot, piNodeChildren, piNodeParents, descendants, findNodesClusters } from './auxi';
 import { NodeInterface, ProofState } from '../../../interfaces/interfaces';
 
 const initialState: ProofState = {
@@ -37,16 +37,19 @@ export const proofSlice = createSlice({
             );
         },
         hideNodes: (state, action: PayloadAction<number[]>) => {
-            state.hiddenNodes = state.hiddenNodes
-                .concat([
-                    action.payload.filter(
-                        (id) =>
-                            id > 0 &&
-                            id < state.proof.length &&
-                            state.hiddenNodes.every((hiddenNodesArray) => hiddenNodesArray.indexOf(id) === -1),
-                    ),
-                ])
-                .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
+            // state.hiddenNodes = state.hiddenNodes
+            //     .concat([
+            //     ])
+            //     .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
+
+            const toHideNodes = action.payload.filter(
+                (id) =>
+                    id > 0 &&
+                    id < state.proof.length &&
+                    state.hiddenNodes.every((hiddenNodesArray) => hiddenNodesArray.indexOf(id) === -1),
+            );
+            // Find the nodes clusters
+            findNodesClusters(state.proof, toHideNodes);
 
             // Set the visual info for the new pi node
             const piNodeId = Object.keys(state.visualInfo).length;

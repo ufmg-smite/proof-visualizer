@@ -52,6 +52,11 @@ interface NodeInfo {
     hiddenNodes: number[];
 }
 
+interface NodeCluster {
+    nodesIds: number[][];
+    highHierarchy: number;
+}
+
 // CANVAS
 // Dividir essas interfaces em funções
 interface CanvasProps {
@@ -153,6 +158,7 @@ export type {
     NodeInterface,
     NodeProps,
     NodeInfo,
+    NodeCluster,
     CanvasProps,
     CanvasPropsAndRedux,
     CanvasState,
