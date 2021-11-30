@@ -90,7 +90,7 @@ const Menu = ({
                                         changeNodeColor(color);
                                         setColor('');
                                     }}
-                                    disabled={color.match(/^(#[a-f0-9]{6})|(#[a-f0-9]{3})$/i) === null}
+                                    disabled={color.match(/^#([0-9a-f]{3}){1,2}$/i) === null}
                                 ></Button>
                             </ControlGroup>
                         </div>

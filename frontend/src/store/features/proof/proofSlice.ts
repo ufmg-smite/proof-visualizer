@@ -207,8 +207,10 @@ export const selectProof = (state: RootState): NodeInterface[] => {
             children: children,
             parents: parents,
             hiddenNodes: hiddenNodesArray.map((hiddenNode) => proof[hiddenNode]),
-            descendants: 0,
+            descendants: 1,
         });
+
+        const piNode = proof[piNodeId];
 
         children.forEach(
             (childId) =>
@@ -227,6 +229,24 @@ export const selectProof = (state: RootState): NodeInterface[] => {
                         .concat([piNodeId])
                         .filter((proofNode) => hiddenNodesArray.indexOf(proofNode) === -1),
                 }),
+        );
+
+        // Get the high hierarchy nodes in this pi node
+        const highHierarchyNodes = hiddenNodesArray?.filter((node) =>
+            proof[node].parents.every((parentId) => piNode.parents.indexOf(parentId) !== -1),
+        );
+
+        // Get the combined conclusion
+        const conclusion = highHierarchyNodes.map((node) => ' ' + proof[node].conclusion);
+        piNode.conclusion = conclusion.length > 1 ? `[${conclusion} ]` : `${conclusion}`;
+
+        const rule = highHierarchyNodes.map((node) => ' ' + proof[node].rule);
+        piNode.rule = rule.length > 1 ? `[${rule} ]` : `${rule} `;
+
+        // Set the descendants number
+        piNode.descendants = piNode.children.reduce(
+            (ac: number, childID) => ((ac += proof[childID].descendants), ac),
+            1,
         );
     });
 

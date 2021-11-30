@@ -289,7 +289,7 @@ const VisualizerStage: React.FC = () => {
                 <tbody>
                     <tr>
                         <td>
-                            <strong>RULE </strong>{' '}
+                            <strong>RULE </strong>
                             <Icon
                                 id="rule-icon"
                                 icon="help"
@@ -309,6 +309,7 @@ const VisualizerStage: React.FC = () => {
                             </Collapse>
                         </td>
                     </tr>
+
                     {nodeInfo.args && (
                         <tr>
                             <td>
@@ -337,6 +338,7 @@ const VisualizerStage: React.FC = () => {
                             </td>
                         </tr>
                     )}
+
                     <tr>
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                             <strong>CONCLUSION</strong>{' '}
@@ -363,18 +365,22 @@ const VisualizerStage: React.FC = () => {
                             ) : null}
                         </td>
                     </tr>
-                    <tr>
-                        <td>
-                            <strong>#DESCENDANTS</strong>
-                        </td>
-                        <td>{nodeInfo.nHided ? `[${nodeInfo.hiddenNodes}]` : `${nodeInfo.nDescendants}`}</td>
-                    </tr>
+
+                    {nodeInfo.nDescendants ? (
+                        <tr>
+                            <td>
+                                <strong>#DESCENDANTS</strong>
+                            </td>
+                            <td>{nodeInfo.nDescendants}</td>
+                        </tr>
+                    ) : null}
+
                     {nodeInfo.nHided ? (
                         <tr>
                             <td>
                                 <strong>#HIDDEN</strong>
                             </td>
-                            <td>[{nodeInfo.hiddenNodes ? `${nodeInfo.hiddenNodes}` : ''}]</td>
+                            <td>{`[${nodeInfo.hiddenNodes.map((node) => ' ' + node)} ]`}</td>
                         </tr>
                     ) : null}
                 </tbody>

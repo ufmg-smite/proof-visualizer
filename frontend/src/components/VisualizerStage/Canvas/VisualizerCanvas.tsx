@@ -452,9 +452,10 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                     foldAllDescendants={this.foldAllDescendants}
                     changeNodeColor={this.changeNodeColor}
                     options={{
-                        unfold: showingNodes[nodeOnFocus] ? showingNodes[nodeOnFocus].props.rule === 'π' : false,
+                        unfold: showingNodes[nodeOnFocus] ? Boolean(showingNodes[nodeOnFocus].props.nHided) : false,
                         foldSelected: nodesSelected.length && nodesSelected.includes(nodeOnFocus) ? true : false,
-                        foldAllDescendants: Boolean(found?.children.length) && found?.rule !== 'π',
+                        foldAllDescendants:
+                            Boolean(found?.children.length) && !Boolean(found?.hiddenNodes?.length) && found?.id != 0,
                     }}
                     currentColor={color}
                 ></Menu>

@@ -110,6 +110,7 @@ export default class Node extends React.Component<NodeProps> {
 
         const nHidedStr = nHided ? `#hidden: ${nHided}` : '';
         const nDescendantsStr = ` #descendants: ${nDescendants}`;
+        const ruleTxt = nHided ? 'π' : rule;
 
         return (
             <Group
@@ -130,7 +131,7 @@ export default class Node extends React.Component<NodeProps> {
                 </Label>
                 <Label x={0} y={35}>
                     <Tag {...tagProps} />
-                    <Text {...textProps} text={rule} />
+                    <Text {...textProps} text={ruleTxt} />
                 </Label>
                 <Label x={0} y={70} {...{ align: 'right' }}>
                     <Tag {...tagProps} />

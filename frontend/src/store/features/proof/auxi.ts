@@ -123,10 +123,12 @@ export const descendants = (proof: NodeInterface[], nodeId: number): number[] =>
 };
 
 export const piNodeChildren = (proof: NodeInterface[], hiddenNodesArray: number[]): number[] => {
-    // Gets all the hidden nodes childrens
-    const children = hiddenNodesArray.reduce((acc: number[], hiddenNode) => acc.concat(proof[hiddenNode].children), []);
-    // Go recursively find all the descendants
-    return children.filter((nodeId) => !descendants(proof, nodeId).some((descendant) => children.includes(descendant)));
+    const children = hiddenNodesArray
+        // Get all the childrens
+        .reduce((acc: number[], hiddenNode) => acc.concat(proof[hiddenNode].children), [])
+        // Exclude the childrens that are part of the hidden nodes
+        .filter((child) => hiddenNodesArray.indexOf(child) === -1);
+    return children;
 };
 
 export const findNodesClusters = (proof: NodeInterface[], hiddenNodesArray: number[]): number[][] => {
