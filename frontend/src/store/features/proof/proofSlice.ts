@@ -37,31 +37,40 @@ export const proofSlice = createSlice({
             );
         },
         hideNodes: (state, action: PayloadAction<number[]>) => {
-            // state.hiddenNodes = state.hiddenNodes
-            //     .concat([
-            //     ])
-            //     .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
-
             const toHideNodes = action.payload.filter(
                 (id) =>
                     id > 0 &&
                     id < state.proof.length &&
                     state.hiddenNodes.every((hiddenNodesArray) => hiddenNodesArray.indexOf(id) === -1),
             );
-            // Find the nodes clusters
-            findNodesClusters(state.proof, toHideNodes);
 
-            // Set the visual info for the new pi node
+            const clusters = findNodesClusters(state.proof, toHideNodes);
+            state.hiddenNodes = state.hiddenNodes
+                .concat(clusters)
+                .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
+
+            // Set the visual info for the new pi nodes
             const piNodeId = Object.keys(state.visualInfo).length;
-            state.visualInfo = {
-                ...state.visualInfo,
-                [piNodeId]: {
-                    color: '#555',
-                    x: 0,
-                    y: 0,
-                    selected: false,
-                },
-            };
+            for (let i = 0; i < clusters.length; i++) {
+                state.visualInfo = {
+                    ...state.visualInfo,
+                    [piNodeId + i]: {
+                        color: '#555',
+                        x: 0,
+                        y: 0,
+                        selected: false,
+                    },
+                };
+            }
+
+            // Unselect the selected nodes
+            toHideNodes.forEach(
+                (id) =>
+                    (state.visualInfo[id] = {
+                        ...state.visualInfo[id],
+                        selected: false,
+                    }),
+            );
         },
         foldAllDescendants: (state, action: PayloadAction<number>) => {
             state.hiddenNodes = state.hiddenNodes

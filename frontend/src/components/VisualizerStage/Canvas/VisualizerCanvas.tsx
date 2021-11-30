@@ -420,7 +420,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     // newTree = (piId: number): TreeNode[] => {
     //     const { proofNodes } = this.state;
-
     //     return this.hiddenNodesTree(
     //         proofNodes[piId].hidedNodes
     //             .sort((a, b) => a - b)
