@@ -52,7 +52,7 @@ export default class Node extends React.Component<NodeProps> {
             setNodeOnFocus,
             toggleNodeSelection,
             openDrawer,
-            tree,
+            createTree,
         } = this.props;
 
         if (e.evt.button === 0) {
@@ -68,7 +68,7 @@ export default class Node extends React.Component<NodeProps> {
                         nDescendants: nDescendants - (rule === 'π' ? 0 : 0),
                         hiddenNodes: hiddenNodes,
                     },
-                    tree,
+                    createTree(id),
                 );
             }
         } else if (e.evt.button === 2) {
@@ -86,8 +86,7 @@ export default class Node extends React.Component<NodeProps> {
     }
 
     render(): JSX.Element {
-        const { rule, conclusion, id, x, y, selected, nHided, nDescendants, hiddenNodes, color, updateNodePosition } =
-            this.props;
+        const { rule, conclusion, id, x, y, selected, nHided, nDescendants, color, updateNodePosition } = this.props;
 
         const bgColor = color;
         const tagProps = {

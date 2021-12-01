@@ -236,10 +236,11 @@ export const selectProof = (state: RootState): NodeInterface[] => {
             proof[node].parents.every((parentId) => piNode.parents.indexOf(parentId) !== -1),
         );
 
-        // Get the combined conclusion
+        // Get the conclusion array
         const conclusion = highHierarchyNodes.map((node) => ' ' + proof[node].conclusion);
         piNode.conclusion = conclusion.length > 1 ? `[${conclusion} ]` : `${conclusion}`;
 
+        // Get the rule array
         const rule = highHierarchyNodes.map((node) => ' ' + proof[node].rule);
         piNode.rule = rule.length > 1 ? `[${rule} ]` : `${rule} `;
 

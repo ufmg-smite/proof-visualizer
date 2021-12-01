@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import Node from '../components/VisualizerStage/Canvas/VisualizerNode';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
+import { TreeNodeInfo } from '@blueprintjs/core';
 
 // NODES
 interface NodeInterface {
@@ -38,6 +39,7 @@ interface NodeProps {
     updateNodePosition: (key: number, x: number, y: number) => void;
     openDrawer: (nodeInfo: NodeInfo, tree?: Array<TreeNode>) => void;
     onDragEnd: () => void;
+    createTree: (id: number) => TreeNode[];
 
     tree?: Array<TreeNode>;
 }
@@ -50,11 +52,6 @@ interface NodeInfo {
     nHided: number;
     nDescendants: number;
     hiddenNodes: number[];
-}
-
-interface NodeCluster {
-    nodesIds: number[][];
-    highHierarchy: number;
 }
 
 // CANVAS
@@ -113,6 +110,13 @@ interface TreeNode {
     rule: string;
     conclusion: string;
     args: string;
+    hasCaret: boolean;
+}
+
+interface TreeProps {
+    nodes: TreeNodeInfo[];
+    selected: number;
+    originalNodeInfo: any;
 }
 
 interface LineProps {
@@ -158,13 +162,13 @@ export type {
     NodeInterface,
     NodeProps,
     NodeInfo,
-    NodeCluster,
     CanvasProps,
     CanvasPropsAndRedux,
     CanvasState,
     NavbarProps,
     NavbarPropsAndRedux,
     TreeNode,
+    TreeProps,
     LineProps,
     ReduxState,
     ProofState,

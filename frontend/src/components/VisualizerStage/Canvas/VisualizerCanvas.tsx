@@ -139,6 +139,9 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             updateNodePosition: () => undefined,
             openDrawer: () => undefined,
             onDragEnd: () => undefined,
+            createTree: () => {
+                return [];
+            },
         };
     };
 
@@ -256,6 +259,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                         updateNodePosition: this.updateNodePosition,
                         openDrawer: openDrawer,
                         onDragEnd: this.saveNodePosition,
+                        createTree: this.createTree,
                     });
                 }
             });
@@ -263,27 +267,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             this.setState({ showingEdges: showingEdges });
         }
     }
-
-    hiddenNodesTree = (list: Array<TreeNode>): Array<TreeNode> => {
-        const map: { [n: number]: number } = {},
-            roots: Array<TreeNode> = [];
-        let node, i;
-
-        for (i = 0; i < list.length; i += 1) {
-            map[list[i].id] = i;
-            list[i].childNodes = [];
-        }
-
-        for (i = 0; i < list.length; i += 1) {
-            node = list[i];
-            if (node.parentId !== NaN && list[map[node.parentId]]) {
-                list[map[node.parentId]].childNodes.push(node);
-            } else {
-                roots.push(node);
-            }
-        }
-        return roots;
-    };
 
     /* NODE MENU ACTIONS */
     foldAllDescendants = (): void => {
@@ -368,6 +351,96 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         this.setState({ nodesSelected });
     };
 
+    /*TREE*/
+    hiddenNodesTree = (list: Array<TreeNode>): Array<TreeNode> => {
+        const map: { [n: number]: number } = {},
+            roots: Array<TreeNode> = [];
+        let node, i;
+
+        for (i = 0; i < list.length; i += 1) {
+            map[list[i].id] = i;
+            list[i].childNodes = [];
+        }
+
+        for (i = 0; i < list.length; i += 1) {
+            node = list[i];
+            if (node.parentId !== NaN && list[map[node.parentId]]) {
+                list[map[node.parentId]].childNodes.push(node);
+            } else {
+                roots.push(node);
+            }
+        }
+        return roots;
+    };
+
+    // newTree = (piId: number): TreeNode[] => {
+    //     const { proof } = this.state;
+    //     return this.hiddenNodesTree(
+    //         proof[piId].hidedNodes
+    //             .sort((a, b) => a - b)
+    //             .map((nodeId) => {
+    //                 return {
+    //                     id: nodeId,
+    //                     icon: 'graph',
+    //                     parentId: proofNodes[nodeId].parent,
+    //                     label: proofNodes[nodeId].rule + ' => ' + proofNodes[nodeId].conclusion,
+    //                     descendants: proofNodes[nodeId].descendants,
+    //                     childNodes: [],
+    //                     rule: proofNodes[nodeId].rule,
+    //                     conclusion: proofNodes[nodeId].conclusion,
+    //                     args: proofNodes[nodeId].args,
+    //                 };
+    //             }),
+    //     );
+    //     return [];
+    // };
+
+    createTree = (id: number): TreeNode[] => {
+        const { proof } = this.state;
+        const rootNode = proof.find((o) => o.id === id);
+        const tree: TreeNode[] = [];
+
+        // Make sure found the node
+        if (rootNode) {
+            let descendants: TreeNode[] = [];
+            rootNode.children.forEach((childID) => {
+                const child = proof.find((o) => o.id === childID);
+
+                if (child) {
+                    descendants = descendants.concat(this.createTree(child.id));
+                }
+            });
+            console.log(descendants);
+
+            tree.push({
+                id: rootNode.id,
+                icon: 'graph',
+                parentId: rootNode.parents[0],
+                label: `[${rootNode.id}]: ${rootNode.conclusion}`,
+                descendants: rootNode.descendants,
+                childNodes: descendants,
+                rule: rootNode.rule,
+                conclusion: rootNode.conclusion,
+                args: rootNode.args,
+                hasCaret: Boolean(descendants.length),
+            });
+        }
+        return tree;
+        // return [
+        //     {
+        //         id: rootNode.id,
+        //         icon: 'graph',
+        //         parentId: rootNode.parents[0],
+        //         label: `[${rootNode.id}]`,
+        //         descendants: rootNode.descendants,
+        //         childNodes: [],
+        //         rule: rootNode.rule,
+        //         conclusion: rootNode.conclusion,
+        //         args: rootNode.args,
+        //     },
+        // ];
+    };
+
     /* PROOF I/O */
     // CV sobre isso
     downloadProof = (dot: string, proofName: string): void => {
@@ -417,27 +490,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             });
         this.setState({ showingNodes, showingEdges });
     };
-
-    // newTree = (piId: number): TreeNode[] => {
-    //     const { proofNodes } = this.state;
-    //     return this.hiddenNodesTree(
-    //         proofNodes[piId].hidedNodes
-    //             .sort((a, b) => a - b)
-    //             .map((nodeId) => {
-    //                 return {
-    //                     id: nodeId,
-    //                     icon: 'graph',
-    //                     parentId: proofNodes[nodeId].parent,
-    //                     label: proofNodes[nodeId].rule + ' => ' + proofNodes[nodeId].conclusion,
-    //                     descendants: proofNodes[nodeId].descendants,
-    //                     childNodes: [],
-    //                     rule: proofNodes[nodeId].rule,
-    //                     conclusion: proofNodes[nodeId].conclusion,
-    //                     args: proofNodes[nodeId].args,
-    //                 };
-    //             }),
-    //     );
-    // };
 
     render(): JSX.Element {
         const { canvasSize, stage, showingNodes, showingEdges, nodesSelected, nodeOnFocus, proof } = this.state;

@@ -2,12 +2,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import * as React from 'react';
 
-import { Classes, TreeNodeInfo, Tree } from '@blueprintjs/core';
+import { Classes, Tree, TreeNodeInfo } from '@blueprintjs/core';
+import { TreeProps } from '../../interfaces/interfaces';
 
-export class VisualizerTree extends React.Component<
-    any,
-    { nodes: TreeNodeInfo[]; selected: number; originalNodeInfo: any }
-> {
+export class VisualizerTree extends React.Component<any, TreeProps> {
     constructor(props: any) {
         super(props);
 
@@ -22,20 +20,6 @@ export class VisualizerTree extends React.Component<
         if (this.props.content !== prevProps.content) {
             this.setState({ nodes: this.props.content });
         }
-    }
-
-    public render(): JSX.Element {
-        return (
-            <div style={{ backgroundColor: this.props.darkTheme ? '#394b59' : 'white' }}>
-                <Tree
-                    contents={this.state.nodes}
-                    onNodeClick={this.handleNodeClick}
-                    onNodeCollapse={this.handleNodeCollapse}
-                    onNodeExpand={this.handleNodeExpand}
-                    className={Classes.ELEVATION_0}
-                />
-            </div>
-        );
     }
 
     private handleNodeClick = (nodeData: any, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
@@ -79,5 +63,19 @@ export class VisualizerTree extends React.Component<
             callback(node);
             this.forEachNode(node.childNodes ? node.childNodes : [], callback);
         }
+    }
+
+    public render(): JSX.Element {
+        return (
+            <div style={{ backgroundColor: this.props.darkTheme ? '#394b59' : 'white' }}>
+                <Tree
+                    contents={this.state.nodes}
+                    onNodeClick={this.handleNodeClick}
+                    onNodeCollapse={this.handleNodeCollapse}
+                    onNodeExpand={this.handleNodeExpand}
+                    className={Classes.ELEVATION_0}
+                />
+            </div>
+        );
     }
 }
