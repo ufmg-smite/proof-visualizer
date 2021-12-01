@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 
 import { Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
-import { VisualizerTree } from '../../VisualizerTree/VisualizerTree';
+import VisualizerTree from '../../VisualizerTree/VisualizerTree';
 
 import '../../../scss/VisualizerDirectoryStyle.scss';
 import { useAppSelector } from '../../../store/hooks';
 import { selectTheme } from '../../../store/features/theme/themeSlice';
+import { NodeInfo } from '../../../interfaces/interfaces';
 
 interface directoryStyleProps {
     proofTree: TreeNodeInfo[];
@@ -24,20 +25,13 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
     const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
     const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);
     const [conclusionTranslatorOpen, setConclusionTranslatorOpen] = useState(false);
-    const [nodeInfo, setNodeInfo] = useState<{
-        rule: string;
-        args: string;
-        conclusion: string;
-        nHided: number;
-        nDescendants: number;
-        topHidedNodes?: Array<[number, string, string, number, number]>;
-    }>({
+    const [nodeInfo, setNodeInfo] = useState<NodeInfo>({
         rule: '',
         args: '',
         conclusion: '',
         nHided: 0,
         nDescendants: 0,
-        topHidedNodes: undefined,
+        hiddenNodes: [],
     });
 
     return (
@@ -68,7 +62,7 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
                         conclusion: '',
                         nHided: 0,
                         nDescendants: 0,
-                        topHidedNodes: undefined,
+                        hiddenNodes: [],
                     }}
                 ></VisualizerTree>
             </div>
@@ -162,7 +156,7 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
                                 ) : null}
                             </td>
                         </tr>
-                        {!nodeInfo.topHidedNodes ? (
+                        {/* {!nodeInfo.topHidedNodes ? (
                             <tr>
                                 <td>
                                     <strong>#DESCENDANTS</strong>
@@ -190,7 +184,7 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
                                     ]
                                 </td>
                             </tr>
-                        ) : null}
+                        ) : null} */}
                     </tbody>
                 </table>
             </div>

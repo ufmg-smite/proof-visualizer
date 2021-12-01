@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
 import Canvas from './Canvas/VisualizerCanvas';
-import { VisualizerTree } from '../VisualizerTree/VisualizerTree';
+import VisualizerTree from '../VisualizerTree/VisualizerTree';
 import VisualizerDirectoryStyle from './VisualizerDirectoryStyle/VisualizerDirectoryStyle';
 import { processDot } from '../../store/features/proof/auxi';
 

@@ -352,47 +352,78 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     /*TREE*/
-    hiddenNodesTree = (list: Array<TreeNode>): Array<TreeNode> => {
-        const map: { [n: number]: number } = {},
-            roots: Array<TreeNode> = [];
-        let node, i;
-
-        for (i = 0; i < list.length; i += 1) {
-            map[list[i].id] = i;
-            list[i].childNodes = [];
-        }
-
-        for (i = 0; i < list.length; i += 1) {
-            node = list[i];
-            if (node.parentId !== NaN && list[map[node.parentId]]) {
-                list[map[node.parentId]].childNodes.push(node);
-            } else {
-                roots.push(node);
-            }
-        }
-        return roots;
-    };
-
-    // newTree = (piId: number): TreeNode[] => {
+    // TODO: Fazer create tree sem ser recursivo, usando uma stack
+    // createTree = (id: number): TreeNode[] => {
     //     const { proof } = this.state;
-    //     return this.hiddenNodesTree(
-    //         proof[piId].hidedNodes
-    //             .sort((a, b) => a - b)
-    //             .map((nodeId) => {
-    //                 return {
-    //                     id: nodeId,
-    //                     icon: 'graph',
-    //                     parentId: proofNodes[nodeId].parent,
-    //                     label: proofNodes[nodeId].rule + ' => ' + proofNodes[nodeId].conclusion,
-    //                     descendants: proofNodes[nodeId].descendants,
-    //                     childNodes: [],
-    //                     rule: proofNodes[nodeId].rule,
-    //                     conclusion: proofNodes[nodeId].conclusion,
-    //                     args: proofNodes[nodeId].args,
-    //                 };
-    //             }),
-    //     );
-    //     return [];
+    //     const stack: number[] = [];
+    //     const tree: TreeNode[] = [];
+    //     let current = 0;
+
+    //     // Function that searchs the node, put it in the stack and return the node
+    //     const findNode = (index: number): NodeInterface | undefined => {
+    //         return proof.find((o, i) => {
+    //             if (o.id === index) {
+    //                 stack.push(i);
+    //                 current = stack[stack.length - 1];
+    //             }
+    //             return o.id === index;
+    //         });
+    //     };
+
+    //     // Function that searchs the node, put it in the stack and return the node
+    //     const addNodeToTree = (t: TreeNode[], nodeID: number): void => {
+    //         const node = proof[nodeID];
+    //         t.push({
+    //             id: node.id,
+    //             icon: 'graph',
+    //             parentId: node.parents[0],
+    //             label: `[${node.id}]: ${node.conclusion}`,
+    //             descendants: node.descendants,
+    //             childNodes: [],
+    //             rule: node.rule,
+    //             conclusion: node.conclusion,
+    //             args: node.args,
+    //             hasCaret: undefined,
+    //         });
+    //     };
+
+    //     let node = findNode(id);
+    //     addNodeToTree(tree, current);
+    //     let subTree: TreeNode[] = tree;
+    //     let lastChild = proof[current].id;
+
+    //     // Make sure found the node
+    //     while (stack.length) {
+    //         // If the node hasn't children or the subTree was completed
+    //         if (node?.children.length && subTree.length !== node?.children.length) {
+    //             // Get the id of the next child in the child array
+    //             const idChildrenArray = proof[current].children.indexOf(lastChild) + 1;
+    //             // Get the next child to be added
+    //             const nextChild = proof[current].children[idChildrenArray];
+
+    //             node = findNode(nextChild);
+    //             // Unica coisa q falta é pegar o numero de filhos do pai desse node aq
+    //             // Allow the access to the first child of a root node
+    //             if (subTree[idChildrenArray]) {
+    //                 subTree = subTree[idChildrenArray].childNodes;
+    //             }
+    //             addNodeToTree(subTree, current);
+    //         }
+    //         // If it's a leaf node
+    //         else {
+    //             lastChild = stack[stack.length - 1];
+    //             current = stack[stack.length - 2];
+    //             node = proof.find((o, i) => {
+    //                 if (o.id === current) {
+    //                     stack.pop();
+    //                     current = stack[stack.length - 1];
+    //                 }
+    //                 return o.id === current;
+    //             });
+    //         }
+    //     }
+
+    //     return tree;
     // };
 
     createTree = (id: number): TreeNode[] => {
@@ -403,20 +434,22 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         // Make sure found the node
         if (rootNode) {
             let descendants: TreeNode[] = [];
+            // For each children
             rootNode.children.forEach((childID) => {
+                // Find the child
                 const child = proof.find((o) => o.id === childID);
 
-                if (child) {
-                    descendants = descendants.concat(this.createTree(child.id));
-                }
+                // Get the current child tree
+                if (child) descendants = descendants.concat(this.createTree(child.id));
             });
-            console.log(descendants);
 
+            // Create the rootNode tree
             tree.push({
                 id: rootNode.id,
                 icon: 'graph',
                 parentId: rootNode.parents[0],
-                label: `[${rootNode.id}]: ${rootNode.conclusion}`,
+                label: `${rootNode.id} ➜ ${rootNode.conclusion}`,
+                secondaryLabel: `${rootNode.rule}`,
                 descendants: rootNode.descendants,
                 childNodes: descendants,
                 rule: rootNode.rule,
@@ -426,19 +459,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             });
         }
         return tree;
-        // return [
-        //     {
-        //         id: rootNode.id,
-        //         icon: 'graph',
-        //         parentId: rootNode.parents[0],
-        //         label: `[${rootNode.id}]`,
-        //         descendants: rootNode.descendants,
-        //         childNodes: [],
-        //         rule: rootNode.rule,
-        //         conclusion: rootNode.conclusion,
-        //         args: rootNode.args,
-        //     },
-        // ];
     };
 
     /* PROOF I/O */

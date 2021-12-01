@@ -105,18 +105,20 @@ interface TreeNode {
     icon: 'graph';
     parentId: number;
     label: string;
+    secondaryLabel: string;
     descendants: number;
     childNodes: TreeNode[];
     rule: string;
     conclusion: string;
     args: string;
-    hasCaret: boolean;
+    hasCaret: boolean | undefined;
 }
 
 interface TreeProps {
-    nodes: TreeNodeInfo[];
-    selected: number;
-    originalNodeInfo: any;
+    darkTheme: boolean;
+    content: TreeNodeInfo[];
+    originalNodeInfo: NodeInfo;
+    setNodeInfo: Dispatch<SetStateAction<NodeInfo>>;
 }
 
 interface LineProps {
