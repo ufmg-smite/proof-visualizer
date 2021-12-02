@@ -110,10 +110,16 @@ const ancestors = (proof: NodeInterface[], nodeId: number): number[] => {
 };
 
 export const piNodeParents = (proof: NodeInterface[], hiddenNodesArray: number[]): number[] => {
-    // Gets all the parents of the nodes in the list
-    const parents = hiddenNodesArray.reduce((acc: number[], hiddenNode) => acc.concat(proof[hiddenNode].parents), []);
-    // Gets the pi node parent
-    return parents.filter((nodeId) => !ancestors(proof, nodeId).some((ancestor) => parents.includes(ancestor)));
+    const parents = hiddenNodesArray
+        // Concat all the parents
+        .reduce((acc: number[], hiddenNode) => acc.concat(proof[hiddenNode].parents), [])
+        // Filter the duplicated elements
+        .filter((parent, i, self) => {
+            return self.indexOf(parent) === i;
+        })
+        // Only the parents that aren't in he hidden nodes array remains
+        .filter((parent) => hiddenNodesArray.indexOf(parent) === -1);
+    return parents;
 };
 
 export const descendants = (proof: NodeInterface[], nodeId: number): number[] => {

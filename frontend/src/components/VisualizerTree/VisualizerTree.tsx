@@ -10,7 +10,6 @@ const VisualizerTree: React.FC<TreeProps> = ({ darkTheme, content, originalNodeI
     const [, forceUpdate] = useReducer((x) => x + 1, 0);
     const [nodes, setNodes] = useState(content);
     const [selected, setSelected] = useState(NaN);
-    const [originalInfo, setOriginalInfo] = useState(originalNodeInfo);
 
     // USE EFFECT:
     useEffect(() => setNodes(content), [content]);
@@ -34,16 +33,17 @@ const VisualizerTree: React.FC<TreeProps> = ({ darkTheme, content, originalNodeI
                       rule: nodeData.rule ? nodeData.rule : '',
                       args: nodeData.args ? nodeData.args : '',
                       conclusion: nodeData.conclusion ? nodeData.conclusion : '',
-                      nHided: 0,
+                      nHided: nodeData.nHided ? nodeData.nHided : 0,
                       nDescendants: nodeData.descendants,
                       hiddenNodes: nodeData.hiddenNodes,
                   }
-                : originalInfo,
+                : originalNodeInfo,
         );
         const originallySelected = nodeData.isSelected;
-        if (!e.shiftKey) {
-            forEachNode(nodes, (n) => (n.isSelected = false));
-        }
+
+        // Set all the nodes to be not selected
+        if (!e.shiftKey) forEachNode(nodes, (n) => (n.isSelected = false));
+
         nodeData.isSelected = originallySelected == null ? true : !originallySelected;
         setSelected(selected === nodeData.id ? NaN : nodeData.id);
     };

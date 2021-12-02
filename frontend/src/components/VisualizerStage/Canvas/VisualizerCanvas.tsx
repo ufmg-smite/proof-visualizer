@@ -443,18 +443,24 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 if (child) descendants = descendants.concat(this.createTree(child.id));
             });
 
+            const label = rootNode.hiddenNodes?.length
+                ? `${rootNode.id} ➜ π ➜ ${rootNode.conclusion}`
+                : `${rootNode.id} ➜ ${rootNode.conclusion}`;
+
             // Create the rootNode tree
             tree.push({
                 id: rootNode.id,
                 icon: 'graph',
-                parentId: rootNode.parents[0],
-                label: `${rootNode.id} ➜ ${rootNode.conclusion}`,
+                label: label,
                 secondaryLabel: `${rootNode.rule}`,
-                descendants: rootNode.descendants,
-                childNodes: descendants,
                 rule: rootNode.rule,
-                conclusion: rootNode.conclusion,
                 args: rootNode.args,
+                conclusion: rootNode.conclusion,
+                parentId: rootNode.parents[0],
+                descendants: rootNode.descendants - 1,
+                nHided: rootNode.hiddenNodes ? rootNode.hiddenNodes.length : 0,
+                hiddenNodes: rootNode.hiddenNodes ? rootNode.hiddenNodes.map((node) => node.id) : [],
+                childNodes: descendants,
                 hasCaret: Boolean(descendants.length),
             });
         }

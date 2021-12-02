@@ -214,9 +214,7 @@ const VisualizerStage: React.FC = () => {
     const dot = useAppSelector(selectFile);
     const style = useAppSelector(selectStyle);
     const darkTheme = useAppSelector(selectTheme);
-    const importedData = {
-        nodes: [],
-    };
+    const importedData = { nodes: [] };
     const [proof, letMap] = processDot(dot ? dot : '');
     const proofTree = createTree(
         Array.from(Array(proof.length).keys()).map((nodeId) => {
