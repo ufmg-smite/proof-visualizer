@@ -18,23 +18,37 @@ export const proofSlice = createSlice({
 
     reducers: {
         process: (state, action: PayloadAction<string>) => {
-            const [proof, letMap] = processDot(action.payload);
+            let proofJSON;
+            let dot = action.payload;
+            let isJSON = false;
+
+            // If the payload is a .json file
+            if (dot.indexOf('{"dot":"') !== -1) {
+                proofJSON = JSON.parse(dot);
+                dot = proofJSON.dot;
+                isJSON = true;
+                // Blocks the reRender of the nodes, making sure that the (x,y) of the uploaded file remains
+            }
+
+            const [proof, letMap] = processDot(dot);
             state.proof = proof;
-            state.view = 'full';
-            state.hiddenNodes = [];
+            state.view = isJSON ? proofJSON.view : 'full';
+            state.hiddenNodes = isJSON ? proofJSON.hiddenNodes : [];
             state.letMap = letMap;
-            state.visualInfo = state.proof.reduce(
-                (ac: any, proofNode) => (
-                    (ac[proofNode.id] = {
-                        color: '#fff',
-                        x: 0,
-                        y: 0,
-                        selected: false,
-                    }),
-                    ac
-                ),
-                {},
-            );
+            state.visualInfo = isJSON
+                ? proofJSON.visualInfo
+                : state.proof.reduce(
+                      (ac: any, proofNode) => (
+                          (ac[proofNode.id] = {
+                              color: '#fff',
+                              x: 0,
+                              y: 0,
+                              selected: false,
+                          }),
+                          ac
+                      ),
+                      {},
+                  );
         },
         hideNodes: (state, action: PayloadAction<number[]>) => {
             const toHideNodes = action.payload.filter(
@@ -274,6 +288,10 @@ export const selectVisualInfo = (state: RootState): ProofState['visualInfo'] => 
     if (state.proof.proof.length) return state.proof.visualInfo;
     // If there is no proof node
     return { 0: { color: '#555', x: 0, y: 0, selected: false } };
+};
+
+export const selectHiddenNodes = (state: RootState): number[][] => {
+    return state.proof.hiddenNodes;
 };
 
 export default proofSlice.reducer;

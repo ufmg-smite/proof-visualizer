@@ -91,10 +91,11 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         };
     }
     // TODO: achar uma maneira melhor de fazer esse firstRender
-    private static renderData = { count: 0 };
+    private static renderData = { count: 0, firstRender: true };
 
     // Allow to reRender the tree
-    static reRender = () => (Canvas.renderData.count = 0);
+    static reRender = () => (Canvas.renderData = { count: 0, firstRender: false });
+    static blockRender = () => (Canvas.renderData.count = 2);
 
     static copyNodePosition = (
         visualInfo: ProofState['visualInfo'],
@@ -154,39 +155,46 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node, props.visualInfo))), ac),
                 {},
             );
+            // If has nodes and can render
             if (showingNodes[0] && Canvas.renderData.count < 2) {
-                Canvas.renderData.count++;
+                // If in the first render the proof is json, no need to render the tree (there are already (x,y) infos)
+                if (!Canvas.renderData.firstRender || props.proofFormat !== 'json') {
+                    Canvas.renderData.count++;
 
-                const g = new dagre.graphlib.Graph();
-                g.setGraph({ rankdir: 'BT', ranker: 'tight-tree' });
-                g.setDefaultEdgeLabel(function () {
-                    return {};
-                });
-                props.proof.forEach((node) => {
-                    g.setNode(node.id.toString(), { width: 300, height: 130 });
-                    node.children.forEach((child) => {
-                        g.setEdge(child.toString(), node.id.toString());
+                    const g = new dagre.graphlib.Graph();
+                    g.setGraph({ rankdir: 'BT', ranker: 'tight-tree' });
+                    g.setDefaultEdgeLabel(function () {
+                        return {};
                     });
-                });
-                dagre.layout(g);
-
-                const xOffset = g.node('0').x - (showingNodes[0].props.x ? showingNodes[0].props.x : 0);
-                const yOffset = g.node('0').y - (showingNodes[0].props.y ? showingNodes[0].props.y : 0);
-                g.nodes().forEach((v) => {
-                    try {
-                        const { x, y } = g.node(v);
-                        const key = parseInt(v);
-                        showingNodes[key] = new Node({
-                            ...showingNodes[key].props,
-                            x: x - xOffset,
-                            y: y - yOffset,
+                    props.proof.forEach((node) => {
+                        g.setNode(node.id.toString(), { width: 300, height: 130 });
+                        node.children.forEach((child) => {
+                            g.setEdge(child.toString(), node.id.toString());
                         });
-                    } catch (e) {
-                        console.log(e);
-                    }
-                });
+                    });
+                    dagre.layout(g);
 
-                props.setVisualInfo(Canvas.copyNodePosition(props.visualInfo, showingNodes));
+                    const xOffset = g.node('0').x - (showingNodes[0].props.x ? showingNodes[0].props.x : 0);
+                    const yOffset = g.node('0').y - (showingNodes[0].props.y ? showingNodes[0].props.y : 0);
+                    g.nodes().forEach((v) => {
+                        try {
+                            const { x, y } = g.node(v);
+                            const key = parseInt(v);
+                            showingNodes[key] = new Node({
+                                ...showingNodes[key].props,
+                                x: x - xOffset,
+                                y: y - yOffset,
+                            });
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    });
+
+                    props.setVisualInfo(Canvas.copyNodePosition(props.visualInfo, showingNodes));
+
+                    // If it's the first render
+                    if (!Canvas.renderData.firstRender) Canvas.renderData.firstRender = false;
+                }
             }
 
             return {
@@ -352,80 +360,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     /*TREE*/
-    // TODO: Fazer create tree sem ser recursivo, usando uma stack
-    // createTree = (id: number): TreeNode[] => {
-    //     const { proof } = this.state;
-    //     const stack: number[] = [];
-    //     const tree: TreeNode[] = [];
-    //     let current = 0;
-
-    //     // Function that searchs the node, put it in the stack and return the node
-    //     const findNode = (index: number): NodeInterface | undefined => {
-    //         return proof.find((o, i) => {
-    //             if (o.id === index) {
-    //                 stack.push(i);
-    //                 current = stack[stack.length - 1];
-    //             }
-    //             return o.id === index;
-    //         });
-    //     };
-
-    //     // Function that searchs the node, put it in the stack and return the node
-    //     const addNodeToTree = (t: TreeNode[], nodeID: number): void => {
-    //         const node = proof[nodeID];
-    //         t.push({
-    //             id: node.id,
-    //             icon: 'graph',
-    //             parentId: node.parents[0],
-    //             label: `[${node.id}]: ${node.conclusion}`,
-    //             descendants: node.descendants,
-    //             childNodes: [],
-    //             rule: node.rule,
-    //             conclusion: node.conclusion,
-    //             args: node.args,
-    //             hasCaret: undefined,
-    //         });
-    //     };
-
-    //     let node = findNode(id);
-    //     addNodeToTree(tree, current);
-    //     let subTree: TreeNode[] = tree;
-    //     let lastChild = proof[current].id;
-
-    //     // Make sure found the node
-    //     while (stack.length) {
-    //         // If the node hasn't children or the subTree was completed
-    //         if (node?.children.length && subTree.length !== node?.children.length) {
-    //             // Get the id of the next child in the child array
-    //             const idChildrenArray = proof[current].children.indexOf(lastChild) + 1;
-    //             // Get the next child to be added
-    //             const nextChild = proof[current].children[idChildrenArray];
-
-    //             node = findNode(nextChild);
-    //             // Unica coisa q falta é pegar o numero de filhos do pai desse node aq
-    //             // Allow the access to the first child of a root node
-    //             if (subTree[idChildrenArray]) {
-    //                 subTree = subTree[idChildrenArray].childNodes;
-    //             }
-    //             addNodeToTree(subTree, current);
-    //         }
-    //         // If it's a leaf node
-    //         else {
-    //             lastChild = stack[stack.length - 1];
-    //             current = stack[stack.length - 2];
-    //             node = proof.find((o, i) => {
-    //                 if (o.id === current) {
-    //                     stack.pop();
-    //                     current = stack[stack.length - 1];
-    //                 }
-    //                 return o.id === current;
-    //             });
-    //         }
-    //     }
-
-    //     return tree;
-    // };
-
+    // TODO: Fazer create tree sem ser recursivo, criando os nós filos sempre que o node pedir para abrir um no filho
     createTree = (id: number): TreeNode[] => {
         const { proof } = this.state;
         const rootNode = proof.find((o) => o.id === id);
@@ -444,8 +379,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             });
 
             const label = rootNode.hiddenNodes?.length
-                ? `${rootNode.id} ➜ π ➜ ${rootNode.conclusion}`
-                : `${rootNode.id} ➜ ${rootNode.conclusion}`;
+                ? `${rootNode.id} : π ➜ ${rootNode.conclusion}`
+                : `${rootNode.id} : ${rootNode.conclusion}`;
 
             // Create the rootNode tree
             tree.push({
@@ -465,24 +400,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             });
         }
         return tree;
-    };
-
-    /* PROOF I/O */
-    // CV sobre isso
-    downloadProof = (dot: string, proofName: string): void => {
-        // Cv dps
-        const link = document.createElement('a');
-        link.download = proofName + '.json';
-        link.href = `data:attachment/text,${encodeURIComponent(JSON.stringify(this.exportProof(dot)))}`;
-        link.click();
-    };
-
-    exportProof = (dot = ''): { dot: string } => {
-        //Apg
-        // TODO
-        return {
-            dot: dot,
-        };
     };
 
     /* UTILS */

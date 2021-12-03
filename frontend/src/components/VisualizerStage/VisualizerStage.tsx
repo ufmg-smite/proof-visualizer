@@ -9,7 +9,7 @@ import { processDot } from '../../store/features/proof/auxi';
 
 import '../../scss/VisualizerStage.scss';
 import { useAppSelector } from '../../store/hooks';
-import { selectFile } from '../../store/features/file/fileSlice';
+import { selectDot, selectFileExtension } from '../../store/features/file/fileSlice';
 import { selectStyle, selectView } from '../../store/features/proof/proofSlice';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { NodeInfo } from '../../interfaces/interfaces';
@@ -211,7 +211,8 @@ const indent = (s: string) => {
 };
 
 const VisualizerStage: React.FC = () => {
-    const dot = useAppSelector(selectFile);
+    const dot = useAppSelector(selectDot);
+    const extension = useAppSelector(selectFileExtension);
     const style = useAppSelector(selectStyle);
     const darkTheme = useAppSelector(selectTheme);
     const importedData = { nodes: [] };
@@ -394,6 +395,7 @@ const VisualizerStage: React.FC = () => {
                         key={dot}
                         view={useAppSelector(selectView)}
                         proofNodes={proof}
+                        proofFormat={extension}
                         openDrawer={openDrawer}
                         importedData={importedData}
                     ></Canvas>

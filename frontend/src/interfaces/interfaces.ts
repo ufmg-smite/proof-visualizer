@@ -58,6 +58,7 @@ interface NodeInfo {
 // Dividir essas interfaces em funções
 interface CanvasProps {
     proofNodes: NodeInterface[];
+    proofFormat: string;
     openDrawer: (nodeInfo: NodeInfo) => void;
     view: string | undefined;
     importedData: {
@@ -95,7 +96,10 @@ interface NavbarProps {
 
 interface NavbarPropsAndRedux extends NavbarProps {
     proof: ProofState['proof'];
+    dot: string;
+    view: string;
     visualInfo: ProofState['visualInfo'];
+    hiddenNodes: number[][];
     hideNodes: ActionCreatorWithPayload<number[], string>;
 }
 

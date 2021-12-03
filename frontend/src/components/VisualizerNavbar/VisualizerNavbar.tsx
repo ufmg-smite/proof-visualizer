@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { connect } from 'react-redux';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { selectFile, selectFileName } from '../../store/features/file/fileSlice';
+import { selectDot, selectFileName } from '../../store/features/file/fileSlice';
 import {
     applyView,
     changeStyle,
@@ -12,6 +12,8 @@ import {
     unhideNodes,
     selectVisualInfo,
     selectProof,
+    selectHiddenNodes,
+    selectView,
 } from '../../store/features/proof/proofSlice';
 import { ReduxState, NavbarPropsAndRedux, NavbarProps } from '../../interfaces/interfaces';
 
@@ -53,9 +55,11 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
     setDrawerIsOpen,
     visualInfo,
     proof,
+    dot,
+    view,
+    hiddenNodes,
     hideNodes,
 }: NavbarPropsAndRedux) => {
-    const file = useAppSelector(selectFile);
     const fileName = useAppSelector(selectFileName);
     const darkTheme = useAppSelector(selectTheme);
     const windowSize = useWindowSize();
@@ -64,84 +68,6 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
     const [commandId, setCommandId] = useState(0);
 
     const dispatch = useAppDispatch();
-
-    const menus = {
-        style: (
-            <Menu>
-                <MenuItem
-                    icon="diagram-tree"
-                    text="Graph"
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        dispatch(changeStyle('graph'));
-                    }}
-                />
-                <MenuItem
-                    icon="folder-open"
-                    text="Directory"
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        dispatch(changeStyle('directory'));
-                    }}
-                />
-            </Menu>
-        ),
-        views: (
-            <Menu>
-                <MenuItem
-                    text="Basic"
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        dispatch(applyView('basic'));
-                    }}
-                />
-                <MenuItem
-                    text="Propositional"
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        dispatch(applyView('propositional'));
-                    }}
-                />
-                <MenuItem
-                    text="Full"
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        dispatch(applyView('full'));
-                    }}
-                />
-            </Menu>
-        ),
-        example: (
-            <Menu>
-                <MenuItem
-                    icon="layout"
-                    text="JSON"
-                    onClick={() => {
-                        // TODO
-                    }}
-                />
-                <MenuItem
-                    icon="graph"
-                    text="DOT"
-                    href={`data:attachment/text,${encodeURIComponent(file ? file : '')}`}
-                    download={fileName ? `${fileName.replaceAll(' ', '_')}.dot` : ''}
-                />
-                <MenuItem
-                    icon="square"
-                    text="PNG"
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        const link = document.createElement('a');
-                        link.download = fileName ? `${fileName.replaceAll(' ', '_')}.png` : '';
-                        link.href = (
-                            document.getElementsByClassName('konvajs-content')[0].children[0] as HTMLCanvasElement
-                        ).toDataURL('image/png');
-                        link.click();
-                    }}
-                />
-            </Menu>
-        ),
-    };
 
     const openDialog = (content: string): void => {
         setDialogIsOpen(true);
@@ -258,6 +184,94 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         }
     };
 
+    const exportJSON = () => {
+        const downloadJSON = {
+            dot: dot,
+            visualInfo: visualInfo,
+            hiddenNodes: hiddenNodes,
+            view: view,
+        };
+        const fName = fileName.split('.');
+        fName.splice(fName.length - 1, 1);
+
+        const link = document.createElement('a');
+        link.download = fName + '.json';
+        link.href = `data:attachment/text,${encodeURIComponent(JSON.stringify(downloadJSON))}`;
+        link.click();
+    };
+
+    const menus = {
+        style: (
+            <Menu>
+                <MenuItem
+                    icon="diagram-tree"
+                    text="Graph"
+                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                        e.preventDefault();
+                        dispatch(changeStyle('graph'));
+                    }}
+                />
+                <MenuItem
+                    icon="folder-open"
+                    text="Directory"
+                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                        e.preventDefault();
+                        dispatch(changeStyle('directory'));
+                    }}
+                />
+            </Menu>
+        ),
+        views: (
+            <Menu>
+                <MenuItem
+                    text="Basic"
+                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                        e.preventDefault();
+                        dispatch(applyView('basic'));
+                    }}
+                />
+                <MenuItem
+                    text="Propositional"
+                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                        e.preventDefault();
+                        dispatch(applyView('propositional'));
+                    }}
+                />
+                <MenuItem
+                    text="Full"
+                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                        e.preventDefault();
+                        dispatch(applyView('full'));
+                    }}
+                />
+            </Menu>
+        ),
+        download: (
+            <Menu>
+                <MenuItem icon="layout" text="JSON" onClick={exportJSON} />
+                <MenuItem
+                    icon="graph"
+                    text="DOT"
+                    href={`data:attachment/text,${encodeURIComponent(dot ? dot : '')}`}
+                    download={fileName ? `${fileName.replaceAll(' ', '_')}.dot` : ''}
+                />
+                <MenuItem
+                    icon="square"
+                    text="PNG"
+                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                        e.preventDefault();
+                        const link = document.createElement('a');
+                        link.download = fileName ? `${fileName.replaceAll(' ', '_')}.png` : '';
+                        link.href = (
+                            document.getElementsByClassName('konvajs-content')[0].children[0] as HTMLCanvasElement
+                        ).toDataURL('image/png');
+                        link.click();
+                    }}
+                />
+            </Menu>
+        ),
+    };
+
     return (
         <Navbar>
             <Navbar.Group align={Alignment.LEFT}>
@@ -338,7 +352,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             onClick={() => setDrawerIsOpen(true)}
                         />
                         <Popover2
-                            content={fileName ? menus.example : undefined}
+                            content={fileName ? menus.download : undefined}
                             placement="bottom-end"
                             disabled={fileName ? false : true}
                         >
@@ -366,7 +380,10 @@ function mapStateToProps(state: ReduxState, ownProps: NavbarProps) {
     return {
         ...ownProps,
         proof: selectProof(state),
+        dot: selectDot(state),
+        view: selectView(state),
         visualInfo: selectVisualInfo(state),
+        hiddenNodes: selectHiddenNodes(state),
     };
 }
 

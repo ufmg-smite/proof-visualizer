@@ -25,6 +25,15 @@ export const { set } = fileSlice.actions;
 // the state. Selectors can also be defined inline where they're used instead of
 // in the slice file. For example: `useSelector((state: RootState) => state.counter.value)`
 export const selectFileName = (state: RootState): string => state.file.name;
+
+export const selectFileExtension = (state: RootState): string => {
+    const ext = state.file.name.split('.').pop();
+    return ext ? ext : '';
+};
+
+export const selectDot = (state: RootState): string =>
+    state.file.name.split('.').pop() === 'json' ? JSON.parse(state.file.value).dot : state.file.value;
+
 export const selectFile = (state: RootState): string => state.file.value;
 
 export default fileSlice.reducer;
