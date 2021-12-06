@@ -121,12 +121,15 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 switch (commands[1]) {
                     case 'basic':
                         dispatch(applyView('basic'));
+                        Canvas.reRender();
                         break;
                     case 'propositional':
                         dispatch(applyView('propositional'));
+                        Canvas.reRender();
                         break;
                     case 'full':
                         dispatch(applyView('full'));
+                        Canvas.reRender();
                         break;
                 }
                 break;
@@ -171,7 +174,8 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     const id = Number(commands[1]);
                     // Get the pi node (to be unfold)
                     const obj = proof.find((node) => node.id === id);
-                    if (obj && obj.rule === 'π') {
+                    // If it's a pi node
+                    if (obj && obj.hiddenNodes?.length) {
                         // Get the hidden nodes and their ids
                         const hiddenNodes = obj.hiddenNodes ? obj.hiddenNodes : [];
                         hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
@@ -228,6 +232,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                         e.preventDefault();
                         dispatch(applyView('basic'));
+                        Canvas.reRender();
                     }}
                 />
                 <MenuItem
@@ -235,6 +240,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                         e.preventDefault();
                         dispatch(applyView('propositional'));
+                        Canvas.reRender();
                     }}
                 />
                 <MenuItem
@@ -242,6 +248,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                         e.preventDefault();
                         dispatch(applyView('full'));
+                        Canvas.reRender();
                     }}
                 />
             </Menu>

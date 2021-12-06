@@ -27,7 +27,6 @@ export const proofSlice = createSlice({
                 proofJSON = JSON.parse(dot);
                 dot = proofJSON.dot;
                 isJSON = true;
-                // Blocks the reRender of the nodes, making sure that the (x,y) of the uploaded file remains
             }
 
             const [proof, letMap] = processDot(dot);
@@ -154,7 +153,15 @@ export const proofSlice = createSlice({
             }
         },
         applyView: (state, action: PayloadAction<'basic' | 'propositional' | 'full'>) => {
+            const visualInfoSize = Object.keys(state.visualInfo).length;
+            const proofSize = state.proof.length;
+            // Delete all the pi nodes
+            for (let i = 0; i < visualInfoSize - proofSize; i++) {
+                delete state.visualInfo[proofSize + i];
+            }
+
             switch (action.payload) {
+                //
                 case 'basic':
                     state.view = 'basic';
                     state.hiddenNodes = [
@@ -162,19 +169,44 @@ export const proofSlice = createSlice({
                             .filter((proofNode) => proofNode.views.indexOf('basic') === -1)
                             .map((proofNode) => proofNode.id),
                     ];
+
+                    // Set the visual info for the new pi nodes
+                    state.visualInfo = {
+                        ...state.visualInfo,
+                        [Object.keys(state.visualInfo).length]: {
+                            color: '#555',
+                            x: 0,
+                            y: 0,
+                            selected: false,
+                        },
+                    };
+
                     break;
+                // Hide all nodes that haven't view equal to basic and propositional
                 case 'propositional':
                     state.view = 'propositional';
                     state.hiddenNodes = [
                         state.proof
                             .filter(
-                                (proofNode) =>
-                                    proofNode.views.indexOf('basic') === -1 &&
-                                    proofNode.views.indexOf('propositional') === -1,
+                                (node) =>
+                                    node.views.indexOf('basic') === -1 && node.views.indexOf('propositional') === -1,
                             )
-                            .map((proofNode) => proofNode.id),
+                            .map((node) => node.id),
                     ];
+
+                    // Set the visual info for the new pi nodes
+                    state.visualInfo = {
+                        ...state.visualInfo,
+                        [Object.keys(state.visualInfo).length]: {
+                            color: '#555',
+                            x: 0,
+                            y: 0,
+                            selected: false,
+                        },
+                    };
+
                     break;
+                // View without hidden Nodes
                 case 'full':
                     state.view = 'full';
                     state.hiddenNodes = [];
