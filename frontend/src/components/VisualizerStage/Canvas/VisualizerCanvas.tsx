@@ -91,10 +91,10 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         };
     }
     // TODO: achar uma maneira melhor de fazer esse firstRender
-    private static renderData = { count: 0, firstRender: true };
+    private static renderData = { count: 0 };
 
     // Allow to reRender the tree
-    static reRender = () => (Canvas.renderData = { count: 0, firstRender: false });
+    static reRender = () => (Canvas.renderData.count = 0);
     static blockRender = () => (Canvas.renderData.count = 2);
 
     static copyNodePosition = (
@@ -157,44 +157,38 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             );
             // If has nodes and can render
             if (showingNodes[0] && Canvas.renderData.count < 2) {
-                // If in the first render the proof is json, no need to render the tree (there are already (x,y) infos)
-                if (!Canvas.renderData.firstRender || props.proofFormat !== 'json') {
-                    Canvas.renderData.count++;
+                Canvas.renderData.count++;
 
-                    const g = new dagre.graphlib.Graph();
-                    g.setGraph({ rankdir: 'BT', ranker: 'tight-tree' });
-                    g.setDefaultEdgeLabel(function () {
-                        return {};
+                const g = new dagre.graphlib.Graph();
+                g.setGraph({ rankdir: 'BT', ranker: 'tight-tree' });
+                g.setDefaultEdgeLabel(function () {
+                    return {};
+                });
+                props.proof.forEach((node) => {
+                    g.setNode(node.id.toString(), { width: 300, height: 130 });
+                    node.children.forEach((child) => {
+                        g.setEdge(child.toString(), node.id.toString());
                     });
-                    props.proof.forEach((node) => {
-                        g.setNode(node.id.toString(), { width: 300, height: 130 });
-                        node.children.forEach((child) => {
-                            g.setEdge(child.toString(), node.id.toString());
+                });
+                dagre.layout(g);
+
+                const xOffset = g.node('0').x - (showingNodes[0].props.x ? showingNodes[0].props.x : 0);
+                const yOffset = g.node('0').y - (showingNodes[0].props.y ? showingNodes[0].props.y : 0);
+                g.nodes().forEach((v) => {
+                    try {
+                        const { x, y } = g.node(v);
+                        const key = parseInt(v);
+                        showingNodes[key] = new Node({
+                            ...showingNodes[key].props,
+                            x: x - xOffset,
+                            y: y - yOffset,
                         });
-                    });
-                    dagre.layout(g);
+                    } catch (e) {
+                        console.log(e);
+                    }
+                });
 
-                    const xOffset = g.node('0').x - (showingNodes[0].props.x ? showingNodes[0].props.x : 0);
-                    const yOffset = g.node('0').y - (showingNodes[0].props.y ? showingNodes[0].props.y : 0);
-                    g.nodes().forEach((v) => {
-                        try {
-                            const { x, y } = g.node(v);
-                            const key = parseInt(v);
-                            showingNodes[key] = new Node({
-                                ...showingNodes[key].props,
-                                x: x - xOffset,
-                                y: y - yOffset,
-                            });
-                        } catch (e) {
-                            console.log(e);
-                        }
-                    });
-
-                    props.setVisualInfo(Canvas.copyNodePosition(props.visualInfo, showingNodes));
-
-                    // If it's the first render
-                    if (!Canvas.renderData.firstRender) Canvas.renderData.firstRender = false;
-                }
+                props.setVisualInfo(Canvas.copyNodePosition(props.visualInfo, showingNodes));
             }
 
             return {

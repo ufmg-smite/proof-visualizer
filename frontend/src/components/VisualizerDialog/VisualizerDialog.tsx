@@ -10,6 +10,7 @@ import '../../scss/VisualizerDialog.scss';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { set } from '../../store/features/file/fileSlice';
 import { process } from '../../store/features/proof/proofSlice';
+import Canvas from '../VisualizerStage/Canvas/VisualizerCanvas';
 
 interface DialogProps {
     icon: IconName | MaybeElement;
@@ -121,6 +122,9 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 <Button
                     onClick={() => {
                         dispatch(set({ name: fileName, value: file }));
+                        if (fileName.split('.').pop() === 'json') {
+                            Canvas.blockRender();
+                        }
                         setProofProcessed(true);
                         dispatch(process(file));
                     }}
