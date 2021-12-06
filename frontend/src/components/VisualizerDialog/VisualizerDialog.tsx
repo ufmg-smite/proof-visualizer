@@ -122,9 +122,12 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 <Button
                     onClick={() => {
                         dispatch(set({ name: fileName, value: file }));
-                        if (fileName.split('.').pop() === 'json') {
-                            Canvas.blockRender();
-                        }
+
+                        Canvas.allowRenderNewFile();
+                        const ext = fileName.split('.').pop();
+                        if (ext === 'json') Canvas.blockRender();
+                        else if (ext === 'dot') Canvas.reRender();
+
                         setProofProcessed(true);
                         dispatch(process(file));
                     }}

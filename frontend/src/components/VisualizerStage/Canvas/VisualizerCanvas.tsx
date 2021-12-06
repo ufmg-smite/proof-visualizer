@@ -91,11 +91,12 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         };
     }
     // TODO: achar uma maneira melhor de fazer esse firstRender
-    private static renderData = { count: 0 };
+    private static renderData = { count: 0, fileChanged: false };
 
     // Allow to reRender the tree
     static reRender = () => (Canvas.renderData.count = 0);
     static blockRender = () => (Canvas.renderData.count = 2);
+    static allowRenderNewFile = () => (Canvas.renderData.fileChanged = true);
 
     static copyNodePosition = (
         visualInfo: ProofState['visualInfo'],
@@ -149,8 +150,11 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     static getDerivedStateFromProps(props: CanvasPropsAndRedux, current_state: CanvasState) {
         const proofChanged = JSON.stringify(current_state.proof) !== JSON.stringify(props.proof);
         const visualInfoChanged = JSON.stringify(current_state.visualInfo) !== JSON.stringify(props.visualInfo);
+        const isNewFile = Canvas.renderData.fileChanged;
 
-        if (proofChanged || visualInfoChanged) {
+        // If the proof or visual info changed or we have a new file being uploaded
+        if (proofChanged || visualInfoChanged || isNewFile) {
+            // Create the showing nodes array
             const showingNodes = props.proof.reduce(
                 (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node, props.visualInfo))), ac),
                 {},
@@ -190,6 +194,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
                 props.setVisualInfo(Canvas.copyNodePosition(props.visualInfo, showingNodes));
             }
+            // Reset the new file indicator if it's true
+            if (isNewFile) Canvas.renderData.fileChanged = false;
 
             return {
                 showingNodes: showingNodes,
@@ -203,7 +209,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     componentDidMount(): void {
         const { showingNodes } = this.state;
-        const { view, proof } = this.props;
+        const { proof } = this.props;
 
         this.setState({
             proof: proof,
@@ -214,21 +220,19 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         });
 
         if (showingNodes[0]) {
-            if (view !== 'imported_data') {
-                const [width, height] = [window.innerWidth, window.innerHeight - 50];
+            const [width, height] = [window.innerWidth, window.innerHeight - 50];
 
-                this.setState({
-                    canvasSize: {
-                        width,
-                        height,
-                    },
-                    stage: {
-                        stageScale: 1,
-                        stageX: width / 2 - (showingNodes[0].props.x + 300 / 2),
-                        stageY: height / 10 - (showingNodes[0].props.y + 30 / 2),
-                    },
-                });
-            }
+            this.setState({
+                canvasSize: {
+                    width,
+                    height,
+                },
+                stage: {
+                    stageScale: 1,
+                    stageX: width / 2 - (showingNodes[0].props.x + 300 / 2),
+                    stageY: height / 10 - (showingNodes[0].props.y + 30 / 2),
+                },
+            });
         }
     }
 
@@ -479,9 +483,7 @@ function mapStateToProps(state: ReduxState, ownProps: CanvasProps) {
     return {
         proof: selectProof(state),
         visualInfo: selectVisualInfo(state),
-        myView: state.proof.view,
         ...ownProps,
-        view: ownProps.view ? ownProps.view : undefined,
     };
 }
 

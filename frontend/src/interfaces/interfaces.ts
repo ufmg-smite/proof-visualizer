@@ -58,18 +58,12 @@ interface NodeInfo {
 // Dividir essas interfaces em funções
 interface CanvasProps {
     proofNodes: NodeInterface[];
-    proofFormat: string;
     openDrawer: (nodeInfo: NodeInfo) => void;
-    view: string | undefined;
-    importedData: {
-        nodes: Array<{ id: number; color: string; x: number; y: number; hidden: number[] }>;
-    };
 }
 
 interface CanvasPropsAndRedux extends CanvasProps {
     proof: NodeInterface[];
     visualInfo: ProofState['visualInfo'];
-    myView: 'basic' | 'propositional' | 'full';
     hideNodes: ActionCreatorWithPayload<number[], string>;
     unhideNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
     foldAllDescendants: ActionCreatorWithPayload<number>;
@@ -160,6 +154,7 @@ interface ProofState {
 interface FileState {
     name: string;
     value: string;
+    filesCount: number;
 }
 //THEME
 interface ThemeState {

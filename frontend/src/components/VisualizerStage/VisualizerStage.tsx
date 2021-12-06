@@ -9,8 +9,8 @@ import { processDot } from '../../store/features/proof/auxi';
 
 import '../../scss/VisualizerStage.scss';
 import { useAppSelector } from '../../store/hooks';
-import { selectDot, selectFileExtension } from '../../store/features/file/fileSlice';
-import { selectStyle, selectView } from '../../store/features/proof/proofSlice';
+import { selectDot, selectFileCount } from '../../store/features/file/fileSlice';
+import { selectStyle } from '../../store/features/proof/proofSlice';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { NodeInfo } from '../../interfaces/interfaces';
 
@@ -212,10 +212,9 @@ const indent = (s: string) => {
 
 const VisualizerStage: React.FC = () => {
     const dot = useAppSelector(selectDot);
-    const extension = useAppSelector(selectFileExtension);
+    const fileID = useAppSelector(selectFileCount);
     const style = useAppSelector(selectStyle);
     const darkTheme = useAppSelector(selectTheme);
-    const importedData = { nodes: [] };
     const [proof, letMap] = processDot(dot ? dot : '');
     const proofTree = createTree(
         Array.from(Array(proof.length).keys()).map((nodeId) => {
@@ -391,14 +390,7 @@ const VisualizerStage: React.FC = () => {
         <div onContextMenu={(e) => e.preventDefault()}>
             {proof.length > 1 ? (
                 style === 'graph' ? (
-                    <Canvas
-                        key={dot}
-                        view={useAppSelector(selectView)}
-                        proofNodes={proof}
-                        proofFormat={extension}
-                        openDrawer={openDrawer}
-                        importedData={importedData}
-                    ></Canvas>
+                    <Canvas key={fileID} proofNodes={proof} openDrawer={openDrawer}></Canvas>
                 ) : (
                     <VisualizerDirectoryStyle
                         proofTree={proofTree}
