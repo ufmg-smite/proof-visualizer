@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
 import Canvas from './Canvas/VisualizerCanvas';
@@ -12,7 +12,7 @@ import { useAppSelector } from '../../store/hooks';
 import { selectDot, selectFileCount } from '../../store/features/file/fileSlice';
 import { selectStyle } from '../../store/features/proof/proofSlice';
 import { selectTheme } from '../../store/features/theme/themeSlice';
-import { NodeInfo } from '../../interfaces/interfaces';
+import { NodeInfo, NodeInterface, TreeNode } from '../../interfaces/interfaces';
 
 function ruleHelper(rule: string) {
     switch (rule.split(' ')[0]) {
@@ -168,23 +168,49 @@ function ruleHelper(rule: string) {
     }
 }
 
-const createTree = (list: any): any => {
+const createTree = (proof: NodeInterface[]): any => {
+    const list: TreeNode[] = proof.map((node) => {
+        const label = node.hiddenNodes?.length
+            ? `${node.id} : π ➜ ${node.conclusion}`
+            : `${node.id} : ${node.conclusion}`;
+        return {
+            id: node.id,
+            icon: 'graph',
+            label: label,
+            secondaryLabel: `${node.rule}`,
+            rule: node.rule,
+            args: node.args,
+            conclusion: node.conclusion,
+            parentId: node.parents[0],
+            descendants: node.descendants - 1,
+            nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
+            hiddenNodes: node.hiddenNodes ? node.hiddenNodes.map((node) => node.id) : [],
+            childNodes: [],
+            parentsId: node.parents,
+            hasCaret: Boolean(node.descendants - 1),
+        };
+    });
+
     const map: any = {},
         roots: any = [];
-    let node, i;
+    let node: TreeNode, i;
 
+    // Map the { [node id]: list array id }
     for (i = 0; i < list.length; i += 1) {
         map[list[i].id] = i;
-        list[i].childNodes = [];
     }
 
     for (i = 0; i < list.length; i += 1) {
         node = list[i];
-        if (node.parentId !== NaN && list[map[node.parentId]]) {
-            list[map[node.parentId]].childNodes.push(node);
-        } else {
-            roots.push(node);
-        }
+        // For all the parents
+        node.parentsId.forEach((parentId) => {
+            // If the parent is valid and exist in the list
+            if (!isNaN(parentId) && list[map[parentId]]) {
+                list[map[parentId]].childNodes.push(node);
+            } else {
+                roots.push(node);
+            }
+        });
     }
     return roots;
 };
@@ -215,22 +241,14 @@ const VisualizerStage: React.FC = () => {
     const fileID = useAppSelector(selectFileCount);
     const style = useAppSelector(selectStyle);
     const darkTheme = useAppSelector(selectTheme);
-    const [proof, letMap] = processDot(dot ? dot : '');
-    const proofTree = createTree(
-        Array.from(Array(proof.length).keys()).map((nodeId) => {
-            return {
-                id: nodeId,
-                icon: 'graph',
-                // parentId: proof[nodeId].parent,
-                label: proof[nodeId].rule + ' => ' + proof[nodeId].conclusion,
-                descendants: proof[nodeId].descendants,
-                childNodes: [],
-                rule: proof[nodeId].rule,
-                conclusion: proof[nodeId].conclusion,
-                args: proof[nodeId].args,
-            };
-        }),
-    );
+    const [[proof, letMap], setProofAndLet] = useState<[NodeInterface[], any]>([[], '']);
+    const [proofTree, setProofTree] = useState([]);
+    // Make sure that a new tree and proof is created only when a new dot is used
+    useEffect(() => {
+        const [newProof, newLetMap] = processDot(dot ? dot : '');
+        setProofAndLet([newProof, newLetMap]);
+        setProofTree(createTree(newProof));
+    }, [dot]);
     const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
     const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);
@@ -251,6 +269,7 @@ const VisualizerStage: React.FC = () => {
         nDescendants: 0,
         hiddenNodes: [],
     });
+    // TODO: Fazer a chamada do createTree aq dentro pra usar nso drawers, em vez de fazer dentro do canvas
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
     const translate = (s: string) => {
         let newS = s;
@@ -390,7 +409,7 @@ const VisualizerStage: React.FC = () => {
         <div onContextMenu={(e) => e.preventDefault()}>
             {proof.length > 1 ? (
                 style === 'graph' ? (
-                    <Canvas key={fileID} proofNodes={proof} openDrawer={openDrawer}></Canvas>
+                    <Canvas key={fileID} openDrawer={openDrawer}></Canvas>
                 ) : (
                     <VisualizerDirectoryStyle
                         proofTree={proofTree}

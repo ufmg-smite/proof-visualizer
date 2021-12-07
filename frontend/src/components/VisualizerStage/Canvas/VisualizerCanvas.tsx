@@ -238,6 +238,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     componentDidUpdate(prevProps: CanvasPropsAndRedux) {
         const { showingNodes, showingEdges } = this.state;
+
         // If the proof changed
         if (prevProps.proof !== this.props.proof) {
             // Update edges
@@ -394,6 +395,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 nHided: rootNode.hiddenNodes ? rootNode.hiddenNodes.length : 0,
                 hiddenNodes: rootNode.hiddenNodes ? rootNode.hiddenNodes.map((node) => node.id) : [],
                 childNodes: descendants,
+                parentsId: rootNode.parents,
                 hasCaret: Boolean(descendants.length),
             });
         }

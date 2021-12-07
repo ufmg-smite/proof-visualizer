@@ -57,7 +57,6 @@ interface NodeInfo {
 // CANVAS
 // Dividir essas interfaces em funções
 interface CanvasProps {
-    proofNodes: NodeInterface[];
     openDrawer: (nodeInfo: NodeInfo) => void;
 }
 
@@ -111,6 +110,7 @@ interface TreeNode {
     nHided: number;
     hiddenNodes: number[];
     childNodes: TreeNode[];
+    parentsId: number[];
     hasCaret: boolean | undefined;
 }
 
