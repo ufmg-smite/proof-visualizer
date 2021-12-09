@@ -222,6 +222,9 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         if (showingNodes[0]) {
             const [width, height] = [window.innerWidth, window.innerHeight - 50];
 
+            // Make sure every time the Canvas is mounted the props are passed to the showing nodes
+            this.updateEdgesAndFuncs();
+
             this.setState({
                 canvasSize: {
                     width,
@@ -237,42 +240,45 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     }
 
     componentDidUpdate(prevProps: CanvasPropsAndRedux) {
-        const { showingNodes, showingEdges } = this.state;
-
         // If the proof changed
         if (prevProps.proof !== this.props.proof) {
-            // Update edges
-            this.props.proof.forEach((node) => {
-                if (showingNodes[node.parents[0]]) {
-                    showingEdges[`${node.id}->${node.parents[0]}`] = Line(
-                        this.LineProps(
-                            `${node.id}->${parent[0]}`,
-                            showingNodes[node.id].props,
-                            showingNodes[node.parents[0]].props,
-                        ),
-                    );
-                }
-            });
-            Object.keys(showingNodes).forEach((nodeId: string) => {
-                // Make sure a function is updated once
-                if (!showingNodes[parseInt(nodeId)].props.setNodeOnFocus.length) {
-                    const { openDrawer } = this.props;
-
-                    // Set the node functions
-                    showingNodes[parseInt(nodeId)] = new Node({
-                        ...showingNodes[parseInt(nodeId)].props,
-                        setNodeOnFocus: this.setNodeOnFocus,
-                        toggleNodeSelection: this.toggleNodeSelection,
-                        updateNodePosition: this.updateNodePosition,
-                        openDrawer: openDrawer,
-                        onDragEnd: this.saveNodePosition,
-                        createTree: this.createTree,
-                    });
-                }
-            });
-
-            this.setState({ showingEdges: showingEdges });
+            this.updateEdgesAndFuncs();
         }
+    }
+
+    updateEdgesAndFuncs() {
+        const { showingNodes, showingEdges } = this.state;
+
+        // Update edges
+        this.props.proof.forEach((node) => {
+            if (showingNodes[node.parents[0]]) {
+                showingEdges[`${node.id}->${node.parents[0]}`] = Line(
+                    this.LineProps(
+                        `${node.id}->${node.parents[0]}`,
+                        showingNodes[node.id].props,
+                        showingNodes[node.parents[0]].props,
+                    ),
+                );
+            }
+        });
+        Object.keys(showingNodes).forEach((nodeId: string) => {
+            // Make sure a function is updated once
+            if (!showingNodes[parseInt(nodeId)].props.setNodeOnFocus.length) {
+                const { openDrawer } = this.props;
+
+                // Set the node functions
+                showingNodes[parseInt(nodeId)] = new Node({
+                    ...showingNodes[parseInt(nodeId)].props,
+                    setNodeOnFocus: this.setNodeOnFocus,
+                    toggleNodeSelection: this.toggleNodeSelection,
+                    updateNodePosition: this.updateNodePosition,
+                    openDrawer: openDrawer,
+                    onDragEnd: this.saveNodePosition,
+                    createTree: this.createTree,
+                });
+            }
+        });
+        this.setState({ showingEdges, showingNodes });
     }
 
     /* NODE MENU ACTIONS */
