@@ -186,6 +186,8 @@ export const proofSlice = createSlice({
                 case 'propositional':
                     state.view = 'propositional';
                     state.hiddenNodes = [
+                        // Hide nodes that aren't basics a
+                        // nos q n são basicos (folhas e o no raiz) e nem proposicionais (outra classe q n tem no .dot1)
                         state.proof
                             .filter(
                                 (node) =>

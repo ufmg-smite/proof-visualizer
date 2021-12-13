@@ -1,15 +1,12 @@
-import React, { useState } from 'react';
-import { Dispatch, SetStateAction } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Drawer, Classes, Position } from '@blueprintjs/core';
 
+import Let from './let';
+import '../../scss/Let.scss';
+import { letDrawerProps } from '../../interfaces/interfaces';
 import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { selectLetMap } from '../../store/features/proof/proofSlice';
-
-interface letDrawerProps {
-    drawerIsOpen: boolean;
-    setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
-}
 
 const indent = (s: string) => {
     let newS = s.replaceAll(' ', '\n');
@@ -36,6 +33,105 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
     const darkTheme = useAppSelector(selectTheme);
     const letMap = useAppSelector(selectLetMap);
     const [letMapS, setLetMapS] = useState(letMap);
+    const [width, setWidth] = useState(0);
+    const [lets, setLets] = useState<{ [key: string]: Let }>({});
+
+    // ComponentDidMount
+    useEffect(() => {
+        // Handler to call on window resize and set the value column width
+        function handleResize() {
+            // -22 from the fixed padding size
+            setWidth(document.getElementsByClassName('letMap-value-column')[0].clientWidth - 22);
+        }
+
+        // Add event listener
+        window.addEventListener('resize', handleResize);
+        // Call handler right away so state gets updated with initial window size
+        handleResize();
+
+        // Remove event listener on cleanup
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    const expandLet = (key: string) => {
+        // Only when is shrinked
+        if (!lets[key].isExpanded) {
+            lets[key].isExpanded = true;
+            const newLetMap = { ...letMapS };
+            newLetMap[lets[key].name] = lets[key].expandValue();
+            setLetMapS(newLetMap);
+        }
+    };
+
+    const revertLet = (key: string) => {
+        // Only when is expanded
+        if (lets[key].isExpanded) {
+            lets[key].isExpanded = false;
+            const newLetMap = { ...letMapS };
+            newLetMap[key] = letMap[key];
+            setLetMapS(newLetMap);
+        }
+    };
+
+    const renderLet = (key: string): JSX.Element => {
+        // Waits for the width to be updated and the DOM element to be updated
+        if (width) {
+            let currentLet = letMapS[key];
+
+            const indices: { [key: number]: string } = {};
+            // Finds all occurences of let in the currentLet
+            [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
+                if (match.index) indices[match.index] = match[0];
+            });
+
+            // If it's the first render (make sure that the lets obj is not calculated every time)
+            if (Object.keys(lets).length !== Object.keys(letMapS).length) {
+                lets[key] = new Let(key, currentLet, lets, indices);
+            }
+
+            // If doesn't fits, then indent
+            if (!lets[key].fitsTheWindow(width)) {
+                currentLet = indent(letMapS[key]);
+                console.log('indent');
+            }
+
+            const arr: any = [];
+            let start = 0;
+            // Slice the currentLet into an array with strings and JSX elements
+            Object.keys(indices).forEach((index, i, self) => {
+                const idx = Number(index);
+                const thisLet = indices[idx];
+
+                // Add the elements to the arr
+                arr.push(currentLet.substring(start, idx));
+                arr.push(<a className={darkTheme ? 'let-literal-or' : 'let-literal'}>{thisLet}</a>);
+                // Defines a new start
+                start = idx + thisLet.length;
+
+                // If it's the last let
+                if (i === self.length - 1) {
+                    arr.push(currentLet.substring(start, currentLet.length));
+                }
+            });
+
+            // If there is a let in this current let
+            if (Object.keys(indices).length) {
+                return (
+                    <span
+                        className="let-instance"
+                        onClick={() => {
+                            expandLet(key);
+                        }}
+                    >
+                        {arr}
+                    </span>
+                );
+            } else {
+                return <span>{currentLet}</span>;
+            }
+        }
+        return <></>;
+    };
 
     return (
         <Drawer
@@ -66,67 +162,27 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
                         <thead>
                             <tr>
                                 <th style={{ width: '100px' }}>Property</th>
-                                <th>Value</th>
+                                <th className="letMap-value-column">Value</th>
                                 <th style={{ width: '250px' }}>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {Object.keys(letMapS).map(function (key) {
+                            {Object.keys(letMapS).map((key) => {
                                 return (
                                     <tr key={key}>
                                         <td>
                                             <strong>{key}</strong>
                                         </td>
-                                        <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>
-                                            {indent(letMapS[key])
-                                                .split('\n')
-                                                .map((e) => {
-                                                    if (e.indexOf(' let') === -1) {
-                                                        return <span>{e + '\n'}</span>;
-                                                    } else {
-                                                        return (
-                                                            <span
-                                                                onClick={() => {
-                                                                    const newLetMap = { ...letMapS };
-                                                                    const i = newLetMap[key].indexOf(
-                                                                        e.replace(/^\s+|\s+$/g, ''),
-                                                                    );
-                                                                    const l = newLetMap[key].slice(i).split(/[ |)]/)[0];
-                                                                    newLetMap[key] = newLetMap[key].replace(
-                                                                        l,
-                                                                        letMap[l],
-                                                                    );
-                                                                    setLetMapS(newLetMap);
-                                                                }}
-                                                            >
-                                                                {e + '\n'}
-                                                            </span>
-                                                        );
-                                                    }
-                                                })}
-                                        </td>
+                                        <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{renderLet(key)}</td>
                                         <td style={{ width: '150px', display: 'flex', flexDirection: 'column' }}>
                                             <Button
-                                                onClick={() => {
-                                                    const newLetMap = { ...letMapS };
-                                                    let i = newLetMap[key].indexOf('let');
-                                                    while (i !== -1) {
-                                                        const l = newLetMap[key].slice(i).split(/[ |)]/)[0];
-                                                        newLetMap[key] = newLetMap[key].replace(l, letMap[l]);
-                                                        i = newLetMap[key].indexOf('let');
-                                                    }
-                                                    setLetMapS(newLetMap);
-                                                }}
+                                                onClick={() => expandLet(key)}
                                                 className="bp3-minimal"
                                                 icon="translate"
                                                 text="Expand"
                                             />
                                             <Button
-                                                onClick={() => {
-                                                    const newLetMap = { ...letMapS };
-                                                    newLetMap[key] = letMap[key];
-                                                    setLetMapS(newLetMap);
-                                                }}
+                                                onClick={() => revertLet(key)}
                                                 className="bp3-minimal"
                                                 icon="undo"
                                                 text="Revert"

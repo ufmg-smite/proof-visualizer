@@ -126,6 +126,12 @@ interface LineProps {
     points: Array<number>;
 }
 
+// LET DRAWER
+interface letDrawerProps {
+    drawerIsOpen: boolean;
+    setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
+}
+
 // REDUX STATES
 interface ReduxState {
     file: FileState;
@@ -173,6 +179,7 @@ export type {
     TreeNode,
     TreeProps,
     LineProps,
+    letDrawerProps,
     ReduxState,
     ProofState,
     FileState,
