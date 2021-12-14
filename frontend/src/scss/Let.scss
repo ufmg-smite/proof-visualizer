@@ -1,4 +1,7 @@
 .let-instance {
+    & > * {
+        white-space: pre;
+    }
     &:hover {
         cursor: pointer;
     }
@@ -6,7 +9,6 @@
         color: #FFC547;
     }
     .let-literal {
-        color: #fd8f00;
+        color: #fd8f00;       
     }
-    
 }

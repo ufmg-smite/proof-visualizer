@@ -78,7 +78,7 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
         if (width) {
             let currentLet = letMapS[key];
 
-            const indices: { [key: number]: string } = {};
+            let indices: { [key: number]: string } = {};
             // Finds all occurences of let in the currentLet
             [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
                 if (match.index) indices[match.index] = match[0];
@@ -92,7 +92,12 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
             // If doesn't fits, then indent
             if (!lets[key].fitsTheWindow(width)) {
                 currentLet = indent(letMapS[key]);
-                console.log('indent');
+
+                indices = {};
+                // Finds all occurences of let in the currentLet after indentation
+                [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
+                    if (match.index) indices[match.index] = match[0];
+                });
             }
 
             const arr: any = [];
@@ -174,7 +179,7 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
                                             <strong>{key}</strong>
                                         </td>
                                         <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{renderLet(key)}</td>
-                                        <td style={{ width: '150px', display: 'flex', flexDirection: 'column' }}>
+                                        <td style={{ width: '150px', height: '100%' }}>
                                             <Button
                                                 onClick={() => expandLet(key)}
                                                 className="bp3-minimal"
