@@ -34,30 +34,31 @@ function sixDigitColor(bgColor: string): string {
     return '000000';
 }
 
-export default class Node extends React.Component<NodeProps> {
-    constructor(props: NodeProps) {
-        super(props);
-        this.handleClick = this.handleClick.bind(this);
-    }
+const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
+    const {
+        id,
+        conclusion,
+        rule,
+        args,
+        x,
+        y,
+        nHided,
+        nDescendants,
+        hiddenNodes,
+        selected,
+        color,
+        setNodeOnFocus,
+        toggleNodeSelection,
+        updateNodePosition,
+        openDrawer,
+        onDragEnd,
+        createTree,
+    } = props;
 
-    handleClick(e: KonvaEventObject<MouseEvent>): void {
-        const {
-            rule,
-            conclusion,
-            args,
-            id,
-            nHided,
-            nDescendants,
-            hiddenNodes,
-            setNodeOnFocus,
-            toggleNodeSelection,
-            openDrawer,
-            createTree,
-        } = this.props;
-
+    const handleClick = (e: KonvaEventObject<MouseEvent>): void => {
         if (e.evt.button === 0) {
             if (e.evt.shiftKey) {
-                toggleNodeSelection(id, this.props);
+                toggleNodeSelection(id, props);
             } else {
                 openDrawer(
                     {
@@ -83,64 +84,62 @@ export default class Node extends React.Component<NodeProps> {
                 });
             }
         }
-    }
+    };
 
-    render(): JSX.Element {
-        const { rule, conclusion, id, x, y, selected, nHided, nDescendants, color, updateNodePosition } = this.props;
+    const bgColor = color;
+    const tagProps = {
+        fill: bgColor,
+        stroke: selected ? 'red' : 'black',
+        strokeWidth: selected ? 3 : 1,
+    };
+    const textProps = {
+        align: 'center',
+        fill: textColorFromBg(sixDigitColor(bgColor)),
+        fontSize: 15,
+        height: 35,
+        padding: 10,
+        width: 300,
+    };
+    const metaInfoProps = {
+        ...textProps,
+        width: 250,
+    };
 
-        const bgColor = color;
-        const tagProps = {
-            fill: bgColor,
-            stroke: selected ? 'red' : 'black',
-            strokeWidth: selected ? 3 : 1,
-        };
-        const textProps = {
-            align: 'center',
-            fill: textColorFromBg(sixDigitColor(bgColor)),
-            fontSize: 15,
-            height: 35,
-            padding: 10,
-            width: 300,
-        };
-        const metaInfoProps = {
-            ...textProps,
-            width: 250,
-        };
+    const nHidedStr = nHided ? `#hidden: ${nHided}` : '';
+    const nDescendantsStr = ` #descendants: ${nDescendants}`;
+    const ruleTxt = nHided ? 'π' : rule;
 
-        const nHidedStr = nHided ? `#hidden: ${nHided}` : '';
-        const nDescendantsStr = ` #descendants: ${nDescendants}`;
-        const ruleTxt = nHided ? 'π' : rule;
+    return (
+        <Group
+            draggable
+            id={id.toString()}
+            key={id}
+            onDragMove={(e) => {
+                updateNodePosition(id, e.target.attrs.x, e.target.attrs.y);
+            }}
+            onDragEnd={onDragEnd}
+            x={x}
+            y={y}
+            onClick={handleClick}
+        >
+            <Label x={0} y={0}>
+                <Tag {...tagProps} />
+                <Text {...textProps} text={conclusion} />
+            </Label>
+            <Label x={0} y={35}>
+                <Tag {...tagProps} />
+                <Text {...textProps} text={ruleTxt} />
+            </Label>
+            <Label x={0} y={70} {...{ align: 'right' }}>
+                <Tag {...tagProps} />
+                <Text {...{ ...metaInfoProps, width: 50 }} text={id.toString()} />
+            </Label>
+            <Label x={50} y={70}>
+                <Tag {...tagProps} />
+                <Text {...metaInfoProps} text={nHidedStr + nDescendantsStr} />
+            </Label>
+        </Group>
+    );
+};
 
-        return (
-            <Group
-                draggable
-                id={id.toString()}
-                key={id}
-                onDragMove={(e) => {
-                    updateNodePosition(id, e.target.attrs.x, e.target.attrs.y);
-                }}
-                onDragEnd={this.props.onDragEnd}
-                x={x}
-                y={y}
-                onClick={this.handleClick}
-            >
-                <Label x={0} y={0}>
-                    <Tag {...tagProps} />
-                    <Text {...textProps} text={conclusion} />
-                </Label>
-                <Label x={0} y={35}>
-                    <Tag {...tagProps} />
-                    <Text {...textProps} text={ruleTxt} />
-                </Label>
-                <Label x={0} y={70} {...{ align: 'right' }}>
-                    <Tag {...tagProps} />
-                    <Text {...{ ...metaInfoProps, width: 50 }} text={id.toString()} />
-                </Label>
-                <Label x={50} y={70}>
-                    <Tag {...tagProps} />
-                    <Text {...metaInfoProps} text={nHidedStr + nDescendantsStr} />
-                </Label>
-            </Group>
-        );
-    }
-}
+export default Node;

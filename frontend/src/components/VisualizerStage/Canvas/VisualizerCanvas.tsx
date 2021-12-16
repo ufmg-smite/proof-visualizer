@@ -2,8 +2,7 @@ import React, { Component } from 'react';
 import { Stage, Layer } from 'react-konva';
 import Konva from 'konva';
 import dagre from 'dagre';
-// import Node from './VisualizerNode';
-import Node from './NewNode';
+import Node from './VisualizerNode';
 import Line from './VisualizerLine';
 import Menu from './VisualizerMenu';
 
@@ -20,7 +19,6 @@ import {
 import '../../../scss/VisualizerCanvas.scss';
 
 import { CanvasProps, CanvasState } from '../../../interfaces/interfaces';
-
 import { connect } from 'react-redux';
 import { selectProof, selectVisualInfo } from '../../../store/features/proof/proofSlice';
 import {

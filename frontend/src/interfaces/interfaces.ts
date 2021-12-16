@@ -1,6 +1,4 @@
 import { Dispatch, SetStateAction } from 'react';
-import Nodee from '../components/VisualizerStage/Canvas/NewNode';
-import Node from '../components/VisualizerStage/Canvas/VisualizerNode';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { TreeNodeInfo } from '@blueprintjs/core';
 
@@ -41,8 +39,6 @@ interface NodeProps {
     openDrawer: (nodeInfo: NodeInfo, tree?: Array<TreeNode>) => void;
     onDragEnd: () => void;
     createTree: (id: number) => TreeNode[];
-
-    tree?: Array<TreeNode>;
 }
 
 // Info passed to the info drawer
