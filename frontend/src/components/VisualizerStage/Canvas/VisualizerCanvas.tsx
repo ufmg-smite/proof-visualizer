@@ -2,7 +2,8 @@ import React, { Component } from 'react';
 import { Stage, Layer } from 'react-konva';
 import Konva from 'konva';
 import dagre from 'dagre';
-import Node from './VisualizerNode';
+// import Node from './VisualizerNode';
+import Node from './NewNode';
 import Line from './VisualizerLine';
 import Menu from './VisualizerMenu';
 
@@ -156,9 +157,10 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         if (proofChanged || visualInfoChanged || isNewFile) {
             // Create the showing nodes array
             const showingNodes = props.proof.reduce(
-                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node, props.visualInfo))), ac),
+                (ac: any, node) => ((ac[node.id] = <Node {...Canvas.newNodeProps(node, props.visualInfo)} />), ac),
                 {},
             );
+
             // If has nodes and can render
             if (showingNodes[0] && Canvas.renderData.count < 2) {
                 Canvas.renderData.count++;
@@ -182,11 +184,15 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                     try {
                         const { x, y } = g.node(v);
                         const key = parseInt(v);
-                        showingNodes[key] = new Node({
-                            ...showingNodes[key].props,
-                            x: x - xOffset,
-                            y: y - yOffset,
-                        });
+                        showingNodes[key] = (
+                            <Node
+                                {...{
+                                    ...showingNodes[key].props,
+                                    x: x - xOffset,
+                                    y: y - yOffset,
+                                }}
+                            />
+                        );
                     } catch (e) {
                         console.log(e);
                     }
@@ -209,12 +215,12 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     componentDidMount(): void {
         const { showingNodes } = this.state;
-        const { proof } = this.props;
+        const { proof, visualInfo } = this.props;
 
         this.setState({
             proof: proof,
             showingNodes: proof.reduce(
-                (ac: any, node) => ((ac[node.id] = new Node(Canvas.newNodeProps(node, this.props.visualInfo))), ac),
+                (ac: any, node) => ((ac[node.id] = <Node {...Canvas.newNodeProps(node, visualInfo)} />), ac),
                 {},
             ),
         });
@@ -267,15 +273,19 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 const { openDrawer } = this.props;
 
                 // Set the node functions
-                showingNodes[parseInt(nodeId)] = new Node({
-                    ...showingNodes[parseInt(nodeId)].props,
-                    setNodeOnFocus: this.setNodeOnFocus,
-                    toggleNodeSelection: this.toggleNodeSelection,
-                    updateNodePosition: this.updateNodePosition,
-                    openDrawer: openDrawer,
-                    onDragEnd: this.saveNodePosition,
-                    createTree: this.createTree,
-                });
+                showingNodes[parseInt(nodeId)] = (
+                    <Node
+                        {...{
+                            ...showingNodes[parseInt(nodeId)].props,
+                            setNodeOnFocus: this.setNodeOnFocus,
+                            toggleNodeSelection: this.toggleNodeSelection,
+                            updateNodePosition: this.updateNodePosition,
+                            openDrawer: openDrawer,
+                            onDragEnd: this.saveNodePosition,
+                            createTree: this.createTree,
+                        }}
+                    />
+                );
             }
         });
         this.setState({ showingEdges, showingNodes });
@@ -429,7 +439,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     updateNodePosition = (key: number, x: number, y: number): void => {
         const { showingNodes, showingEdges } = this.state;
 
-        showingNodes[key] = new Node({ ...showingNodes[key].props, x, y });
+        showingNodes[key] = <Node {...{ ...showingNodes[key].props, x, y }} />;
 
         Object.keys(showingEdges)
             .filter((edgeKey) => edgeKey.indexOf(key.toString()) !== -1)
@@ -478,7 +488,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                             })}
                         {Object.keys(showingNodes).length > 0 &&
                             Object.keys(showingNodes).map(
-                                (value: string): JSX.Element => showingNodes[parseInt(value)].render(),
+                                (value: string): JSX.Element => showingNodes[parseInt(value)],
                             )}
                     </Layer>
                 </Stage>

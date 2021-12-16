@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction } from 'react';
+import Nodee from '../components/VisualizerStage/Canvas/NewNode';
 import Node from '../components/VisualizerStage/Canvas/VisualizerNode';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { TreeNodeInfo } from '@blueprintjs/core';
@@ -72,7 +73,7 @@ interface CanvasPropsAndRedux extends CanvasProps {
 interface CanvasState {
     canvasSize: { width: number; height: number };
     stage: { stageScale: number; stageX: number; stageY: number };
-    showingNodes: { [id: number]: Node };
+    showingNodes: { [id: number]: JSX.Element };
     showingEdges: { [id: string]: JSX.Element };
     nodeOnFocus: number;
     nodesSelected: Array<number>;
