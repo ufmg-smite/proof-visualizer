@@ -34,20 +34,19 @@ export const proofSlice = createSlice({
             state.view = isJSON ? proofJSON.view : 'full';
             state.hiddenNodes = isJSON ? proofJSON.hiddenNodes : [];
             state.letMap = letMap;
-            state.visualInfo = isJSON
-                ? proofJSON.visualInfo
-                : state.proof.reduce(
-                      (ac: any, proofNode) => (
-                          (ac[proofNode.id] = {
-                              color: '#fff',
-                              x: 0,
-                              y: 0,
-                              selected: false,
-                          }),
-                          ac
-                      ),
-                      {},
-                  );
+            if (isJSON) state.visualInfo = proofJSON.visualInfo;
+            else {
+                const visualInfo: ProofState['visualInfo'] = {};
+                state.proof.forEach((node) => {
+                    visualInfo[node.id] = {
+                        color: '#fff',
+                        x: 0,
+                        y: 0,
+                        selected: false,
+                    };
+                });
+                state.visualInfo = visualInfo;
+            }
         },
         hideNodes: (state, action: PayloadAction<number[]>) => {
             const toHideNodes = action.payload.filter(
@@ -97,10 +96,14 @@ export const proofSlice = createSlice({
                 ])
                 .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
 
-            // Set the visual info for the new pi node
+            // Set the visual info for the new pi node and the root node
             const piNodeId = Object.keys(state.visualInfo).length;
             state.visualInfo = {
                 ...state.visualInfo,
+                [action.payload]: {
+                    ...state.visualInfo[action.payload],
+                    selected: false,
+                },
                 [piNodeId]: {
                     color: '#555',
                     x: 0,

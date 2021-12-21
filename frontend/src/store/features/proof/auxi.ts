@@ -1,4 +1,4 @@
-import { NodeInterface } from '../../../interfaces/interfaces';
+import { NodeInterface, ProofState } from '../../../interfaces/interfaces';
 
 function removeEscapedCharacters(s: string): string {
     let newS = '';
@@ -21,8 +21,8 @@ function removeEscapedCharacters(s: string): string {
     return newS;
 }
 
-export function processDot(dot: string): [NodeInterface[], any] {
-    const nodes: Array<NodeInterface> = [
+export function processDot(dot: string): [NodeInterface[], ProofState['letMap']] {
+    const nodes: NodeInterface[] = [
         {
             id: 0,
             conclusion: '',
@@ -34,7 +34,7 @@ export function processDot(dot: string): [NodeInterface[], any] {
             descendants: 0,
         },
     ];
-    let comment: any = dot.slice(dot.indexOf('comment='));
+    let comment: string | null = dot.slice(dot.indexOf('comment='));
     comment = comment
         ? removeEscapedCharacters(
               removeEscapedCharacters(comment.slice(comment.indexOf('=') + 2, comment.indexOf(';') - 1)),
@@ -100,14 +100,15 @@ export function processDot(dot: string): [NodeInterface[], any] {
     return comment ? [nodes, JSON.parse(comment)['letMap']] : [nodes, {}];
 }
 
-const ancestors = (proof: NodeInterface[], nodeId: number): number[] => {
-    if (!isNaN(nodeId)) {
-        return proof[nodeId].parents.concat(
-            proof[nodeId].parents.reduce((acc: number[], parentId) => acc.concat(ancestors(proof, parentId)), []),
-        );
-    }
-    return [];
-};
+// DEPRECATED
+// const ancestors = (proof: NodeInterface[], nodeId: number): number[] => {
+//     if (!isNaN(nodeId)) {
+//         return proof[nodeId].parents.concat(
+//             proof[nodeId].parents.reduce((acc: number[], parentId) => acc.concat(ancestors(proof, parentId)), []),
+//         );
+//     }
+//     return [];
+// };
 
 export const piNodeParents = (proof: NodeInterface[], hiddenNodesArray: number[]): number[] => {
     const parents = hiddenNodesArray

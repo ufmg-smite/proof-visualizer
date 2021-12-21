@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button, Drawer, Classes, Position } from '@blueprintjs/core';
 
 import Let from './let';
@@ -34,7 +34,8 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
     const letMap = useAppSelector(selectLetMap);
     const [letMapS, setLetMapS] = useState(letMap);
     const [width, setWidth] = useState(0);
-    const [lets, setLets] = useState<{ [key: string]: Let }>({});
+    const letsRef = useRef<{ [key: string]: Let }>({});
+    // const [lets, setLets] = useState<{ [key: string]: Let }>({});
 
     // ComponentDidMount
     useEffect(() => {
@@ -54,6 +55,8 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
     }, []);
 
     const expandLet = (key: string) => {
+        const lets = letsRef.current;
+
         // Only when is shrinked
         if (!lets[key].isExpanded) {
             lets[key].isExpanded = true;
@@ -64,6 +67,8 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
     };
 
     const revertLet = (key: string) => {
+        const lets = letsRef.current;
+
         // Only when is expanded
         if (lets[key].isExpanded) {
             lets[key].isExpanded = false;
@@ -74,6 +79,8 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
     };
 
     const renderLet = (key: string): JSX.Element => {
+        const lets = letsRef.current;
+
         // Waits for the width to be updated and the DOM element to be updated
         if (width) {
             let currentLet = letMapS[key];
@@ -100,7 +107,7 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
                 });
             }
 
-            const arr: any = [];
+            const arr: (JSX.Element | string)[] = [];
             let start = 0;
             // Slice the currentLet into an array with strings and JSX elements
             Object.keys(indices).forEach((index, i, self) => {

@@ -58,7 +58,7 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
     const handleClick = (e: KonvaEventObject<MouseEvent>): void => {
         if (e.evt.button === 0) {
             if (e.evt.shiftKey) {
-                toggleNodeSelection(id, props);
+                toggleNodeSelection(id);
             } else {
                 openDrawer(
                     {
@@ -100,10 +100,7 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
         padding: 10,
         width: 300,
     };
-    const metaInfoProps = {
-        ...textProps,
-        width: 250,
-    };
+    const metaInfoProps = { ...textProps, width: 250 };
 
     const nHidedStr = nHided ? `#hidden: ${nHided}` : '';
     const nDescendantsStr = ` #descendants: ${nDescendants}`;
