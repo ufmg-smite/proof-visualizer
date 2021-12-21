@@ -32,17 +32,23 @@ const indent = (s: string) => {
 const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: letDrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
     const letMap = useAppSelector(selectLetMap);
-    const [letMapS, setLetMapS] = useState(letMap);
-    const [width, setWidth] = useState(0);
+    const [letMapS, setLetMapS] = useState({ ...letMap });
+    // const [width, setWidth] = useState(0);
+    const [resizeMode, setResizeMode] = useState(0);
     const letsRef = useRef<{ [key: string]: Let }>({});
-    // const [lets, setLets] = useState<{ [key: string]: Let }>({});
+    const widthRef = useRef(0);
 
     // ComponentDidMount
     useEffect(() => {
         // Handler to call on window resize and set the value column width
         function handleResize() {
+            const width = widthRef.current;
+
             // -22 from the fixed padding size
-            setWidth(document.getElementsByClassName('letMap-value-column')[0].clientWidth - 22);
+            const newWidth = document.getElementsByClassName('letMap-value-column')[0].clientWidth - 22;
+            width === newWidth ? setResizeMode(1) : width > newWidth ? setResizeMode(0) : setResizeMode(2);
+
+            widthRef.current = newWidth;
         }
 
         // Add event listener
@@ -60,9 +66,8 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
         // Only when is shrinked
         if (!lets[key].isExpanded) {
             lets[key].isExpanded = true;
-            const newLetMap = { ...letMapS };
-            newLetMap[lets[key].name] = lets[key].expandValue();
-            setLetMapS(newLetMap);
+            letMapS[key] = lets[key].expandValue(true);
+            setLetMapS({ ...letMapS });
         }
     };
 
@@ -72,14 +77,14 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
         // Only when is expanded
         if (lets[key].isExpanded) {
             lets[key].isExpanded = false;
-            const newLetMap = { ...letMapS };
-            newLetMap[key] = letMap[key];
-            setLetMapS(newLetMap);
+            letMapS[key] = lets[key].shrinkValue();
+            setLetMapS({ ...letMapS });
         }
     };
 
     const renderLet = (key: string): JSX.Element => {
         const lets = letsRef.current;
+        const width = widthRef.current;
 
         // Waits for the width to be updated and the DOM element to be updated
         if (width) {
@@ -98,13 +103,28 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
 
             // If doesn't fits, then indent
             if (!lets[key].fitsTheWindow(width)) {
-                currentLet = indent(letMapS[key]);
+                currentLet = lets[key].indent(width);
+                letMapS[key] = currentLet;
 
                 indices = {};
                 // Finds all occurences of let in the currentLet after indentation
                 [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
                     if (match.index) indices[match.index] = match[0];
                 });
+            }
+            // If fits
+            else {
+                // Only in the momment the page size is growing
+                if (resizeMode === 2 && lets[key].lines.length > 1) {
+                    currentLet = lets[key].groupUp(width);
+                    letMapS[key] = currentLet;
+
+                    indices = {};
+                    // Finds all occurences of let in the currentLet after indentation
+                    [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
+                        if (match.index) indices[match.index] = match[0];
+                    });
+                }
             }
 
             const arr: (JSX.Element | string)[] = [];
@@ -139,7 +159,7 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
                     </span>
                 );
             } else {
-                return <span>{currentLet}</span>;
+                return <span className="let-instance">{currentLet}</span>;
             }
         }
         return <></>;
