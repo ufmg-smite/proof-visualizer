@@ -100,16 +100,6 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap']]
     return comment ? [nodes, JSON.parse(comment)['letMap']] : [nodes, {}];
 }
 
-// DEPRECATED
-// const ancestors = (proof: NodeInterface[], nodeId: number): number[] => {
-//     if (!isNaN(nodeId)) {
-//         return proof[nodeId].parents.concat(
-//             proof[nodeId].parents.reduce((acc: number[], parentId) => acc.concat(ancestors(proof, parentId)), []),
-//         );
-//     }
-//     return [];
-// };
-
 export const piNodeParents = (proof: NodeInterface[], hiddenNodesArray: number[]): number[] => {
     const parents = hiddenNodesArray
         // Concat all the parents

@@ -155,8 +155,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         if (proofChanged || visualInfoChanged || isNewFile) {
             // Create the showing nodes array
             const showingNodes: CanvasState['showingNodes'] = {};
-            props.proof.forEach((node) => {
-                showingNodes[node.id] = <Node {...Canvas.newNodeProps(node, props.visualInfo)} />;
+            props.proof.forEach((node, id) => {
+                showingNodes[node.id] = <Node key={id} {...Canvas.newNodeProps(node, props.visualInfo)} />;
             });
 
             // If has nodes and can render
@@ -216,8 +216,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const { proof, visualInfo } = this.props;
 
         const newShowingNodes: CanvasState['showingNodes'] = {};
-        proof.forEach((node) => {
-            newShowingNodes[node.id] = <Node {...Canvas.newNodeProps(node, visualInfo)} />;
+        proof.forEach((node, id) => {
+            newShowingNodes[node.id] = <Node key={id} {...Canvas.newNodeProps(node, visualInfo)} />;
         });
 
         this.setState({ proof: proof, showingNodes: newShowingNodes });

@@ -8,27 +8,6 @@ import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { selectLetMap } from '../../store/features/proof/proofSlice';
 
-const indent = (s: string) => {
-    let newS = s.replaceAll(' ', '\n');
-    let i = 0;
-    let pCounter = 0;
-    while (i < newS.length) {
-        if (newS[i] === '(') pCounter++;
-        else if (newS[i] === ')') pCounter--;
-        else if (newS[i] === '\n') {
-            if (newS[i + 1] === ')') {
-                newS = [newS.slice(0, i + 1), '    '.repeat(pCounter - 1), newS.slice(i + 1)].join('');
-                i += pCounter - 1;
-            } else {
-                newS = [newS.slice(0, i + 1), '    '.repeat(pCounter), newS.slice(i + 1)].join('');
-                i += pCounter;
-            }
-        }
-        i++;
-    }
-    return newS;
-};
-
 const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: letDrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
     const letMap = useAppSelector(selectLetMap);
