@@ -45,7 +45,7 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
             const width = widthRef.current;
 
             // -22 from the fixed padding size
-            const newWidth = document.getElementsByClassName('letMap-value-column')[0].clientWidth - 22;
+            const newWidth = document.getElementsByClassName('letMap-value-column')[0].clientWidth - 24;
             width === newWidth ? setResizeMode(1) : width > newWidth ? setResizeMode(0) : setResizeMode(2);
 
             widthRef.current = newWidth;
@@ -103,7 +103,7 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
 
             // If doesn't fits, then indent
             if (!lets[key].fitsTheWindow(width)) {
-                currentLet = lets[key].indent(width);
+                currentLet = lets[key].indent(width, true);
                 letMapS[key] = currentLet;
 
                 indices = {};
@@ -114,9 +114,17 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
             }
             // If fits
             else {
-                // Only in the momment the page size is growing
-                if (resizeMode === 2 && lets[key].lines.length > 1) {
-                    currentLet = lets[key].groupUp(width);
+                // Only in the momment the page size is growing and the line is broken
+                if (resizeMode >= 0 && lets[key].lines.length > 1) {
+                    // currentLet = lets[key].groupUp(width);
+                    // Reset the line
+                    lets[key].lines = [
+                        { value: lets[key].isExpanded ? lets[key].expandValue() : lets[key].value, indentLevel: 0 },
+                    ];
+                    lets[key].biggerID = 0;
+
+                    // Indent it again
+                    currentLet = lets[key].indent(width, false);
                     letMapS[key] = currentLet;
 
                     indices = {};

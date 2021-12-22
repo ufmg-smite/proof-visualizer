@@ -79,8 +79,10 @@ class Let {
         return size < windowSize;
     };
 
-    indent = (windowSize: number): string => {
-        let someDoesntFit = true;
+    indent = (windowSize: number, mode: boolean): string => {
+        let someDoesntFit;
+        if (mode) someDoesntFit = true;
+        else someDoesntFit = this.getTextWidth(this.lines[this.biggerID].value) < windowSize ? false : true;
 
         // While there are lines that doesn't fit the window size
         while (someDoesntFit) {
@@ -170,6 +172,7 @@ class Let {
         const thisLevel = lines[biggerID].indentLevel;
         let i = biggerID,
             k = biggerID;
+
         // Search the cases bellow
         for (i; i < lines.length; i++) {
             if (i !== biggerID && lines[i + 1] !== undefined && lines[i + 1].indentLevel < thisLevel - 1) break;
@@ -184,7 +187,8 @@ class Let {
         newValue = '';
         // Creates the new string
         for (let j = k; j <= i; j++) {
-            newValue += lines[j].value + (j < i - 1 ? ' ' : '');
+            newValue +=
+                lines[j].value + (j < i - 1 && lines[j + 1] !== undefined && lines[j + 1].value !== ')' ? ' ' : '');
         }
 
         const newSize = this.getTextWidth(newValue);
@@ -192,7 +196,7 @@ class Let {
         // Verifies if the new string fits the window
         if (newSize < windowSize) {
             // Substitute the lines for the new one
-            this.lines.splice(k, i - k + 1, { value: newValue, indentLevel: thisLevel - 1 });
+            this.lines.splice(k, i - k + 1, { value: newValue, indentLevel: thisLevel ? thisLevel - 1 : thisLevel });
             this.biggerID = k;
         }
         return this.lines.reduce((ac, line) => (ac += `${'    '.repeat(line.indentLevel)}${line.value}\n`), '');
