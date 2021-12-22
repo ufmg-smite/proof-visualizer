@@ -107,7 +107,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
     };
 
     const runCommands = (command: string): void => {
-        const commands = command.split(' ');
+        const commands = command.trim().split(/ +/);
         let hiddenIds: number[];
 
         // View: basic | propositional | full

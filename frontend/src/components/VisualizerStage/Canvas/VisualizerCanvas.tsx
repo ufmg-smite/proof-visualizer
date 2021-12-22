@@ -154,10 +154,10 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         // If the proof or visual info changed or we have a new file being uploaded
         if (proofChanged || visualInfoChanged || isNewFile) {
             // Create the showing nodes array
-            const showingNodes = props.proof.reduce(
-                (ac: any, node) => ((ac[node.id] = <Node {...Canvas.newNodeProps(node, props.visualInfo)} />), ac),
-                {},
-            );
+            const showingNodes: CanvasState['showingNodes'] = {};
+            props.proof.forEach((node) => {
+                showingNodes[node.id] = <Node {...Canvas.newNodeProps(node, props.visualInfo)} />;
+            });
 
             // If has nodes and can render
             if (showingNodes[0] && Canvas.renderData.count < 2) {
@@ -215,13 +215,12 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const { showingNodes } = this.state;
         const { proof, visualInfo } = this.props;
 
-        this.setState({
-            proof: proof,
-            showingNodes: proof.reduce(
-                (ac: any, node) => ((ac[node.id] = <Node {...Canvas.newNodeProps(node, visualInfo)} />), ac),
-                {},
-            ),
+        const newShowingNodes: CanvasState['showingNodes'] = {};
+        proof.forEach((node) => {
+            newShowingNodes[node.id] = <Node {...Canvas.newNodeProps(node, visualInfo)} />;
         });
+
+        this.setState({ proof: proof, showingNodes: newShowingNodes });
 
         if (showingNodes[0]) {
             const [width, height] = [window.innerWidth, window.innerHeight - 50];
@@ -252,9 +251,10 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     updateEdgesAndFuncs() {
         const { showingNodes, showingEdges } = this.state;
+        const { proof } = this.props;
 
         // Update edges
-        this.props.proof.forEach((node) => {
+        proof.forEach((node) => {
             if (showingNodes[node.parents[0]]) {
                 showingEdges[`${node.id}->${node.parents[0]}`] = Line(
                     this.LineProps(
@@ -326,6 +326,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     changeNodeColor = (color: string): void => {
         const { showingNodes, nodesSelected, nodeOnFocus } = this.state;
+        const { setVisualInfo } = this.props;
         let { visualInfo } = this.props;
 
         // Save the current position
@@ -346,22 +347,22 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             };
         }
 
-        this.props.setVisualInfo(visualInfo);
+        setVisualInfo(visualInfo);
         this.setState({ nodesSelected: [] });
     };
 
     toggleNodeSelection = (id: number): void => {
         let { nodesSelected } = this.state;
-        const { visualInfo } = this.props;
+        const { visualInfo, setVisualInfo } = this.props;
 
-        if (this.props.visualInfo[id].selected) {
+        if (visualInfo[id].selected) {
             nodesSelected = nodesSelected.filter((nodeId) => nodeId !== id);
         } else {
             nodesSelected.push(id);
         }
 
         // Save the current position
-        this.props.setVisualInfo({
+        setVisualInfo({
             ...visualInfo,
             [id]: {
                 ...visualInfo[id],
@@ -470,6 +471,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 ></Menu>
                 <Stage
                     draggable
+                    onDragMove={() => null}
+                    onDragEnd={() => null}
                     width={canvasSize.width}
                     height={canvasSize.height}
                     onWheel={(e) => this.setState({ stage: handleWheel(e) })}
