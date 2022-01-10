@@ -67,6 +67,36 @@ class Let {
         return letText;
     };
 
+    expandPartialy = (externalRef: Let, letIdx: number): string => {
+        const key = externalRef.name;
+        const indentedText = this.printLines();
+
+        let lastLine = 0,
+            count = 0,
+            i;
+        // Iterates through the first lines until the point we reach the changed line
+        for (i = 0; i < this.lines.length; i++) {
+            lastLine = this.lines[i].value.length + 4 * this.lines[i].indentLevel + 1;
+            count += lastLine;
+            if (letIdx < count) break;
+        }
+        // New index (points to the start of the line content (ignores initial indent white space))
+        const newIdx = letIdx - (count - lastLine + 4 * this.lines[i].indentLevel);
+
+        // Update the new line to the new content
+        this.lines[i].value =
+            this.lines[i].value.substring(0, newIdx) +
+            externalRef.value +
+            this.lines[i].value.substring(newIdx + key.length, this.lines[i].value.length);
+
+        // Returns the indented text with the content to be replaced
+        return (
+            indentedText.substring(0, letIdx) +
+            externalRef.value +
+            indentedText.substring(letIdx + key.length, indentedText.length)
+        );
+    };
+
     shrinkValue = (): string => {
         this.lines = [{ value: this.value, indentLevel: 0 }];
         this.biggerID = 0;
@@ -162,43 +192,22 @@ class Let {
             // If the biggest size fits the window or no new line was found (minimal indentation)
             if (biggestSize < windowSize || newLines.length < 1) someDoesntFit = false;
         }
-        return this.lines.reduce((ac, line) => (ac += `${'    '.repeat(line.indentLevel)}${line.value}\n`), '');
+        return this.printLines();
     };
 
-    groupUp = (windowSize: number): string => {
-        let newValue = '';
+    groupUp = (): string => {
+        let original = '';
+        // Group up all the lines into one single string
+        this.lines.forEach((line, id, self) => {
+            original += line.value;
+            if (id < self.length - 1 && self[id + 1].value !== ')') {
+                original += ' ';
+            }
+        });
+        return original;
+    };
 
-        const { lines, biggerID } = this;
-        const thisLevel = lines[biggerID].indentLevel;
-        let i = biggerID,
-            k = biggerID;
-
-        // Search the cases bellow
-        for (i; i < lines.length; i++) {
-            if (i !== biggerID && lines[i + 1] !== undefined && lines[i + 1].indentLevel < thisLevel - 1) break;
-        }
-        // Search the cases above
-        for (k; k >= 0; k--) {
-            if (k !== biggerID && lines[k - 1] !== undefined && lines[k - 1].indentLevel < thisLevel - 1) break;
-        }
-        if (i === lines.length) i--;
-        if (k === -1) k = 0;
-
-        newValue = '';
-        // Creates the new string
-        for (let j = k; j <= i; j++) {
-            newValue +=
-                lines[j].value + (j < i - 1 && lines[j + 1] !== undefined && lines[j + 1].value !== ')' ? ' ' : '');
-        }
-
-        const newSize = this.getTextWidth(newValue);
-
-        // Verifies if the new string fits the window
-        if (newSize < windowSize) {
-            // Substitute the lines for the new one
-            this.lines.splice(k, i - k + 1, { value: newValue, indentLevel: thisLevel ? thisLevel - 1 : thisLevel });
-            this.biggerID = k;
-        }
+    printLines = (): string => {
         return this.lines.reduce((ac, line) => (ac += `${'    '.repeat(line.indentLevel)}${line.value}\n`), '');
     };
 }

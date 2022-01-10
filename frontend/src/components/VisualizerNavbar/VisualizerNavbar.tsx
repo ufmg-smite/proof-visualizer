@@ -277,6 +277,89 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 />
             </Menu>
         ),
+        help: (
+            <Menu>
+                <MenuItem text="/view">
+                    <div className="cmd-desc">
+                        <div>
+                            <u className="title">Desc.:</u> Command that changes the view mode.
+                        </div>
+                        <div>
+                            <u className="title">Pattern:</u> /view {'<option>'}.
+                        </div>
+                        <div>
+                            <u className="title">Option:</u> basic, propositional, full.
+                        </div>
+                    </div>
+                </MenuItem>
+                <MenuItem text="/select">
+                    <div className="cmd-desc">
+                        <div>
+                            <u className="title">Desc.:</u> Command that select a group of nodes.
+                        </div>
+                        <div>
+                            <u className="title">Pattern:</u> /select {'<option>'}.
+                        </div>
+                        <div>
+                            <u className="title">Option:</u> a list of node {`id's`} separated by spaces (eg.: 1 15 6
+                            3).
+                        </div>
+                    </div>
+                </MenuItem>
+                <MenuItem text="/color">
+                    <div className="cmd-desc">
+                        <div>
+                            <u className="title">Desc.:</u> Command that changes the color of a selected nodes group.
+                        </div>
+                        <div>
+                            <u className="title">Pattern:</u> /color {'<option>'}.
+                        </div>
+                        <div>
+                            <u className="title">Option:</u> a valid hex color notation (eg.: #A7B).
+                        </div>
+                    </div>
+                </MenuItem>
+                <MenuItem text="/hide">
+                    <div className="cmd-desc">
+                        <div>
+                            <u className="title">Desc.:</u> Command that try to fold (hide) a group of selected nodes.
+                        </div>
+                        <div>
+                            <u className="title">Pattern:</u> /hide.
+                        </div>
+                        <div>
+                            <u className="title">Prerequisites:</u> an group of nodes being selected.
+                        </div>
+                    </div>
+                </MenuItem>
+                <MenuItem text="/fold">
+                    <div className="cmd-desc">
+                        <div>
+                            <u className="title">Desc.:</u> Command that fold all descendants of a specific node.
+                        </div>
+                        <div>
+                            <u className="title">Pattern:</u> /fold {'<option>'}.
+                        </div>
+                        <div>
+                            <u className="title">Option:</u> a valid node id.
+                        </div>
+                    </div>
+                </MenuItem>
+                <MenuItem text="/unfold">
+                    <div className="cmd-desc">
+                        <div>
+                            <u className="title">Desc.:</u> Command that unfold a specific pi node.
+                        </div>
+                        <div>
+                            <u className="title">Pattern:</u> /unfold {'<option>'}.
+                        </div>
+                        <div>
+                            <u className="title">Option:</u> a valid pi node id.
+                        </div>
+                    </div>
+                </MenuItem>
+            </Menu>
+        ),
     };
 
     return (
@@ -313,6 +396,11 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                                 setCommand(e.target.value);
                             }}
                             onKeyDown={handleInputKeyDown}
+                            rightElement={
+                                <Popover2 content={menus.help} placement="bottom-end">
+                                    <Button icon="help" className="bp3-minimal" />
+                                </Popover2>
+                            }
                         />
                         <Button
                             style={{ marginLeft: '5px' }}

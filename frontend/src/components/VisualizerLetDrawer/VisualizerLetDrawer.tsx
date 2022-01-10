@@ -39,15 +39,21 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const expandLet = (key: string) => {
+    const expandLet = (parent: string, key: string, letIdx: number) => {
         const lets = letsRef.current;
 
-        // Only when is shrinked
-        if (!lets[key].isExpanded) {
-            lets[key].isExpanded = true;
-            letMapS[key] = lets[key].expandValue(true);
-            setLetMapS({ ...letMapS });
-        }
+        const externalRef = lets[key];
+        lets[parent].isExpanded = true;
+        letMapS[parent] = lets[parent].expandPartialy(externalRef, letIdx);
+        setLetMapS({ ...letMapS });
+    };
+
+    const expandAll = (key: string) => {
+        const lets = letsRef.current;
+
+        lets[key].isExpanded = true;
+        letMapS[key] = lets[key].expandValue(true);
+        setLetMapS({ ...letMapS });
     };
 
     const revertLet = (key: string) => {
@@ -95,10 +101,9 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
             else {
                 // Only in the momment the page size is growing and the line is broken
                 if (resizeMode >= 0 && lets[key].lines.length > 1) {
-                    // currentLet = lets[key].groupUp(width);
                     // Reset the line
                     lets[key].lines = [
-                        { value: lets[key].isExpanded ? lets[key].expandValue() : lets[key].value, indentLevel: 0 },
+                        { value: lets[key].isExpanded ? lets[key].groupUp() : lets[key].value, indentLevel: 0 },
                     ];
                     lets[key].biggerID = 0;
 
@@ -123,7 +128,16 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
 
                 // Add the elements to the arr
                 arr.push(currentLet.substring(start, idx));
-                arr.push(<a className={darkTheme ? 'let-literal-or' : 'let-literal'}>{thisLet}</a>);
+                arr.push(
+                    <a
+                        className={darkTheme ? 'let-literal-or' : 'let-literal'}
+                        onClick={() => {
+                            expandLet(key, thisLet, idx);
+                        }}
+                    >
+                        {thisLet}
+                    </a>,
+                );
                 // Defines a new start
                 start = idx + thisLet.length;
 
@@ -135,16 +149,7 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
 
             // If there is a let in this current let
             if (Object.keys(indices).length) {
-                return (
-                    <span
-                        className="let-instance"
-                        onClick={() => {
-                            expandLet(key);
-                        }}
-                    >
-                        {arr}
-                    </span>
-                );
+                return <span className="let-instance">{arr}</span>;
             } else {
                 return <span className="let-instance">{currentLet}</span>;
             }
@@ -195,7 +200,7 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
                                         <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{renderLet(key)}</td>
                                         <td style={{ width: '150px', height: '100%' }}>
                                             <Button
-                                                onClick={() => expandLet(key)}
+                                                onClick={() => expandAll(key)}
                                                 className="bp3-minimal"
                                                 icon="translate"
                                                 text="Expand"
