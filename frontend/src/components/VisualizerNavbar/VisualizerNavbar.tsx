@@ -309,13 +309,17 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 <MenuItem text="/color">
                     <div className="cmd-desc">
                         <div>
-                            <u className="title">Desc.:</u> Command that changes the color of a selected nodes group.
+                            <u className="title">Desc.:</u> Command that changes the color of the current selected
+                            nodes.
                         </div>
                         <div>
                             <u className="title">Pattern:</u> /color {'<option>'}.
                         </div>
                         <div>
                             <u className="title">Option:</u> a valid hex color notation (eg.: #A7B).
+                        </div>
+                        <div>
+                            <u className="title">Prerequisites:</u> a group of nodes being selected.
                         </div>
                     </div>
                 </MenuItem>
@@ -328,7 +332,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             <u className="title">Pattern:</u> /hide.
                         </div>
                         <div>
-                            <u className="title">Prerequisites:</u> an group of nodes being selected.
+                            <u className="title">Prerequisites:</u> a group of nodes being selected.
                         </div>
                     </div>
                 </MenuItem>
