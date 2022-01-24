@@ -79,9 +79,12 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap']]
             nodes[id].args = removeEscapedCharacters(args);
             nodes[id].views = views;
             nodes[id].descendants = commentJSON.subProofQty;
-        } else if (line.search('->') !== -1) {
+        }
+        // TODO: Se o filho ja existe, isso aqui vai resetar os dados setados do filho
+        else if (line.search('->') !== -1) {
             const [child, parent] = line.split('->').map((x) => parseInt(x.trim()));
             nodes[parent].children.push(child);
+            // If there isn't a child node
             if (!nodes[child]) {
                 nodes[child] = {
                     id: child,
@@ -90,11 +93,15 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap']]
                     args: '',
                     views: [],
                     children: [],
-                    parents: [parent],
+                    parents: [],
                     descendants: 0,
                 };
             }
-            nodes[child].parents = [parent];
+            // If there is and is an invalid parent
+            else if (isNaN(nodes[child].parents[0])) {
+                nodes[child].parents = [];
+            }
+            nodes[child].parents.push(parent);
         }
     });
     return comment ? [nodes, JSON.parse(comment)['letMap']] : [nodes, {}];

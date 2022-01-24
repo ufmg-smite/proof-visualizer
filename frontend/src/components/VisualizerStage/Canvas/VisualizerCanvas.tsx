@@ -256,13 +256,15 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         // Update edges
         proof.forEach((node) => {
             if (showingNodes[node.parents[0]]) {
-                showingEdges[`${node.id}->${node.parents[0]}`] = Line(
-                    this.LineProps(
-                        `${node.id}->${node.parents[0]}`,
-                        showingNodes[node.id].props,
-                        showingNodes[node.parents[0]].props,
-                    ),
-                );
+                node.parents.forEach((parent) => {
+                    showingEdges[`${node.id}->${parent}`] = Line(
+                        this.LineProps(
+                            `${node.id}->${parent}`,
+                            showingNodes[node.id].props,
+                            showingNodes[parent].props,
+                        ),
+                    );
+                });
             }
         });
         Object.keys(showingNodes).forEach((nodeId: string) => {
