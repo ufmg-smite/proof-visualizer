@@ -18,4 +18,11 @@
         font-weight: bold;
         margin-right: 4px;
     }
+    .option {
+        margin-left: 15px;
+        margin-bottom: 10px;
+    }
+    & .option:last-child {
+        margin-bottom: 0px;
+    }
 }

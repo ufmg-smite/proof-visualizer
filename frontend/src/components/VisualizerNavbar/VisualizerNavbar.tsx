@@ -134,14 +134,90 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 }
                 break;
             case '/select':
-                const idList = commands.filter((word) => !isNaN(Number(word))).map((id) => Number(id));
-                dispatch(selectNodes(idList));
+                // '/select aa  [1,2,3 ,4,5 ] a aa[1-1]a';
+                // '/select aa  [1 -5 ] a aa[aaa]a';
+                let cmdArg = '';
+                commands.forEach((string, id) => id !== 0 && (cmdArg += string + ' '));
+                // Matches all the brackets
+                const matches = [...cmdArg.matchAll(/\[([^\[\]]+)\]/g)];
+
+                // There is a case with brackets
+                if (matches[0]) {
+                    const insideBracket = matches[0][1].trim();
+                    let insideMatches = [...insideBracket.matchAll(/\s*\d+\s*-\s*\d+\s*/g)];
+
+                    // Number range notation
+                    if (insideMatches[0]) {
+                        // Get the range limits
+                        const rangeLim = insideMatches[0][0].split(/\s*-\s*/).map((numS) => Number(numS));
+                        const range = [];
+                        for (let i = rangeLim[0]; i <= rangeLim[1]; i++) {
+                            range.push(i);
+                        }
+                        dispatch(selectNodes(range));
+                    }
+                    // List notation
+                    else {
+                        insideMatches = [...insideBracket.matchAll(/(\s*\d+\s*,*)+/g)];
+                        // Number list notation
+                        if (insideMatches[0]) {
+                            // Group all the matches
+                            let listStr = '';
+                            insideMatches.forEach((match) => (listStr += match[0]));
+                            // Convert to number
+                            const list = listStr
+                                .split(/,\s*/)
+                                .filter((word) => word.length > 0 && !isNaN(Number(word)))
+                                .map((id) => Number(id));
+                            dispatch(selectNodes(list));
+                        }
+                    }
+                }
+                // There is no bracket, so the last possibility is to select based on the RULE
+                else {
+                    const ids: number[] = proof
+                        .filter((node) => node.rule.trim() === commands[1].trim())
+                        .map((node) => node.id);
+                    dispatch(selectNodes(ids));
+                }
+
                 break;
             case '/color':
                 if (commands[1]) {
-                    const exp = new RegExp(/^#([0-9a-f]{3}){1,2}$/i);
-                    if (exp.test(commands[1])) {
+                    // Hex color
+                    if (RegExp(/^#([0-9a-f]{3}){1,2}$/i).test(commands[1])) {
                         dispatch(applyColor(commands[1]));
+                        break;
+                    }
+                    // Default colors
+                    switch (commands[1]) {
+                        case 'red':
+                            dispatch(applyColor('#f72b34'));
+                            break;
+                        case 'orange':
+                            dispatch(applyColor('#ff8334'));
+                            break;
+                        case 'yellow':
+                            dispatch(applyColor('#ffc149'));
+                            break;
+                        case 'green':
+                            dispatch(applyColor('#60aa51'));
+                            break;
+                        case 'blue':
+                            dispatch(applyColor('#0097e4'));
+                            break;
+                        case 'purple':
+                            dispatch(applyColor('#a73da5'));
+                            break;
+                        case 'brown':
+                            dispatch(applyColor('#a95a49'));
+                            break;
+                        case 'gray':
+                            dispatch(applyColor('#464646'));
+                            break;
+                        case 'white':
+                            dispatch(applyColor('#f0f0f0'));
+                            break;
                     }
                 }
                 break;
@@ -301,8 +377,17 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             <u className="title">Pattern:</u> /select {'<option>'}.
                         </div>
                         <div>
-                            <u className="title">Option:</u> a list of node {`id's`} separated by spaces (eg.: 1 15 6
-                            3).
+                            <u className="title">Options:</u>
+                            <div className="option">
+                                1 - A list of node {`id's`} wrapped by brackets and separated by commas (and spaces if
+                                wanted) (eg.: [1, 15, 6,3]).
+                            </div>
+                            <div className="option">
+                                2 - A range of node {`id's`} wrapped by brackets and separated by hyphen (and spaces if
+                                wanted) (eg.: [ 4 -15]).
+                            </div>
+                            <div className="option">3 - A node rule (eg.: CHAIN_RESOLUTION).</div>
+                            <div className="option">4 - A regex for the (...TO DO) (eg.: //).</div>
                         </div>
                     </div>
                 </MenuItem>
@@ -316,7 +401,11 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             <u className="title">Pattern:</u> /color {'<option>'}.
                         </div>
                         <div>
-                            <u className="title">Option:</u> a valid hex color notation (eg.: #A7B).
+                            <u className="title">Options:</u>
+                            <div className="option">1 - A valid hex color notation (eg.: #A7B).</div>
+                            <div className="option">
+                                2 - A color name between: red, orange, yellow, green, blue, purple, brown, gray, white.
+                            </div>
                         </div>
                         <div>
                             <u className="title">Prerequisites:</u> a group of nodes being selected.
