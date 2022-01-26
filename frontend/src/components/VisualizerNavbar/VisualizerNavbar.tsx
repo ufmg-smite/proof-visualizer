@@ -14,6 +14,7 @@ import {
     selectProof,
     selectHiddenNodes,
     selectView,
+    unselectNodes,
 } from '../../store/features/proof/proofSlice';
 import { ReduxState, NavbarPropsAndRedux, NavbarProps } from '../../interfaces/interfaces';
 
@@ -134,53 +135,71 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 }
                 break;
             case '/select':
-                // '/select aa  [1,2,3 ,4,5 ] a aa[1-1]a';
-                // '/select aa  [1 -5 ] a aa[aaa]a';
-                let cmdArg = '';
-                commands.forEach((string, id) => id !== 0 && (cmdArg += string + ' '));
-                // Matches all the brackets
-                const matches = [...cmdArg.matchAll(/\[([^\[\]]+)\]/g)];
+                if (commands[1]) {
+                    let cmdArg = '';
+                    commands.forEach((string, id) => id !== 0 && (cmdArg += string + ' '));
+                    // Matches all the brackets
+                    const matches = [...cmdArg.matchAll(/\[([^\[\]]+)\]/g)];
+                    let idList: number[] = [];
 
-                // There is a case with brackets
-                if (matches[0]) {
-                    const insideBracket = matches[0][1].trim();
-                    let insideMatches = [...insideBracket.matchAll(/\s*\d+\s*-\s*\d+\s*/g)];
+                    // There is a case with brackets
+                    if (matches[0]) {
+                        const insideBracket = matches[0][1].trim();
+                        let insideMatches = [...insideBracket.matchAll(/\s*\d+\s*-\s*\d+\s*/g)];
 
-                    // Number range notation
-                    if (insideMatches[0]) {
-                        // Get the range limits
-                        const rangeLim = insideMatches[0][0].split(/\s*-\s*/).map((numS) => Number(numS));
-                        const range = [];
-                        for (let i = rangeLim[0]; i <= rangeLim[1]; i++) {
-                            range.push(i);
-                        }
-                        dispatch(selectNodes(range));
-                    }
-                    // List notation
-                    else {
-                        insideMatches = [...insideBracket.matchAll(/(\s*\d+\s*,*)+/g)];
-                        // Number list notation
+                        // Number range notation
                         if (insideMatches[0]) {
-                            // Group all the matches
-                            let listStr = '';
-                            insideMatches.forEach((match) => (listStr += match[0]));
-                            // Convert to number
-                            const list = listStr
-                                .split(/,\s*/)
-                                .filter((word) => word.length > 0 && !isNaN(Number(word)))
-                                .map((id) => Number(id));
-                            dispatch(selectNodes(list));
+                            // Get the range limits
+                            const rangeLim = insideMatches[0][0].split(/\s*-\s*/).map((numS) => Number(numS));
+                            idList = Array.from({ length: rangeLim[1] - rangeLim[0] + 1 }, (_, i) => rangeLim[0] + i);
+                        }
+                        // List notation
+                        else {
+                            insideMatches = [...insideBracket.matchAll(/(\s*\d+\s*,*)+/g)];
+                            // Number list notation
+                            if (insideMatches[0]) {
+                                // Group all the matches
+                                let listStr = '';
+                                insideMatches.forEach((match) => (listStr += match[0]));
+                                // Convert to number
+                                idList = listStr
+                                    .split(/,\s*/)
+                                    .filter((word) => word.length > 0 && !isNaN(Number(word)))
+                                    .map((id) => Number(id));
+                            }
                         }
                     }
-                }
-                // There is no bracket, so the last possibility is to select based on the RULE
-                else {
-                    const ids: number[] = proof
-                        .filter((node) => node.rule.trim() === commands[1].trim())
-                        .map((node) => node.id);
-                    dispatch(selectNodes(ids));
-                }
+                    //
+                    else {
+                        // /select /let\d+/
+                        // Is a regex select?
+                        const matches = [...cmdArg.matchAll(/\/[^\/]*\//g)];
+                        // If there is a regex
+                        if (matches[0]) {
+                            const regexString = matches[0][0].substring(1, matches[0][0].length - 1);
+                            try {
+                                // Search all the nodes with the specific regex matching in the conclusion
+                                const regex = new RegExp(regexString);
+                                idList = proof.filter((node) => regex.test(node.conclusion)).map((node) => node.id);
+                            } catch (err) {
+                                // If the inserted regex expression is invalid (probably missing \)
+                                console.log(err);
+                            }
+                        }
+                        // There is no regex, so the last possibility is to select based on the RULE
+                        else {
+                            idList = proof
+                                .filter((node) => node.rule.trim() === commands[1].trim())
+                                .map((node) => node.id);
+                        }
+                    }
 
+                    dispatch(selectNodes(idList));
+                }
+                break;
+            case '/unselect':
+                const allNodesIds = proof.map((node) => node.id);
+                dispatch(unselectNodes(allNodesIds));
                 break;
             case '/color':
                 if (commands[1]) {
@@ -384,10 +403,23 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             </div>
                             <div className="option">
                                 2 - A range of node {`id's`} wrapped by brackets and separated by hyphen (and spaces if
-                                wanted) (eg.: [ 4 -15]).
+                                wanted) (eg.: [ 4 -15]). This range will include the last element.
                             </div>
                             <div className="option">3 - A node rule (eg.: CHAIN_RESOLUTION).</div>
-                            <div className="option">4 - A regex for the (...TO DO) (eg.: //).</div>
+                            <div className="option">
+                                4 - A regex expression used to select all the nodes which the conclusion owns a match
+                                (eg.: /\.*false\.*/ {'->'} selects all the nodes with false anywhere in the conclusion).
+                            </div>
+                        </div>
+                    </div>
+                </MenuItem>
+                <MenuItem text="/unselect">
+                    <div className="cmd-desc">
+                        <div>
+                            <u className="title">Desc.:</u> Command that unselect all the nodes.
+                        </div>
+                        <div>
+                            <u className="title">Pattern:</u> /unselect.
                         </div>
                     </div>
                 </MenuItem>

@@ -139,9 +139,18 @@ export const proofSlice = createSlice({
             state.visualInfo = action.payload;
         },
         selectNodes: (state, action: PayloadAction<number[]>) => {
+            const len = Object.keys(state.visualInfo).length;
             action.payload.forEach((id) => {
-                if (id >= 0 && id < Object.keys(state.visualInfo).length) {
+                if (id >= 0 && id < len) {
                     state.visualInfo[id].selected = true;
+                }
+            });
+        },
+        unselectNodes: (state, action: PayloadAction<number[]>) => {
+            const len = Object.keys(state.visualInfo).length;
+            action.payload.forEach((id) => {
+                if (id >= 0 && id < len) {
+                    state.visualInfo[id].selected = false;
                 }
             });
         },
@@ -236,6 +245,7 @@ export const {
     unhideNodes,
     setVisualInfo,
     selectNodes,
+    unselectNodes,
     changeStyle,
     applyView,
     applyColor,
