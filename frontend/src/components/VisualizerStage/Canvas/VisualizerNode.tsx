@@ -1,6 +1,6 @@
 import { KonvaEventObject } from 'konva/types/Node';
 import React from 'react';
-import { Label, Text, Tag, Group } from 'react-konva';
+import { Label, Text, Tag, Group, Circle, Arrow } from 'react-konva';
 import { NodeProps } from '../../../interfaces/interfaces';
 
 function textColorFromBg(bgColor: string) {
@@ -45,6 +45,7 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
         nHided,
         nDescendants,
         hiddenNodes,
+        dependencies,
         selected,
         color,
         setNodeOnFocus,
@@ -106,6 +107,23 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
     const nDescendantsStr = ` #descendants: ${nDescendants}`;
     const ruleTxt = nHided ? 'π' : rule;
 
+    const depSize = 35,
+        depLineSize = 25;
+    const depProps = {
+        fill: bgColor,
+        stroke: selected ? 'red' : 'black',
+        strokeWidth: selected ? 3 : 1,
+    };
+    //  x={depSize / 2} y={depSize} text="27" fontSize={30} verticalAlign="center" fill="white"
+    const depTextProp = {
+        align: 'center',
+        fill: textColorFromBg(sixDigitColor(bgColor)),
+        fontSize: 20,
+        padding: 10,
+        height: 10,
+        width: 70,
+    };
+
     return (
         <Group
             draggable
@@ -135,6 +153,15 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
                 <Tag {...tagProps} />
                 <Text {...metaInfoProps} text={nHidedStr + nDescendantsStr} />
             </Label>
+            {dependencies.length ? (
+                <Label x={300} y={0}>
+                    <Arrow strokeWidth={1} stroke="black" fill="black" points={[depLineSize, 53, 0, 53]} />
+                    <Circle x={depLineSize + depSize} y={53} radius={35} {...depProps}></Circle>
+                    <Label x={depLineSize} y={35}>
+                        <Text {...depTextProp} text={String(dependencies[0])} />
+                    </Label>
+                </Label>
+            ) : null}
         </Group>
     );
 };

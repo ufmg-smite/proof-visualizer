@@ -13,6 +13,7 @@ interface NodeInterface {
     parents: number[];
     hiddenNodes?: NodeInterface[];
     descendants: number;
+    dependencies?: number[];
 }
 
 interface NodeProps {
@@ -28,9 +29,9 @@ interface NodeProps {
     nHided: number;
     nDescendants: number;
     hiddenNodes: number[];
+    dependencies: number[];
 
     selected: boolean;
-
     color: string;
 
     setNodeOnFocus: (id: number) => void;

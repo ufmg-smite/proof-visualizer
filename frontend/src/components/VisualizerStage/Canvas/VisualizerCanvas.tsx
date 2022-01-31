@@ -133,6 +133,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
             nDescendants: node.descendants - 1,
             hiddenNodes: node.hiddenNodes ? node.hiddenNodes.map((node) => node.id) : [],
+            dependencies: node.dependencies ? node.dependencies : [],
             selected: visualInfo.selected,
             color: visualInfo.color,
             setNodeOnFocus: () => undefined,
@@ -169,7 +170,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                     return {};
                 });
                 props.proof.forEach((node) => {
-                    g.setNode(node.id.toString(), { width: 300, height: 130 });
+                    g.setNode(node.id.toString(), { width: 300 + (node.dependencies ? 95 : 0), height: 130 });
                     node.children.forEach((child) => {
                         g.setEdge(child.toString(), node.id.toString());
                     });
