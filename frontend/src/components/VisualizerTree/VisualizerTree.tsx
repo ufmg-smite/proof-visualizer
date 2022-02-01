@@ -36,6 +36,7 @@ const VisualizerTree: React.FC<TreeProps> = ({ darkTheme, content, originalNodeI
                       nHided: nodeData.nHided ? nodeData.nHided : 0,
                       nDescendants: nodeData.descendants,
                       hiddenNodes: nodeData.hiddenNodes,
+                      dependencies: nodeData.dependencies,
                   }
                 : originalNodeInfo,
         );

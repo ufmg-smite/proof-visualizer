@@ -88,10 +88,11 @@ export const proofSlice = createSlice({
             state.hiddenNodes = state.hiddenNodes
                 .concat([
                     [action.payload, ...descendants(state.proof, action.payload)].filter(
-                        (id) =>
+                        (id, index, self) =>
                             id > 0 &&
                             id < state.proof.length &&
-                            state.hiddenNodes.every((hiddenNodesArray) => hiddenNodesArray.indexOf(id) === -1),
+                            state.hiddenNodes.every((hiddenNodesArray) => hiddenNodesArray.indexOf(id) === -1) &&
+                            self.indexOf(id) === index,
                     ),
                 ])
                 .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
@@ -256,8 +257,10 @@ export const selectProof = (state: RootState): NodeInterface[] => {
     const hiddenNodes = state.proof.hiddenNodes;
 
     hiddenNodes.forEach((hiddenNodesArray) => {
+        const dependencies: { [parentId: number]: number[] } = {};
         const children = piNodeChildren(proof, hiddenNodesArray);
-        const parents = piNodeParents(proof, hiddenNodesArray);
+        const parents = piNodeParents(proof, hiddenNodesArray, dependencies);
+
         const piNodeId = proof.length;
         proof = proof.concat({
             id: piNodeId,
@@ -269,6 +272,7 @@ export const selectProof = (state: RootState): NodeInterface[] => {
             parents: parents,
             hiddenNodes: hiddenNodesArray.map((hiddenNode) => proof[hiddenNode]),
             descendants: 1,
+            dependencies: [],
         });
 
         const piNode = proof[piNodeId];
@@ -291,6 +295,15 @@ export const selectProof = (state: RootState): NodeInterface[] => {
                         .filter((proofNode) => hiddenNodesArray.indexOf(proofNode) === -1),
                 }),
         );
+
+        // Set the dependencies array of each parent that has deps
+        Object.keys(dependencies).forEach((parent) => {
+            const parentId = Number(parent);
+            proof[parentId] = {
+                ...proof[parentId],
+                dependencies: [...proof[parentId].dependencies, { piId: piNodeId, depsId: dependencies[parentId] }],
+            };
+        });
 
         // Get the high hierarchy nodes in this pi node
         const highHierarchyNodes = hiddenNodesArray?.filter((node) =>

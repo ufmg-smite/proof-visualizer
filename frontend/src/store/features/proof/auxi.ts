@@ -32,6 +32,7 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap']]
             children: [],
             parents: [NaN],
             descendants: 0,
+            dependencies: [],
         },
     ];
     let comment: string | null = dot.slice(dot.indexOf('comment='));
@@ -72,6 +73,7 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap']]
                     children: [],
                     parents: [NaN],
                     descendants: 0,
+                    dependencies: [],
                 };
             }
             nodes[id].conclusion = removeEscapedCharacters(conclusion);
@@ -95,6 +97,7 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap']]
                     children: [],
                     parents: [],
                     descendants: 0,
+                    dependencies: [],
                 };
             }
             // If there is and is an invalid parent
@@ -107,16 +110,41 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap']]
     return comment ? [nodes, JSON.parse(comment)['letMap']] : [nodes, {}];
 }
 
-export const piNodeParents = (proof: NodeInterface[], hiddenNodesArray: number[]): number[] => {
+export const piNodeParents = (
+    proof: NodeInterface[],
+    hiddenNodesArray: number[],
+    dependencies: { [parentId: number]: number[] } = {},
+): number[] => {
     const parents = hiddenNodesArray
         // Concat all the parents
-        .reduce((acc: number[], hiddenNode) => acc.concat(proof[hiddenNode].parents), [])
+        .reduce((acc: number[], hiddenNode) => {
+            let haveHiddenParent = false;
+
+            proof[hiddenNode].parents.forEach((parent) => {
+                // If this parent is a hidden node
+                if (hiddenNodesArray.indexOf(parent) !== -1) {
+                    haveHiddenParent = true;
+                } else {
+                    dependencies[parent]
+                        ? dependencies[parent].push(hiddenNode)
+                        : (dependencies[parent] = [hiddenNode]);
+                }
+            });
+
+            if (haveHiddenParent) return acc;
+            return acc.concat(proof[hiddenNode].parents);
+        }, [])
         // Filter the duplicated elements
-        .filter((parent, i, self) => {
-            return self.indexOf(parent) === i;
-        })
+        .filter((parent, i, self) => self.indexOf(parent) === i)
         // Only the parents that aren't in he hidden nodes array remains
         .filter((parent) => hiddenNodesArray.indexOf(parent) === -1);
+
+    // Removes the pi node parents from the dependencies
+    Object.keys(dependencies).forEach((parent) => {
+        const n = Number(parent);
+        if (parents.indexOf(n) !== -1) delete dependencies[n];
+    });
+
     return parents;
 };
 

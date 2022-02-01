@@ -69,6 +69,7 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
                         nHided: nHided,
                         nDescendants: nDescendants - (rule === 'π' ? 0 : 0),
                         hiddenNodes: hiddenNodes,
+                        dependencies: dependencies,
                     },
                     createTree(id),
                 );
@@ -158,7 +159,7 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
                     <Arrow strokeWidth={1} stroke="black" fill="black" points={[depLineSize, 53, 0, 53]} />
                     <Circle x={depLineSize + depSize} y={53} radius={35} {...depProps}></Circle>
                     <Label x={depLineSize} y={35}>
-                        <Text {...depTextProp} text={String(dependencies[0])} />
+                        <Text {...depTextProp} text={dependencies.length === 1 ? String(dependencies[0].piId) : 'π'} />
                     </Label>
                 </Label>
             ) : null}

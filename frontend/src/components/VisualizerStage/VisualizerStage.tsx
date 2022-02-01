@@ -260,6 +260,7 @@ const VisualizerStage: React.FC = () => {
         nHided: 0,
         nDescendants: 0,
         hiddenNodes: [],
+        dependencies: [],
     });
     const [nodeInfoCopy, setNodeInfoCopy] = useState<NodeInfo>({
         rule: '',
@@ -268,6 +269,7 @@ const VisualizerStage: React.FC = () => {
         nHided: 0,
         nDescendants: 0,
         hiddenNodes: [],
+        dependencies: [],
     });
     // TODO: Fazer a chamada do createTree aq dentro pra usar nso drawers, em vez de fazer dentro do canvas
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
@@ -398,6 +400,16 @@ const VisualizerStage: React.FC = () => {
                                 <strong>#HIDDEN</strong>
                             </td>
                             <td>{`[${nodeInfo.hiddenNodes.map((node) => ' ' + node)} ]`}</td>
+                        </tr>
+                    ) : null}
+                    {nodeInfo.dependencies.length ? (
+                        <tr>
+                            <td>
+                                <strong>DEPENDENCIES</strong>
+                            </td>
+                            <td>{`${nodeInfo.dependencies.map(
+                                (dependency) => ` ${dependency.piId}: [${dependency.depsId.map((dep) => ' ' + dep)} ] `,
+                            )}`}</td>
                         </tr>
                     ) : null}
                 </tbody>

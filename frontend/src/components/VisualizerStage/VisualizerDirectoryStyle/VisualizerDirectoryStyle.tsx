@@ -32,6 +32,7 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
         nHided: 0,
         nDescendants: 0,
         hiddenNodes: [],
+        dependencies: [],
     });
 
     return (
@@ -63,6 +64,7 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
                         nHided: 0,
                         nDescendants: 0,
                         hiddenNodes: [],
+                        dependencies: [],
                     }}
                 ></VisualizerTree>
             </div>

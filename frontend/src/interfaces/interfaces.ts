@@ -13,15 +13,14 @@ interface NodeInterface {
     parents: number[];
     hiddenNodes?: NodeInterface[];
     descendants: number;
-    dependencies?: number[];
+    dependencies: { piId: number; depsId: number[] }[];
 }
 
 interface NodeProps {
-    id: number;
-
-    conclusion: string;
-    rule: string;
-    args: string;
+    id: NodeInterface['id'];
+    conclusion: NodeInterface['conclusion'];
+    rule: NodeInterface['rule'];
+    args: NodeInterface['args'];
 
     x: number;
     y: number;
@@ -29,7 +28,7 @@ interface NodeProps {
     nHided: number;
     nDescendants: number;
     hiddenNodes: number[];
-    dependencies: number[];
+    dependencies: NodeInterface['dependencies'];
 
     selected: boolean;
     color: string;
@@ -44,12 +43,13 @@ interface NodeProps {
 
 // Info passed to the info drawer
 interface NodeInfo {
-    rule: string;
-    args: string;
-    conclusion: string;
-    nHided: number;
-    nDescendants: number;
-    hiddenNodes: number[];
+    rule: NodeProps['rule'];
+    args: NodeProps['args'];
+    conclusion: NodeProps['conclusion'];
+    nHided: NodeProps['nHided'];
+    nDescendants: NodeProps['nDescendants'];
+    hiddenNodes: NodeProps['hiddenNodes'];
+    dependencies: NodeProps['dependencies'];
 }
 
 // CANVAS
