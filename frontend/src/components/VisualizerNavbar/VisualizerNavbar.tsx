@@ -248,14 +248,15 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 }
                 break;
             case '/fold':
-                // Fold all children if there is only one node selected
-                hiddenIds = Object.keys(visualInfo)
-                    .map((id) => Number(id))
-                    .filter((id) => visualInfo[id].selected);
-                if (hiddenIds.length === 1) {
-                    // Re-render the canvas and update the store
-                    Canvas.reRender();
-                    dispatch(foldAllDescendants(hiddenIds[0]));
+                // If the option is a number
+                if (commands[1] && !isNaN(Number(commands[1]))) {
+                    const nodeId = Number(commands[1]);
+                    // Is a valid node
+                    if (nodeId >= 0 && nodeId < proof.length) {
+                        // Re-render the canvas and update the store
+                        Canvas.reRender();
+                        dispatch(foldAllDescendants(nodeId));
+                    }
                 }
                 break;
             case '/unfold':
