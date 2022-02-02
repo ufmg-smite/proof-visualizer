@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
 
 import { Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
-import { VisualizerTree } from './VisualizerTree';
+import VisualizerTree from '../../VisualizerTree/VisualizerTree';
 
-import { stateInterface } from './interfaces';
-
-import '../scss/VisualizerDirectoryStyle.scss';
+import '../../../scss/VisualizerDirectoryStyle.scss';
+import { useAppSelector } from '../../../store/hooks';
+import { selectTheme } from '../../../store/features/theme/themeSlice';
+import { NodeInfo } from '../../../interfaces/interfaces';
 
 interface directoryStyleProps {
     proofTree: TreeNodeInfo[];
@@ -21,24 +21,18 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
     indent,
     translate,
 }: directoryStyleProps) => {
-    const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
+    const darkTheme = useAppSelector(selectTheme);
     const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
     const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);
     const [conclusionTranslatorOpen, setConclusionTranslatorOpen] = useState(false);
-    const [nodeInfo, setNodeInfo] = useState<{
-        rule: string;
-        args: string;
-        conclusion: string;
-        nHided: number;
-        nDescendants: number;
-        topHidedNodes?: Array<[number, string, string, number, number]>;
-    }>({
+    const [nodeInfo, setNodeInfo] = useState<NodeInfo>({
         rule: '',
         args: '',
         conclusion: '',
         nHided: 0,
         nDescendants: 0,
-        topHidedNodes: undefined,
+        hiddenNodes: [],
+        dependencies: [],
     });
 
     return (
@@ -69,7 +63,8 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
                         conclusion: '',
                         nHided: 0,
                         nDescendants: 0,
-                        topHidedNodes: undefined,
+                        hiddenNodes: [],
+                        dependencies: [],
                     }}
                 ></VisualizerTree>
             </div>
@@ -95,7 +90,7 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
                     <tbody>
                         <tr>
                             <td>
-                                <strong>RULE </strong>{' '}
+                                <strong>RULE </strong>
                                 <Icon
                                     id="rule-icon"
                                     icon="help"
@@ -106,14 +101,17 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
                                     }}
                                 ></Icon>
                             </td>
-                            <td className="value">
+                            <td>
                                 {nodeInfo.rule}
                                 <Collapse isOpen={ruleHelperOpen}>
-                                    <Pre id="pre-rule">{ruleHelper(nodeInfo.rule)}</Pre>
+                                    <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
+                                        {ruleHelper(nodeInfo.rule)}
+                                    </Pre>
                                 </Collapse>
                             </td>
                         </tr>
-                        {nodeInfo.args ? (
+
+                        {nodeInfo.args && (
                             <tr>
                                 <td>
                                     <strong>ARGS</strong>{' '}
@@ -122,74 +120,68 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
                                             id="rule-icon"
                                             icon="translate"
                                             onClick={() => {
-                                                setRuleHelperOpen(false);
                                                 setConclusionTranslatorOpen(false);
+                                                setRuleHelperOpen(false);
                                                 setArgsTranslatorOpen(!argsTranslatorOpen);
                                             }}
                                         ></Icon>
                                     ) : null}
                                 </td>
-                                <td className="value">
+                                <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                                     {nodeInfo.args}
                                     {nodeInfo.args.indexOf('let') !== -1 ? (
                                         <Collapse isOpen={argsTranslatorOpen}>
-                                            <Pre id="pre-rule">{indent(translate(nodeInfo.args))}</Pre>
+                                            <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
+                                                {indent(translate(nodeInfo.args))}
+                                            </Pre>
                                         </Collapse>
                                     ) : null}
                                 </td>
                             </tr>
-                        ) : null}
+                        )}
+
                         <tr>
-                            <td>
+                            <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                                 <strong>CONCLUSION</strong>{' '}
                                 {nodeInfo.conclusion.indexOf('let') !== -1 ? (
                                     <Icon
                                         id="rule-icon"
                                         icon="translate"
                                         onClick={() => {
-                                            setRuleHelperOpen(false);
                                             setArgsTranslatorOpen(false);
+                                            setRuleHelperOpen(false);
                                             setConclusionTranslatorOpen(!conclusionTranslatorOpen);
                                         }}
                                     ></Icon>
                                 ) : null}
                             </td>
-                            <td className="value">
+                            <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                                 {nodeInfo.conclusion}
                                 {nodeInfo.conclusion.indexOf('let') !== -1 ? (
                                     <Collapse isOpen={conclusionTranslatorOpen}>
-                                        <Pre id="pre-rule">{indent(translate(nodeInfo.conclusion))}</Pre>
+                                        <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
+                                            {indent(translate(nodeInfo.conclusion))}
+                                        </Pre>
                                     </Collapse>
                                 ) : null}
                             </td>
                         </tr>
-                        {!nodeInfo.topHidedNodes ? (
+
+                        {nodeInfo.nDescendants ? (
                             <tr>
                                 <td>
                                     <strong>#DESCENDANTS</strong>
                                 </td>
                                 <td>{nodeInfo.nDescendants}</td>
                             </tr>
-                        ) : (
-                            <tr>
-                                <td>
-                                    <strong>#DESCENDANTS</strong>
-                                </td>
-                                <td>[{nodeInfo.topHidedNodes.map((node) => node[3]).join(', ')}]</td>
-                            </tr>
-                        )}
+                        ) : null}
+
                         {nodeInfo.nHided ? (
                             <tr>
                                 <td>
                                     <strong>#HIDDEN</strong>
                                 </td>
-                                <td>
-                                    [
-                                    {nodeInfo.topHidedNodes
-                                        ? nodeInfo.topHidedNodes.map((node) => node[4]).join(', ')
-                                        : ''}
-                                    ]
-                                </td>
+                                <td>{`[${nodeInfo.hiddenNodes.map((node) => ' ' + node)} ]`}</td>
                             </tr>
                         ) : null}
                     </tbody>

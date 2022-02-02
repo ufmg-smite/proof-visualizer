@@ -1,149 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useState } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import React, { useEffect, useState } from 'react';
 
 import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
-import Canvas from './canvas/VisualizerCanvas';
-import { VisualizerTree } from './VisualizerTree';
-import VisualizerDirectoryStyle from './VisualizerDirectoryStyle';
-import { NodeInterface, stateInterface } from './interfaces';
+import Canvas from './Canvas/VisualizerCanvas';
+import VisualizerTree from '../VisualizerTree/VisualizerTree';
+import VisualizerDirectoryStyle from './VisualizerDirectoryStyle/VisualizerDirectoryStyle';
+import { processDot } from '../../store/features/proof/auxi';
 
-import '../scss/VisualizerStage.scss';
-
-function removeEscapedCharacters(s: string): string {
-    let newS = '';
-    for (let i = 0; i < s.length; i += 1) {
-        if (
-            !(
-                s[i] === '\\' &&
-                (s[i + 1] === '"' ||
-                    s[i + 1] === '>' ||
-                    s[i + 1] === '<' ||
-                    s[i + 1] === '{' ||
-                    s[i + 1] === '}' ||
-                    s[i + 1] === '|')
-            )
-        ) {
-            newS += s[i];
-        }
-    }
-
-    return newS;
-}
-
-function processDot(dot: string) {
-    const nodes: Array<NodeInterface> = [
-        {
-            id: 0,
-            conclusion: '',
-            rule: '',
-            args: '',
-            views: [],
-            children: [],
-            parent: NaN,
-            x: NaN,
-            y: NaN,
-            hideMyChildNode: NaN,
-            hided: false,
-            hidedNodes: [],
-            hidedIn: NaN,
-            positionCache: false,
-            descendants: 0,
-            rank: 0,
-            color: '#8d99ae',
-        },
-    ];
-    let comment: any = dot.slice(dot.indexOf('comment='));
-    comment = comment
-        ? removeEscapedCharacters(
-              removeEscapedCharacters(comment.slice(comment.indexOf('=') + 2, comment.indexOf(';') - 1)),
-          )
-        : null;
-    if (comment) {
-        const dispatch = useDispatch();
-        dispatch({
-            type: 'SET_LET_MAP',
-            payload: JSON.parse(comment)['letMap'],
-        });
-    }
-
-    const lines = dot
-        .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
-        .replace(/(\n|\t)/gm, '')
-        .split(';');
-    lines.forEach((line) => {
-        if (line.search('label') !== -1) {
-            const id = parseInt(line.slice(0, line.indexOf('[')).trim());
-            let attributes = line.slice(line.indexOf('[') + 1, line.lastIndexOf(']')).trim();
-
-            let label = attributes.slice(attributes.search(/(?<!\\)"/) + 2);
-            label = label.slice(0, label.search(/(?<!\\)"/) - 1);
-            let [conclusion, rule, args] = ['', '', ''];
-            [conclusion, rule] = label.split(/(?<!\\)\|/);
-            [rule, args] = rule.indexOf(':args') != -1 ? rule.split(':args') : [rule, ''];
-
-            attributes = attributes.slice(attributes.indexOf(', class = ') + ', class = '.length);
-            attributes = attributes.slice(attributes.indexOf('"') + 1, attributes.slice(1).indexOf('"') + 1);
-            const views = attributes.trim().split(' ');
-            const comment: string = removeEscapedCharacters(line.slice(line.indexOf('comment'), line.lastIndexOf('"')));
-            const commentJSON = JSON.parse(comment.slice(comment.indexOf('"') + 1).replace(/'/g, '"'));
-
-            if (!nodes[id]) {
-                nodes[id] = {
-                    id: id,
-                    conclusion: '',
-                    rule: '',
-                    args: '',
-                    views: [],
-                    children: [],
-                    parent: NaN,
-                    x: NaN,
-                    y: NaN,
-                    hideMyChildNode: NaN,
-                    hided: false,
-                    hidedNodes: [],
-                    hidedIn: NaN,
-                    positionCache: false,
-                    descendants: 0,
-                    rank: 0,
-                    color: '#8d99ae',
-                };
-            }
-            nodes[id].conclusion = removeEscapedCharacters(conclusion);
-            nodes[id].rule = removeEscapedCharacters(rule);
-            nodes[id].args = removeEscapedCharacters(args);
-            nodes[id].views = views;
-            nodes[id].descendants = commentJSON.subProofQty - 1;
-        } else if (line.search('->') !== -1) {
-            const [child, parent] = line.split('->').map((x) => parseInt(x.trim()));
-            nodes[parent].children.push(child);
-            if (!nodes[child]) {
-                nodes[child] = {
-                    id: child,
-                    conclusion: '',
-                    rule: '',
-                    args: '',
-                    views: [],
-                    children: [],
-                    parent: parent,
-                    x: NaN,
-                    y: NaN,
-                    hideMyChildNode: NaN,
-                    hided: false,
-                    hidedNodes: [],
-                    hidedIn: NaN,
-                    positionCache: false,
-                    descendants: 0,
-                    rank: nodes[parent].rank + 1,
-                    color: '#8d99ae',
-                };
-            }
-            nodes[child].parent = parent;
-            nodes[child].rank = nodes[parent].rank + 1;
-        }
-    });
-    return comment ? [nodes, JSON.parse(comment)['letMap']] : [nodes, {}];
-}
+import '../../scss/VisualizerStage.scss';
+import { useAppSelector } from '../../store/hooks';
+import { selectDot, selectFileCount } from '../../store/features/file/fileSlice';
+import { selectStyle } from '../../store/features/proof/proofSlice';
+import { selectTheme } from '../../store/features/theme/themeSlice';
+import { NodeInfo, NodeInterface, TreeNode } from '../../interfaces/interfaces';
 
 function ruleHelper(rule: string) {
     switch (rule.split(' ')[0]) {
@@ -299,23 +168,49 @@ function ruleHelper(rule: string) {
     }
 }
 
-const createTree = (list: any): any => {
+const createTree = (proof: NodeInterface[]): any => {
+    const list: TreeNode[] = proof.map((node) => {
+        const label = node.hiddenNodes?.length
+            ? `${node.id} : π ➜ ${node.conclusion}`
+            : `${node.id} : ${node.conclusion}`;
+        return {
+            id: node.id,
+            icon: 'graph',
+            label: label,
+            secondaryLabel: `${node.rule}`,
+            rule: node.rule,
+            args: node.args,
+            conclusion: node.conclusion,
+            parentId: node.parents[0],
+            descendants: node.descendants - 1,
+            nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
+            hiddenNodes: node.hiddenNodes ? node.hiddenNodes.map((node) => node.id) : [],
+            childNodes: [],
+            parentsId: node.parents,
+            hasCaret: Boolean(node.descendants - 1),
+        };
+    });
+
     const map: any = {},
         roots: any = [];
-    let node, i;
+    let node: TreeNode, i;
 
+    // Map the { [node id]: list array id }
     for (i = 0; i < list.length; i += 1) {
         map[list[i].id] = i;
-        list[i].childNodes = [];
     }
 
     for (i = 0; i < list.length; i += 1) {
         node = list[i];
-        if (node.parentId !== NaN && list[map[node.parentId]]) {
-            list[map[node.parentId]].childNodes.push(node);
-        } else {
-            roots.push(node);
-        }
+        // For all the parents
+        node.parentsId.forEach((parentId) => {
+            // If the parent is valid and exist in the list
+            if (!isNaN(parentId) && list[map[parentId]]) {
+                list[map[parentId]].childNodes.push(node);
+            } else {
+                roots.push(node);
+            }
+        });
     }
     return roots;
 };
@@ -341,68 +236,42 @@ const indent = (s: string) => {
     return newS;
 };
 
-const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
-    canvasRef,
-}: {
-    canvasRef: React.RefObject<Canvas>;
-}) => {
-    const dot = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.dot);
-    const view = useSelector<stateInterface, string | undefined>((state) => state.proofReducer.proof.view);
-    const style = useSelector<stateInterface, string | undefined>((state) => state.styleReducer.style);
-    const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
-    const importedData = useSelector<stateInterface, stateInterface['importedDataReducer']['importedData']>(
-        (state: stateInterface) => state.importedDataReducer.importedData,
-    );
-    const [proof, letMap] = processDot(dot ? dot : '');
-    const proofTree = createTree(
-        Array.from(Array(proof.length).keys()).map((nodeId) => {
-            return {
-                id: nodeId,
-                icon: 'graph',
-                parentId: proof[nodeId].parent,
-                label: proof[nodeId].rule + ' => ' + proof[nodeId].conclusion,
-                descendants: proof[nodeId].descendants,
-                childNodes: [],
-                rule: proof[nodeId].rule,
-                conclusion: proof[nodeId].conclusion,
-                args: proof[nodeId].args,
-            };
-        }),
-    );
+const VisualizerStage: React.FC = () => {
+    const dot = useAppSelector(selectDot);
+    const fileID = useAppSelector(selectFileCount);
+    const style = useAppSelector(selectStyle);
+    const darkTheme = useAppSelector(selectTheme);
+    const [[proof, letMap], setProofAndLet] = useState<[NodeInterface[], any]>([[], '']);
+    const [proofTree, setProofTree] = useState([]);
+    // Make sure that a new tree and proof is created only when a new dot is used
+    useEffect(() => {
+        const [newProof, newLetMap] = processDot(dot ? dot : '');
+        setProofAndLet([newProof, newLetMap]);
+        setProofTree(createTree(newProof));
+    }, [dot]);
     const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
     const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);
     const [conclusionTranslatorOpen, setConclusionTranslatorOpen] = useState(false);
-    const [nodeInfo, setNodeInfo] = useState<{
-        rule: string;
-        args: string;
-        conclusion: string;
-        nHided: number;
-        nDescendants: number;
-        topHidedNodes?: Array<[number, string, string, number, number]>;
-    }>({
+    const [nodeInfo, setNodeInfo] = useState<NodeInfo>({
         rule: '',
         args: '',
         conclusion: '',
         nHided: 0,
         nDescendants: 0,
-        topHidedNodes: undefined,
+        hiddenNodes: [],
+        dependencies: [],
     });
-    const [nodeInfoCopy, setNodeInfoCopy] = useState<{
-        rule: string;
-        args: string;
-        conclusion: string;
-        nHided: number;
-        nDescendants: number;
-        topHidedNodes?: Array<[number, string, string, number, number]>;
-    }>({
+    const [nodeInfoCopy, setNodeInfoCopy] = useState<NodeInfo>({
         rule: '',
         args: '',
         conclusion: '',
         nHided: 0,
         nDescendants: 0,
-        topHidedNodes: undefined,
+        hiddenNodes: [],
+        dependencies: [],
     });
+    // TODO: Fazer a chamada do createTree aq dentro pra usar nso drawers, em vez de fazer dentro do canvas
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
     const translate = (s: string) => {
         let newS = s;
@@ -415,17 +284,7 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
         return newS;
     };
 
-    const openDrawer = (
-        nodeInfo: {
-            rule: string;
-            args: string;
-            conclusion: string;
-            nHided: number;
-            nDescendants: number;
-            topHidedNodes?: Array<[number, string, string, number, number]>;
-        },
-        tree?: TreeNodeInfo[],
-    ) => {
+    const openDrawer = (nodeInfo: NodeInfo, tree?: TreeNodeInfo[]) => {
         setRuleHelperOpen(false);
         setNodeInfo(nodeInfo);
         setTree(tree ? tree : []);
@@ -449,7 +308,7 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                 <tbody>
                     <tr>
                         <td>
-                            <strong>RULE </strong>{' '}
+                            <strong>RULE </strong>
                             <Icon
                                 id="rule-icon"
                                 icon="help"
@@ -469,7 +328,8 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                             </Collapse>
                         </td>
                     </tr>
-                    {nodeInfo.args ? (
+
+                    {nodeInfo.args && (
                         <tr>
                             <td>
                                 <strong>ARGS</strong>{' '}
@@ -496,7 +356,8 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                                 ) : null}
                             </td>
                         </tr>
-                    ) : null}
+                    )}
+
                     <tr>
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                             <strong>CONCLUSION</strong>{' '}
@@ -523,31 +384,32 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
                             ) : null}
                         </td>
                     </tr>
-                    {!nodeInfo.topHidedNodes ? (
+
+                    {nodeInfo.nDescendants ? (
                         <tr>
                             <td>
                                 <strong>#DESCENDANTS</strong>
                             </td>
                             <td>{nodeInfo.nDescendants}</td>
                         </tr>
-                    ) : (
-                        <tr>
-                            <td>
-                                <strong>#DESCENDANTS</strong>
-                            </td>
-                            <td>[{nodeInfo.topHidedNodes.map((node) => node[3]).join(', ')}]</td>
-                        </tr>
-                    )}
+                    ) : null}
+
                     {nodeInfo.nHided ? (
                         <tr>
                             <td>
                                 <strong>#HIDDEN</strong>
                             </td>
+                            <td>{`[${nodeInfo.hiddenNodes.map((node) => ' ' + node)} ]`}</td>
+                        </tr>
+                    ) : null}
+                    {nodeInfo.dependencies.length ? (
+                        <tr>
                             <td>
-                                [
-                                {nodeInfo.topHidedNodes ? nodeInfo.topHidedNodes.map((node) => node[4]).join(', ') : ''}
-                                ]
+                                <strong>DEPENDENCIES</strong>
                             </td>
+                            <td>{`${nodeInfo.dependencies.map(
+                                (dependency) => ` ${dependency.piId}: [${dependency.depsId.map((dep) => ' ' + dep)} ] `,
+                            )}`}</td>
                         </tr>
                     ) : null}
                 </tbody>
@@ -556,17 +418,10 @@ const VisualizerStage: React.FC<{ canvasRef: React.RefObject<Canvas> }> = ({
     };
 
     return (
-        <div>
+        <div onContextMenu={(e) => e.preventDefault()}>
             {proof.length > 1 ? (
-                style === 'tree' ? (
-                    <Canvas
-                        ref={canvasRef}
-                        key={dot}
-                        view={view}
-                        proofNodes={proof}
-                        openDrawer={openDrawer}
-                        importedData={importedData}
-                    ></Canvas>
+                style === 'graph' ? (
+                    <Canvas key={fileID} openDrawer={openDrawer}></Canvas>
                 ) : (
                     <VisualizerDirectoryStyle
                         proofTree={proofTree}

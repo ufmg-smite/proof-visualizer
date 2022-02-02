@@ -1,28 +1,21 @@
-import React, { useEffect, useState, useRef } from 'react';
-import Canvas from './components/canvas/VisualizerCanvas';
-import { useSelector } from 'react-redux';
+import React, { useEffect, useState } from 'react';
 
 import { Intent, Position, Toaster } from '@blueprintjs/core';
 
-import VisualizerNavbar from './components/VisualizerNavbar';
-import VisualizerDialog from './components/VisualizerDialog';
-import VisualizerStage from './components/VisualizerStage';
-import VisualizerLetDrawer from './components/VisualizerLetDrawer';
+import VisualizerNavbar from '../VisualizerNavbar/VisualizerNavbar';
+import VisualizerDialog from '../VisualizerDialog/VisualizerDialog';
+import VisualizerStage from '../VisualizerStage/VisualizerStage';
+import VisualizerLetDrawer from '../VisualizerLetDrawer/VisualizerLetDrawer';
 
-import { stateInterface } from './components/interfaces';
+import { useAppSelector } from '../../store/hooks';
+import { selectTheme } from '../../store/features/theme/themeSlice';
 
 const App: React.FC = () => {
     const [dialogIsOpen, setDialogIsOpen] = useState(true);
     const [dialogContent, setDialogContent] = useState('welcome');
-
     const [drawerIsOpen, setDrawerIsOpen] = useState(false);
+    const darkTheme = useAppSelector(selectTheme);
 
-    const darkTheme = useSelector<stateInterface, boolean>((state: stateInterface) => state.darkThemeReducer.darkTheme);
-
-    const canvasRef = useRef<Canvas>(null);
-    const downloadProof = (dot: string, proofName: string) => {
-        canvasRef.current ? canvasRef.current.downloadProof(dot, proofName) : null;
-    };
     // Toaster
     let toaster: Toaster;
     const refHandlers = {
@@ -39,10 +32,6 @@ const App: React.FC = () => {
             : null;
     }, [drawerIsOpen]);
 
-    const runCommands = (command: string) => {
-        canvasRef.current ? canvasRef.current.runCommands(command) : null;
-    };
-
     return (
         <div className={darkTheme ? ' bp3-dark' : ''}>
             <Toaster position={Position.TOP} ref={refHandlers.toaster} />
@@ -50,9 +39,6 @@ const App: React.FC = () => {
                 setDialogIsOpen={setDialogIsOpen}
                 setDialogContent={setDialogContent}
                 setDrawerIsOpen={setDrawerIsOpen}
-                downloadProof={downloadProof}
-                runCommands={runCommands}
-                canvasRef={canvasRef}
             ></VisualizerNavbar>
             <VisualizerDialog
                 dialogIsOpen={dialogIsOpen}
@@ -61,7 +47,7 @@ const App: React.FC = () => {
                 setDialogContent={setDialogContent}
                 addErrorToast={addErrorToast}
             ></VisualizerDialog>
-            <VisualizerStage canvasRef={canvasRef}></VisualizerStage>
+            <VisualizerStage></VisualizerStage>
             {drawerIsOpen ? (
                 <VisualizerLetDrawer drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerIsOpen} />
             ) : null}
