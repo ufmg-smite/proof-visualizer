@@ -61,10 +61,13 @@ interface CanvasProps {
 interface CanvasPropsAndRedux extends CanvasProps {
     proof: NodeInterface[];
     visualInfo: ProofState['visualInfo'];
+    nodeFindData: ExternalCmdState['findData'];
+
     hideNodes: ActionCreatorWithPayload<number[], string>;
     unhideNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
     foldAllDescendants: ActionCreatorWithPayload<number>;
     setVisualInfo: ActionCreatorWithPayload<ProofState['visualInfo'], string>;
+    findNode: ActionCreatorWithPayload<{ nodeId: number; option: boolean }, string>;
 }
 
 interface CanvasState {
@@ -135,6 +138,7 @@ interface ReduxState {
     file: FileState;
     proof: ProofState;
     theme: ThemeState;
+    externalCmd: ExternalCmdState;
 }
 // PROOFS
 interface ProofState {
@@ -164,6 +168,17 @@ interface FileState {
 interface ThemeState {
     value: boolean;
 }
+//EXTERNAL COMMANDS
+interface ExternalCmdState {
+    findData: {
+        nodeToFind: number;
+        findOption: boolean;
+    };
+    renderData: {
+        count: number;
+        fileChanged: boolean;
+    };
+}
 
 export type {
     NodeInterface,
@@ -182,4 +197,5 @@ export type {
     ProofState,
     FileState,
     ThemeState,
+    ExternalCmdState,
 };

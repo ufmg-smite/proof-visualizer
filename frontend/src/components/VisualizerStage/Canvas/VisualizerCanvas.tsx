@@ -28,6 +28,10 @@ import {
     applyView,
     setVisualInfo,
 } from '../../../store/features/proof/proofSlice';
+import { selectFindData, findNode } from '../../../store/features/externalCmd/externalCmd';
+
+const nodeWidth = 300,
+    nodeHeight = 130;
 
 function handleWheel(e: Konva.KonvaEventObject<WheelEvent>): { stageScale: number; stageX: number; stageY: number } {
     e.evt.preventDefault();
@@ -151,6 +155,29 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const proofChanged = JSON.stringify(current_state.proof) !== JSON.stringify(props.proof);
         const visualInfoChanged = JSON.stringify(current_state.visualInfo) !== JSON.stringify(props.visualInfo);
         const isNewFile = Canvas.renderData.fileChanged;
+        const stage = current_state.stage;
+        const { nodeToFind, findOption } = props.nodeFindData;
+
+        // If there is a node to be found
+        if (nodeToFind > -1) {
+            // Valid node
+            if (nodeToFind < props.proof.length) {
+                // Change the stage position
+                const { x, y } = props.visualInfo[nodeToFind];
+                stage.stageX = current_state.canvasSize.width / 2 - (x + nodeWidth / 2) * stage.stageScale;
+                stage.stageY = current_state.canvasSize.height / 2 - (y + nodeHeight / 2) * stage.stageScale;
+
+                // Select the finded node
+                if (findOption) {
+                    props.setVisualInfo({
+                        ...props.visualInfo,
+                        [nodeToFind]: { ...props.visualInfo[nodeToFind], selected: true },
+                    });
+                }
+            }
+            // Reset the node finder
+            props.findNode({ nodeId: -1, option: false });
+        }
 
         // If the proof or visual info changed or we have a new file being uploaded
         if (proofChanged || visualInfoChanged || isNewFile) {
@@ -170,7 +197,10 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                     return {};
                 });
                 props.proof.forEach((node) => {
-                    g.setNode(node.id.toString(), { width: 300 + (node.dependencies ? 95 : 0), height: 130 });
+                    g.setNode(node.id.toString(), {
+                        width: nodeWidth + (node.dependencies.length ? 95 : 0),
+                        height: nodeHeight,
+                    });
                     node.children.forEach((child) => {
                         g.setEdge(child.toString(), node.id.toString());
                     });
@@ -207,9 +237,10 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 showingEdges: {},
                 proof: props.proof,
                 visualInfo: props.visualInfo,
+                stage: stage,
             };
         }
-        return null;
+        return { stage: stage };
     }
 
     componentDidMount(): void {
@@ -377,7 +408,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     /*TREE*/
-    // TODO: Fazer create tree sem ser recursivo, criando os nós filos sempre que o node pedir para abrir um no filho
     createTree = (id: number): TreeNode[] => {
         const { proof } = this.state;
         const rootNode = proof.find((o) => o.id === id);
@@ -505,10 +535,11 @@ function mapStateToProps(state: ReduxState, ownProps: CanvasProps) {
     return {
         proof: selectProof(state),
         visualInfo: selectVisualInfo(state),
+        nodeFindData: selectFindData(state),
         ...ownProps,
     };
 }
 
-const mapDispatchToProps = { hideNodes, unhideNodes, foldAllDescendants, applyView, setVisualInfo };
+const mapDispatchToProps = { hideNodes, unhideNodes, foldAllDescendants, applyView, setVisualInfo, findNode };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Canvas);

@@ -23,6 +23,7 @@ import { Popover2 } from '@blueprintjs/popover2';
 import { selectTheme, toggle } from '../../store/features/theme/themeSlice';
 import '../../scss/VisualizerNavbar.scss';
 import Canvas from '../VisualizerStage/Canvas/VisualizerCanvas';
+import { findNode } from '../../store/features/externalCmd/externalCmd';
 
 function useWindowSize() {
     // Initialize state with undefined width/height so server and client renders match
@@ -111,12 +112,6 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         const commands = command.trim().split(/ +/);
         let hiddenIds: number[];
 
-        // View: basic | propositional | full
-        // Select: list of numbers
-        // Color: Hexadecimal color code
-        // Hide: --- (must have more then 2 selected nodes)
-        // Fold: --- (must have 1 node selected)
-        // Unfold: Id of the node
         switch (commands[0]) {
             case '/view':
                 switch (commands[1]) {
@@ -278,6 +273,18 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                         Canvas.reRender();
                         dispatch(unhideNodes({ pi: id, hiddens: hiddenIds }));
                     }
+                }
+                break;
+            case '/find':
+                // If there is an argument and is a number
+                if (commands[1] && !isNaN(Number(commands[1]))) {
+                    // Find the node
+                    dispatch(
+                        findNode({
+                            nodeId: Number(commands[1]),
+                            option: commands[2] === '--s' ? true : false,
+                        }),
+                    );
                 }
                 break;
         }
@@ -480,6 +487,19 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                         </div>
                         <div>
                             <u className="title">Option:</u> a valid pi node id.
+                        </div>
+                    </div>
+                </MenuItem>
+                <MenuItem text="/find">
+                    <div className="cmd-desc">
+                        <div>
+                            <u className="title">Desc.:</u> Command that find a node and centralize the canvas at it.
+                        </div>
+                        <div>
+                            <u className="title">Pattern:</u> /fild {'<node number>'} {'<option>'}.
+                        </div>
+                        <div>
+                            <u className="title">Option:</u> --s: find and select the node.
                         </div>
                     </div>
                 </MenuItem>

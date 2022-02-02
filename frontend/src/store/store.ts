@@ -1,4 +1,5 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
+import externalCmdReducer from './features/externalCmd/externalCmd';
 import fileReducer from './features/file/fileSlice';
 import proofReducer from './features/proof/proofSlice';
 import themeReducer from './features/theme/themeSlice';
@@ -8,6 +9,7 @@ export const store = configureStore({
         file: fileReducer,
         proof: proofReducer,
         theme: themeReducer,
+        externalCmd: externalCmdReducer,
     },
 });
 
