@@ -20,12 +20,31 @@ export const externalCmd = createSlice({
         findNode: (state, action: PayloadAction<{ nodeId: number; option: boolean }>) => {
             state.findData = { nodeToFind: action.payload.nodeId, findOption: action.payload.option };
         },
+        reRender: (state) => {
+            state.renderData.count = 0;
+        },
+        addRenderCount: (state) => {
+            state.renderData.count++;
+        },
+        blockRender: (state) => {
+            state.renderData.count = 2;
+        },
+        allowRenderNewFile: (state) => {
+            state.renderData.fileChanged = true;
+        },
+        blockRenderNewFile: (state) => {
+            state.renderData.fileChanged = false;
+        },
     },
 });
 
-export const { findNode } = externalCmd.actions;
+export const { findNode, reRender, addRenderCount, blockRender, allowRenderNewFile, blockRenderNewFile } =
+    externalCmd.actions;
 
 export const selectFindData = (state: RootState): { nodeToFind: number; findOption: boolean } =>
     state.externalCmd.findData;
+
+export const selectRenderData = (state: RootState): { count: number; fileChanged: boolean } =>
+    state.externalCmd.renderData;
 
 export default externalCmd.reducer;

@@ -22,8 +22,7 @@ import { Alignment, Button, Icon, InputGroup, Navbar, Switch, Menu, MenuItem } f
 import { Popover2 } from '@blueprintjs/popover2';
 import { selectTheme, toggle } from '../../store/features/theme/themeSlice';
 import '../../scss/VisualizerNavbar.scss';
-import Canvas from '../VisualizerStage/Canvas/VisualizerCanvas';
-import { findNode } from '../../store/features/externalCmd/externalCmd';
+import { findNode, reRender } from '../../store/features/externalCmd/externalCmd';
 
 function useWindowSize() {
     // Initialize state with undefined width/height so server and client renders match
@@ -117,15 +116,15 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 switch (commands[1]) {
                     case 'basic':
                         dispatch(applyView('basic'));
-                        Canvas.reRender();
+                        dispatch(reRender());
                         break;
                     case 'propositional':
                         dispatch(applyView('propositional'));
-                        Canvas.reRender();
+                        dispatch(reRender());
                         break;
                     case 'full':
                         dispatch(applyView('full'));
-                        Canvas.reRender();
+                        dispatch(reRender());
                         break;
                 }
                 break;
@@ -243,7 +242,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 // Make sure there are nodes selected
                 if (hiddenIds.length > 1) {
                     // Re-render the canvas and update the store
-                    Canvas.reRender();
+                    dispatch(reRender());
                     dispatch(hideNodes(hiddenIds));
                 }
                 break;
@@ -254,7 +253,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     // Is a valid node
                     if (nodeId >= 0 && nodeId < proof.length) {
                         // Re-render the canvas and update the store
-                        Canvas.reRender();
+                        dispatch(reRender());
                         dispatch(foldAllDescendants(nodeId));
                     }
                 }
@@ -271,7 +270,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                         const hiddenNodes = obj.hiddenNodes ? obj.hiddenNodes : [];
                         hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
                         // Re-render the canvas and update the store
-                        Canvas.reRender();
+                        dispatch(reRender());
                         dispatch(unhideNodes({ pi: id, hiddens: hiddenIds }));
                     }
                 }
@@ -335,7 +334,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                         e.preventDefault();
                         dispatch(applyView('basic'));
-                        Canvas.reRender();
+                        dispatch(reRender());
                     }}
                 />
                 <MenuItem
@@ -343,7 +342,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                         e.preventDefault();
                         dispatch(applyView('propositional'));
-                        Canvas.reRender();
+                        dispatch(reRender());
                     }}
                 />
                 <MenuItem
@@ -351,7 +350,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                         e.preventDefault();
                         dispatch(applyView('full'));
-                        Canvas.reRender();
+                        dispatch(reRender());
                     }}
                 />
             </Menu>

@@ -62,12 +62,16 @@ interface CanvasPropsAndRedux extends CanvasProps {
     proof: NodeInterface[];
     visualInfo: ProofState['visualInfo'];
     nodeFindData: ExternalCmdState['findData'];
+    renderData: ExternalCmdState['renderData'];
 
     hideNodes: ActionCreatorWithPayload<number[], string>;
     unhideNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
     foldAllDescendants: ActionCreatorWithPayload<number>;
     setVisualInfo: ActionCreatorWithPayload<ProofState['visualInfo'], string>;
     findNode: ActionCreatorWithPayload<{ nodeId: number; option: boolean }, string>;
+    reRender: ActionCreatorWithPayload<void, string>;
+    addRenderCount: ActionCreatorWithPayload<void, string>;
+    blockRenderNewFile: ActionCreatorWithPayload<void, string>;
 }
 
 interface CanvasState {
