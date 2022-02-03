@@ -296,11 +296,13 @@ export const selectProof = (state: RootState): NodeInterface[] => {
                 }),
         );
 
-        // Set the dependencies array of each parent that has deps
+        // Set the dependencies array of each parent that has deps and remove
+        //  the children that are dependencies
         Object.keys(dependencies).forEach((parent) => {
             const parentId = Number(parent);
             proof[parentId] = {
                 ...proof[parentId],
+                children: proof[parentId].children.filter((c) => dependencies[parentId].indexOf(c) === -1),
                 dependencies: [...proof[parentId].dependencies, { piId: piNodeId, depsId: dependencies[parentId] }],
             };
         });

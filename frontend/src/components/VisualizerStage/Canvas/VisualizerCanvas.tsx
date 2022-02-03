@@ -160,8 +160,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
         // If there is a node to be found
         if (nodeToFind > -1) {
-            // Valid node
-            if (nodeToFind < props.proof.length) {
+            // Is valid node
+            if (nodeToFind <= props.proof[props.proof.length - 1].id) {
                 // Change the stage position
                 const { x, y } = props.visualInfo[nodeToFind];
                 stage.stageX = current_state.canvasSize.width / 2 - (x + nodeWidth / 2) * stage.stageScale;
