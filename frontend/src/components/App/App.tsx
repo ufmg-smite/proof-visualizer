@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 
 import { Intent, Position, Toaster } from '@blueprintjs/core';
 
@@ -13,7 +13,7 @@ import { selectTheme } from '../../store/features/theme/themeSlice';
 const App: React.FC = () => {
     const [dialogIsOpen, setDialogIsOpen] = useState(true);
     const [dialogContent, setDialogContent] = useState('welcome');
-    const [drawerIsOpen, setDrawerIsOpen] = useState(false);
+    const [drawerIsOpen, setDrawerOpenState] = useReducer((isOpen) => !isOpen, false);
     const darkTheme = useAppSelector(selectTheme);
 
     // Toaster
@@ -38,7 +38,7 @@ const App: React.FC = () => {
             <VisualizerNavbar
                 setDialogIsOpen={setDialogIsOpen}
                 setDialogContent={setDialogContent}
-                setDrawerIsOpen={setDrawerIsOpen}
+                setDrawerIsOpen={setDrawerOpenState}
             ></VisualizerNavbar>
             <VisualizerDialog
                 dialogIsOpen={dialogIsOpen}
@@ -49,7 +49,7 @@ const App: React.FC = () => {
             ></VisualizerDialog>
             <VisualizerStage></VisualizerStage>
             {drawerIsOpen ? (
-                <VisualizerLetDrawer drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerIsOpen} />
+                <VisualizerLetDrawer drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerOpenState} />
             ) : null}
         </div>
     );
