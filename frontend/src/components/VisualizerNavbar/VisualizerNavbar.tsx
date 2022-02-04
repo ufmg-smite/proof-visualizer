@@ -546,6 +546,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                                     <Button icon="help" className="bp3-minimal" />
                                 </Popover2>
                             }
+                            autoComplete="off"
                         />
                         <Button
                             style={{ marginLeft: '5px' }}
