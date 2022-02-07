@@ -11,11 +11,11 @@ import { selectLetMap } from '../../store/features/proof/proofSlice';
 const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: letDrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
     const letMap = useAppSelector(selectLetMap);
+    const widthRef = useRef(0);
+
     const [letMapS, setLetMapS] = useState({ ...letMap });
-    // const [width, setWidth] = useState(0);
     const [resizeMode, setResizeMode] = useState(0);
     const letsRef = useRef<{ [key: string]: Let }>({});
-    const widthRef = useRef(0);
 
     // ComponentDidMount
     useEffect(() => {

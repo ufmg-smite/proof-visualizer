@@ -164,11 +164,13 @@ class Let {
                 else if (c === ' ') {
                     lastSpace = i;
 
-                    if (indent === thisLevel && thisLine[i - 1] !== ')') {
-                        newLines.push({
-                            value: thisLine.substring(lastUsedSpace + 1, i),
-                            indentLevel: newLines.length ? indent + 1 : indent,
-                        });
+                    if (indent === thisLevel) {
+                        if (thisLine[i - 1] !== ')') {
+                            newLines.push({
+                                value: thisLine.substring(lastUsedSpace + 1, i),
+                                indentLevel: newLines.length ? indent + 1 : indent,
+                            });
+                        }
                         lastUsedSpace = i;
                     }
                 }
