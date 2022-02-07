@@ -88,41 +88,40 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
         }
     };
 
-    const bgColor = color;
-    const tagProps = {
-        fill: bgColor,
-        stroke: selected ? 'red' : 'black',
-        strokeWidth: selected ? 3 : 1,
-    };
-    const textProps = {
-        align: 'center',
-        fill: textColorFromBg(sixDigitColor(bgColor)),
-        fontSize: 15,
-        height: 35,
-        padding: 10,
-        width: 300,
-    };
-    const metaInfoProps = { ...textProps, width: 250 };
-
-    const nHidedStr = nHided ? `#hidden: ${nHided}` : '';
-    const nDescendantsStr = ` #descendants: ${nDescendants}`;
-    const ruleTxt = nHided ? 'π' : rule;
-
-    const depSize = 35,
+    const depSize = 25,
         depLineSize = 25;
-    const depProps = {
-        fill: bgColor,
-        stroke: selected ? 'red' : 'black',
-        strokeWidth: selected ? 3 : 1,
+    const bgColor = color;
+
+    const style = {
+        tag: {
+            fill: bgColor,
+            stroke: selected ? 'red' : 'black',
+            strokeWidth: selected ? 3 : 1,
+        },
+        get dep() {
+            return { ...this.tag };
+        },
+        text: {
+            align: 'center',
+            fill: textColorFromBg(sixDigitColor(bgColor)),
+            fontSize: 15,
+            height: 35,
+            padding: 10,
+            width: 300,
+        },
+        get depText() {
+            return {
+                ...this.text,
+                padding: 0,
+                width: depSize * 2,
+            };
+        },
     };
-    //  x={depSize / 2} y={depSize} text="27" fontSize={30} verticalAlign="center" fill="white"
-    const depTextProp = {
-        align: 'center',
-        fill: textColorFromBg(sixDigitColor(bgColor)),
-        fontSize: 20,
-        padding: 10,
-        height: 10,
-        width: 70,
+    const infos = {
+        nHided: nHided ? `#hidden: ${nHided}` : '',
+        nDescendants: ` #descendants: ${nDescendants}`,
+        rule: nHided ? 'π' : rule,
+        dependencies: dependencies.length === 1 ? String(dependencies[0].piId) : 'π',
     };
 
     return (
@@ -139,27 +138,27 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
             onClick={handleClick}
         >
             <Label x={0} y={0}>
-                <Tag {...tagProps} />
-                <Text {...textProps} text={conclusion} />
+                <Tag {...style.tag} />
+                <Text {...style.text} text={conclusion} />
             </Label>
             <Label x={0} y={35}>
-                <Tag {...tagProps} />
-                <Text {...textProps} text={ruleTxt} />
+                <Tag {...style.tag} />
+                <Text {...style.text} text={infos.rule} />
             </Label>
             <Label x={0} y={70} {...{ align: 'right' }}>
-                <Tag {...tagProps} />
-                <Text {...{ ...metaInfoProps, width: 50 }} text={id.toString()} />
+                <Tag {...style.tag} />
+                <Text {...{ ...style.text, width: 50 }} text={id.toString()} />
             </Label>
             <Label x={50} y={70}>
-                <Tag {...tagProps} />
-                <Text {...metaInfoProps} text={nHidedStr + nDescendantsStr} />
+                <Tag {...style.tag} />
+                <Text {...{ ...style.text, width: 250 }} text={infos.nHided + infos.nDescendants} />
             </Label>
             {dependencies.length ? (
                 <Label x={300} y={0}>
                     <Arrow strokeWidth={1} stroke="black" fill="black" points={[depLineSize, 53, 0, 53]} />
-                    <Circle x={depLineSize + depSize} y={53} radius={35} {...depProps}></Circle>
-                    <Label x={depLineSize} y={35}>
-                        <Text {...depTextProp} text={dependencies.length === 1 ? String(dependencies[0].piId) : 'π'} />
+                    <Circle x={depLineSize + depSize} y={53} radius={depSize} {...style.dep}></Circle>
+                    <Label x={depLineSize} y={45}>
+                        <Text {...style.depText} text={infos.dependencies} />
                     </Label>
                 </Label>
             ) : null}

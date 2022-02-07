@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { Dispatch, SetStateAction } from 'react';
 import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
@@ -54,11 +54,32 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     let dialogBody = <p>This wasn&apos;t supposed to happen. Please contact the developers.</p>;
     let succesButton = <></>;
 
+    const dispatch = useAppDispatch();
     const [processingProof, setProcessingProof] = useState(false);
     const [proofProcessed, setProofProcessed] = useState(false);
     const [fileName, changeFileName] = useState('Choose file...');
     const [file, changeFile] = useState('');
-    const dispatch = useAppDispatch();
+    const [focusFlag, setFocusFlag] = useState(0);
+
+    useEffect(() => {
+        if (dialogIsOpen && dialogContent === 'upload-proof') setFocusFlag(1);
+    }, [dialogIsOpen, dialogContent]);
+
+    useEffect(() => {
+        let el;
+        switch (focusFlag) {
+            // Focus the file input
+            case 1:
+                el = document.getElementsByClassName(Classes.DIALOG_BODY + ' dialog-body');
+                (el[0].childNodes[0] as HTMLElement).focus();
+                break;
+            // Focus the input button
+            case 2:
+                el = document.getElementsByClassName(Classes.DIALOG_FOOTER_ACTIONS);
+                (el[0].childNodes[1] as HTMLElement).focus();
+                break;
+        }
+    }, [focusFlag]);
 
     switch (dialogContent) {
         case 'welcome':
@@ -111,6 +132,9 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                             const fileContents = await readUploadedFileAsText(file);
                             changeFile(fileContents as string);
                             changeFileName(file.name);
+
+                            // If succeded, set the focus of the page to the upload button
+                            setFocusFlag(2);
                         } catch (er: any) {
                             addErrorToast(er.message);
                         }
