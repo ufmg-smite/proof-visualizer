@@ -103,20 +103,22 @@ interface NavbarPropsAndRedux extends NavbarProps {
 
 // TREENODE
 interface TreeNode {
-    id: number;
+    id: NodeProps['id'];
+    conclusion: NodeProps['conclusion'];
+    rule: NodeProps['rule'];
+    args: NodeProps['args'];
+    descendants: NodeProps['nDescendants'];
+    nHided: NodeProps['nHided'];
+    hiddenNodes: NodeProps['hiddenNodes'];
+    dependencies: NodeProps['dependencies'];
+
     icon: 'graph';
     label: string;
     secondaryLabel: string;
-    rule: string;
-    args: string;
-    conclusion: string;
-    parentId: number;
-    descendants: number;
-    nHided: number;
-    hiddenNodes: number[];
-    childNodes: TreeNode[];
-    parentsId: number[];
     hasCaret: boolean | undefined;
+    parentsId: number[];
+    parentId: number;
+    childNodes: TreeNode[];
 }
 
 interface TreeProps {

@@ -334,6 +334,10 @@ export const selectProof = (state: RootState): NodeInterface[] => {
     return proof;
 };
 
+export const selectOriginalProof = (state: RootState): NodeInterface[] => {
+    return state.proof.proof;
+};
+
 export const selectView = (state: RootState): 'basic' | 'propositional' | 'full' => {
     return state.proof.view;
 };

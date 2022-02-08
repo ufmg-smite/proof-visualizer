@@ -5,12 +5,11 @@ import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@b
 import Canvas from './Canvas/VisualizerCanvas';
 import VisualizerTree from '../VisualizerTree/VisualizerTree';
 import VisualizerDirectoryStyle from './VisualizerDirectoryStyle/VisualizerDirectoryStyle';
-import { processDot } from '../../store/features/proof/auxi';
 
 import '../../scss/VisualizerStage.scss';
 import { useAppSelector } from '../../store/hooks';
 import { selectDot, selectFileCount } from '../../store/features/file/fileSlice';
-import { selectStyle } from '../../store/features/proof/proofSlice';
+import { selectStyle, selectLetMap, selectOriginalProof } from '../../store/features/proof/proofSlice';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { NodeInfo, NodeInterface, TreeNode } from '../../interfaces/interfaces';
 
@@ -186,6 +185,7 @@ const createTree = (proof: NodeInterface[]): any => {
             nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
             hiddenNodes: node.hiddenNodes ? node.hiddenNodes.map((node) => node.id) : [],
             childNodes: [],
+            dependencies: node.dependencies,
             parentsId: node.parents,
             hasCaret: Boolean(node.descendants - 1),
         };
@@ -237,22 +237,18 @@ const indent = (s: string) => {
 };
 
 const VisualizerStage: React.FC = () => {
+    const letMap = useAppSelector(selectLetMap);
+    const proof = useAppSelector(selectOriginalProof);
     const dot = useAppSelector(selectDot);
     const fileID = useAppSelector(selectFileCount);
     const style = useAppSelector(selectStyle);
     const darkTheme = useAppSelector(selectTheme);
-    const [[proof, letMap], setProofAndLet] = useState<[NodeInterface[], any]>([[], '']);
+
+    // Make sure that a new tree is created only when a new dot is used
+    useEffect(() => setProofTree(createTree(proof)), [dot]);
+
+    // Data structures
     const [proofTree, setProofTree] = useState([]);
-    // Make sure that a new tree and proof is created only when a new dot is used
-    useEffect(() => {
-        const [newProof, newLetMap] = processDot(dot ? dot : '');
-        setProofAndLet([newProof, newLetMap]);
-        setProofTree(createTree(newProof));
-    }, [dot]);
-    const [drawerIsOpen, setDrawerIsOpen] = useState(false);
-    const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
-    const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);
-    const [conclusionTranslatorOpen, setConclusionTranslatorOpen] = useState(false);
     const [nodeInfo, setNodeInfo] = useState<NodeInfo>({
         rule: '',
         args: '',
@@ -262,7 +258,7 @@ const VisualizerStage: React.FC = () => {
         hiddenNodes: [],
         dependencies: [],
     });
-    const [nodeInfoCopy, setNodeInfoCopy] = useState<NodeInfo>({
+    const [originalNodeInfo, setOriginalNodeInfo] = useState<NodeInfo>({
         rule: '',
         args: '',
         conclusion: '',
@@ -271,8 +267,14 @@ const VisualizerStage: React.FC = () => {
         hiddenNodes: [],
         dependencies: [],
     });
-    // TODO: Fazer a chamada do createTree aq dentro pra usar nso drawers, em vez de fazer dentro do canvas
+
+    // Drawer
+    const [drawerIsOpen, setDrawerIsOpen] = useState(false);
+    const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
+    const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);
+    const [conclusionTranslatorOpen, setConclusionTranslatorOpen] = useState(false);
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
+
     const translate = (s: string) => {
         let newS = s;
         let i = newS.indexOf('let');
@@ -288,7 +290,7 @@ const VisualizerStage: React.FC = () => {
         setRuleHelperOpen(false);
         setNodeInfo(nodeInfo);
         setTree(tree ? tree : []);
-        setNodeInfoCopy(nodeInfo);
+        setOriginalNodeInfo(nodeInfo);
         setDrawerIsOpen(true);
     };
 
@@ -455,7 +457,7 @@ const VisualizerStage: React.FC = () => {
                         darkTheme={darkTheme}
                         content={tree}
                         setNodeInfo={setNodeInfo}
-                        originalNodeInfo={nodeInfoCopy}
+                        originalNodeInfo={originalNodeInfo}
                     ></VisualizerTree>
                     <div className={Classes.DIALOG_BODY}>{nodeInfoTable()}</div>
                 </div>

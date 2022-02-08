@@ -443,6 +443,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 nHided: rootNode.hiddenNodes ? rootNode.hiddenNodes.length : 0,
                 hiddenNodes: rootNode.hiddenNodes ? rootNode.hiddenNodes.map((node) => node.id) : [],
                 childNodes: descendants,
+                dependencies: rootNode.dependencies,
                 parentsId: rootNode.parents,
                 hasCaret: Boolean(descendants.length),
             });
