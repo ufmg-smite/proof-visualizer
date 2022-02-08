@@ -85,6 +85,14 @@ interface CanvasState {
     visualInfo: ProofState['visualInfo'];
 }
 
+// DIRECTORY STYLE
+interface DirectoryStyleProps {
+    proofTree: TreeNodeInfo[];
+    ruleHelper: (s: string) => string;
+    indent: (s: string) => string;
+    translate: (s: string) => string;
+}
+
 // NAVBAR
 interface NavbarProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
@@ -193,6 +201,7 @@ export type {
     CanvasProps,
     CanvasPropsAndRedux,
     CanvasState,
+    DirectoryStyleProps,
     NavbarProps,
     NavbarPropsAndRedux,
     TreeNode,

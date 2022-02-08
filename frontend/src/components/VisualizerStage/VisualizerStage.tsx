@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 
 import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
 import Canvas from './Canvas/VisualizerCanvas';
@@ -12,6 +12,13 @@ import { selectDot, selectFileCount } from '../../store/features/file/fileSlice'
 import { selectStyle, selectLetMap, selectOriginalProof } from '../../store/features/proof/proofSlice';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { NodeInfo, NodeInterface, TreeNode } from '../../interfaces/interfaces';
+
+export enum drawerHelpersKind {
+    RULE,
+    ARGS,
+    CONC,
+    ALL,
+}
 
 function ruleHelper(rule: string) {
     switch (rule.split(' ')[0]) {
@@ -269,10 +276,32 @@ const VisualizerStage: React.FC = () => {
     });
 
     // Drawer
+    const [[ruleHelperIsOpen, argsHelperIsOpen, concHelperIsOpen], dispatchHelper] = useReducer(
+        (state: boolean[], action: { type: drawerHelpersKind; payload: boolean }): boolean[] => {
+            const { type, payload } = action;
+
+            // Act over all the positions
+            if (type === drawerHelpersKind.ALL) {
+                for (let i = 0; i < state.length; i++) {
+                    state[i] = payload;
+                }
+            }
+            // If wanna set a position
+            else if (payload) {
+                // Reset everything and set the wanted
+                for (let i = 0; i < state.length; i++) {
+                    state[i] = i === type ? payload : false;
+                }
+            }
+            // If wanna only reset a position
+            else state[type] = payload;
+
+            return [...state];
+        },
+        // Rule, args, conclusion
+        [false, false, false],
+    );
     const [drawerIsOpen, setDrawerIsOpen] = useState(false);
-    const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
-    const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);
-    const [conclusionTranslatorOpen, setConclusionTranslatorOpen] = useState(false);
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
 
     const translate = (s: string) => {
@@ -287,14 +316,13 @@ const VisualizerStage: React.FC = () => {
     };
 
     const openDrawer = (nodeInfo: NodeInfo, tree?: TreeNodeInfo[]) => {
-        setRuleHelperOpen(false);
         setNodeInfo(nodeInfo);
         setTree(tree ? tree : []);
         setOriginalNodeInfo(nodeInfo);
         setDrawerIsOpen(true);
     };
 
-    const nodeInfoTable = () => {
+    const nodeInfoTable = (): JSX.Element => {
         return (
             <table
                 id="table-node-info"
@@ -312,18 +340,16 @@ const VisualizerStage: React.FC = () => {
                         <td>
                             <strong>RULE </strong>
                             <Icon
-                                id="rule-icon"
+                                id="icon"
                                 icon="help"
                                 onClick={() => {
-                                    setArgsTranslatorOpen(false);
-                                    setConclusionTranslatorOpen(false);
-                                    setRuleHelperOpen(!ruleHelperOpen);
+                                    dispatchHelper({ type: drawerHelpersKind.RULE, payload: !ruleHelperIsOpen });
                                 }}
                             ></Icon>
                         </td>
                         <td>
                             {nodeInfo.rule}
-                            <Collapse isOpen={ruleHelperOpen}>
+                            <Collapse isOpen={ruleHelperIsOpen}>
                                 <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
                                     {ruleHelper(nodeInfo.rule)}
                                 </Pre>
@@ -337,12 +363,13 @@ const VisualizerStage: React.FC = () => {
                                 <strong>ARGS</strong>{' '}
                                 {nodeInfo.args.indexOf('let') !== -1 ? (
                                     <Icon
-                                        id="rule-icon"
+                                        id="icon"
                                         icon="translate"
                                         onClick={() => {
-                                            setConclusionTranslatorOpen(false);
-                                            setRuleHelperOpen(false);
-                                            setArgsTranslatorOpen(!argsTranslatorOpen);
+                                            dispatchHelper({
+                                                type: drawerHelpersKind.ARGS,
+                                                payload: !argsHelperIsOpen,
+                                            });
                                         }}
                                     ></Icon>
                                 ) : null}
@@ -350,7 +377,7 @@ const VisualizerStage: React.FC = () => {
                             <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                                 {nodeInfo.args}
                                 {nodeInfo.args.indexOf('let') !== -1 ? (
-                                    <Collapse isOpen={argsTranslatorOpen}>
+                                    <Collapse isOpen={argsHelperIsOpen}>
                                         <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
                                             {indent(translate(nodeInfo.args))}
                                         </Pre>
@@ -365,12 +392,10 @@ const VisualizerStage: React.FC = () => {
                             <strong>CONCLUSION</strong>{' '}
                             {nodeInfo.conclusion.indexOf('let') !== -1 ? (
                                 <Icon
-                                    id="rule-icon"
+                                    id="icon"
                                     icon="translate"
                                     onClick={() => {
-                                        setArgsTranslatorOpen(false);
-                                        setRuleHelperOpen(false);
-                                        setConclusionTranslatorOpen(!conclusionTranslatorOpen);
+                                        dispatchHelper({ type: drawerHelpersKind.CONC, payload: !concHelperIsOpen });
                                     }}
                                 ></Icon>
                             ) : null}
@@ -378,7 +403,7 @@ const VisualizerStage: React.FC = () => {
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                             {nodeInfo.conclusion}
                             {nodeInfo.conclusion.indexOf('let') !== -1 ? (
-                                <Collapse isOpen={conclusionTranslatorOpen}>
+                                <Collapse isOpen={concHelperIsOpen}>
                                     <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
                                         {indent(translate(nodeInfo.conclusion))}
                                     </Pre>
@@ -446,8 +471,7 @@ const VisualizerStage: React.FC = () => {
                 onClose={(e) => {
                     e.preventDefault();
                     setDrawerIsOpen(false);
-                    setArgsTranslatorOpen(false);
-                    setConclusionTranslatorOpen(false);
+                    dispatchHelper({ type: drawerHelpersKind.ALL, payload: false });
                 }}
                 icon="info-sign"
                 title="Node info"

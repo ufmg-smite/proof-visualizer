@@ -12,11 +12,16 @@
                 }
             }
         }
-        #rule-icon {
+        #icon {
             color: white;
+        }
+        #icon:hover {
+            cursor: pointer;
         }
         #pre-rule {
             white-space: pre-wrap;
         }
+
+        
     }
 }
