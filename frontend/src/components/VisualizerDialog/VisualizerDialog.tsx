@@ -128,13 +128,18 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                             addErrorToast('Sorry! Our app only support DOT and JSON files.');
                             return;
                         }
-                        try {
-                            const fileContents = await readUploadedFileAsText(file);
-                            changeFile(fileContents as string);
-                            changeFileName(file.name);
 
-                            // If succeded, set the focus of the page to the upload button
-                            setFocusFlag(2);
+                        try {
+                            // Make sure the file was selected and none error
+                            //  of "no file select" will be prompted
+                            if (file) {
+                                const fileContents = await readUploadedFileAsText(file);
+                                changeFile(fileContents as string);
+                                changeFileName(file.name);
+
+                                // If succeded, set the focus of the page to the upload button
+                                setFocusFlag(2);
+                            }
                         } catch (er: any) {
                             addErrorToast(er.message);
                         }
