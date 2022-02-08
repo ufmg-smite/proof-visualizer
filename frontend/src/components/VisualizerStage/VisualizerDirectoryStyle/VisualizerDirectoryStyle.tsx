@@ -37,6 +37,7 @@ const VisualizerDirectoryStyle: React.FC<directoryStyleProps> = ({
 
     return (
         <div
+            className="dir-style"
             style={{
                 backgroundColor: darkTheme ? 'rgb(57, 75, 89)' : 'white',
                 height:

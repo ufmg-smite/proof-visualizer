@@ -6,3 +6,11 @@
         overflow: auto;
     }
 }
+
+.dir-style #table-node-info {
+    thead tr th:first-child,
+    tbody tr td:first-child {
+        width:200px;
+        min-width: fit-content;
+    }
+}
