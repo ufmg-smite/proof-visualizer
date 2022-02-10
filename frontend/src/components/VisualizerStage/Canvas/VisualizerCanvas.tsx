@@ -426,8 +426,13 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             });
 
             const label = rootNode.hiddenNodes?.length
-                ? `${rootNode.id} : π ➜ ${rootNode.conclusion}`
-                : `${rootNode.id} : ${rootNode.conclusion}`;
+                ? // Pi node
+                  `${rootNode.id} : π ➜ ${rootNode.conclusion}`
+                : rootNode.dependencies.length
+                ? // Node with dependencies
+                  `${rootNode.id} : β ➜ ${rootNode.conclusion}`
+                : //Normal node
+                  `${rootNode.id} : ${rootNode.conclusion}`;
 
             // Create the rootNode tree
             tree.push({
