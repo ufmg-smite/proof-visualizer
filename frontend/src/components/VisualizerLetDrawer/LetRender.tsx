@@ -1,36 +1,59 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Button, Drawer, Classes, Position } from '@blueprintjs/core';
-
-import Let from './let';
-import '../../scss/Let.scss';
-import { letDrawerProps } from '../../interfaces/interfaces';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
-import { selectLetMap } from '../../store/features/proof/proofSlice';
+import { LetRenderProps } from '../../interfaces/interfaces';
+import Let from './let';
+import { Button } from '@blueprintjs/core';
 
-const font =
-    '14px / 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", Icons16, sans-serif';
+const font = '13px monospace';
+const triggerSize = 300;
 
-const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: letDrawerProps) => {
+const LetRender: React.FC<LetRenderProps> = ({ id, toRender, letMap }: LetRenderProps) => {
     const darkTheme = useAppSelector(selectTheme);
-    const letMap = useAppSelector(selectLetMap);
-    const widthRef = useRef(0);
-
-    const [letMapS, setLetMapS] = useState({ ...letMap });
+    const widthRef = useRef({ letRender: 0, full: 0 });
     const [resizeMode, setResizeMode] = useState(0);
-    const letsRef = useRef<{ [key: string]: Let }>({});
+    const [letMapS, setLetMapS] = useState(
+        (() => {
+            const newMap = { ...letMap };
+            newMap['this'] = toRender;
+            return newMap;
+        })(),
+    );
+
+    const initializeLet = (key = 'this', lets: { [key: string]: Let } = {}) => {
+        const currentLet = letMapS[key];
+        const indices: { [key: number]: string } = {};
+
+        // Finds all occurences of let in the currentLet
+        [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
+            if (match.index) indices[match.index] = match[0];
+        });
+
+        // Call recursive for all the external lets
+        Object.keys(indices).forEach((indice) => {
+            initializeLet(indices[Number(indice)], lets);
+        });
+
+        // If this let was not created yet
+        if (Object.keys(lets).indexOf(key) === -1) {
+            lets[key] = new Let(key, currentLet, lets, indices);
+        }
+
+        return lets;
+    };
+    const letsRef = useRef<{ [key: string]: Let }>(initializeLet());
 
     // ComponentDidMount
     useEffect(() => {
         // Handler to call on window resize and set the value column width
         function handleResize() {
-            const width = widthRef.current;
+            const width = widthRef.current.letRender;
 
-            // -22 from the fixed padding size
-            const newWidth = document.getElementsByClassName('letMap-value-column')[0].clientWidth - 24;
+            const fullWidth = document.getElementsByClassName(`let-corpus-${id}`)[0].clientWidth;
+            const newWidth = document.getElementsByClassName(`let-render-${id}`)[0].clientWidth - 10;
             width === newWidth ? setResizeMode(1) : width > newWidth ? setResizeMode(0) : setResizeMode(2);
 
-            widthRef.current = newWidth;
+            widthRef.current = { letRender: newWidth, full: fullWidth };
         }
 
         // Add event listener
@@ -70,24 +93,20 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
         }
     };
 
-    const renderLet = (key: string): JSX.Element => {
+    const renderLet = (): JSX.Element => {
         const lets = letsRef.current;
-        const width = widthRef.current;
+        const width = widthRef.current.letRender;
+        const key = 'this';
 
         // Waits for the width to be updated and the DOM element to be updated
         if (width) {
             let currentLet = letMapS[key];
-
             let indices: { [key: number]: string } = {};
+
             // Finds all occurences of let in the currentLet
             [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
                 if (match.index) indices[match.index] = match[0];
             });
-
-            // If it's the first render (make sure that the lets obj is not calculated every time)
-            if (Object.keys(lets).length !== Object.keys(letMapS).length) {
-                lets[key] = new Let(key, currentLet, lets, indices);
-            }
 
             // If doesn't fits, then indent
             if (!lets[key].fitsTheWindow(width, font)) {
@@ -124,6 +143,7 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
 
             const arr: (JSX.Element | string)[] = [];
             let start = 0;
+
             // Slice the currentLet into an array with strings and JSX elements
             Object.keys(indices).forEach((index, i, self) => {
                 const idx = Number(index);
@@ -152,78 +172,58 @@ const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawer
 
             // If there is a let in this current let
             if (Object.keys(indices).length) {
-                return <span className="let-instance">{arr}</span>;
+                return (
+                    <span className="let-instance" style={{ overflowWrap: 'break-word' }}>
+                        {arr}
+                    </span>
+                );
             } else {
-                return <span className="let-instance">{currentLet}</span>;
+                return (
+                    <span className="let-instance" style={{ overflowWrap: 'break-word' }}>
+                        {currentLet}
+                    </span>
+                );
             }
         }
         return <></>;
     };
 
+    const btColumnSize = widthRef.current.full > triggerSize ? 100 : 40;
+
     return (
-        <Drawer
-            className={darkTheme ? 'bp3-dark' : ''}
-            style={{ maxHeight: '65%', width: '35%' }}
-            autoFocus={true}
-            canEscapeKeyClose={true}
-            canOutsideClickClose={false}
-            enforceFocus={true}
-            hasBackdrop={false}
-            isOpen={drawerIsOpen}
-            position={Position.RIGHT}
-            usePortal={false}
-            onClose={(e) => {
-                e.preventDefault();
-                setDrawerIsOpen(false);
+        <div
+            className={`let-corpus-${id}`}
+            style={{
+                display: 'grid',
+                gridTemplateColumns: `auto ${btColumnSize + 7}px`,
             }}
-            icon="translate"
-            title="Let Map"
         >
-            <div className={Classes.DRAWER_BODY}>
-                <div className={Classes.DIALOG_BODY}>
-                    <table
-                        id="table-node-info"
-                        className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
-                        style={{ width: '100%' }}
-                    >
-                        <thead>
-                            <tr>
-                                <th style={{ width: '100px' }}>Property</th>
-                                <th className="letMap-value-column">Value</th>
-                                <th style={{ width: '250px' }}>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {Object.keys(letMapS).map((key) => {
-                                return (
-                                    <tr key={key}>
-                                        <td>
-                                            <strong>{key}</strong>
-                                        </td>
-                                        <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{renderLet(key)}</td>
-                                        <td style={{ width: '150px', height: '100%' }}>
-                                            <Button
-                                                onClick={() => expandAll(key)}
-                                                className="bp3-minimal"
-                                                icon="translate"
-                                                text="Expand"
-                                            />
-                                            <Button
-                                                onClick={() => revertLet(key)}
-                                                className="bp3-minimal"
-                                                icon="undo"
-                                                text="Revert"
-                                            />
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
+            <div className={`let-render-${id}`} style={{ height: '100%', borderRight: 'solid 1px' }}>
+                {renderLet()}
             </div>
-        </Drawer>
+            <div
+                style={{
+                    width: `${btColumnSize}px`,
+                    display: 'flex',
+                    flexFlow: 'column',
+                    justifySelf: 'right',
+                }}
+            >
+                <Button
+                    onClick={() => expandAll('this')}
+                    className="bp3-minimal"
+                    icon="translate"
+                    text={widthRef.current.full > triggerSize ? 'Expand' : null}
+                />
+                <Button
+                    onClick={() => revertLet('this')}
+                    className="bp3-minimal"
+                    icon="undo"
+                    text={widthRef.current.full > triggerSize ? 'Revert' : null}
+                />
+            </div>
+        </div>
     );
 };
 
-export default VisualizerLetDrawer;
+export default LetRender;

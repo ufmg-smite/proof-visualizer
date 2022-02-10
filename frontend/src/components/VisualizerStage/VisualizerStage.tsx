@@ -12,6 +12,7 @@ import { selectDot, selectFileCount } from '../../store/features/file/fileSlice'
 import { selectStyle, selectLetMap, selectOriginalProof } from '../../store/features/proof/proofSlice';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { NodeInfo, NodeInterface, TreeNode } from '../../interfaces/interfaces';
+import LetRender from '../VisualizerLetDrawer/LetRender';
 
 export enum drawerHelpersKind {
     RULE,
@@ -222,38 +223,14 @@ const createTree = (proof: NodeInterface[]): any => {
     return roots;
 };
 
-const indent = (s: string) => {
-    let newS = s.replaceAll(' ', '\n');
-    let i = 0;
-    let pCounter = 0;
-    while (i < newS.length) {
-        if (newS[i] === '(' || newS[i] === '[') pCounter++;
-        else if (newS[i] === ')' || newS[i] === ']') pCounter--;
-        else if (newS[i] === '\n') {
-            if (newS[i + 1] === ')' || newS[i + 1] === ']') {
-                newS = [newS.slice(0, i + 1), '  '.repeat(pCounter - 1), newS.slice(i + 1)].join('');
-                i += pCounter - 1;
-            } else {
-                newS = [newS.slice(0, i + 1), '  '.repeat(pCounter), newS.slice(i + 1)].join('');
-                i += pCounter;
-            }
-        }
-        i++;
-    }
-    return newS;
-};
-
 const VisualizerStage: React.FC = () => {
+    // Proof data
     const letMap = useAppSelector(selectLetMap);
     const proof = useAppSelector(selectOriginalProof);
     const dot = useAppSelector(selectDot);
     const fileID = useAppSelector(selectFileCount);
     const style = useAppSelector(selectStyle);
     const darkTheme = useAppSelector(selectTheme);
-
-    // Make sure that a new tree is created only when a new dot is used
-    useEffect(() => setProofTree(createTree(proof)), [dot]);
-
     // Data structures
     const [proofTree, setProofTree] = useState([]);
     const [nodeInfo, setNodeInfo] = useState<NodeInfo>({
@@ -274,7 +251,6 @@ const VisualizerStage: React.FC = () => {
         hiddenNodes: [],
         dependencies: [],
     });
-
     // Drawer
     const [[ruleHelperIsOpen, argsHelperIsOpen, concHelperIsOpen], dispatchHelper] = useReducer(
         (state: boolean[], action: { type: drawerHelpersKind; payload: boolean }): boolean[] => {
@@ -304,16 +280,8 @@ const VisualizerStage: React.FC = () => {
     const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
 
-    const translate = (s: string) => {
-        let newS = s;
-        let i = newS.indexOf('let');
-        while (i !== -1) {
-            const l = newS.slice(i).split(/[ |)|,]/)[0];
-            newS = newS.replace(l, letMap[l]);
-            i = newS.indexOf('let');
-        }
-        return newS;
-    };
+    // Make sure that a new tree is created only when a new dot is used
+    useEffect(() => setProofTree(createTree(proof)), [dot]);
 
     const openDrawer = (nodeInfo: NodeInfo, tree?: TreeNodeInfo[]) => {
         setNodeInfo(nodeInfo);
@@ -379,7 +347,7 @@ const VisualizerStage: React.FC = () => {
                                 {nodeInfo.args.indexOf('let') !== -1 ? (
                                     <Collapse isOpen={argsHelperIsOpen}>
                                         <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
-                                            {indent(translate(nodeInfo.args))}
+                                            {nodeInfo.args}
                                         </Pre>
                                     </Collapse>
                                 ) : null}
@@ -404,8 +372,14 @@ const VisualizerStage: React.FC = () => {
                             {nodeInfo.conclusion}
                             {nodeInfo.conclusion.indexOf('let') !== -1 ? (
                                 <Collapse isOpen={concHelperIsOpen}>
-                                    <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
-                                        {indent(translate(nodeInfo.conclusion))}
+                                    <Pre
+                                        style={{
+                                            maxHeight: '300px',
+                                            overflow: 'auto',
+                                        }}
+                                        id="pre-conclusion"
+                                    >
+                                        <LetRender id={0} toRender={nodeInfo.conclusion} letMap={letMap} />
                                     </Pre>
                                 </Collapse>
                             ) : null}
@@ -453,8 +427,8 @@ const VisualizerStage: React.FC = () => {
                     <VisualizerDirectoryStyle
                         proofTree={proofTree}
                         ruleHelper={ruleHelper}
-                        indent={indent}
-                        translate={translate}
+                        indent={() => ''}
+                        translate={() => ''}
                     />
                 )
             ) : null}

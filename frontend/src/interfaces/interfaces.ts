@@ -142,6 +142,12 @@ interface LineProps {
 }
 
 // LET DRAWER
+interface LetRenderProps {
+    id: number;
+    toRender: string;
+    letMap: ProofState['letMap'];
+}
+
 interface letDrawerProps {
     drawerIsOpen: boolean;
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
@@ -207,6 +213,7 @@ export type {
     TreeNode,
     TreeProps,
     LineProps,
+    LetRenderProps,
     letDrawerProps,
     ReduxState,
     ProofState,
