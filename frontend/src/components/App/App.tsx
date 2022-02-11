@@ -12,7 +12,7 @@ import { selectTheme } from '../../store/features/theme/themeSlice';
 
 const App: React.FC = () => {
     const [dialogIsOpen, setDialogIsOpen] = useState(true);
-    const [dialogContent, setDialogContent] = useState('welcome');
+    const [dialogContent, setDialogContent] = useState('upload-proof');
     const [drawerIsOpen, setDrawerOpenState] = useReducer((isOpen) => !isOpen, false);
     const darkTheme = useAppSelector(selectTheme);
 

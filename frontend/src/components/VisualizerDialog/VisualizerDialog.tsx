@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useReducer, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { Dispatch, SetStateAction } from 'react';
 import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
@@ -49,21 +49,27 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     addErrorToast,
 }: VisualizerDialogProps) => {
     const darkTheme = useAppSelector(selectTheme);
+    const dispatch = useAppDispatch();
 
     let dialogProps: DialogProps = { icon: 'error', title: 'Error' };
     let dialogBody = <p>This wasn&apos;t supposed to happen. Please contact the developers.</p>;
     let succesButton = <></>;
 
-    const dispatch = useAppDispatch();
     const [processingProof, setProcessingProof] = useState(false);
     const [proofProcessed, setProofProcessed] = useState(false);
     const [fileName, changeFileName] = useState('Choose file...');
     const [file, changeFile] = useState('');
-    const [focusFlag, setFocusFlag] = useState(0);
+    const [[focusFlag, count], setFocusFlag] = useReducer(
+        (state: number[], newFlag: number): number[] => [newFlag, state[1] + 1],
+        [0, 0],
+    );
 
     useEffect(() => {
-        if (dialogIsOpen && dialogContent === 'upload-proof') setFocusFlag(1);
-    }, [dialogIsOpen, dialogContent]);
+        if (dialogIsOpen && dialogContent === 'upload-proof') {
+            if (proofProcessed) setFocusFlag(3);
+            else setFocusFlag(1);
+        }
+    }, [dialogIsOpen, dialogContent, proofProcessed]);
 
     useEffect(() => {
         let el;
@@ -78,8 +84,13 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 el = document.getElementsByClassName(Classes.DIALOG_FOOTER_ACTIONS);
                 (el[0].childNodes[1] as HTMLElement).focus();
                 break;
+            // Focus the close button
+            case 3:
+                el = document.getElementsByClassName(Classes.DIALOG_FOOTER_ACTIONS);
+                (el[0].childNodes[0] as HTMLElement).focus();
+                break;
         }
-    }, [focusFlag]);
+    }, [count]);
 
     switch (dialogContent) {
         case 'welcome':
@@ -103,8 +114,8 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
             dialogBody = proofProcessed ? (
                 <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
                     <Icon icon="tick" intent={Intent.SUCCESS} iconSize={40}></Icon>
-                    <br></br>
-                    <br></br>
+                    <br />
+                    <br />
                     <p>Your proof is ready to be visualized!</p>
                 </div>
             ) : processingProof ? (
