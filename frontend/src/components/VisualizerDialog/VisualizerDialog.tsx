@@ -4,7 +4,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { MaybeElement } from '@blueprintjs/core/lib/esm/common/props';
 import { IconName } from '@blueprintjs/core/lib/esm/components/icon/icon';
 
-import { Button, Classes, Dialog, FileInput, Icon, Intent, Spinner } from '@blueprintjs/core';
+import { Button, Classes, Dialog, FileInput, Intent } from '@blueprintjs/core';
 
 import '../../scss/VisualizerDialog.scss';
 import { selectTheme } from '../../store/features/theme/themeSlice';
@@ -55,21 +55,16 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     let dialogBody = <p>This wasn&apos;t supposed to happen. Please contact the developers.</p>;
     let succesButton = <></>;
 
-    const [processingProof, setProcessingProof] = useState(false);
-    const [proofProcessed, setProofProcessed] = useState(false);
     const [fileName, changeFileName] = useState('Choose file...');
     const [file, changeFile] = useState('');
-    const [[focusFlag, count], setFocusFlag] = useReducer(
+    const [[focusFlag, flagCount], setFocusFlag] = useReducer(
         (state: number[], newFlag: number): number[] => [newFlag, state[1] + 1],
         [0, 0],
     );
 
     useEffect(() => {
-        if (dialogIsOpen && dialogContent === 'upload-proof') {
-            if (proofProcessed) setFocusFlag(3);
-            else setFocusFlag(1);
-        }
-    }, [dialogIsOpen, dialogContent, proofProcessed]);
+        if (dialogIsOpen && dialogContent === 'upload-proof') setFocusFlag(1);
+    }, [dialogIsOpen, dialogContent]);
 
     useEffect(() => {
         let el;
@@ -79,51 +74,24 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 el = document.getElementsByClassName(Classes.DIALOG_BODY + ' dialog-body');
                 (el[0].childNodes[0] as HTMLElement).focus();
                 break;
-            // Focus the input button
+            // Focus the upload button
             case 2:
-                el = document.getElementsByClassName(Classes.DIALOG_FOOTER_ACTIONS);
-                (el[0].childNodes[1] as HTMLElement).focus();
-                break;
-            // Focus the close button
-            case 3:
                 el = document.getElementsByClassName(Classes.DIALOG_FOOTER_ACTIONS);
                 (el[0].childNodes[0] as HTMLElement).focus();
                 break;
         }
-    }, [count]);
+    }, [flagCount]);
+
+    const closeDialog = () => {
+        setDialogIsOpen(false);
+        changeFileName('Choose file...');
+        changeFile('');
+    };
 
     switch (dialogContent) {
-        case 'welcome':
-            dialogProps = { icon: 'graph', title: 'Welcome' };
-            dialogBody = (
-                <div className="welcome-menu">
-                    <h2>Welcome to Proof Visualizer</h2>
-                    <p>You can upload the DOT/JSON file of your proof.</p>
-                    <Button
-                        style={{ width: '155px' }}
-                        icon="upload"
-                        large
-                        text="Upload proof"
-                        onClick={() => setDialogContent('upload-proof')}
-                    />
-                </div>
-            );
-            break;
         case 'upload-proof':
             dialogProps = { icon: 'upload', title: 'Upload Proof' };
-            dialogBody = proofProcessed ? (
-                <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
-                    <Icon icon="tick" intent={Intent.SUCCESS} iconSize={40}></Icon>
-                    <br />
-                    <br />
-                    <p>Your proof is ready to be visualized!</p>
-                </div>
-            ) : processingProof ? (
-                <div style={{ textAlign: 'center', height: '200px', paddingTop: 50 }}>
-                    <p>Processing your proof...</p>
-                    <Spinner size={30} />
-                </div>
-            ) : (
+            dialogBody = (
                 <FileInput
                     text={fileName}
                     hasSelection={fileName !== 'Choose file...'}
@@ -158,7 +126,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                     fill={true}
                 />
             );
-            succesButton = !proofProcessed ? (
+            succesButton = (
                 <Button
                     onClick={() => {
                         dispatch(set({ name: fileName, value: file }));
@@ -168,16 +136,14 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                         if (ext === 'json') dispatch(blockRender());
                         else if (ext === 'dot') dispatch(reRender());
 
-                        setProofProcessed(true);
                         dispatch(process(file));
+                        closeDialog();
                     }}
                     intent={Intent.SUCCESS}
                     disabled={fileName === 'Choose file...'}
                 >
                     Upload Proof
                 </Button>
-            ) : (
-                <></>
             );
             break;
     }
@@ -187,34 +153,13 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
             <Dialog
                 className={darkTheme ? ' bp3-dark' : ''}
                 isOpen={dialogIsOpen}
-                onClose={(): void => {
-                    setProcessingProof(false);
-                    setProofProcessed(false);
-                    setDialogIsOpen(false);
-                    changeFileName('Choose file...');
-                    changeFile('');
-                }}
+                onClose={(): void => closeDialog()}
                 usePortal={true}
                 {...dialogProps}
             >
                 <div className={Classes.DIALOG_BODY + ' dialog-body'}>{dialogBody}</div>
                 <div className={Classes.DIALOG_FOOTER}>
-                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                        <Button
-                            onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                                e.preventDefault();
-                                setDialogIsOpen(false);
-                                setProcessingProof(false);
-                                setProofProcessed(false);
-                                setDialogIsOpen(false);
-                                changeFileName('Choose file...');
-                                changeFile('');
-                            }}
-                        >
-                            Close
-                        </Button>
-                        {succesButton}
-                    </div>
+                    <div className={Classes.DIALOG_FOOTER_ACTIONS}>{succesButton}</div>
                 </div>
             </Dialog>
         </>
