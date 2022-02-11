@@ -54,6 +54,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
     setDialogIsOpen,
     setDialogContent,
     setDrawerIsOpen,
+    addErrorToast,
     visualInfo,
     proof,
     dot,
@@ -162,29 +163,36 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                                     .map((id) => Number(id));
                             }
                         }
-                    }
-                    //
-                    else {
-                        // /select /let\d+/
+                    } else {
                         // Is a regex select?
                         const matches = [...cmdArg.matchAll(/\/[^\/]*\//g)];
+                        const argMatch = [...cmdArg.matchAll(/--(c|r)/g)];
                         // If there is a regex
                         if (matches[0]) {
+                            let argIsConclusion = true;
+                            // Try to find the option
+                            if (argMatch[0]) {
+                                switch (argMatch[0][1]) {
+                                    case 'r':
+                                        argIsConclusion = false;
+                                        break;
+                                    case 'c':
+                                        argIsConclusion = true;
+                                        break;
+                                }
+                            }
+
                             const regexString = matches[0][0].substring(1, matches[0][0].length - 1);
                             try {
                                 // Search all the nodes with the specific regex matching in the conclusion
                                 const regex = new RegExp(regexString);
-                                idList = proof.filter((node) => regex.test(node.conclusion)).map((node) => node.id);
+                                idList = proof
+                                    .filter((node) => regex.test(argIsConclusion ? node.conclusion : node.rule))
+                                    .map((node) => node.id);
                             } catch (err) {
                                 // If the inserted regex expression is invalid (probably missing \)
-                                console.log(err);
+                                addErrorToast('Regex error: probably and wrong regex expression');
                             }
-                        }
-                        // There is no regex, so the last possibility is to select based on the RULE
-                        else {
-                            idList = proof
-                                .filter((node) => node.rule.trim() === commands[1].trim())
-                                .map((node) => node.id);
                         }
                     }
 
@@ -400,7 +408,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             <u className="title">Desc.:</u> Command that select a group of nodes.
                         </div>
                         <div>
-                            <u className="title">Pattern:</u> /select {'<option>'}.
+                            <u className="title">Pattern:</u> /select {'<option>'} {'<argument>'}.
                         </div>
                         <div>
                             <u className="title">Options:</u>
@@ -412,10 +420,13 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                                 2 - A range of node {`id's`} wrapped by brackets and separated by hyphen (and spaces if
                                 wanted) (eg.: [ 4 -15]). This range will include the last element.
                             </div>
-                            <div className="option">3 - A node rule (eg.: CHAIN_RESOLUTION).</div>
                             <div className="option">
-                                4 - A regex expression used to select all the nodes which the conclusion owns a match
+                                3 - A regex expression used to select all the nodes which the conclusion owns a match
                                 (eg.: /\.*false\.*/ {'->'} selects all the nodes with false anywhere in the conclusion).
+                                <br />
+                                <br />
+                                If wanted to search a match in the rule just insert the --r argument. The --c argument
+                                exists but the /select will by default search in the conclusion.
                             </div>
                         </div>
                     </div>

@@ -39,6 +39,7 @@ const App: React.FC = () => {
                 setDialogIsOpen={setDialogIsOpen}
                 setDialogContent={setDialogContent}
                 setDrawerIsOpen={setDrawerOpenState}
+                addErrorToast={addErrorToast}
             ></VisualizerNavbar>
             <VisualizerDialog
                 dialogIsOpen={dialogIsOpen}

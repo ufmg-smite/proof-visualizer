@@ -99,6 +99,7 @@ interface NavbarProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
     setDialogContent: Dispatch<SetStateAction<string>>;
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
+    addErrorToast: (err: string) => void;
 }
 
 interface NavbarPropsAndRedux extends NavbarProps {
