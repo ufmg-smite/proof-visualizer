@@ -175,53 +175,108 @@ function ruleHelper(rule: string) {
     }
 }
 
-const createTree = (proof: NodeInterface[]): any => {
-    const list: TreeNode[] = proof.map((node) => {
-        const label = node.hiddenNodes?.length
-            ? `${node.id} : π ➜ ${node.conclusion}`
-            : `${node.id} : ${node.conclusion}`;
-        return {
-            id: node.id,
-            icon: 'graph',
-            label: label,
-            secondaryLabel: `${node.rule}`,
-            rule: node.rule,
-            args: node.args,
-            conclusion: node.conclusion,
-            parentId: node.parents[0],
-            descendants: node.descendants - 1,
-            nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
-            hiddenNodes: node.hiddenNodes ? node.hiddenNodes.map((node) => node.id) : [],
-            childNodes: [],
-            dependencies: node.dependencies,
-            parentsId: node.parents,
-            hasCaret: Boolean(node.descendants - 1),
-        };
-    });
+function castProofNodeToTreeNode(node: NodeInterface): TreeNode {
+    const label = node.hiddenNodes?.length
+        ? // Pi node
+          `${node.id} : π ➜ ${node.conclusion}`
+        : node.dependencies.length
+        ? // Node with dependencies
+          `${node.id} : β ➜ ${node.conclusion}`
+        : //Normal node
+          `${node.id} : ${node.conclusion}`;
 
-    const map: any = {},
-        roots: any = [];
-    let node: TreeNode, i;
+    // Create the node tree
+    return {
+        id: node.id,
+        icon: 'graph',
+        label: label,
+        secondaryLabel: `${node.rule}`,
+        rule: node.rule,
+        args: node.args,
+        conclusion: node.conclusion,
+        parentId: node.parents[0],
+        descendants: node.descendants - 1,
+        nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
+        hiddenNodes: node.hiddenNodes ? node.hiddenNodes.map((n) => n.id) : [],
+        childNodes: [],
+        dependencies: node.dependencies,
+        parentsId: node.parents,
+        hasCaret: Boolean(node.descendants - 1),
+    };
+}
 
-    // Map the { [node id]: list array id }
-    for (i = 0; i < list.length; i += 1) {
-        map[list[i].id] = i;
-    }
+function createTree(proof: NodeInterface[], id: number): TreeNode[] {
+    const rootNode = proof.find((o) => o.id === id);
+    const tree: TreeNode[] = [],
+        roots: TreeNode[] = [];
 
-    for (i = 0; i < list.length; i += 1) {
-        node = list[i];
-        // For all the parents
-        node.parentsId.forEach((parentId) => {
-            // If the parent is valid and exist in the list
-            if (!isNaN(parentId) && list[map[parentId]]) {
-                list[map[parentId]].childNodes.push(node);
-            } else {
-                roots.push(node);
+    // Make sure found the root node
+    if (rootNode) {
+        const stack: number[] = [rootNode.id];
+        const childrenStack = [-1];
+        const insertedStack: number[] = [];
+
+        let currentNode: any;
+        tree.push(castProofNodeToTreeNode(rootNode));
+        insertedStack.push(rootNode.id);
+
+        //While stack isn't empty
+        while (stack.length) {
+            const lastNode = stack[stack.length - 1];
+            let lastChild = childrenStack[childrenStack.length - 1];
+            currentNode = proof.find((o) => o.id === lastNode);
+
+            // If still has children
+            if (lastChild < currentNode.children.length - 1) {
+                lastChild++;
+                stack.push(currentNode.children[lastChild]);
+                childrenStack.push(-1);
+                // Add the node to the tree
+                const nextNode: any = proof.find((o) => o.id === currentNode.children[lastChild]);
+
+                // Avoid duplicate nodes
+                if (insertedStack.indexOf(nextNode.id) === -1) {
+                    tree.push(castProofNodeToTreeNode(nextNode));
+                    insertedStack.push(nextNode.id);
+                }
             }
-        });
+            // Hasn't children
+            else {
+                stack.pop();
+                childrenStack.pop();
+                childrenStack[childrenStack.length - 1]++;
+            }
+        }
+
+        // Make the id's list
+        const map: any = {};
+        let node: TreeNode, i: number;
+
+        // Map the { [node id]: list array id }
+        for (i = 0; i < tree.length; i++) {
+            map[tree[i].id] = i;
+        }
+
+        for (i = 0; i < tree.length; i += 1) {
+            node = tree[i];
+            // For all the parents
+            node.parentsId.forEach((parentId) => {
+                // If this parent was mapped or it's the root node
+                if (!isNaN(map[parentId]) || !i) {
+                    // If the parent is valid and exist in the list
+                    if (!isNaN(parentId) && tree[map[parentId]]) {
+                        tree[map[parentId]].childNodes.push(node);
+                    }
+                    // If root node was already inserted
+                    else if (!roots.length) {
+                        roots.push(node);
+                    }
+                }
+            });
+        }
     }
     return roots;
-};
+}
 
 const VisualizerStage: React.FC = () => {
     // Proof data
@@ -232,7 +287,7 @@ const VisualizerStage: React.FC = () => {
     const style = useAppSelector(selectStyle);
     const darkTheme = useAppSelector(selectTheme);
     // Data structures
-    const [proofTree, setProofTree] = useState([]);
+    const [proofTree, setProofTree] = useState<TreeNodeInfo[]>([]);
     const [nodeInfo, setNodeInfo] = useState<NodeInfo>({
         rule: '',
         args: '',
@@ -281,7 +336,7 @@ const VisualizerStage: React.FC = () => {
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
 
     // Make sure that a new tree is created only when a new dot is used
-    useEffect(() => setProofTree(createTree(proof)), [dot]);
+    useEffect(() => setProofTree(createTree(proof, 0)), [dot]);
 
     const openDrawer = (nodeInfo: NodeInfo, tree?: TreeNodeInfo[]) => {
         setNodeInfo(nodeInfo);
@@ -422,7 +477,7 @@ const VisualizerStage: React.FC = () => {
         <div onContextMenu={(e) => e.preventDefault()}>
             {proof.length > 1 ? (
                 style === 'graph' ? (
-                    <Canvas key={fileID} openDrawer={openDrawer}></Canvas>
+                    <Canvas key={fileID} openDrawer={openDrawer} createTree={createTree}></Canvas>
                 ) : (
                     <VisualizerDirectoryStyle
                         proofTree={proofTree}

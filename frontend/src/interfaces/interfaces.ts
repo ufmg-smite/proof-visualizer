@@ -56,6 +56,7 @@ interface NodeInfo {
 // Dividir essas interfaces em funções
 interface CanvasProps {
     openDrawer: (nodeInfo: NodeInfo) => void;
+    createTree: (proof: NodeInterface[], id: number) => TreeNode[];
 }
 
 interface CanvasPropsAndRedux extends CanvasProps {

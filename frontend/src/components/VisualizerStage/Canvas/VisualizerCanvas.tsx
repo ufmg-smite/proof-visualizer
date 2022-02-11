@@ -409,51 +409,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     /*TREE*/
     createTree = (id: number): TreeNode[] => {
-        const { proof } = this.state;
-        const rootNode = proof.find((o) => o.id === id);
-        const tree: TreeNode[] = [];
-
-        // Make sure found the node
-        if (rootNode) {
-            let descendants: TreeNode[] = [];
-            // For each children
-            rootNode.children.forEach((childID) => {
-                // Find the child
-                const child = proof.find((o) => o.id === childID);
-
-                // Get the current child tree
-                if (child) descendants = descendants.concat(this.createTree(child.id));
-            });
-
-            const label = rootNode.hiddenNodes?.length
-                ? // Pi node
-                  `${rootNode.id} : π ➜ ${rootNode.conclusion}`
-                : rootNode.dependencies.length
-                ? // Node with dependencies
-                  `${rootNode.id} : β ➜ ${rootNode.conclusion}`
-                : //Normal node
-                  `${rootNode.id} : ${rootNode.conclusion}`;
-
-            // Create the rootNode tree
-            tree.push({
-                id: rootNode.id,
-                icon: 'graph',
-                label: label,
-                secondaryLabel: `${rootNode.rule}`,
-                rule: rootNode.rule,
-                args: rootNode.args,
-                conclusion: rootNode.conclusion,
-                parentId: rootNode.parents[0],
-                descendants: rootNode.descendants - 1,
-                nHided: rootNode.hiddenNodes ? rootNode.hiddenNodes.length : 0,
-                hiddenNodes: rootNode.hiddenNodes ? rootNode.hiddenNodes.map((node) => node.id) : [],
-                childNodes: descendants,
-                dependencies: rootNode.dependencies,
-                parentsId: rootNode.parents,
-                hasCaret: Boolean(descendants.length),
-            });
-        }
-        return tree;
+        return this.props.createTree(this.state.proof, id);
     };
 
     /* UTILS */
