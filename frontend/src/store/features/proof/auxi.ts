@@ -210,3 +210,32 @@ export const findNodesClusters = (proof: NodeInterface[], hiddenNodesArray: numb
     // Filter the nodes with length 1
     return clusters.filter((cluster) => cluster.length > 1);
 };
+
+export const groupPiNodeDependencies = (
+    proof: NodeInterface[],
+    hiddenNodesArray: number[],
+): NodeInterface['dependencies'] => {
+    const piNodeDependencies: NodeInterface['dependencies'] = [];
+    const depMap: { [piID: number]: number } = {};
+    // Copy all the hidden nodes dependencies to the new pi node
+    proof.forEach((node) => {
+        // Search for all the hidden nodes that have deps
+        if (hiddenNodesArray.indexOf(node.id) !== -1 && node.dependencies.length) {
+            // For each dependence in this node
+            node.dependencies.forEach((dep) => {
+                // This pi node dependence wasn't inserted yet
+                if (Object.keys(depMap).indexOf(String(dep.piId)) === -1) {
+                    piNodeDependencies.push(dep);
+                    depMap[dep.piId] = piNodeDependencies.length - 1;
+                }
+                // Concat the nodes inside the pi node already inserted
+                else {
+                    piNodeDependencies[depMap[dep.piId]].depsId = piNodeDependencies[depMap[dep.piId]].depsId.concat(
+                        dep.depsId,
+                    );
+                }
+            });
+        }
+    });
+    return piNodeDependencies;
+};

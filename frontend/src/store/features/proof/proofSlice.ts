@@ -1,6 +1,13 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
-import { processDot, piNodeChildren, piNodeParents, descendants, findNodesClusters } from './auxi';
+import {
+    processDot,
+    piNodeChildren,
+    piNodeParents,
+    descendants,
+    findNodesClusters,
+    groupPiNodeDependencies,
+} from './auxi';
 import { NodeInterface, ProofState } from '../../../interfaces/interfaces';
 
 const initialState: ProofState = {
@@ -260,6 +267,7 @@ export const selectProof = (state: RootState): NodeInterface[] => {
         const dependencies: { [parentId: number]: number[] } = {};
         const children = piNodeChildren(proof, hiddenNodesArray);
         const parents = piNodeParents(proof, hiddenNodesArray, dependencies);
+        const piNodeDependencies = groupPiNodeDependencies(proof, hiddenNodesArray);
 
         const piNodeId = proof.length;
         proof = proof.concat({
@@ -272,7 +280,7 @@ export const selectProof = (state: RootState): NodeInterface[] => {
             parents: parents,
             hiddenNodes: hiddenNodesArray.map((hiddenNode) => proof[hiddenNode]),
             descendants: 1,
-            dependencies: [],
+            dependencies: piNodeDependencies,
         });
 
         const piNode = proof[piNodeId];
