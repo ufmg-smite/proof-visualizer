@@ -6,7 +6,7 @@ import '../../../scss/VisualizerDirectoryStyle.scss';
 import { useAppSelector } from '../../../store/hooks';
 import { selectTheme } from '../../../store/features/theme/themeSlice';
 import { NodeInfo, DirectoryStyleProps } from '../../../interfaces/interfaces';
-import { drawerHelpersKind } from '../VisualizerStage';
+import { drawerHelpersKind } from '../../../interfaces/enum';
 import VisualizerTree from '../../VisualizerTree/VisualizerTree';
 
 const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({

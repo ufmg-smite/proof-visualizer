@@ -2,19 +2,29 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { LetRenderProps } from '../../interfaces/interfaces';
+import { renderLetKind } from '../../interfaces/enum';
 import Let from './let';
-import { Button } from '@blueprintjs/core';
+import { Pre } from '@blueprintjs/core';
 
 const font = '13px monospace';
-const triggerSize = 300;
 
-const LetRender: React.FC<LetRenderProps> = ({ id, toRender, letMap }: LetRenderProps) => {
+const LetRender: React.FC<LetRenderProps> = ({
+    id,
+    toRender,
+    letMap,
+    shouldExpand,
+    shouldRevert,
+    dispatchExpansion,
+}: LetRenderProps) => {
     const darkTheme = useAppSelector(selectTheme);
-    const widthRef = useRef({ letRender: 0, full: 0 });
+    const widthRef = useRef(0);
     const [resizeMode, setResizeMode] = useState(0);
     const [letMapS, setLetMapS] = useState(
         (() => {
             const newMap = { ...letMap };
+            if (toRender[0] !== '(' && toRender[toRender.length] !== ')') {
+                toRender = `(${toRender})`;
+            }
             newMap['this'] = toRender;
             return newMap;
         })(),
@@ -47,13 +57,12 @@ const LetRender: React.FC<LetRenderProps> = ({ id, toRender, letMap }: LetRender
     useEffect(() => {
         // Handler to call on window resize and set the value column width
         function handleResize() {
-            const width = widthRef.current.letRender;
+            const width = widthRef.current;
 
-            const fullWidth = document.getElementsByClassName(`let-corpus-${id}`)[0].clientWidth;
-            const newWidth = document.getElementsByClassName(`let-render-${id}`)[0].clientWidth - 10;
+            const newWidth = document.getElementsByClassName(`let-render-${id}`)[0].clientWidth - 30;
             width === newWidth ? setResizeMode(1) : width > newWidth ? setResizeMode(0) : setResizeMode(2);
 
-            widthRef.current = { letRender: newWidth, full: fullWidth };
+            widthRef.current = newWidth;
         }
 
         // Add event listener
@@ -64,6 +73,19 @@ const LetRender: React.FC<LetRenderProps> = ({ id, toRender, letMap }: LetRender
         // Remove event listener on cleanup
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    useEffect(() => {
+        // Expand
+        if (shouldExpand) {
+            expandAll('this');
+            dispatchExpansion({ type: renderLetKind.EXPAND, payload: false });
+        }
+        // Revert
+        else if (shouldRevert) {
+            revertLet('this');
+            dispatchExpansion({ type: renderLetKind.REVERT, payload: false });
+        }
+    }, [shouldExpand, shouldRevert]);
 
     const expandLet = (parent: string, key: string, letIdx: number) => {
         const lets = letsRef.current;
@@ -95,7 +117,7 @@ const LetRender: React.FC<LetRenderProps> = ({ id, toRender, letMap }: LetRender
 
     const renderLet = (): JSX.Element => {
         const lets = letsRef.current;
-        const width = widthRef.current.letRender;
+        const width = widthRef.current;
         const key = 'this';
 
         // Waits for the width to be updated and the DOM element to be updated
@@ -105,7 +127,7 @@ const LetRender: React.FC<LetRenderProps> = ({ id, toRender, letMap }: LetRender
 
             // Finds all occurences of let in the currentLet
             [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
-                if (match.index) indices[match.index] = match[0];
+                if (match.index !== undefined) indices[match.index] = match[0];
             });
 
             // If doesn't fits, then indent
@@ -188,41 +210,13 @@ const LetRender: React.FC<LetRenderProps> = ({ id, toRender, letMap }: LetRender
         return <></>;
     };
 
-    const btColumnSize = widthRef.current.full > triggerSize ? 100 : 40;
-
     return (
-        <div
-            className={`let-corpus-${id}`}
-            style={{
-                display: 'grid',
-                gridTemplateColumns: `auto ${btColumnSize + 7}px`,
-            }}
+        <Pre
+            className={`let-render-${id}`}
+            style={{ maxHeight: '300px', overflow: 'auto', margin: '0', whiteSpace: 'pre-wrap' }}
         >
-            <div className={`let-render-${id}`} style={{ height: '100%', borderRight: 'solid 1px' }}>
-                {renderLet()}
-            </div>
-            <div
-                style={{
-                    width: `${btColumnSize}px`,
-                    display: 'flex',
-                    flexFlow: 'column',
-                    justifySelf: 'right',
-                }}
-            >
-                <Button
-                    onClick={() => expandAll('this')}
-                    className="bp3-minimal"
-                    icon="translate"
-                    text={widthRef.current.full > triggerSize ? 'Expand' : null}
-                />
-                <Button
-                    onClick={() => revertLet('this')}
-                    className="bp3-minimal"
-                    icon="undo"
-                    text={widthRef.current.full > triggerSize ? 'Revert' : null}
-                />
-            </div>
-        </div>
+            {renderLet()}
+        </Pre>
     );
 };
 

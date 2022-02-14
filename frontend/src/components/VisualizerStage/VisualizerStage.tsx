@@ -12,14 +12,8 @@ import { selectDot, selectFileCount } from '../../store/features/file/fileSlice'
 import { selectStyle, selectLetMap, selectOriginalProof } from '../../store/features/proof/proofSlice';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { NodeInfo, NodeInterface, TreeNode } from '../../interfaces/interfaces';
+import { renderLetKind, drawerHelpersKind } from '../../interfaces/enum';
 import LetRender from '../VisualizerLetDrawer/LetRender';
-
-export enum drawerHelpersKind {
-    RULE,
-    ARGS,
-    CONC,
-    ALL,
-}
 
 function ruleHelper(rule: string) {
     switch (rule.split(' ')[0]) {
@@ -332,6 +326,19 @@ const VisualizerStage: React.FC = () => {
         // Rule, args, conclusion
         [false, false, false],
     );
+    const [[expandAll, revertAll], dispatchLetExpansion] = useReducer(
+        (state: boolean[], action: { type: renderLetKind; payload: boolean }): boolean[] => {
+            const { type, payload } = action;
+
+            for (let i = 0; i < state.length; i++) {
+                state[i] = i === type ? payload : false;
+            }
+
+            return [...state];
+        },
+        // Expand, revert
+        [false, false],
+    );
     const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
 
@@ -414,29 +421,48 @@ const VisualizerStage: React.FC = () => {
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                             <strong>CONCLUSION</strong>{' '}
                             {nodeInfo.conclusion.indexOf('let') !== -1 ? (
-                                <Icon
-                                    id="icon"
-                                    icon="translate"
-                                    onClick={() => {
-                                        dispatchHelper({ type: drawerHelpersKind.CONC, payload: !concHelperIsOpen });
-                                    }}
-                                ></Icon>
+                                <>
+                                    <Icon
+                                        id="icon"
+                                        icon="translate"
+                                        onClick={() => {
+                                            dispatchHelper({
+                                                type: drawerHelpersKind.CONC,
+                                                payload: !concHelperIsOpen,
+                                            });
+                                            dispatchLetExpansion({
+                                                type: renderLetKind.EXPAND,
+                                                payload: true,
+                                            });
+                                        }}
+                                    ></Icon>
+                                    <Icon
+                                        id="icon"
+                                        icon="undo"
+                                        onClick={() => {
+                                            dispatchHelper({
+                                                type: drawerHelpersKind.CONC,
+                                                payload: false,
+                                            });
+                                            dispatchLetExpansion({
+                                                type: renderLetKind.REVERT,
+                                                payload: true,
+                                            });
+                                        }}
+                                    ></Icon>
+                                </>
                             ) : null}
                         </td>
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
-                            {nodeInfo.conclusion}
                             {nodeInfo.conclusion.indexOf('let') !== -1 ? (
-                                <Collapse isOpen={concHelperIsOpen}>
-                                    <Pre
-                                        style={{
-                                            maxHeight: '300px',
-                                            overflow: 'auto',
-                                        }}
-                                        id="pre-conclusion"
-                                    >
-                                        <LetRender id={0} toRender={nodeInfo.conclusion} letMap={letMap} />
-                                    </Pre>
-                                </Collapse>
+                                <LetRender
+                                    id={0}
+                                    toRender={nodeInfo.conclusion}
+                                    letMap={letMap}
+                                    shouldExpand={expandAll}
+                                    shouldRevert={revertAll}
+                                    dispatchExpansion={dispatchLetExpansion}
+                                />
                             ) : null}
                         </td>
                     </tr>

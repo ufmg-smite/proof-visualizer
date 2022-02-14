@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { TreeNodeInfo } from '@blueprintjs/core';
+import { renderLetKind } from './enum';
 
 // NODES
 interface NodeInterface {
@@ -148,6 +149,12 @@ interface LetRenderProps {
     id: number;
     toRender: string;
     letMap: ProofState['letMap'];
+    shouldExpand: boolean;
+    shouldRevert: boolean;
+    dispatchExpansion: React.Dispatch<{
+        type: renderLetKind;
+        payload: boolean;
+    }>;
 }
 
 interface letDrawerProps {
