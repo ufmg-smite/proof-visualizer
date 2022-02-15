@@ -217,6 +217,7 @@ export const groupPiNodeDependencies = (
 ): NodeInterface['dependencies'] => {
     const piNodeDependencies: NodeInterface['dependencies'] = [];
     const depMap: { [piID: number]: number } = {};
+
     // Copy all the hidden nodes dependencies to the new pi node
     proof.forEach((node) => {
         // Search for all the hidden nodes that have deps
