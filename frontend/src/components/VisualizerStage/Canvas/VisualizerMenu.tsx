@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ControlGroup, Button, InputGroup } from '@blueprintjs/core';
+import { colorConverter } from '../../../store/features/theme/auxi';
 
 const Menu = ({
     unfold,
@@ -56,15 +57,15 @@ const Menu = ({
                     <a className="bp3-menu-item">
                         <div className="bp3-text-overflow-ellipsis bp3-fill">
                             <span>
-                                <span onClick={() => changeNodeColor('#f72b34')}> 🟥</span>
-                                <span onClick={() => changeNodeColor('#ff8334')}> 🟧</span>
-                                <span onClick={() => changeNodeColor('#ffc149')}> 🟨</span>
-                                <span onClick={() => changeNodeColor('#60aa51')}> 🟩</span>
-                                <span onClick={() => changeNodeColor('#0097e4')}> 🟦</span>
-                                <span onClick={() => changeNodeColor('#a73da5')}> 🟪</span>
-                                <span onClick={() => changeNodeColor('#a95a49')}> 🟫</span>
-                                <span onClick={() => changeNodeColor('#464646')}> ⬛</span>
-                                <span onClick={() => changeNodeColor('#f0f0f0')}> ⬜</span>
+                                <span onClick={() => changeNodeColor(colorConverter('red'))}> 🟥</span>
+                                <span onClick={() => changeNodeColor(colorConverter('orange'))}> 🟧</span>
+                                <span onClick={() => changeNodeColor(colorConverter('yellow'))}> 🟨</span>
+                                <span onClick={() => changeNodeColor(colorConverter('green'))}> 🟩</span>
+                                <span onClick={() => changeNodeColor(colorConverter('blue'))}> 🟦</span>
+                                <span onClick={() => changeNodeColor(colorConverter('purple'))}> 🟪</span>
+                                <span onClick={() => changeNodeColor(colorConverter('brown'))}> 🟫</span>
+                                <span onClick={() => changeNodeColor(colorConverter('black'))}> ⬛</span>
+                                <span onClick={() => changeNodeColor(colorConverter('white'))}> ⬜</span>
                             </span>
                         </div>
                     </a>

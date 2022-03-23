@@ -186,6 +186,11 @@ interface ProofState {
             selected: boolean;
         };
     };
+    clustersInfos: {
+        hiddenNodes: number[];
+        label: string;
+        color: string;
+    }[];
 }
 // FILE
 interface FileState {

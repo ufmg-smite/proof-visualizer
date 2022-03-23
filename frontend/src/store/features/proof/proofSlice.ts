@@ -9,6 +9,7 @@ import {
     groupPiNodeDependencies,
 } from './auxi';
 import { NodeInterface, ProofState } from '../../../interfaces/interfaces';
+import { colorConverter } from '../theme/auxi';
 
 const initialState: ProofState = {
     proof: [],
@@ -17,6 +18,7 @@ const initialState: ProofState = {
     hiddenNodes: [],
     letMap: {},
     visualInfo: [],
+    clustersInfos: [],
 };
 
 export const proofSlice = createSlice({
@@ -36,11 +38,13 @@ export const proofSlice = createSlice({
                 isJSON = true;
             }
 
-            const [proof, letMap] = processDot(dot);
+            const [proof, letMap, clustersInfos] = processDot(dot);
             state.proof = proof;
-            state.view = isJSON ? proofJSON.view : 'full';
-            state.hiddenNodes = isJSON ? proofJSON.hiddenNodes : [];
             state.letMap = letMap;
+            state.clustersInfos = clustersInfos;
+            state.view = isJSON ? proofJSON.view : 'full';
+            state.hiddenNodes = isJSON ? proofJSON.hiddenNodes : clustersInfos.map((cluster) => cluster.hiddenNodes);
+
             if (isJSON) state.visualInfo = proofJSON.visualInfo;
             else {
                 const visualInfo: ProofState['visualInfo'] = {};
@@ -52,6 +56,17 @@ export const proofSlice = createSlice({
                         selected: false,
                     };
                 });
+                let size = Object.keys(visualInfo).length;
+                state.clustersInfos.forEach((cluster) => {
+                    visualInfo[size] = {
+                        color: colorConverter(cluster.color),
+                        x: 0,
+                        y: 0,
+                        selected: false,
+                    };
+                    size++;
+                });
+
                 state.visualInfo = visualInfo;
             }
         },

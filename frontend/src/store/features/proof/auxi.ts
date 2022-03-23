@@ -21,7 +21,7 @@ function removeEscapedCharacters(s: string): string {
     return newS;
 }
 
-export function processDot(dot: string): [NodeInterface[], ProofState['letMap']] {
+export function processDot(dot: string): [NodeInterface[], ProofState['letMap'], ProofState['clustersInfos']] {
     const nodes: NodeInterface[] = [
         {
             id: 0,
@@ -42,12 +42,37 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap']]
           )
         : null;
 
+    const clustersInfos: ProofState['clustersInfos'] = [];
     const lines = dot
         .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
         .replace(/(\n|\t)/gm, '')
         .split(';');
     lines.forEach((line) => {
-        if (line.search('label') !== -1) {
+        if (line.search('subgraph') !== -1) {
+            // Get the label of this node subgraph
+            let label = '';
+            let idx = line.indexOf('label="') + 7;
+            while (line[idx] !== '"') {
+                label += line[idx];
+                idx++;
+            }
+
+            // Get the label of this node subgraph
+            let color = '';
+            idx = line.indexOf('bgcolor="') + 9;
+            while (line[idx] !== '"') {
+                color += line[idx];
+                idx++;
+            }
+
+            // Get the nodes ID's
+            const numbers = line
+                .substring(idx + 1, line.length - 1)
+                .trim()
+                .split(' ')
+                .map((num) => Number(num));
+            clustersInfos.push({ hiddenNodes: numbers, label: label, color: color });
+        } else if (line.search('label') !== -1) {
             const id = parseInt(line.slice(0, line.indexOf('[')).trim());
             let attributes = line.slice(line.indexOf('[') + 1, line.lastIndexOf(']')).trim();
 
@@ -107,7 +132,8 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap']]
             nodes[child].parents.push(parent);
         }
     });
-    return comment ? [nodes, JSON.parse(comment)['letMap']] : [nodes, {}];
+
+    return comment ? [nodes, JSON.parse(comment)['letMap'], clustersInfos] : [nodes, {}, clustersInfos];
 }
 
 export const piNodeParents = (
