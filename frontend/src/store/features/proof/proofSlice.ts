@@ -143,8 +143,8 @@ export const proofSlice = createSlice({
 
             // Make sure the ids are realocated
             const size = Object.keys(state.visualInfo).length;
-            for (let i = pi; i < size; i++) {
-                state.visualInfo[pi] = state.visualInfo[pi + 1];
+            for (let i = pi; i < size - 1; i++) {
+                state.visualInfo[i] = state.visualInfo[i + 1];
             }
             // Delete the last position
             delete state.visualInfo[size - 1];
