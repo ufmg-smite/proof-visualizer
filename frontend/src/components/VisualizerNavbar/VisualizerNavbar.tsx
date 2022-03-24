@@ -361,6 +361,14 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                         dispatch(reRender());
                     }}
                 />
+                <MenuItem
+                    text="Clustered"
+                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                        e.preventDefault();
+                        dispatch(applyView('clustered'));
+                        dispatch(reRender());
+                    }}
+                />
             </Menu>
         ),
         download: (

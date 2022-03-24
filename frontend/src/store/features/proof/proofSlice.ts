@@ -187,7 +187,7 @@ export const proofSlice = createSlice({
                     break;
             }
         },
-        applyView: (state, action: PayloadAction<'basic' | 'propositional' | 'full'>) => {
+        applyView: (state, action: PayloadAction<'basic' | 'propositional' | 'full' | 'clustered'>) => {
             const visualInfoSize = Object.keys(state.visualInfo).length;
             const proofSize = state.proof.length;
             // Delete all the pi nodes
@@ -247,6 +247,25 @@ export const proofSlice = createSlice({
                 case 'full':
                     state.view = 'full';
                     state.hiddenNodes = [];
+                    break;
+                // Cluster all the nodes in your respective group
+                case 'clustered':
+                    // If there are clusters infos
+                    if (state.clustersInfos.length) {
+                        state.hiddenNodes = [];
+                        const size = Object.keys(state.visualInfo).length;
+
+                        state.clustersInfos.forEach((cluster, i) => {
+                            state.visualInfo[size + i] = {
+                                color: colorConverter(cluster.color),
+                                x: 0,
+                                y: 0,
+                                selected: false,
+                            };
+
+                            state.hiddenNodes.push(cluster.hiddenNodes);
+                        });
+                    }
                     break;
             }
         },
