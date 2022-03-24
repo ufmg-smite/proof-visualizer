@@ -56,15 +56,15 @@ export const proofSlice = createSlice({
                         selected: false,
                     };
                 });
-                let size = Object.keys(visualInfo).length;
-                state.clustersInfos.forEach((cluster) => {
-                    visualInfo[size] = {
+
+                const size = Object.keys(visualInfo).length;
+                state.clustersInfos.forEach((cluster, i) => {
+                    visualInfo[size + i] = {
                         color: colorConverter(cluster.color),
                         x: 0,
                         y: 0,
                         selected: false,
                     };
-                    size++;
                 });
 
                 state.visualInfo = visualInfo;
