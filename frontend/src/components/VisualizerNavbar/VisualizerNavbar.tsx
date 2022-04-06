@@ -515,7 +515,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             <u className="title">Desc.:</u> Command that find a node and centralize the canvas at it.
                         </div>
                         <div>
-                            <u className="title">Pattern:</u> /fild {'<node number>'} {'<option>'}.
+                            <u className="title">Pattern:</u> /find {'<node number>'} {'<option>'}.
                         </div>
                         <div>
                             <u className="title">Option:</u> --s: find and select the node.
