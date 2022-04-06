@@ -68,8 +68,8 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
             // Get the nodes ID's
             const numbers = line
                 .substring(idx + 1, line.length - 1)
-                .trim()
-                .split(' ')
+                .split(/\s/)
+                .filter((str) => str.length)
                 .map((num) => Number(num));
             clustersInfos.push({ hiddenNodes: numbers, label: label, color: color });
         } else if (line.search('label') !== -1) {
