@@ -15,7 +15,7 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
 
     const [tabID, setTabID] = useState('lm');
 
-    const handleTabChange = (newTabId: TabId, _: TabId | undefined, e: React.MouseEvent<HTMLElement>): void => {
+    const handleTabChange = (newTabId: TabId, _: any, e: any): void => {
         setTabID(typeof newTabId === 'string' ? newTabId : String(newTabId));
     };
 
@@ -23,22 +23,6 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
         view: (
             <div className="view-infos">
                 <div className="bts">
-                    <Button
-                        text="Basic"
-                        onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                            e.preventDefault();
-                            dispatch(applyView('basic'));
-                            dispatch(reRender());
-                        }}
-                    />
-                    <Button
-                        text="Propositional"
-                        onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                            e.preventDefault();
-                            dispatch(applyView('propositional'));
-                            dispatch(reRender());
-                        }}
-                    />
                     <Button
                         text="Full"
                         onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {

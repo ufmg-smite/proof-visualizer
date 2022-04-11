@@ -115,12 +115,8 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         switch (commands[0]) {
             case '/view':
                 switch (commands[1]) {
-                    case 'basic':
-                        dispatch(applyView('basic'));
-                        dispatch(reRender());
-                        break;
-                    case 'propositional':
-                        dispatch(applyView('propositional'));
+                    case 'clustered':
+                        dispatch(applyView('clustered'));
                         dispatch(reRender());
                         break;
                     case 'full':
@@ -331,42 +327,6 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                         e.preventDefault();
                         dispatch(changeStyle('directory'));
-                    }}
-                />
-            </Menu>
-        ),
-        views: (
-            <Menu>
-                <MenuItem
-                    text="Basic"
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        dispatch(applyView('basic'));
-                        dispatch(reRender());
-                    }}
-                />
-                <MenuItem
-                    text="Propositional"
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        dispatch(applyView('propositional'));
-                        dispatch(reRender());
-                    }}
-                />
-                <MenuItem
-                    text="Full"
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        dispatch(applyView('full'));
-                        dispatch(reRender());
-                    }}
-                />
-                <MenuItem
-                    text="Clustered"
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        dispatch(applyView('clustered'));
-                        dispatch(reRender());
                     }}
                 />
             </Menu>
@@ -599,25 +559,6 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             disabled={fileName ? false : true}
                             onClick={() => setDrawerIsOpen(true)}
                         />
-                        {/* <Popover2
-                            content={fileName ? menus.views : undefined}
-                            placement="bottom-end"
-                            disabled={fileName ? false : true}
-                        >
-                            <Button
-                                className="bp3-minimal"
-                                icon="diagram-tree"
-                                text={windowSize.width >= 1035 ? 'View' : ''}
-                                disabled={fileName ? false : true}
-                            />
-                        </Popover2>
-                        <Button
-                            className="bp3-minimal"
-                            icon="translate"
-                            text={windowSize.width >= 1035 ? 'Let Map' : ''}
-                            disabled={fileName ? false : true}
-                            onClick={() => setDrawerIsOpen(true)}
-                        /> */}
                         <Popover2
                             content={fileName ? menus.download : undefined}
                             placement="bottom-end"

@@ -187,7 +187,7 @@ export const proofSlice = createSlice({
                     break;
             }
         },
-        applyView: (state, action: PayloadAction<'basic' | 'propositional' | 'full' | 'clustered'>) => {
+        applyView: (state, action: PayloadAction<'full' | 'clustered'>) => {
             const visualInfoSize = Object.keys(state.visualInfo).length;
             const proofSize = state.proof.length;
             // Delete all the pi nodes
@@ -196,53 +196,6 @@ export const proofSlice = createSlice({
             }
 
             switch (action.payload) {
-                //
-                case 'basic':
-                    state.view = 'basic';
-                    state.hiddenNodes = [
-                        state.proof
-                            .filter((proofNode) => proofNode.views.indexOf('basic') === -1)
-                            .map((proofNode) => proofNode.id),
-                    ];
-
-                    // Set the visual info for the new pi nodes
-                    state.visualInfo = {
-                        ...state.visualInfo,
-                        [Object.keys(state.visualInfo).length]: {
-                            color: '#555',
-                            x: 0,
-                            y: 0,
-                            selected: false,
-                        },
-                    };
-
-                    break;
-                // Hide all nodes that haven't view equal to basic and propositional
-                case 'propositional':
-                    state.view = 'propositional';
-                    state.hiddenNodes = [
-                        // Hide nodes that aren't basics a
-                        // nos q n são basicos (folhas e o no raiz) e nem proposicionais (outra classe q n tem no .dot1)
-                        state.proof
-                            .filter(
-                                (node) =>
-                                    node.views.indexOf('basic') === -1 && node.views.indexOf('propositional') === -1,
-                            )
-                            .map((node) => node.id),
-                    ];
-
-                    // Set the visual info for the new pi nodes
-                    state.visualInfo = {
-                        ...state.visualInfo,
-                        [Object.keys(state.visualInfo).length]: {
-                            color: '#555',
-                            x: 0,
-                            y: 0,
-                            selected: false,
-                        },
-                    };
-
-                    break;
                 // View without hidden Nodes
                 case 'full':
                     state.view = 'full';
