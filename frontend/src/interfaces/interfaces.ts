@@ -157,7 +157,7 @@ interface LetRenderProps {
     }>;
 }
 
-interface letDrawerProps {
+interface DrawerProps {
     drawerIsOpen: boolean;
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
 }
@@ -228,7 +228,7 @@ export type {
     TreeProps,
     LineProps,
     LetRenderProps,
-    letDrawerProps,
+    DrawerProps,
     ReduxState,
     ProofState,
     FileState,

@@ -1,0 +1,40 @@
+.bp3-tabs {
+    width: 100%;
+    .services-tab {
+        user-select: none;
+        &:focus {
+            outline: none;
+        }
+    }
+}
+
+.view-infos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    & > * {
+        display: flex;
+        flex-flow: column;
+        padding: 1px 0px;
+    }
+
+    .bts {
+        border-right: 1px solid;
+        padding-right: 10px;
+
+        & > * {
+            outline: none;
+        }
+    }
+
+    .views-color-map {
+        padding-left: 10px;
+    }
+
+    .bts,
+    .views-color-map {
+        & > *:not(& > *:last-child) {
+            margin-bottom: 5px;
+        }
+    }
+}

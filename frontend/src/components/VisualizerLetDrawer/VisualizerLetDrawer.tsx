@@ -3,7 +3,7 @@ import { Button, Drawer, Classes, Position } from '@blueprintjs/core';
 
 import Let from './let';
 import '../../scss/Let.scss';
-import { letDrawerProps } from '../../interfaces/interfaces';
+import { DrawerProps } from '../../interfaces/interfaces';
 import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { selectLetMap } from '../../store/features/proof/proofSlice';
@@ -11,7 +11,7 @@ import { selectLetMap } from '../../store/features/proof/proofSlice';
 const font =
     '14px / 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", Icons16, sans-serif';
 
-const VisualizerLetDrawer: React.FC<letDrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: letDrawerProps) => {
+const VisualizerLetDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: DrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
     const letMap = useAppSelector(selectLetMap);
     const widthRef = useRef(0);

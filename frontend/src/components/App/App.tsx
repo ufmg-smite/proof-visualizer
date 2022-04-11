@@ -5,7 +5,7 @@ import { Intent, Position, Toaster } from '@blueprintjs/core';
 import VisualizerNavbar from '../VisualizerNavbar/VisualizerNavbar';
 import VisualizerDialog from '../VisualizerDialog/VisualizerDialog';
 import VisualizerStage from '../VisualizerStage/VisualizerStage';
-import VisualizerLetDrawer from '../VisualizerLetDrawer/VisualizerLetDrawer';
+import VisualizersDrawer from '../VisualizersDrawer/ServicesDrawer';
 
 import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
@@ -50,7 +50,7 @@ const App: React.FC = () => {
             ></VisualizerDialog>
             <VisualizerStage></VisualizerStage>
             {drawerIsOpen ? (
-                <VisualizerLetDrawer drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerOpenState} />
+                <VisualizersDrawer drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerOpenState}></VisualizersDrawer>
             ) : null}
         </div>
     );

@@ -530,7 +530,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         <Navbar>
             <Navbar.Group align={Alignment.LEFT}>
                 <Navbar.Heading>
-                    <b>{windowSize.width >= 900 ? 'Proof Visualizer' : 'PV'}</b>
+                    <b>{windowSize.width >= 1035 ? 'Proof Visualizer' : 'PV'}</b>
                 </Navbar.Heading>
                 <Navbar.Divider />
                 <Button
@@ -540,7 +540,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     }}
                     className="bp3-minimal"
                     icon="upload"
-                    text={windowSize.width >= 900 ? 'Upload Proof' : ''}
+                    text={windowSize.width >= 1035 ? 'Upload Proof' : ''}
                 />
             </Navbar.Group>
 
@@ -588,11 +588,18 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             <Button
                                 icon="presentation"
                                 className="bp3-minimal"
-                                text={windowSize.width >= 900 ? 'Style' : ''}
+                                text={windowSize.width >= 1035 ? 'Style' : ''}
                                 disabled={fileName ? false : true}
                             />
                         </Popover2>
-                        <Popover2
+                        <Button
+                            className="bp3-minimal"
+                            icon="applications"
+                            text={windowSize.width >= 1035 ? 'Visualizers' : ''}
+                            disabled={fileName ? false : true}
+                            onClick={() => setDrawerIsOpen(true)}
+                        />
+                        {/* <Popover2
                             content={fileName ? menus.views : undefined}
                             placement="bottom-end"
                             disabled={fileName ? false : true}
@@ -600,17 +607,17 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             <Button
                                 className="bp3-minimal"
                                 icon="diagram-tree"
-                                text={windowSize.width >= 900 ? 'View' : ''}
+                                text={windowSize.width >= 1035 ? 'View' : ''}
                                 disabled={fileName ? false : true}
                             />
                         </Popover2>
                         <Button
                             className="bp3-minimal"
                             icon="translate"
-                            text={windowSize.width >= 900 ? 'Let Map' : ''}
+                            text={windowSize.width >= 1035 ? 'Let Map' : ''}
                             disabled={fileName ? false : true}
                             onClick={() => setDrawerIsOpen(true)}
-                        />
+                        /> */}
                         <Popover2
                             content={fileName ? menus.download : undefined}
                             placement="bottom-end"
@@ -619,7 +626,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             <Button
                                 className="bp3-minimal"
                                 icon="download"
-                                text={windowSize.width >= 900 ? 'Download' : ''}
+                                text={windowSize.width >= 1035 ? 'Download' : ''}
                                 disabled={fileName ? false : true}
                             />
                         </Popover2>
