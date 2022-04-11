@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Button, Drawer, Classes, Position } from '@blueprintjs/core';
+import { Button, Classes } from '@blueprintjs/core';
 
 import Let from './let';
 import '../../scss/Let.scss';
-import { DrawerProps } from '../../interfaces/interfaces';
 import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { selectLetMap } from '../../store/features/proof/proofSlice';
@@ -11,7 +10,7 @@ import { selectLetMap } from '../../store/features/proof/proofSlice';
 const font =
     '14px / 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", Icons16, sans-serif';
 
-const VisualizerLetDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: DrawerProps) => {
+const VisualizerLetDrawer: React.FC = () => {
     const darkTheme = useAppSelector(selectTheme);
     const letMap = useAppSelector(selectLetMap);
     const widthRef = useRef(0);
@@ -161,68 +160,49 @@ const VisualizerLetDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsO
     };
 
     return (
-        <Drawer
-            className={darkTheme ? 'bp3-dark' : ''}
-            style={{ maxHeight: '65%', width: '35%' }}
-            autoFocus={true}
-            canEscapeKeyClose={true}
-            canOutsideClickClose={false}
-            enforceFocus={true}
-            hasBackdrop={false}
-            isOpen={drawerIsOpen}
-            position={Position.RIGHT}
-            usePortal={false}
-            onClose={(e) => {
-                e.preventDefault();
-                setDrawerIsOpen(false);
-            }}
-            icon="translate"
-            title="Let Map"
-        >
-            <div className={Classes.DRAWER_BODY}>
-                <div className={Classes.DIALOG_BODY}>
-                    <table
-                        id="table-node-info"
-                        className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
-                        style={{ width: '100%' }}
-                    >
-                        <thead>
-                            <tr>
-                                <th style={{ width: '100px' }}>Property</th>
-                                <th className="letMap-value-column">Value</th>
-                                <th style={{ width: '250px' }}>Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {Object.keys(letMapS).map((key) => {
-                                return (
-                                    <tr key={key}>
-                                        <td>
-                                            <strong>{key}</strong>
-                                        </td>
-                                        <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{renderLet(key)}</td>
-                                        <td style={{ width: '150px', height: '100%' }}>
-                                            <Button
-                                                onClick={() => expandAll(key)}
-                                                className="bp3-minimal"
-                                                icon="translate"
-                                                text="Expand"
-                                            />
-                                            <Button
-                                                onClick={() => revertLet(key)}
-                                                className="bp3-minimal"
-                                                icon="undo"
-                                                text="Revert"
-                                            />
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
+        <div className={Classes.DRAWER_BODY}>
+            <div className={Classes.DIALOG_BODY}>
+                <table
+                    id="table-node-info"
+                    className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
+                    style={{ width: '100%' }}
+                >
+                    <thead>
+                        <tr>
+                            <th style={{ width: '100px' }}>Property</th>
+                            <th className="letMap-value-column">Value</th>
+                            <th style={{ width: '250px' }}>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Object.keys(letMapS).map((key) => {
+                            return (
+                                <tr key={key}>
+                                    <td>
+                                        <strong>{key}</strong>
+                                    </td>
+                                    <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{renderLet(key)}</td>
+                                    <td style={{ width: '150px', height: '100%' }}>
+                                        <Button
+                                            onClick={() => expandAll(key)}
+                                            className="bp3-minimal"
+                                            icon="translate"
+                                            text="Expand"
+                                        />
+                                        <Button
+                                            onClick={() => revertLet(key)}
+                                            className="bp3-minimal"
+                                            icon="undo"
+                                            text="Revert"
+                                        />
+                                    </td>
+                                </tr>
+                            );
+                        })}
+                    </tbody>
+                </table>
             </div>
-        </Drawer>
+        </div>
     );
 };
 

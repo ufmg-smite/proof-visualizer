@@ -8,6 +8,7 @@ import { DrawerProps } from '../../interfaces/interfaces';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { applyView } from '../../store/features/proof/proofSlice';
 import { reRender } from '../../store/features/externalCmd/externalCmd';
+import VisualizerLetDrawer from '../VisualizerLetDrawer/VisualizerLetDrawer';
 
 const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: DrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
@@ -50,6 +51,8 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
                 </div>
             </div>
         ),
+        letMap: <VisualizerLetDrawer />,
+        theoryLemma: <>a</>,
     };
 
     return (
@@ -71,14 +74,13 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
             icon="applications"
             title="Visualizers"
         >
-            <div className={Classes.DRAWER_HEADER}>
+            <div className={Classes.DRAWER_BODY}>
                 <Tabs id="services-tabs" onChange={handleTabChange} selectedTabId={tabID}>
                     <Tab id="vw" title="View" panel={menus['view']} className="services-tab" />
-                    <Tab id="lm" title="Let Map" panel={<div>b</div>} className="services-tab" />
-                    <Tab id="tl" title="Theory Lemma" panel={<div>c</div>} className="services-tab" />
+                    <Tab id="lm" title="Let Map" panel={menus['letMap']} className="services-tab" />
+                    <Tab id="tl" title="Theory Lemma" panel={menus['theoryLemma']} className="services-tab" />
                 </Tabs>
             </div>
-            <div className={Classes.DRAWER_BODY}></div>
         </Drawer>
     );
 };
