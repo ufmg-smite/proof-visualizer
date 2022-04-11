@@ -9,6 +9,7 @@ import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { applyView } from '../../store/features/proof/proofSlice';
 import { reRender } from '../../store/features/externalCmd/externalCmd';
 import VisualizerLetDrawer from '../VisualizerLetDrawer/VisualizerLetDrawer';
+import VisualizerTheoryLemma from '../VisualizerTheoryLemma/VisualizerTheoryLemma';
 
 const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: DrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
@@ -22,7 +23,7 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
 
     const menus = {
         view: (
-            <div className="view-infos">
+            <div className={'view-infos ' + Classes.DIALOG_BODY}>
                 <div className="bts">
                     <Button
                         text="Full"
@@ -52,7 +53,7 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
             </div>
         ),
         letMap: <VisualizerLetDrawer />,
-        theoryLemma: <>a</>,
+        theoryLemma: <VisualizerTheoryLemma />,
     };
 
     return (
