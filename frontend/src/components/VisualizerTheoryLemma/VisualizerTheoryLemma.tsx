@@ -5,7 +5,7 @@ const font =
     '14px / 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", Icons16, sans-serif';
 
 const VisualizerTheoryLemma: React.FC = () => {
-    const TheoryLemmas = [1,2];
+    const TheoryLemmas = [1, 2];
     return (
         <div className={Classes.DRAWER_BODY}>
             <div className={Classes.DIALOG_BODY}>

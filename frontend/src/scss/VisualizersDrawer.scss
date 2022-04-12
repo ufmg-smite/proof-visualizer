@@ -1,7 +1,6 @@
 .bp3-tabs {
     width: 100%;
     .services-tab {
-        user-select: none;
         &:focus {
             outline: none;
         }
@@ -10,6 +9,7 @@
     .bp3-tab-list {
         margin-top: 8px;
         margin-left: 18px;
+        user-select: none;
     }
 }
 

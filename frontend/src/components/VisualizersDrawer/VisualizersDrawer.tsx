@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-import '../../scss/ServicesDrawer.scss';
+import '../../scss/VisualizersDrawer.scss';
 import { Drawer, Position, Classes, Tabs, Tab, TabId, Button } from '@blueprintjs/core';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { DrawerProps } from '../../interfaces/interfaces';
