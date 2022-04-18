@@ -41,5 +41,10 @@
         & > *:not(& > *:last-child) {
             margin-bottom: 5px;
         }
+
+        span:hover {
+            cursor: pointer;
+            color: #48aff0;
+        }
     }
 }

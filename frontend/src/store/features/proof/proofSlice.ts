@@ -355,4 +355,8 @@ export const selectHiddenNodes = (state: RootState): number[][] => {
     return state.proof.hiddenNodes;
 };
 
+export const selectNodeClusters = (state: RootState): ProofState['clustersInfos'] => {
+    return state.proof.clustersInfos;
+};
+
 export default proofSlice.reducer;

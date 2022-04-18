@@ -6,19 +6,44 @@ import { selectTheme } from '../../store/features/theme/themeSlice';
 import { DrawerProps } from '../../interfaces/interfaces';
 
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { applyView } from '../../store/features/proof/proofSlice';
+import { applyView, selectNodeClusters, selectNodes } from '../../store/features/proof/proofSlice';
 import { reRender } from '../../store/features/externalCmd/externalCmd';
 import VisualizerLetDrawer from '../VisualizerLetDrawer/VisualizerLetDrawer';
 import VisualizerTheoryLemma from '../VisualizerTheoryLemma/VisualizerTheoryLemma';
 
 const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: DrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
+    const nodeClusters = useAppSelector(selectNodeClusters);
     const dispatch = useAppDispatch();
 
     const [tabID, setTabID] = useState('lm');
 
     const handleTabChange = (newTabId: TabId, _: any, e: any): void => {
         setTabID(typeof newTabId === 'string' ? newTabId : String(newTabId));
+    };
+
+    const handleClusterClick = (cluster: string): void => {
+        //
+        switch (cluster) {
+            case 'ALL':
+                dispatch(selectNodes(nodeClusters.reduce((acc: number[], c) => acc.concat(c.hiddenNodes), [])));
+                break;
+            case 'SAT':
+                dispatch(selectNodes(nodeClusters[0].hiddenNodes));
+                break;
+            case 'CNF':
+                dispatch(selectNodes(nodeClusters[1].hiddenNodes));
+                break;
+            case 'TL':
+                dispatch(selectNodes(nodeClusters[2].hiddenNodes));
+                break;
+            case 'PP':
+                dispatch(selectNodes(nodeClusters[3].hiddenNodes));
+                break;
+            case 'IN':
+                dispatch(selectNodes(nodeClusters[4].hiddenNodes));
+                break;
+        }
     };
 
     const menus = {
@@ -43,12 +68,12 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
                     />
                 </div>
                 <div className="views-color-map">
-                    <span>⬜ First Scope</span>
-                    <span>🟪 SAT</span>
-                    <span>🟨 CNF</span>
-                    <span>🟩 Theory Lemma</span>
-                    <span>🟫 Pre Processing</span>
-                    <span>🟦 Input</span>
+                    <span onClick={() => handleClusterClick('ALL')}>⬜ First Scope</span>
+                    <span onClick={() => handleClusterClick('SAT')}>🟪 SAT</span>
+                    <span onClick={() => handleClusterClick('CNF')}>🟨 CNF</span>
+                    <span onClick={() => handleClusterClick('TL')}>🟩 Theory Lemma</span>
+                    <span onClick={() => handleClusterClick('PP')}>🟫 Pre Processing</span>
+                    <span onClick={() => handleClusterClick('IN')}>🟦 Input</span>
                 </div>
             </div>
         ),
