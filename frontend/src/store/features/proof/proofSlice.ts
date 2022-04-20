@@ -7,9 +7,11 @@ import {
     descendants,
     findNodesClusters,
     groupPiNodeDependencies,
+    sliceNodesCluster,
 } from './auxi';
 import { NodeInterface, ProofState } from '../../../interfaces/interfaces';
 import { colorConverter } from '../theme/auxi';
+import { ClusterKind } from '../../../interfaces/enum';
 
 const initialState: ProofState = {
     proof: [],
@@ -43,7 +45,9 @@ export const proofSlice = createSlice({
             state.letMap = letMap;
             state.clustersInfos = clustersInfos;
             state.view = isJSON ? proofJSON.view : 'full';
-            state.hiddenNodes = isJSON ? proofJSON.hiddenNodes : clustersInfos.map((cluster) => cluster.hiddenNodes);
+
+            const clustersMap: number[] = state.proof.map(() => -1);
+            state.hiddenNodes = isJSON ? proofJSON.hiddenNodes : sliceNodesCluster(state.proof, clustersMap);
 
             if (isJSON) state.visualInfo = proofJSON.visualInfo;
             else {
@@ -57,14 +61,23 @@ export const proofSlice = createSlice({
                     };
                 });
 
-                const size = Object.keys(visualInfo).length;
-                state.clustersInfos.forEach((cluster, i) => {
-                    visualInfo[size + i] = {
-                        color: colorConverter(cluster.color),
+                let size = Object.keys(visualInfo).length;
+                // state.clustersInfos.forEach((cluster, i) => {
+                //     visualInfo[size + i] = {
+                //         color: colorConverter(cluster.color),
+                //         x: 0,
+                //         y: 0,
+                //         selected: false,
+                //     };
+                // });
+                state.hiddenNodes.forEach(() => {
+                    visualInfo[size] = {
+                        color: '#f0f',
                         x: 0,
                         y: 0,
                         selected: false,
                     };
+                    size += 1;
                 });
 
                 state.visualInfo = visualInfo;
@@ -268,6 +281,7 @@ export const selectProof = (state: RootState): NodeInterface[] => {
             hiddenNodes: hiddenNodesArray.map((hiddenNode) => proof[hiddenNode]),
             descendants: 1,
             dependencies: piNodeDependencies,
+            clusterType: ClusterKind.NONE,
         });
 
         const piNode = proof[piNodeId];

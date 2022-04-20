@@ -1,3 +1,4 @@
+import { ClusterKind } from '../../../interfaces/enum';
 import { NodeInterface, ProofState } from '../../../interfaces/interfaces';
 
 function removeEscapedCharacters(s: string): string {
@@ -33,6 +34,7 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
             parents: [NaN],
             descendants: 0,
             dependencies: [],
+            clusterType: ClusterKind.NONE,
         },
     ];
     let comment: string | null = dot.slice(dot.indexOf('comment='));
@@ -71,6 +73,32 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
                 .split(/\s/)
                 .filter((str) => str.length)
                 .map((num) => Number(num));
+
+            let thisType: ClusterKind;
+            switch (label) {
+                case 'SAT':
+                    thisType = ClusterKind.SAT;
+                    break;
+                case 'CNF':
+                    thisType = ClusterKind.CNF;
+                    break;
+                case 'TL':
+                    thisType = ClusterKind.TL;
+                    break;
+                case 'PP':
+                    thisType = ClusterKind.PP;
+                    break;
+                case 'IN':
+                    thisType = ClusterKind.IN;
+                    break;
+                default:
+                    thisType = ClusterKind.NONE;
+            }
+
+            // Assign the type for each node
+            numbers.forEach((num) => {
+                nodes[num].clusterType = thisType;
+            });
             clustersInfos.push({ hiddenNodes: numbers, label: label, color: color });
         } else if (line.search('label') !== -1) {
             const id = parseInt(line.slice(0, line.indexOf('[')).trim());
@@ -99,6 +127,7 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
                     parents: [NaN],
                     descendants: 0,
                     dependencies: [],
+                    clusterType: ClusterKind.NONE,
                 };
             }
             nodes[id].conclusion = removeEscapedCharacters(conclusion);
@@ -123,6 +152,7 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
                     parents: [],
                     descendants: 0,
                     dependencies: [],
+                    clusterType: ClusterKind.NONE,
                 };
             }
             // If there is and is an invalid parent
@@ -265,4 +295,76 @@ export const groupPiNodeDependencies = (
         }
     });
     return piNodeDependencies;
+};
+
+export const sliceNodesCluster = (
+    proof: NodeInterface[],
+    clusterMap: number[],
+    nodeId = 0,
+    clusterCounter = 0,
+    slicedClusters: number[][] = [],
+): number[][] => {
+    const currentNode = proof[nodeId];
+
+    if (nodeId) {
+        // Get all parents with the same type
+        const parentsClusters: { [parentID: number]: number } = {};
+        currentNode.parents.forEach((p) => {
+            if (proof[p].clusterType === currentNode.clusterType) {
+                parentsClusters[p] = clusterMap[p];
+            }
+        });
+        const keys = Object.keys(parentsClusters);
+
+        // If the current node has the same type as at least one of it's parents
+        if (keys.length) {
+            // Put the current node in the cluster of the first parent with the same type
+            const target = parentsClusters[Number(keys[0])];
+            if (clusterMap[currentNode.id] === -1) {
+                slicedClusters[target].push(currentNode.id);
+                clusterMap[currentNode.id] = target;
+            }
+
+            // Merge the other parents clusters in the target
+            for (let i = 1; i < keys.length; i++) {
+                const toBeMerged = parentsClusters[Number(keys[i])];
+                // If the parent is already inside a cluster and it's cluster is
+                //   different from the current one
+                if (toBeMerged !== -1 && toBeMerged !== clusterMap[currentNode.id]) {
+                    slicedClusters[target] = slicedClusters[target].concat(slicedClusters[toBeMerged]);
+                    // Uptade the cluster it belongs
+                    delete slicedClusters[toBeMerged];
+                }
+            }
+        }
+        // Parent with different type
+        else {
+            let clusterID = clusterMap[currentNode.id];
+            if (clusterMap[currentNode.id] === -1) {
+                clusterID = slicedClusters.length;
+                clusterMap[currentNode.id] = clusterID;
+                slicedClusters.push([currentNode.id]);
+
+                clusterCounter++;
+            }
+            // Add the brothers with the same type in the same cluster
+            currentNode.parents.forEach((p) => {
+                proof[p].children.forEach((c) => {
+                    // If the brother node has the same type as the current one
+                    if (
+                        proof[c].clusterType === currentNode.clusterType &&
+                        slicedClusters[clusterID].indexOf(c) === -1
+                    ) {
+                        slicedClusters[clusterID].push(c);
+                        clusterMap[c] = clusterID;
+                    }
+                });
+            });
+        }
+    }
+
+    currentNode.children.forEach((child) => {
+        sliceNodesCluster(proof, clusterMap, child, clusterCounter, slicedClusters);
+    });
+    return slicedClusters;
 };

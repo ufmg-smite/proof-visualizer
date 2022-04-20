@@ -9,3 +9,12 @@ export enum renderLetKind {
     EXPAND,
     REVERT,
 }
+
+export enum ClusterKind {
+    NONE,
+    SAT,
+    CNF,
+    TL,
+    PP,
+    IN,
+}

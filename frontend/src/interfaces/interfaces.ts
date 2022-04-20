@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { TreeNodeInfo } from '@blueprintjs/core';
-import { renderLetKind } from './enum';
+import { renderLetKind, ClusterKind } from './enum';
 
 // NODES
 interface NodeInterface {
@@ -15,6 +15,7 @@ interface NodeInterface {
     hiddenNodes?: NodeInterface[];
     descendants: number;
     dependencies: { piId: number; depsId: number[] }[];
+    clusterType: ClusterKind;
 }
 
 interface NodeProps {
