@@ -173,7 +173,7 @@ interface ReduxState {
 // PROOFS
 interface ProofState {
     proof: NodeInterface[];
-    view: 'basic' | 'propositional' | 'full';
+    view: 'full' | 'clustered' | 'colored-full';
     style: 'graph' | 'directory';
     hiddenNodes: number[][];
     letMap: {
@@ -189,7 +189,7 @@ interface ProofState {
     };
     clustersInfos: {
         hiddenNodes: number[];
-        label: string;
+        type: ClusterKind;
         color: string;
     }[];
 }

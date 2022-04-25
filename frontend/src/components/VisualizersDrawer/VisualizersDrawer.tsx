@@ -66,6 +66,14 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
                             dispatch(reRender());
                         }}
                     />
+                    <Button
+                        text="Full and Colored"
+                        onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                            e.preventDefault();
+                            dispatch(applyView('colored-full'));
+                            dispatch(reRender());
+                        }}
+                    />
                 </div>
                 <div className="views-color-map">
                     <span onClick={() => handleClusterClick('ALL')}>⬜ First Scope</span>

@@ -40,18 +40,40 @@ export const proofSlice = createSlice({
                 isJSON = true;
             }
 
-            const [proof, letMap, clustersInfos] = processDot(dot);
+            const [proof, letMap, clustersColors] = processDot(dot);
             state.proof = proof;
             state.letMap = letMap;
-            state.clustersInfos = clustersInfos;
-            state.view = isJSON ? proofJSON.view : 'full';
 
-            const clustersMap: number[] = state.proof.map(() => -1);
-            state.hiddenNodes = isJSON ? proofJSON.hiddenNodes : sliceNodesCluster(state.proof, clustersMap);
-
-            if (isJSON) state.visualInfo = proofJSON.visualInfo;
+            if (isJSON) {
+                state.view = proofJSON.view;
+                state.hiddenNodes = proofJSON.hiddenNodes;
+                state.visualInfo = proofJSON.visualInfo;
+            }
+            // Is .dot
             else {
+                state.view = 'full';
+
+                if (Object.keys(clustersColors).length) {
+                    state.view = 'clustered';
+
+                    // Slice the clusters
+                    const clustersMap: number[] = Array(state.proof.length).fill(-1);
+                    state.hiddenNodes = sliceNodesCluster(state.proof, clustersMap);
+
+                    // Maps the cluster infos
+                    state.hiddenNodes.forEach((cluster) => {
+                        const type = state.proof[cluster[0]].clusterType;
+                        state.clustersInfos.push({
+                            hiddenNodes: cluster,
+                            type: type,
+                            color: colorConverter(clustersColors[type]),
+                        });
+                    });
+                }
+
+                // Init the visual info
                 const visualInfo: ProofState['visualInfo'] = {};
+                let size = 0;
                 state.proof.forEach((node) => {
                     visualInfo[node.id] = {
                         color: '#fff',
@@ -59,25 +81,17 @@ export const proofSlice = createSlice({
                         y: 0,
                         selected: false,
                     };
+                    size++;
                 });
 
-                let size = Object.keys(visualInfo).length;
-                // state.clustersInfos.forEach((cluster, i) => {
-                //     visualInfo[size + i] = {
-                //         color: colorConverter(cluster.color),
-                //         x: 0,
-                //         y: 0,
-                //         selected: false,
-                //     };
-                // });
-                state.hiddenNodes.forEach(() => {
+                state.clustersInfos.forEach((cluster) => {
                     visualInfo[size] = {
-                        color: '#f0f',
+                        color: cluster.color,
                         x: 0,
                         y: 0,
                         selected: false,
                     };
-                    size += 1;
+                    size++;
                 });
 
                 state.visualInfo = visualInfo;
@@ -200,7 +214,7 @@ export const proofSlice = createSlice({
                     break;
             }
         },
-        applyView: (state, action: PayloadAction<'full' | 'clustered'>) => {
+        applyView: (state, action: PayloadAction<ProofState['view']>) => {
             const visualInfoSize = Object.keys(state.visualInfo).length;
             const proofSize = state.proof.length;
             // Delete all the pi nodes
@@ -211,11 +225,24 @@ export const proofSlice = createSlice({
             switch (action.payload) {
                 // View without hidden Nodes
                 case 'full':
+                    if (state.hiddenNodes.length || state.view === 'colored-full') {
+                        state.proof.forEach((node) => {
+                            state.visualInfo[node.id] = {
+                                color: '#fff',
+                                x: 0,
+                                y: 0,
+                                selected: false,
+                            };
+                        });
+
+                        state.hiddenNodes = [];
+                    }
                     state.view = 'full';
-                    state.hiddenNodes = [];
                     break;
                 // Cluster all the nodes in your respective group
                 case 'clustered':
+                    state.view = 'clustered';
+
                     // If there are clusters infos
                     if (state.clustersInfos.length) {
                         state.hiddenNodes = [];
@@ -223,13 +250,32 @@ export const proofSlice = createSlice({
 
                         state.clustersInfos.forEach((cluster, i) => {
                             state.visualInfo[size + i] = {
-                                color: colorConverter(cluster.color),
+                                color: cluster.color,
                                 x: 0,
                                 y: 0,
                                 selected: false,
                             };
 
                             state.hiddenNodes.push(cluster.hiddenNodes);
+                        });
+                    }
+                    break;
+                // Apply full view but apply the clustrer color
+                case 'colored-full':
+                    state.view = 'colored-full';
+                    state.hiddenNodes = [];
+
+                    // If there are clusters infos
+                    if (state.clustersInfos.length) {
+                        state.clustersInfos.forEach((cluster) => {
+                            cluster.hiddenNodes.forEach((node) => {
+                                state.visualInfo[node] = {
+                                    color: cluster.color,
+                                    x: 0,
+                                    y: 0,
+                                    selected: false,
+                                };
+                            });
                         });
                     }
                     break;
@@ -347,7 +393,7 @@ export const selectOriginalProof = (state: RootState): NodeInterface[] => {
     return state.proof.proof;
 };
 
-export const selectView = (state: RootState): 'basic' | 'propositional' | 'full' => {
+export const selectView = (state: RootState): ProofState['view'] => {
     return state.proof.view;
 };
 
