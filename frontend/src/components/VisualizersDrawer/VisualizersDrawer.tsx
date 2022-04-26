@@ -10,6 +10,7 @@ import { applyView, selectNodeClusters, selectNodes } from '../../store/features
 import { reRender } from '../../store/features/externalCmd/externalCmd';
 import VisualizerLetDrawer from '../VisualizerLetDrawer/VisualizerLetDrawer';
 import VisualizerTheoryLemma from '../VisualizerTheoryLemma/VisualizerTheoryLemma';
+import { ClusterKind } from '../../interfaces/enum';
 
 const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpen }: DrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
@@ -22,27 +23,15 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
         setTabID(typeof newTabId === 'string' ? newTabId : String(newTabId));
     };
 
-    const handleClusterClick = (cluster: string): void => {
-        //
-        switch (cluster) {
-            case 'ALL':
-                dispatch(selectNodes(nodeClusters.reduce((acc: number[], c) => acc.concat(c.hiddenNodes), [])));
-                break;
-            case 'SAT':
-                dispatch(selectNodes(nodeClusters[0].hiddenNodes));
-                break;
-            case 'CNF':
-                dispatch(selectNodes(nodeClusters[1].hiddenNodes));
-                break;
-            case 'TL':
-                dispatch(selectNodes(nodeClusters[2].hiddenNodes));
-                break;
-            case 'PP':
-                dispatch(selectNodes(nodeClusters[3].hiddenNodes));
-                break;
-            case 'IN':
-                dispatch(selectNodes(nodeClusters[4].hiddenNodes));
-                break;
+    const handleClusterClick = (type: ClusterKind): void => {
+        if (type === ClusterKind.NONE) {
+            dispatch(selectNodes(nodeClusters.reduce((acc: number[], c) => acc.concat(c.hiddenNodes), [])));
+        } else {
+            dispatch(
+                selectNodes(
+                    nodeClusters.reduce((acc: number[], c) => (c.type === type ? acc.concat(c.hiddenNodes) : acc), []),
+                ),
+            );
         }
     };
 
@@ -76,12 +65,12 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
                     />
                 </div>
                 <div className="views-color-map">
-                    <span onClick={() => handleClusterClick('ALL')}>⬜ First Scope</span>
-                    <span onClick={() => handleClusterClick('SAT')}>🟪 SAT</span>
-                    <span onClick={() => handleClusterClick('CNF')}>🟨 CNF</span>
-                    <span onClick={() => handleClusterClick('TL')}>🟩 Theory Lemma</span>
-                    <span onClick={() => handleClusterClick('PP')}>🟫 Pre Processing</span>
-                    <span onClick={() => handleClusterClick('IN')}>🟦 Input</span>
+                    <span onClick={() => handleClusterClick(ClusterKind.NONE)}>⬜ First Scope</span>
+                    <span onClick={() => handleClusterClick(ClusterKind.SAT)}>🟪 SAT</span>
+                    <span onClick={() => handleClusterClick(ClusterKind.CNF)}>🟨 CNF</span>
+                    <span onClick={() => handleClusterClick(ClusterKind.TL)}>🟩 Theory Lemma</span>
+                    <span onClick={() => handleClusterClick(ClusterKind.PP)}>🟫 Pre Processing</span>
+                    <span onClick={() => handleClusterClick(ClusterKind.IN)}>🟦 Input</span>
                 </div>
             </div>
         ),
