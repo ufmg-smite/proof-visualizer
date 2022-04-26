@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { selectDot, selectFileName } from '../../store/features/file/fileSlice';
@@ -68,12 +68,222 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
     const [command, setCommand] = useState('');
     const [lastCommands, setLastCommands] = useState(['']);
     const [commandId, setCommandId] = useState(0);
+    const [matchableCmd, setMatchableCmd] = useState<string[]>([]);
+    const [matchableCmdIsOpen, setMatchableCmdIsOpen] = useState(false);
 
     const dispatch = useAppDispatch();
+
+    const commandsMap: { [cmd: string]: (cmds: string[]) => void } = {
+        ['/view']: (cmds: string[]) => {
+            switch (cmds[1]) {
+                case 'full':
+                    dispatch(applyView('full'));
+                    dispatch(reRender());
+                    break;
+                case 'clustered':
+                    dispatch(applyView('clustered'));
+                    dispatch(reRender());
+                    break;
+                case 'colored-full':
+                    dispatch(applyView('colored-full'));
+                    dispatch(reRender());
+                    break;
+            }
+        },
+        ['/select']: (cmds: string[]) => {
+            if (cmds[1]) {
+                let cmdArg = '';
+                cmds.forEach((string, id) => id !== 0 && (cmdArg += string + ' '));
+                // Matches all the brackets
+                const matches = [...cmdArg.matchAll(/\[([^\[\]]+)\]/g)];
+                let idList: number[] = [];
+
+                // There is a case with brackets
+                if (matches[0]) {
+                    const insideBracket = matches[0][1].trim();
+                    let insideMatches = [...insideBracket.matchAll(/\s*\d+\s*-\s*\d+\s*/g)];
+
+                    // Number range notation
+                    if (insideMatches[0]) {
+                        // Get the range limits
+                        const rangeLim = insideMatches[0][0].split(/\s*-\s*/).map((numS) => Number(numS));
+                        idList = Array.from({ length: rangeLim[1] - rangeLim[0] + 1 }, (_, i) => rangeLim[0] + i);
+                    }
+                    // List notation
+                    else {
+                        insideMatches = [...insideBracket.matchAll(/(\s*\d+\s*,*)+/g)];
+                        // Number list notation
+                        if (insideMatches[0]) {
+                            // Group all the matches
+                            let listStr = '';
+                            insideMatches.forEach((match) => (listStr += match[0]));
+                            // Convert to number
+                            idList = listStr
+                                .split(/,\s*/)
+                                .filter((word) => word.length > 0 && !isNaN(Number(word)))
+                                .map((id) => Number(id));
+                        }
+                    }
+                } else {
+                    // Is a regex select?
+                    const matches = [...cmdArg.matchAll(/\/[^\/]*\//g)];
+                    const argMatch = [...cmdArg.matchAll(/--(c|r)/g)];
+                    // If there is a regex
+                    if (matches[0]) {
+                        let argIsConclusion = true;
+                        // Try to find the option
+                        if (argMatch[0]) {
+                            switch (argMatch[0][1]) {
+                                case 'r':
+                                    argIsConclusion = false;
+                                    break;
+                                case 'c':
+                                    argIsConclusion = true;
+                                    break;
+                            }
+                        }
+
+                        const regexString = matches[0][0].substring(1, matches[0][0].length - 1);
+                        try {
+                            // Search all the nodes with the specific regex matching in the conclusion
+                            const regex = new RegExp(regexString);
+                            idList = proof
+                                .filter((node) => regex.test(argIsConclusion ? node.conclusion : node.rule))
+                                .map((node) => node.id);
+                        } catch (err) {
+                            // If the inserted regex expression is invalid (probably missing \)
+                            addErrorToast('Regex error: probably and wrong regex expression');
+                        }
+                    }
+                }
+
+                dispatch(selectNodes(idList));
+            }
+        },
+        ['/unselect']: (cmds: string[]) => {
+            const allNodesIds = proof.map((node) => node.id);
+            dispatch(unselectNodes(allNodesIds));
+        },
+        ['/color']: (cmds: string[]) => {
+            if (cmds[1]) {
+                // Hex color
+                if (RegExp(/^#([0-9a-f]{3}){1,2}$/i).test(cmds[1])) {
+                    dispatch(applyColor(cmds[1]));
+                    return;
+                }
+                // Default colors
+                switch (cmds[1]) {
+                    case 'red':
+                        dispatch(applyColor('#f72b34'));
+                        break;
+                    case 'orange':
+                        dispatch(applyColor('#ff8334'));
+                        break;
+                    case 'yellow':
+                        dispatch(applyColor('#ffc149'));
+                        break;
+                    case 'green':
+                        dispatch(applyColor('#60aa51'));
+                        break;
+                    case 'blue':
+                        dispatch(applyColor('#0097e4'));
+                        break;
+                    case 'purple':
+                        dispatch(applyColor('#a73da5'));
+                        break;
+                    case 'brown':
+                        dispatch(applyColor('#a95a49'));
+                        break;
+                    case 'gray':
+                        dispatch(applyColor('#464646'));
+                        break;
+                    case 'white':
+                        dispatch(applyColor('#f0f0f0'));
+                        break;
+                }
+            }
+        },
+        ['/hide']: (cmds: string[]) => {
+            // Hide all the selected nodes
+            const hiddenIds = Object.keys(visualInfo)
+                .map((id) => Number(id))
+                .filter((id) => visualInfo[id].selected);
+            // Make sure there are nodes selected
+            if (hiddenIds.length > 1) {
+                // Re-render the canvas and update the store
+                dispatch(reRender());
+                dispatch(hideNodes(hiddenIds));
+            }
+        },
+        ['/fold']: (cmds: string[]) => {
+            // If the option is a number
+            if (cmds[1] && !isNaN(Number(cmds[1]))) {
+                const nodeId = Number(cmds[1]);
+                // Is a valid node
+                if (proof.findIndex((node) => node.id === nodeId) !== -1) {
+                    // Re-render the canvas and update the store
+                    dispatch(reRender());
+                    dispatch(foldAllDescendants(nodeId));
+                }
+            }
+        },
+        ['/unfold']: (cmds: string[]) => {
+            let hiddenIds: number[];
+            // If there is a number argument
+            if (cmds[1] && !isNaN(Number(cmds[1]))) {
+                const id = Number(cmds[1]);
+                // Get the pi node (to be unfold)
+                const obj = proof.find((node) => node.id === id);
+                // If it's a pi node
+                if (obj && obj.hiddenNodes?.length) {
+                    // Get the hidden nodes and their ids
+                    const hiddenNodes = obj.hiddenNodes ? obj.hiddenNodes : [];
+                    hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
+                    // Re-render the canvas and update the store
+                    dispatch(reRender());
+                    dispatch(unhideNodes({ pi: id, hiddens: hiddenIds }));
+                }
+            }
+        },
+        ['/find']: (cmds: string[]) => {
+            // If there is an argument and is a number
+            if (cmds[1] && !isNaN(Number(cmds[1]))) {
+                // Find the node
+                dispatch(
+                    findNode({
+                        nodeId: Number(cmds[1]),
+                        option: cmds[2] === '--s' ? true : false,
+                    }),
+                );
+            }
+        },
+    };
+    const commands = useRef(Object.keys(commandsMap)).current;
 
     const openDialog = (content: string): void => {
         setDialogIsOpen(true);
         setDialogContent(content);
+    };
+
+    const findMatchableCmd = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.value.length) {
+            setMatchableCmd(commands.filter((cmd) => cmd.indexOf(e.target.value) !== -1));
+            setMatchableCmdIsOpen(true);
+        }
+        // If it's an empty string
+        else {
+            setMatchableCmd([]);
+            setMatchableCmdIsOpen(false);
+        }
+    };
+
+    const renderMatchableCmd = () => {
+        if (matchableCmd.length) {
+            const list: JSX.Element[] = [];
+            matchableCmd.forEach((cmd) => list.push(<MenuItem text={cmd} />));
+            return <Menu>{list}</Menu>;
+        }
+        return <></>;
     };
 
     const handleInputKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
@@ -90,12 +300,15 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     setLastCommands(lastCommands);
                     setCommand('');
                 }
+                setMatchableCmd([]);
                 break;
             case 'ArrowUp':
                 if (commandId < lastCommands.length - 1) {
                     const newId = commandId + 1;
                     setCommandId(newId);
                     setCommand(lastCommands[newId]);
+                    setMatchableCmd([]);
+                    setMatchableCmdIsOpen(false);
                 }
                 break;
             case 'ArrowDown':
@@ -103,194 +316,18 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     const newId = commandId - 1;
                     setCommandId(newId);
                     setCommand(lastCommands[newId]);
+                    setMatchableCmd([]);
+                    setMatchableCmdIsOpen(false);
                 }
                 break;
         }
     };
 
     const runCommands = (command: string): void => {
-        const commands = command.trim().split(/ +/);
-        let hiddenIds: number[];
-
-        switch (commands[0]) {
-            case '/view':
-                switch (commands[1]) {
-                    case 'clustered':
-                        dispatch(applyView('clustered'));
-                        dispatch(reRender());
-                        break;
-                    case 'full':
-                        dispatch(applyView('full'));
-                        dispatch(reRender());
-                        break;
-                }
-                break;
-            case '/select':
-                if (commands[1]) {
-                    let cmdArg = '';
-                    commands.forEach((string, id) => id !== 0 && (cmdArg += string + ' '));
-                    // Matches all the brackets
-                    const matches = [...cmdArg.matchAll(/\[([^\[\]]+)\]/g)];
-                    let idList: number[] = [];
-
-                    // There is a case with brackets
-                    if (matches[0]) {
-                        const insideBracket = matches[0][1].trim();
-                        let insideMatches = [...insideBracket.matchAll(/\s*\d+\s*-\s*\d+\s*/g)];
-
-                        // Number range notation
-                        if (insideMatches[0]) {
-                            // Get the range limits
-                            const rangeLim = insideMatches[0][0].split(/\s*-\s*/).map((numS) => Number(numS));
-                            idList = Array.from({ length: rangeLim[1] - rangeLim[0] + 1 }, (_, i) => rangeLim[0] + i);
-                        }
-                        // List notation
-                        else {
-                            insideMatches = [...insideBracket.matchAll(/(\s*\d+\s*,*)+/g)];
-                            // Number list notation
-                            if (insideMatches[0]) {
-                                // Group all the matches
-                                let listStr = '';
-                                insideMatches.forEach((match) => (listStr += match[0]));
-                                // Convert to number
-                                idList = listStr
-                                    .split(/,\s*/)
-                                    .filter((word) => word.length > 0 && !isNaN(Number(word)))
-                                    .map((id) => Number(id));
-                            }
-                        }
-                    } else {
-                        // Is a regex select?
-                        const matches = [...cmdArg.matchAll(/\/[^\/]*\//g)];
-                        const argMatch = [...cmdArg.matchAll(/--(c|r)/g)];
-                        // If there is a regex
-                        if (matches[0]) {
-                            let argIsConclusion = true;
-                            // Try to find the option
-                            if (argMatch[0]) {
-                                switch (argMatch[0][1]) {
-                                    case 'r':
-                                        argIsConclusion = false;
-                                        break;
-                                    case 'c':
-                                        argIsConclusion = true;
-                                        break;
-                                }
-                            }
-
-                            const regexString = matches[0][0].substring(1, matches[0][0].length - 1);
-                            try {
-                                // Search all the nodes with the specific regex matching in the conclusion
-                                const regex = new RegExp(regexString);
-                                idList = proof
-                                    .filter((node) => regex.test(argIsConclusion ? node.conclusion : node.rule))
-                                    .map((node) => node.id);
-                            } catch (err) {
-                                // If the inserted regex expression is invalid (probably missing \)
-                                addErrorToast('Regex error: probably and wrong regex expression');
-                            }
-                        }
-                    }
-
-                    dispatch(selectNodes(idList));
-                }
-                break;
-            case '/unselect':
-                const allNodesIds = proof.map((node) => node.id);
-                dispatch(unselectNodes(allNodesIds));
-                break;
-            case '/color':
-                if (commands[1]) {
-                    // Hex color
-                    if (RegExp(/^#([0-9a-f]{3}){1,2}$/i).test(commands[1])) {
-                        dispatch(applyColor(commands[1]));
-                        break;
-                    }
-                    // Default colors
-                    switch (commands[1]) {
-                        case 'red':
-                            dispatch(applyColor('#f72b34'));
-                            break;
-                        case 'orange':
-                            dispatch(applyColor('#ff8334'));
-                            break;
-                        case 'yellow':
-                            dispatch(applyColor('#ffc149'));
-                            break;
-                        case 'green':
-                            dispatch(applyColor('#60aa51'));
-                            break;
-                        case 'blue':
-                            dispatch(applyColor('#0097e4'));
-                            break;
-                        case 'purple':
-                            dispatch(applyColor('#a73da5'));
-                            break;
-                        case 'brown':
-                            dispatch(applyColor('#a95a49'));
-                            break;
-                        case 'gray':
-                            dispatch(applyColor('#464646'));
-                            break;
-                        case 'white':
-                            dispatch(applyColor('#f0f0f0'));
-                            break;
-                    }
-                }
-                break;
-            case '/hide':
-                // Hide all the selected nodes
-                hiddenIds = Object.keys(visualInfo)
-                    .map((id) => Number(id))
-                    .filter((id) => visualInfo[id].selected);
-                // Make sure there are nodes selected
-                if (hiddenIds.length > 1) {
-                    // Re-render the canvas and update the store
-                    dispatch(reRender());
-                    dispatch(hideNodes(hiddenIds));
-                }
-                break;
-            case '/fold':
-                // If the option is a number
-                if (commands[1] && !isNaN(Number(commands[1]))) {
-                    const nodeId = Number(commands[1]);
-                    // Is a valid node
-                    if (nodeId >= 0 && nodeId < proof.length) {
-                        // Re-render the canvas and update the store
-                        dispatch(reRender());
-                        dispatch(foldAllDescendants(nodeId));
-                    }
-                }
-                break;
-            case '/unfold':
-                // If there is a number argument
-                if (commands[1] && !isNaN(Number(commands[1]))) {
-                    const id = Number(commands[1]);
-                    // Get the pi node (to be unfold)
-                    const obj = proof.find((node) => node.id === id);
-                    // If it's a pi node
-                    if (obj && obj.hiddenNodes?.length) {
-                        // Get the hidden nodes and their ids
-                        const hiddenNodes = obj.hiddenNodes ? obj.hiddenNodes : [];
-                        hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
-                        // Re-render the canvas and update the store
-                        dispatch(reRender());
-                        dispatch(unhideNodes({ pi: id, hiddens: hiddenIds }));
-                    }
-                }
-                break;
-            case '/find':
-                // If there is an argument and is a number
-                if (commands[1] && !isNaN(Number(commands[1]))) {
-                    // Find the node
-                    dispatch(
-                        findNode({
-                            nodeId: Number(commands[1]),
-                            option: commands[2] === '--s' ? true : false,
-                        }),
-                    );
-                }
-                break;
+        const cmds = command.trim().split(/ +/);
+        // If the command exist
+        if (cmds[0] && commandsMap[cmds[0]]) {
+            commandsMap[cmds[0]](cmds);
         }
     };
 
@@ -366,7 +403,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             <u className="title">Pattern:</u> /view {'<option>'}.
                         </div>
                         <div>
-                            <u className="title">Option:</u> basic, propositional, full.
+                            <u className="title">Option:</u> full, clustered and colored-full.
                         </div>
                     </div>
                 </MenuItem>
@@ -509,24 +546,34 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     <>
                         <Navbar.Heading>{fileName}</Navbar.Heading>
                         <Navbar.Divider />
-                        <InputGroup
-                            id="command"
-                            placeholder="/command"
-                            value={command}
-                            onChange={(e) => {
-                                setCommandId(0);
-                                lastCommands[0] = e.target.value;
-                                setLastCommands(lastCommands);
-                                setCommand(e.target.value);
-                            }}
-                            onKeyDown={handleInputKeyDown}
-                            rightElement={
-                                <Popover2 content={menus.help} placement="bottom-end">
-                                    <Button icon="help" className="bp3-minimal" />
-                                </Popover2>
-                            }
-                            autoComplete="off"
-                        />
+                        <Popover2
+                            autoFocus={false}
+                            enforceFocus={false}
+                            content={renderMatchableCmd()}
+                            isOpen={matchableCmdIsOpen}
+                            disabled={matchableCmd.length === 0}
+                            placement="bottom-end"
+                        >
+                            <InputGroup
+                                id="command"
+                                placeholder="/command"
+                                value={command}
+                                onChange={(e) => {
+                                    setCommandId(0);
+                                    lastCommands[0] = e.target.value;
+                                    setLastCommands(lastCommands);
+                                    setCommand(e.target.value);
+                                    findMatchableCmd(e);
+                                }}
+                                onKeyDown={handleInputKeyDown}
+                                rightElement={
+                                    <Popover2 content={menus.help} placement="bottom-end">
+                                        <Button icon="help" className="bp3-minimal" />
+                                    </Popover2>
+                                }
+                                autoComplete="off"
+                            />
+                        </Popover2>
                         <Button
                             style={{ marginLeft: '5px' }}
                             icon="play"
