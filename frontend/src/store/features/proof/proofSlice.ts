@@ -321,7 +321,6 @@ export const selectProof = (state: RootState): NodeInterface[] => {
             conclusion: '∴',
             rule: 'π',
             args: '',
-            views: [],
             children: children,
             parents: parents,
             hiddenNodes: hiddenNodesArray.map((hiddenNode) => proof[hiddenNode]),

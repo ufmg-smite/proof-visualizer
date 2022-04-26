@@ -33,7 +33,6 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
             conclusion: '',
             rule: '',
             args: '',
-            views: [],
             children: [],
             parents: [NaN],
             descendants: 0,
@@ -106,7 +105,7 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
             clustersInfos[thisType] = color;
         } else if (line.search('label') !== -1) {
             const id = parseInt(line.slice(0, line.indexOf('[')).trim());
-            let attributes = line.slice(line.indexOf('[') + 1, line.lastIndexOf(']')).trim();
+            const attributes = line.slice(line.indexOf('[') + 1, line.lastIndexOf(']')).trim();
 
             let label = attributes.slice(attributes.search(/(?<!\\)"/) + 2);
             label = label.slice(0, label.search(/(?<!\\)"/) - 1);
@@ -114,9 +113,6 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
             [conclusion, rule] = label.split(/(?<!\\)\|/);
             [rule, args] = rule.indexOf(':args') != -1 ? rule.split(':args') : [rule, ''];
 
-            attributes = attributes.slice(attributes.indexOf(', class = ') + ', class = '.length);
-            attributes = attributes.slice(attributes.indexOf('"') + 1, attributes.slice(1).indexOf('"') + 1);
-            const views = attributes.trim().split(' ');
             const comment: string = removeEscapedCharacters(line.slice(line.indexOf('comment'), line.lastIndexOf('"')));
             const commentJSON = JSON.parse(comment.slice(comment.indexOf('"') + 1).replace(/'/g, '"'));
 
@@ -126,7 +122,6 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
                     conclusion: '',
                     rule: '',
                     args: '',
-                    views: [],
                     children: [],
                     parents: [NaN],
                     descendants: 0,
@@ -137,11 +132,8 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
             nodes[id].conclusion = removeEscapedCharacters(conclusion);
             nodes[id].rule = removeEscapedCharacters(rule);
             nodes[id].args = removeEscapedCharacters(args);
-            nodes[id].views = views;
             nodes[id].descendants = commentJSON.subProofQty;
-        }
-        // TODO: Se o filho ja existe, isso aqui vai resetar os dados setados do filho
-        else if (line.search('->') !== -1) {
+        } else if (line.search('->') !== -1) {
             const [child, parent] = line.split('->').map((x) => parseInt(x.trim()));
             nodes[parent].children.push(child);
             // If there isn't a child node
@@ -151,7 +143,6 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
                     conclusion: '',
                     rule: '',
                     args: '',
-                    views: [],
                     children: [],
                     parents: [],
                     descendants: 0,

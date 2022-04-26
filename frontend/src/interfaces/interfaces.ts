@@ -9,7 +9,6 @@ interface NodeInterface {
     conclusion: string;
     rule: string;
     args: string;
-    views: string[];
     children: number[];
     parents: number[];
     hiddenNodes?: NodeInterface[];
