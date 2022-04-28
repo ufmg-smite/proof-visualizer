@@ -19,6 +19,7 @@ const initialState: ProofState = {
     style: 'graph',
     hiddenNodes: [],
     letMap: {},
+    theoryLemmaMap: [],
     visualInfo: [],
     clustersInfos: [],
 };
@@ -40,9 +41,10 @@ export const proofSlice = createSlice({
                 isJSON = true;
             }
 
-            const [proof, letMap, clustersColors] = processDot(dot);
+            const [proof, letMap, clustersColors, theoryLemmas] = processDot(dot);
             state.proof = proof;
             state.letMap = letMap;
+            state.theoryLemmaMap = theoryLemmas;
 
             if (isJSON) {
                 state.view = proofJSON.view;
@@ -204,7 +206,7 @@ export const proofSlice = createSlice({
                 }
             });
         },
-        changeStyle: (state, action: PayloadAction<'graph' | 'directory'>) => {
+        changeStyle: (state, action: PayloadAction<ProofState['style']>) => {
             switch (action.payload) {
                 case 'graph':
                     state.style = 'graph';
@@ -402,6 +404,10 @@ export const selectStyle = (state: RootState): 'graph' | 'directory' => {
 
 export const selectLetMap = (state: RootState): { [Key: string]: string } => {
     return state.proof.letMap;
+};
+
+export const selectTheoryLemmas = (state: RootState): ProofState['theoryLemmaMap'] => {
+    return state.proof.theoryLemmaMap;
 };
 
 export const selectVisualInfo = (state: RootState): ProofState['visualInfo'] => {

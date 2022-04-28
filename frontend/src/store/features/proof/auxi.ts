@@ -26,7 +26,9 @@ function removeEscapedCharacters(s: string): string {
     return newS;
 }
 
-export function processDot(dot: string): [NodeInterface[], ProofState['letMap'], ClusterColorMap] {
+export function processDot(
+    dot: string,
+): [NodeInterface[], ProofState['letMap'], ClusterColorMap, ProofState['theoryLemmaMap']] {
     const nodes: NodeInterface[] = [
         {
             id: 0,
@@ -48,6 +50,7 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
         : null;
 
     const clustersInfos: ClusterColorMap = {};
+    const theoryLemmas: ProofState['theoryLemmaMap'] = [];
     const lines = dot
         .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
         .replace(/(\n|\t)/gm, '')
@@ -111,7 +114,11 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
             label = label.slice(0, label.search(/(?<!\\)"/) - 1);
             let [conclusion, rule, args] = ['', '', ''];
             [conclusion, rule] = label.split(/(?<!\\)\|/);
-            [rule, args] = rule.indexOf(':args') != -1 ? rule.split(':args') : [rule, ''];
+            [rule, args] = rule.indexOf(' :args ') != -1 ? rule.split(' :args ') : [rule, ''];
+
+            if (rule === 'SCOPE') {
+                theoryLemmas.push(conclusion);
+            }
 
             const comment: string = removeEscapedCharacters(line.slice(line.indexOf('comment'), line.lastIndexOf('"')));
             const commentJSON = JSON.parse(comment.slice(comment.indexOf('"') + 1).replace(/'/g, '"'));
@@ -158,7 +165,9 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
         }
     });
 
-    return comment ? [nodes, JSON.parse(comment)['letMap'], clustersInfos] : [nodes, {}, clustersInfos];
+    return comment
+        ? [nodes, JSON.parse(comment)['letMap'], clustersInfos, theoryLemmas]
+        : [nodes, {}, clustersInfos, theoryLemmas];
 }
 
 export const piNodeParents = (

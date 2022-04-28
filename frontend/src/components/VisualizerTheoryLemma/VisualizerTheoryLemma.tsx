@@ -1,11 +1,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, Classes } from '@blueprintjs/core';
+import { selectTheoryLemmas } from '../../store/features/proof/proofSlice';
+import { useAppSelector } from '../../store/hooks';
 
 const font =
     '14px / 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", Icons16, sans-serif';
 
 const VisualizerTheoryLemma: React.FC = () => {
-    const TheoryLemmas = [1, 2];
+    const theoryLemmas = useAppSelector(selectTheoryLemmas);
+
     return (
         <div className={Classes.DRAWER_BODY}>
             <div className={Classes.DIALOG_BODY}>
@@ -22,13 +25,13 @@ const VisualizerTheoryLemma: React.FC = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {TheoryLemmas.map((tl) => {
+                        {theoryLemmas.map((tl, id) => {
                             return (
-                                <tr key={tl}>
+                                <tr key={id}>
                                     <td>
-                                        <strong>{tl}</strong>
+                                        <strong>{id}</strong>
                                     </td>
-                                    <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{null}</td>
+                                    <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{tl}</td>
                                     <td style={{ width: '150px', height: '100%' }}>
                                         <Button
                                             onClick={() => null}
