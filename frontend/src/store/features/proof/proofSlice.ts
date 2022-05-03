@@ -8,6 +8,7 @@ import {
     findNodesClusters,
     groupPiNodeDependencies,
     sliceNodesCluster,
+    extractTheoryLemmas,
 } from './auxi';
 import { NodeInterface, ProofState } from '../../../interfaces/interfaces';
 import { colorConverter } from '../theme/auxi';
@@ -30,6 +31,9 @@ export const proofSlice = createSlice({
 
     reducers: {
         process: (state, action: PayloadAction<string>) => {
+            // Reset the state
+            state.clustersInfos = [];
+
             let proofJSON;
             let dot = action.payload;
             let isJSON = false;
@@ -41,10 +45,35 @@ export const proofSlice = createSlice({
                 isJSON = true;
             }
 
-            const [proof, letMap, clustersColors, theoryLemmas] = processDot(dot);
+            const [proof, letMap, clustersColors] = processDot(dot);
             state.proof = proof;
             state.letMap = letMap;
-            state.theoryLemmaMap = theoryLemmas;
+            state.view = 'full';
+
+            // If there are clusters
+            let clusters: number[][] = [];
+            if (Object.keys(clustersColors).length) {
+                state.view = 'clustered';
+
+                // Slice the clusters
+                const clustersMap: number[] = Array(state.proof.length).fill(-1);
+                clusters = sliceNodesCluster(state.proof, clustersMap);
+
+                // Maps the cluster infos
+                clusters.forEach((cluster) => {
+                    const type = state.proof[cluster[0]].clusterType;
+                    state.clustersInfos.push({
+                        hiddenNodes: cluster,
+                        type: type,
+                        color: colorConverter(clustersColors[type]),
+                    });
+                });
+
+                // Extract the theory lemmas
+                state.theoryLemmaMap = extractTheoryLemmas(state.proof, state.clustersInfos, true);
+            } else {
+                state.theoryLemmaMap = extractTheoryLemmas(state.proof, state.clustersInfos, false);
+            }
 
             if (isJSON) {
                 state.view = proofJSON.view;
@@ -53,25 +82,7 @@ export const proofSlice = createSlice({
             }
             // Is .dot
             else {
-                state.view = 'full';
-
-                if (Object.keys(clustersColors).length) {
-                    state.view = 'clustered';
-
-                    // Slice the clusters
-                    const clustersMap: number[] = Array(state.proof.length).fill(-1);
-                    state.hiddenNodes = sliceNodesCluster(state.proof, clustersMap);
-
-                    // Maps the cluster infos
-                    state.hiddenNodes.forEach((cluster) => {
-                        const type = state.proof[cluster[0]].clusterType;
-                        state.clustersInfos.push({
-                            hiddenNodes: cluster,
-                            type: type,
-                            color: colorConverter(clustersColors[type]),
-                        });
-                    });
-                }
+                state.hiddenNodes = clusters;
 
                 // Init the visual info
                 const visualInfo: ProofState['visualInfo'] = {};

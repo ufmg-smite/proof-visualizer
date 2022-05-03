@@ -26,9 +26,7 @@ function removeEscapedCharacters(s: string): string {
     return newS;
 }
 
-export function processDot(
-    dot: string,
-): [NodeInterface[], ProofState['letMap'], ClusterColorMap, ProofState['theoryLemmaMap']] {
+export function processDot(dot: string): [NodeInterface[], ProofState['letMap'], ClusterColorMap] {
     const nodes: NodeInterface[] = [
         {
             id: 0,
@@ -50,7 +48,6 @@ export function processDot(
         : null;
 
     const clustersInfos: ClusterColorMap = {};
-    const theoryLemmas: ProofState['theoryLemmaMap'] = [];
     const lines = dot
         .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
         .replace(/(\n|\t)/gm, '')
@@ -116,10 +113,6 @@ export function processDot(
             [conclusion, rule] = label.split(/(?<!\\)\|/);
             [rule, args] = rule.indexOf(' :args ') != -1 ? rule.split(' :args ') : [rule, ''];
 
-            if (rule === 'SCOPE') {
-                theoryLemmas.push(conclusion);
-            }
-
             const comment: string = removeEscapedCharacters(line.slice(line.indexOf('comment'), line.lastIndexOf('"')));
             const commentJSON = JSON.parse(comment.slice(comment.indexOf('"') + 1).replace(/'/g, '"'));
 
@@ -165,9 +158,7 @@ export function processDot(
         }
     });
 
-    return comment
-        ? [nodes, JSON.parse(comment)['letMap'], clustersInfos, theoryLemmas]
-        : [nodes, {}, clustersInfos, theoryLemmas];
+    return comment ? [nodes, JSON.parse(comment)['letMap'], clustersInfos] : [nodes, {}, clustersInfos];
 }
 
 export const piNodeParents = (
@@ -351,4 +342,19 @@ export const sliceNodesCluster = (
         sliceNodesCluster(proof, clusterMap, child, slicedClusters);
     });
     return slicedClusters;
+};
+
+export const extractTheoryLemmas = (
+    proof: NodeInterface[],
+    clusters: ProofState['clustersInfos'],
+    haveCluster: boolean,
+): ProofState['theoryLemmaMap'] => {
+    // If have clusters registered
+    if (haveCluster) {
+        return [proof[0].conclusion].concat(
+            clusters.filter((c) => c.type === ClusterKind.TL).map((c) => proof[c.hiddenNodes[0]].conclusion),
+        );
+    } else {
+        return proof.filter((n) => n.rule === 'SCOPE').map((n) => n.conclusion);
+    }
 };
