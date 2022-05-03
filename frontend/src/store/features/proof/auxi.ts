@@ -304,11 +304,14 @@ export const sliceNodesCluster = (
     if (nodeId && clusterMap[currentNode.id] === -1) {
         // Get all parents with the same type
         const parentsClusters: { [parentID: number]: number } = {};
-        currentNode.parents.forEach((p) => {
+        for (let i = 0; i < currentNode.parents.length; i++) {
+            const p = currentNode.parents[i];
             if (proof[p].clusterType === currentNode.clusterType) {
                 parentsClusters[p] = clusterMap[p];
+                break;
             }
-        });
+        }
+
         const keys = Object.keys(parentsClusters);
 
         // If the current node has the same type as (at least) one of it's parents
