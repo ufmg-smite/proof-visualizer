@@ -111,7 +111,7 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
             label = label.slice(0, label.search(/(?<!\\)"/) - 1);
             let [conclusion, rule, args] = ['', '', ''];
             [conclusion, rule] = label.split(/(?<!\\)\|/);
-            [rule, args] = rule.indexOf(':args') != -1 ? rule.split(':args') : [rule, ''];
+            [rule, args] = rule.indexOf(' :args ') != -1 ? rule.split(' :args ') : [rule, ''];
 
             const comment: string = removeEscapedCharacters(line.slice(line.indexOf('comment'), line.lastIndexOf('"')));
             const commentJSON = JSON.parse(comment.slice(comment.indexOf('"') + 1).replace(/'/g, '"'));
@@ -342,4 +342,19 @@ export const sliceNodesCluster = (
         sliceNodesCluster(proof, clusterMap, child, slicedClusters);
     });
     return slicedClusters;
+};
+
+export const extractTheoryLemmas = (
+    proof: NodeInterface[],
+    clusters: ProofState['clustersInfos'],
+    haveCluster: boolean,
+): ProofState['theoryLemmaMap'] => {
+    // If have clusters registered
+    if (haveCluster) {
+        return [proof[0].conclusion].concat(
+            clusters.filter((c) => c.type === ClusterKind.TL).map((c) => proof[c.hiddenNodes[0]].conclusion),
+        );
+    } else {
+        return proof.filter((n) => n.rule === 'SCOPE').map((n) => n.conclusion);
+    }
 };

@@ -178,6 +178,7 @@ interface ProofState {
     letMap: {
         [Key: string]: string;
     };
+    theoryLemmaMap: string[];
     visualInfo: {
         [id: number]: {
             color: string;
