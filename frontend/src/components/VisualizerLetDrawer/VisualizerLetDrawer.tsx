@@ -163,26 +163,26 @@ const VisualizerLetDrawer: React.FC = () => {
         <div className={Classes.DRAWER_BODY}>
             <div className={Classes.DIALOG_BODY}>
                 <table
-                    id="table-node-info"
+                    id="table-node-info-2"
                     className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
                     style={{ width: '100%' }}
                 >
                     <thead>
                         <tr>
-                            <th style={{ width: '100px' }}>Property</th>
+                            <th style={{ width: '50px' }}>Property</th>
                             <th className="letMap-value-column">Value</th>
-                            <th style={{ width: '250px' }}>Action</th>
+                            <th style={{ width: '100px' }}>Action</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {Object.keys(letMapS).map((key) => {
+                        {Object.keys(letMapS).map((key, id) => {
                             return (
-                                <tr key={key}>
+                                <tr key={id}>
                                     <td>
                                         <strong>{key}</strong>
                                     </td>
                                     <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{renderLet(key)}</td>
-                                    <td style={{ width: '150px', height: '100%' }}>
+                                    <td style={{ width: '100px', height: '100%' }}>
                                         <Button
                                             onClick={() => expandAll(key)}
                                             className="bp3-minimal"
