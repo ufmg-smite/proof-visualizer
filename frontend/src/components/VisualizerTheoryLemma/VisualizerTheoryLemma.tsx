@@ -19,33 +19,14 @@ const VisualizerTheoryLemma: React.FC = () => {
                 >
                     <thead>
                         <tr>
-                            <th style={{ width: '100px' }}>Property</th>
                             <th className="letMap-value-column">Value</th>
-                            <th style={{ width: '250px' }}>Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         {theoryLemmas.map((tl, id) => {
                             return (
                                 <tr key={id}>
-                                    <td>
-                                        <strong>{id}</strong>
-                                    </td>
                                     <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{tl}</td>
-                                    <td style={{ width: '150px', height: '100%' }}>
-                                        <Button
-                                            onClick={() => null}
-                                            className="bp3-minimal"
-                                            icon="translate"
-                                            text="Expand"
-                                        />
-                                        <Button
-                                            onClick={() => null}
-                                            className="bp3-minimal"
-                                            icon="undo"
-                                            text="Revert"
-                                        />
-                                    </td>
                                 </tr>
                             );
                         })}
