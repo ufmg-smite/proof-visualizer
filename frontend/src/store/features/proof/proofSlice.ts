@@ -82,11 +82,10 @@ export const proofSlice = createSlice({
             }
             // Is .dot
             else {
-                state.hiddenNodes = clusters;
+                state.hiddenNodes = clusters.filter((c) => c.length > 1);
 
                 // Init the visual info
                 const visualInfo: ProofState['visualInfo'] = {};
-                let size = 0;
                 state.proof.forEach((node) => {
                     visualInfo[node.id] = {
                         color: '#fff',
@@ -94,17 +93,16 @@ export const proofSlice = createSlice({
                         y: 0,
                         selected: false,
                     };
-                    size++;
                 });
 
+                let size = state.proof.length;
                 state.clustersInfos.forEach((cluster) => {
-                    visualInfo[size] = {
+                    visualInfo[cluster.hiddenNodes.length !== 1 ? size++ : cluster.hiddenNodes[0]] = {
                         color: cluster.color,
                         x: 0,
                         y: 0,
                         selected: false,
                     };
-                    size++;
                 });
 
                 state.visualInfo = visualInfo;
@@ -254,22 +252,33 @@ export const proofSlice = createSlice({
                     break;
                 // Cluster all the nodes in your respective group
                 case 'clustered':
-                    state.view = 'clustered';
-
                     // If there are clusters infos
                     if (state.clustersInfos.length) {
+                        state.view = 'clustered';
+
                         state.hiddenNodes = [];
-                        const size = Object.keys(state.visualInfo).length;
+                        let size = Object.keys(state.visualInfo).length;
 
-                        state.clustersInfos.forEach((cluster, i) => {
-                            state.visualInfo[size + i] = {
-                                color: cluster.color,
-                                x: 0,
-                                y: 0,
-                                selected: false,
-                            };
+                        state.clustersInfos.forEach((cluster) => {
+                            if (cluster.hiddenNodes.length !== 1) {
+                                state.visualInfo[size++] = {
+                                    color: cluster.color,
+                                    x: 0,
+                                    y: 0,
+                                    selected: false,
+                                };
 
-                            state.hiddenNodes.push(cluster.hiddenNodes);
+                                state.hiddenNodes.push(cluster.hiddenNodes);
+                            }
+                            // Cluster with 1 node
+                            else {
+                                state.visualInfo[cluster.hiddenNodes[0]] = {
+                                    color: cluster.color,
+                                    x: 0,
+                                    y: 0,
+                                    selected: false,
+                                };
+                            }
                         });
                     }
                     break;
