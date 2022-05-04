@@ -10,29 +10,27 @@ const VisualizerTheoryLemma: React.FC = () => {
     const theoryLemmas = useAppSelector(selectTheoryLemmas);
 
     return (
-        <div className={Classes.DRAWER_BODY}>
-            <div className={Classes.DIALOG_BODY}>
-                <table
-                    id="table-node-info"
-                    className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
-                    style={{ width: '100%' }}
-                >
-                    <thead>
-                        <tr>
-                            <th className="letMap-value-column">Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {theoryLemmas.map((tl, id) => {
-                            return (
-                                <tr key={id}>
-                                    <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{tl}</td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+        <div className={Classes.DIALOG_BODY}>
+            <table
+                id="table-node-info-2"
+                className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
+                style={{ width: '100%', minWidth: '230px' }}
+            >
+                <thead>
+                    <tr>
+                        <th className="letMap-value-column">Value</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {theoryLemmas.map((tl, id) => {
+                        return (
+                            <tr key={id}>
+                                <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{tl}</td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
         </div>
     );
 };

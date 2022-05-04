@@ -160,48 +160,46 @@ const VisualizerLetDrawer: React.FC = () => {
     };
 
     return (
-        <div className={Classes.DRAWER_BODY}>
-            <div className={Classes.DIALOG_BODY}>
-                <table
-                    id="table-node-info-2"
-                    className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
-                    style={{ width: '100%' }}
-                >
-                    <thead>
-                        <tr>
-                            <th style={{ width: '50px' }}>Property</th>
-                            <th className="letMap-value-column">Value</th>
-                            <th style={{ width: '100px' }}>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {Object.keys(letMapS).map((key, id) => {
-                            return (
-                                <tr key={id}>
-                                    <td>
-                                        <strong>{key}</strong>
-                                    </td>
-                                    <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{renderLet(key)}</td>
-                                    <td style={{ width: '100px', height: '100%' }}>
-                                        <Button
-                                            onClick={() => expandAll(key)}
-                                            className="bp3-minimal"
-                                            icon="translate"
-                                            text="Expand"
-                                        />
-                                        <Button
-                                            onClick={() => revertLet(key)}
-                                            className="bp3-minimal"
-                                            icon="undo"
-                                            text="Revert"
-                                        />
-                                    </td>
-                                </tr>
-                            );
-                        })}
-                    </tbody>
-                </table>
-            </div>
+        <div className={Classes.DIALOG_BODY}>
+            <table
+                id="table-node-info-2"
+                className="bp3-html-table bp3-html-table-bordered bp3-html-table-condensed bp3-html-table-striped"
+                style={{ width: '100%' }}
+            >
+                <thead>
+                    <tr>
+                        <th style={{ width: '50px' }}>Property</th>
+                        <th className="letMap-value-column">Value</th>
+                        <th style={{ width: '100px' }}>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {Object.keys(letMapS).map((key, id) => {
+                        return (
+                            <tr key={id}>
+                                <td>
+                                    <strong>{key}</strong>
+                                </td>
+                                <td style={{ width: '100%', whiteSpace: 'pre-wrap' }}>{renderLet(key)}</td>
+                                <td style={{ width: '100px', height: '100%' }}>
+                                    <Button
+                                        onClick={() => expandAll(key)}
+                                        className="bp3-minimal"
+                                        icon="translate"
+                                        text="Expand"
+                                    />
+                                    <Button
+                                        onClick={() => revertLet(key)}
+                                        className="bp3-minimal"
+                                        icon="undo"
+                                        text="Revert"
+                                    />
+                                </td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
         </div>
     );
 };
