@@ -18,7 +18,7 @@ const VisualizerTheoryLemma: React.FC = () => {
             >
                 <thead>
                     <tr>
-                        <th className="letMap-value-column">Value</th>
+                        <th className="theoryLemma-value-column">Value</th>
                     </tr>
                 </thead>
                 <tbody>
