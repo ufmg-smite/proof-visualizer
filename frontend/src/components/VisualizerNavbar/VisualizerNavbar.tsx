@@ -281,7 +281,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         if (matchableCmd.length) {
             const list: JSX.Element[] = [];
             matchableCmd.forEach((cmd) => list.push(<MenuItem text={cmd} />));
-            return <Menu>{list}</Menu>;
+            return <Menu className="matchable-menu">{list}</Menu>;
         }
         return <></>;
     };
