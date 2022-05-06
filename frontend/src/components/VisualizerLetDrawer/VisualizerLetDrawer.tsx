@@ -37,6 +37,18 @@ const VisualizerLetDrawer: React.FC = () => {
         // Call handler right away so state gets updated with initial window size
         handleResize();
 
+        // Init the let ref
+        Object.keys(letMapS).forEach((key) => {
+            const currentLet = letMapS[key];
+            const indices: { [key: number]: string } = {};
+            // Finds all occurences of let in the currentLet
+            [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
+                if (match.index) indices[match.index] = match[0];
+            });
+
+            letsRef.current[key] = new Let(key, currentLet, letsRef.current, indices);
+        });
+
         // Remove event listener on cleanup
         return () => window.removeEventListener('resize', handleResize);
     }, []);
@@ -83,11 +95,6 @@ const VisualizerLetDrawer: React.FC = () => {
                 if (match.index) indices[match.index] = match[0];
             });
 
-            // If it's the first render (make sure that the lets obj is not calculated every time)
-            if (Object.keys(lets).length !== Object.keys(letMapS).length) {
-                lets[key] = new Let(key, currentLet, lets, indices);
-            }
-
             // If doesn't fits, then indent
             if (!lets[key].fitsTheWindow(width, font)) {
                 currentLet = lets[key].indent(width, true, font);
@@ -99,26 +106,23 @@ const VisualizerLetDrawer: React.FC = () => {
                     if (match.index) indices[match.index] = match[0];
                 });
             }
-            // If fits
-            else {
-                // Only in the momment the page size is growing and the line is broken
-                if (resizeMode >= 0 && lets[key].lines.length > 1) {
-                    // Reset the line
-                    lets[key].lines = [
-                        { value: lets[key].isExpanded ? lets[key].groupUp() : lets[key].value, indentLevel: 0 },
-                    ];
-                    lets[key].biggerID = 0;
+            // If fits, then only in the momment the page size is growing and the line is broken
+            else if (resizeMode >= 0 && lets[key].lines.length > 1) {
+                // Reset the line
+                lets[key].lines = [
+                    { value: lets[key].isExpanded ? lets[key].groupUp() : lets[key].value, indentLevel: 0 },
+                ];
+                lets[key].biggerID = 0;
 
-                    // Indent it again
-                    currentLet = lets[key].indent(width, false, font);
-                    letMapS[key] = currentLet;
+                // Indent it again
+                currentLet = lets[key].indent(width, false, font);
+                letMapS[key] = currentLet;
 
-                    indices = {};
-                    // Finds all occurences of let in the currentLet after indentation
-                    [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
-                        if (match.index) indices[match.index] = match[0];
-                    });
-                }
+                indices = {};
+                // Finds all occurences of let in the currentLet after indentation
+                [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
+                    if (match.index) indices[match.index] = match[0];
+                });
             }
 
             const arr: (JSX.Element | string)[] = [];
