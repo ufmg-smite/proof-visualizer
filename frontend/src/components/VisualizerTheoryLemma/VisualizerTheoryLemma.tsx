@@ -10,14 +10,12 @@ const font =
 
 const VisualizerTheoryLemma: React.FC = () => {
     const darkTheme = useAppSelector(selectTheme);
-    const theoryLemmas = useAppSelector(selectTheoryLemmas);
     const letMap = useAppSelector(selectLetMap);
     const widthRef = useRef(0);
 
-    const [tLemmaS, setTLemmaS] = useState([...theoryLemmas]);
+    const [theoryLemmas, setTheoryLemmas] = useState([...useAppSelector(selectTheoryLemmas)]);
     const [resizeMode, setResizeMode] = useState(0);
     const letsRef = useRef<{ [key: string]: Let }>({});
-    const tlRef = useRef<Let[]>([]);
 
     // ComponentDidMount
     useEffect(() => {
@@ -56,7 +54,8 @@ const VisualizerTheoryLemma: React.FC = () => {
             [...tl.matchAll(/let\d+/g)].forEach((match) => {
                 if (match.index) indices[match.index] = match[0];
             });
-            tlRef.current.push(new Let(String(id), tl, letsRef.current, indices));
+
+            letsRef.current[id] = new Let(String(id), tl, letsRef.current, indices);
         });
 
         // Remove event listener on cleanup
@@ -65,76 +64,59 @@ const VisualizerTheoryLemma: React.FC = () => {
 
     const expandLet = (parent: number, key: string, letIdx: number) => {
         const lets = letsRef.current;
-        const tls = tlRef.current;
         const externalRef = lets[key];
-        tls[parent].isExpanded = true;
-        tLemmaS[parent] = tls[parent].expandPartialy(externalRef, letIdx);
-        setTLemmaS([...tLemmaS]);
+        lets[parent].isExpanded = true;
+        theoryLemmas[parent] = lets[parent].expandPartialy(externalRef, letIdx);
+        setTheoryLemmas([...theoryLemmas]);
     };
 
     const expandAll = (key: number) => {
-        const tls = tlRef.current;
-        tls[key].isExpanded = true;
-        tLemmaS[key] = tls[key].expandValue(true);
-        setTLemmaS([...tLemmaS]);
+        const thisLet = letsRef.current[key];
+        thisLet.isExpanded = true;
+        theoryLemmas[key] = thisLet.expandValue(true);
+        setTheoryLemmas([...theoryLemmas]);
     };
 
     const revertLet = (key: number) => {
-        const tls = tlRef.current;
+        const thisLet = letsRef.current[key];
         // Only when is expanded
-        if (tls[key].isExpanded) {
-            tls[key].isExpanded = false;
-            tLemmaS[key] = tls[key].shrinkValue();
-            setTLemmaS([...tLemmaS]);
+        if (thisLet.isExpanded) {
+            thisLet.isExpanded = false;
+            theoryLemmas[key] = thisLet.shrinkValue();
+            setTheoryLemmas([...theoryLemmas]);
         }
     };
 
     const renderLet = (key: number): JSX.Element => {
-        const tls = tlRef.current;
+        const lets = letsRef.current;
         const width = widthRef.current;
 
         // Waits for the width to be updated and the DOM element to be updated
         if (width) {
-            let currentTL = tLemmaS[key];
+            let currentTL = theoryLemmas[key];
+            const thisLet = lets[key];
 
-            let indices: { [key: number]: string } = {};
+            // If doesn't fits, then indent
+            if (!thisLet.fitsTheWindow(width, font)) {
+                currentTL = thisLet.indent(width, true, font);
+                theoryLemmas[key] = currentTL;
+            }
+            // If fits, then only in the momment the page size is growing and the line is broken
+            else if (resizeMode >= 0 && thisLet.lines.length > 1) {
+                // Reset the line
+                thisLet.lines = [{ value: thisLet.isExpanded ? thisLet.groupUp() : thisLet.value, indentLevel: 0 }];
+                thisLet.biggerID = 0;
+
+                // Indent it again
+                currentTL = thisLet.indent(width, false, font);
+                theoryLemmas[key] = currentTL;
+            }
+
             // Finds all occurences of let in the currentTL
+            const indices: { [key: number]: string } = {};
             [...currentTL.matchAll(/let\d+/g)].forEach((match) => {
                 if (match.index) indices[match.index] = match[0];
             });
-
-            // If doesn't fits, then indent
-            if (!tls[key].fitsTheWindow(width, font)) {
-                currentTL = tls[key].indent(width, true, font);
-                tLemmaS[key] = currentTL;
-
-                indices = {};
-                // Finds all occurences of let in the currentTL after indentation
-                [...currentTL.matchAll(/let\d+/g)].forEach((match) => {
-                    if (match.index) indices[match.index] = match[0];
-                });
-            }
-            // If fits
-            else {
-                // Only in the momment the page size is growing and the line is broken
-                if (resizeMode >= 0 && tls[key].lines.length > 1) {
-                    // Reset the line
-                    tls[key].lines = [
-                        { value: tls[key].isExpanded ? tls[key].groupUp() : tls[key].value, indentLevel: 0 },
-                    ];
-                    tls[key].biggerID = 0;
-
-                    // Indent it again
-                    currentTL = tls[key].indent(width, false, font);
-                    tLemmaS[key] = currentTL;
-
-                    indices = {};
-                    // Finds all occurences of let in the currentTL after indentation
-                    [...currentTL.matchAll(/let\d+/g)].forEach((match) => {
-                        if (match.index) indices[match.index] = match[0];
-                    });
-                }
-            }
 
             const arr: (JSX.Element | string)[] = [];
             let start = 0;

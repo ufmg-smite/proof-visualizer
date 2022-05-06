@@ -12,11 +12,10 @@ const font =
 
 const VisualizerLetDrawer: React.FC = () => {
     const darkTheme = useAppSelector(selectTheme);
-    const letMap = useAppSelector(selectLetMap);
     const widthRef = useRef(0);
-
-    const [letMapS, setLetMapS] = useState({ ...letMap });
     const [resizeMode, setResizeMode] = useState(0);
+
+    const [letMap, setLetMap] = useState({ ...useAppSelector(selectLetMap) });
     const letsRef = useRef<{ [key: string]: Let }>({});
 
     // ComponentDidMount
@@ -38,8 +37,8 @@ const VisualizerLetDrawer: React.FC = () => {
         handleResize();
 
         // Init the let ref
-        Object.keys(letMapS).forEach((key) => {
-            const currentLet = letMapS[key];
+        Object.keys(letMap).forEach((key) => {
+            const currentLet = letMap[key];
             const indices: { [key: number]: string } = {};
             // Finds all occurences of let in the currentLet
             [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
@@ -58,26 +57,24 @@ const VisualizerLetDrawer: React.FC = () => {
 
         const externalRef = lets[key];
         lets[parent].isExpanded = true;
-        letMapS[parent] = lets[parent].expandPartialy(externalRef, letIdx);
-        setLetMapS({ ...letMapS });
+        letMap[parent] = lets[parent].expandPartialy(externalRef, letIdx);
+        setLetMap({ ...letMap });
     };
 
     const expandAll = (key: string) => {
-        const lets = letsRef.current;
-
-        lets[key].isExpanded = true;
-        letMapS[key] = lets[key].expandValue(true);
-        setLetMapS({ ...letMapS });
+        const thisLet = letsRef.current[key];
+        thisLet.isExpanded = true;
+        letMap[key] = thisLet.expandValue(true);
+        setLetMap({ ...letMap });
     };
 
     const revertLet = (key: string) => {
-        const lets = letsRef.current;
-
+        const thisLet = letsRef.current[key];
         // Only when is expanded
-        if (lets[key].isExpanded) {
-            lets[key].isExpanded = false;
-            letMapS[key] = lets[key].shrinkValue();
-            setLetMapS({ ...letMapS });
+        if (thisLet.isExpanded) {
+            thisLet.isExpanded = false;
+            letMap[key] = thisLet.shrinkValue();
+            setLetMap({ ...letMap });
         }
     };
 
@@ -87,43 +84,30 @@ const VisualizerLetDrawer: React.FC = () => {
 
         // Waits for the width to be updated and the DOM element to be updated
         if (width) {
-            let currentLet = letMapS[key];
+            let currentLet = letMap[key];
+            const thisLet = lets[key];
 
-            let indices: { [key: number]: string } = {};
+            // If doesn't fits, then indent
+            if (!thisLet.fitsTheWindow(width, font)) {
+                currentLet = thisLet.indent(width, true, font);
+                letMap[key] = currentLet;
+            }
+            // If fits, then only in the momment the page size is growing and the line is broken
+            else if (resizeMode >= 0 && thisLet.lines.length > 1) {
+                // Reset the line
+                thisLet.lines = [{ value: thisLet.isExpanded ? thisLet.groupUp() : thisLet.value, indentLevel: 0 }];
+                thisLet.biggerID = 0;
+
+                // Indent it again
+                currentLet = thisLet.indent(width, false, font);
+                letMap[key] = currentLet;
+            }
+
             // Finds all occurences of let in the currentLet
+            const indices: { [key: number]: string } = {};
             [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
                 if (match.index) indices[match.index] = match[0];
             });
-
-            // If doesn't fits, then indent
-            if (!lets[key].fitsTheWindow(width, font)) {
-                currentLet = lets[key].indent(width, true, font);
-                letMapS[key] = currentLet;
-
-                indices = {};
-                // Finds all occurences of let in the currentLet after indentation
-                [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
-                    if (match.index) indices[match.index] = match[0];
-                });
-            }
-            // If fits, then only in the momment the page size is growing and the line is broken
-            else if (resizeMode >= 0 && lets[key].lines.length > 1) {
-                // Reset the line
-                lets[key].lines = [
-                    { value: lets[key].isExpanded ? lets[key].groupUp() : lets[key].value, indentLevel: 0 },
-                ];
-                lets[key].biggerID = 0;
-
-                // Indent it again
-                currentLet = lets[key].indent(width, false, font);
-                letMapS[key] = currentLet;
-
-                indices = {};
-                // Finds all occurences of let in the currentLet after indentation
-                [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
-                    if (match.index) indices[match.index] = match[0];
-                });
-            }
 
             const arr: (JSX.Element | string)[] = [];
             let start = 0;
@@ -178,7 +162,7 @@ const VisualizerLetDrawer: React.FC = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {Object.keys(letMapS).map((key, id) => {
+                    {Object.keys(letMap).map((key, id) => {
                         return (
                             <tr key={id}>
                                 <td>
