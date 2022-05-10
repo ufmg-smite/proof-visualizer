@@ -6,11 +6,12 @@ import '../../scss/Let.scss';
 import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { selectLetMap } from '../../store/features/proof/proofSlice';
+import { DrawerVisualizerTabProps } from '../../interfaces/interfaces';
 
 const font =
     '14px / 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", Icons16, sans-serif';
 
-const VisualizerLetDrawer: React.FC = () => {
+const VisualizerLetDrawer: React.FC<DrawerVisualizerTabProps> = ({ shouldResize }: DrawerVisualizerTabProps) => {
     const darkTheme = useAppSelector(selectTheme);
     const widthRef = useRef(0);
     const [resizeMode, setResizeMode] = useState(0);
@@ -18,19 +19,19 @@ const VisualizerLetDrawer: React.FC = () => {
     const [letMap, setLetMap] = useState({ ...useAppSelector(selectLetMap) });
     const letsRef = useRef<{ [key: string]: Let }>({});
 
+    // Handler to call on window resize and set the value column width
+    function handleResize() {
+        const width = widthRef.current;
+
+        // -22 from the fixed padding size
+        const newWidth = document.getElementsByClassName('letMap-value-column')[0].clientWidth - 24;
+        width === newWidth ? setResizeMode(1) : width > newWidth ? setResizeMode(0) : setResizeMode(2);
+
+        widthRef.current = newWidth;
+    }
+
     // ComponentDidMount
     useEffect(() => {
-        // Handler to call on window resize and set the value column width
-        function handleResize() {
-            const width = widthRef.current;
-
-            // -22 from the fixed padding size
-            const newWidth = document.getElementsByClassName('letMap-value-column')[0].clientWidth - 24;
-            width === newWidth ? setResizeMode(1) : width > newWidth ? setResizeMode(0) : setResizeMode(2);
-
-            widthRef.current = newWidth;
-        }
-
         // Add event listener
         window.addEventListener('resize', handleResize);
         // Call handler right away so state gets updated with initial window size
@@ -51,6 +52,10 @@ const VisualizerLetDrawer: React.FC = () => {
         // Remove event listener on cleanup
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    useEffect(() => {
+        handleResize();
+    }, [shouldResize]);
 
     const expandLet = (parent: string, key: string, letIdx: number) => {
         const lets = letsRef.current;

@@ -4,11 +4,12 @@ import { selectLetMap, selectTheoryLemmas } from '../../store/features/proof/pro
 import { useAppSelector } from '../../store/hooks';
 import Let from '../VisualizerLetDrawer/let';
 import { selectTheme } from '../../store/features/theme/themeSlice';
+import { DrawerVisualizerTabProps } from '../../interfaces/interfaces';
 
 const font =
     '14px / 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", Icons16, sans-serif';
 
-const VisualizerTheoryLemma: React.FC = () => {
+const VisualizerTheoryLemma: React.FC<DrawerVisualizerTabProps> = ({ shouldResize }: DrawerVisualizerTabProps) => {
     const darkTheme = useAppSelector(selectTheme);
     const letMap = useAppSelector(selectLetMap);
     const widthRef = useRef(0);
@@ -17,19 +18,19 @@ const VisualizerTheoryLemma: React.FC = () => {
     const [resizeMode, setResizeMode] = useState(0);
     const letsRef = useRef<{ [key: string]: Let }>({});
 
+    // Handler to call on window resize and set the value column width
+    function handleResize() {
+        const width = widthRef.current;
+
+        // -22 from the fixed padding size
+        const newWidth = document.getElementsByClassName('theoryLemma-value-column')[0].clientWidth - 24;
+        width === newWidth ? setResizeMode(1) : width > newWidth ? setResizeMode(0) : setResizeMode(2);
+
+        widthRef.current = newWidth;
+    }
+
     // ComponentDidMount
     useEffect(() => {
-        // Handler to call on window resize and set the value column width
-        function handleResize() {
-            const width = widthRef.current;
-
-            // -22 from the fixed padding size
-            const newWidth = document.getElementsByClassName('theoryLemma-value-column')[0].clientWidth - 24;
-            width === newWidth ? setResizeMode(1) : width > newWidth ? setResizeMode(0) : setResizeMode(2);
-
-            widthRef.current = newWidth;
-        }
-
         // Add event listener
         window.addEventListener('resize', handleResize);
         // Call handler right away so state gets updated with initial window size
@@ -61,6 +62,10 @@ const VisualizerTheoryLemma: React.FC = () => {
         // Remove event listener on cleanup
         return () => window.removeEventListener('resize', handleResize);
     }, []);
+
+    useEffect(() => {
+        handleResize();
+    }, [shouldResize]);
 
     const expandLet = (parent: number, key: string, letIdx: number) => {
         const lets = letsRef.current;

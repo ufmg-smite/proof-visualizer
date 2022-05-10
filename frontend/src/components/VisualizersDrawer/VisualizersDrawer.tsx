@@ -18,9 +18,14 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
     const dispatch = useAppDispatch();
 
     const [tabID, setTabID] = useState('lm');
+    const [resizeFlag, setResizeFlag] = useState([false, false]);
 
-    const handleTabChange = (newTabId: TabId, _: any, e: any): void => {
-        setTabID(typeof newTabId === 'string' ? newTabId : String(newTabId));
+    const handleTabChange = (newTabId: string, _: any, e: any): void => {
+        setTabID(newTabId);
+        const newResizeFlag = [...resizeFlag];
+        if (newTabId === 'lm') newResizeFlag[0] = !newResizeFlag[0];
+        else if (newTabId === 'tl') newResizeFlag[1] = !newResizeFlag[1];
+        setResizeFlag(newResizeFlag);
     };
 
     const handleClusterClick = (type: ClusterKind): void => {
@@ -74,8 +79,8 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
                 </div>
             </div>
         ),
-        letMap: <VisualizerLetDrawer />,
-        theoryLemma: <VisualizerTheoryLemma />,
+        letMap: <VisualizerLetDrawer shouldResize={resizeFlag[0]} />,
+        theoryLemma: <VisualizerTheoryLemma shouldResize={resizeFlag[1]} />,
     };
 
     return (

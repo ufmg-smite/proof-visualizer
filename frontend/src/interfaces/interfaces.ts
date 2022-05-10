@@ -144,7 +144,7 @@ interface LineProps {
     points: Array<number>;
 }
 
-// LET DRAWER
+// VISUALIZERS DRAWER
 interface LetRenderProps {
     id: number;
     toRender: string;
@@ -155,6 +155,10 @@ interface LetRenderProps {
         type: renderLetKind;
         payload: boolean;
     }>;
+}
+
+interface DrawerVisualizerTabProps {
+    shouldResize: boolean;
 }
 
 interface DrawerProps {
@@ -229,6 +233,7 @@ export type {
     TreeProps,
     LineProps,
     LetRenderProps,
+    DrawerVisualizerTabProps,
     DrawerProps,
     ReduxState,
     ProofState,
