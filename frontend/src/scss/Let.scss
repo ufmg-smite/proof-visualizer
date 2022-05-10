@@ -3,12 +3,18 @@
         white-space: pre;
     }
     &:hover {
-        cursor: pointer;
+        cursor: default;
     }
     .let-literal-or {
-        color: #FFC547;
+        &:hover {
+            cursor: pointer;
+        }
+        color: #ffc547;
     }
     .let-literal {
-        color: #fd8f00;       
+        &:hover {
+            cursor: pointer;
+        }
+        color: #fd8f00;
     }
 }
