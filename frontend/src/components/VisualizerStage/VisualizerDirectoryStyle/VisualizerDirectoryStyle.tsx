@@ -208,15 +208,6 @@ const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
                     positionMap={positionMap}
                     content={proofTree}
                     setNodeInfo={setNodeInfo}
-                    originalNodeInfo={{
-                        rule: '',
-                        args: '',
-                        conclusion: '',
-                        nHided: 0,
-                        nDescendants: 0,
-                        hiddenNodes: [],
-                        dependencies: [],
-                    }}
                 ></VisualizerTree>
             </div>
             <div

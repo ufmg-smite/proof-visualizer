@@ -6,14 +6,7 @@ import { Classes, Tree, TreeNodeInfo } from '@blueprintjs/core';
 import { TreeProps } from '../../interfaces/interfaces';
 import { castProofNodeToTreeNode } from '../VisualizerStage/VisualizerStage';
 
-const VisualizerTree: React.FC<TreeProps> = ({
-    darkTheme,
-    proof,
-    positionMap,
-    content,
-    originalNodeInfo,
-    setNodeInfo,
-}: TreeProps) => {
+const VisualizerTree: React.FC<TreeProps> = ({ darkTheme, proof, positionMap, content, setNodeInfo }: TreeProps) => {
     // STATES:
     const [, forceUpdate] = useReducer((x) => x + 1, 0);
     const [nodes, setNodes] = useState(content);
@@ -35,19 +28,16 @@ const VisualizerTree: React.FC<TreeProps> = ({
     };
 
     const handleNodeClick = (nodeData: any, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
-        setNodeInfo(
-            selected !== nodeData.id
-                ? {
-                      rule: nodeData.rule ? nodeData.rule : '',
-                      args: nodeData.args ? nodeData.args : '',
-                      conclusion: nodeData.conclusion ? nodeData.conclusion : '',
-                      nHided: nodeData.nHided ? nodeData.nHided : 0,
-                      nDescendants: nodeData.descendants,
-                      hiddenNodes: nodeData.hiddenNodes,
-                      dependencies: nodeData.dependencies,
-                  }
-                : originalNodeInfo,
-        );
+        const toBeShow: any = selected !== nodeData.id ? nodeData : nodes[0];
+        setNodeInfo({
+            rule: toBeShow.rule ? toBeShow.rule : '',
+            args: toBeShow.args ? toBeShow.args : '',
+            conclusion: toBeShow.conclusion ? toBeShow.conclusion : '',
+            nHided: toBeShow.nHided ? toBeShow.nHided : 0,
+            nDescendants: toBeShow.descendants,
+            hiddenNodes: toBeShow.hiddenNodes,
+            dependencies: toBeShow.dependencies,
+        });
         const originallySelected = nodeData.isSelected;
 
         // Set all the nodes to be not selected

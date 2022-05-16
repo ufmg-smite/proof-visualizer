@@ -229,15 +229,6 @@ const VisualizerStage: React.FC = () => {
         hiddenNodes: [],
         dependencies: [],
     });
-    const [originalNodeInfo, setOriginalNodeInfo] = useState<NodeInfo>({
-        rule: '',
-        args: '',
-        conclusion: '',
-        nHided: 0,
-        nDescendants: 0,
-        hiddenNodes: [],
-        dependencies: [],
-    });
     const [map, setMap] = useState<any>({});
     // Drawer
     const [[ruleHelperIsOpen, argsHelperIsOpen, concHelperIsOpen], dispatchHelper] = useReducer(
@@ -293,7 +284,6 @@ const VisualizerStage: React.FC = () => {
     const openDrawer = (nodeInfo: NodeInfo, tree?: TreeNodeInfo[]) => {
         setNodeInfo(nodeInfo);
         setTree(tree ? tree : []);
-        setOriginalNodeInfo(nodeInfo);
         setDrawerIsOpen(true);
     };
 
@@ -483,7 +473,6 @@ const VisualizerStage: React.FC = () => {
                         positionMap={map}
                         content={tree}
                         setNodeInfo={setNodeInfo}
-                        originalNodeInfo={originalNodeInfo}
                     ></VisualizerTree>
                     <div className={Classes.DIALOG_BODY}>{nodeInfoTable()}</div>
                 </div>

@@ -137,7 +137,6 @@ interface TreeProps {
     proof: ProofState['proof'];
     positionMap: any;
     content: TreeNodeInfo[];
-    originalNodeInfo: NodeInfo;
     setNodeInfo: Dispatch<SetStateAction<NodeInfo>>;
 }
 
