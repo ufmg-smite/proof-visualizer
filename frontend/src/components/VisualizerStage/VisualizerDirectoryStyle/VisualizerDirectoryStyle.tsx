@@ -1,4 +1,4 @@
-import React, { useState, useReducer } from 'react';
+import React, { useState, useReducer, useEffect } from 'react';
 
 import { Icon, Collapse, Pre } from '@blueprintjs/core';
 
@@ -8,6 +8,7 @@ import { selectTheme } from '../../../store/features/theme/themeSlice';
 import { NodeInfo, DirectoryStyleProps } from '../../../interfaces/interfaces';
 import { drawerHelpersKind } from '../../../interfaces/enum';
 import VisualizerTree from '../../VisualizerTree/VisualizerTree';
+import { selectOriginalProof } from '../../../store/features/proof/proofSlice';
 
 const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
     proofTree,
@@ -15,6 +16,7 @@ const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
     indent,
     translate,
 }: DirectoryStyleProps) => {
+    const proof = useAppSelector(selectOriginalProof);
     const darkTheme = useAppSelector(selectTheme);
     const [nodeInfo, setNodeInfo] = useState<NodeInfo>({
         rule: '',
@@ -50,6 +52,14 @@ const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
         // Rule, args, conclusion
         [false, false, false],
     );
+    const [positionMap, setMap] = useState<any>({});
+
+    useEffect(() => {
+        const _map: any = {};
+        // Map the { [node id]: list array id }
+        proof.forEach((n, id) => (_map[n.id] = id));
+        setMap(_map);
+    }, [proof]);
 
     const nodeInfoTable = () => {
         return (
@@ -194,6 +204,8 @@ const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
             >
                 <VisualizerTree
                     darkTheme={darkTheme}
+                    proof={proof}
+                    positionMap={positionMap}
                     content={proofTree}
                     setNodeInfo={setNodeInfo}
                     originalNodeInfo={{

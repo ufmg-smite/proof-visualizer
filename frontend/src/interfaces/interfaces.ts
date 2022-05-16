@@ -134,6 +134,8 @@ interface TreeNode {
 
 interface TreeProps {
     darkTheme: boolean;
+    proof: ProofState['proof'];
+    positionMap: any;
     content: TreeNodeInfo[];
     originalNodeInfo: NodeInfo;
     setNodeInfo: Dispatch<SetStateAction<NodeInfo>>;

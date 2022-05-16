@@ -4,8 +4,16 @@ import React, { useEffect, useReducer, useState } from 'react';
 
 import { Classes, Tree, TreeNodeInfo } from '@blueprintjs/core';
 import { TreeProps } from '../../interfaces/interfaces';
+import { castProofNodeToTreeNode } from '../VisualizerStage/VisualizerStage';
 
-const VisualizerTree: React.FC<TreeProps> = ({ darkTheme, content, originalNodeInfo, setNodeInfo }: TreeProps) => {
+const VisualizerTree: React.FC<TreeProps> = ({
+    darkTheme,
+    proof,
+    positionMap,
+    content,
+    originalNodeInfo,
+    setNodeInfo,
+}: TreeProps) => {
     // STATES:
     const [, forceUpdate] = useReducer((x) => x + 1, 0);
     const [nodes, setNodes] = useState(content);
@@ -56,6 +64,13 @@ const VisualizerTree: React.FC<TreeProps> = ({ darkTheme, content, originalNodeI
 
     const handleNodeExpand = (nodeData: TreeNodeInfo) => {
         nodeData.isExpanded = true;
+        if (nodeData.hasCaret && !nodeData.childNodes?.length) {
+            const currentNode = proof[positionMap[nodeData.id]];
+            currentNode.children.forEach((c) => {
+                const child = proof[positionMap[c]];
+                nodeData.childNodes?.push(castProofNodeToTreeNode(child));
+            });
+        }
         forceUpdate();
     };
 

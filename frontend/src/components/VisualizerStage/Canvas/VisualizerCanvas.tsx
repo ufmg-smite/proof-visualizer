@@ -495,7 +495,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
 function mapStateToProps(state: ReduxState, ownProps: CanvasProps) {
     return {
-        proof: selectProof(state),
         visualInfo: selectVisualInfo(state),
         nodeFindData: selectFindData(state),
         renderData: selectRenderData(state),

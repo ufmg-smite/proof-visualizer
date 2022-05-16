@@ -9,7 +9,7 @@ import VisualizerDirectoryStyle from './VisualizerDirectoryStyle/VisualizerDirec
 import '../../scss/VisualizerStage.scss';
 import { useAppSelector } from '../../store/hooks';
 import { selectDot, selectFileCount } from '../../store/features/file/fileSlice';
-import { selectStyle, selectLetMap, selectOriginalProof } from '../../store/features/proof/proofSlice';
+import { selectStyle, selectLetMap, selectProof } from '../../store/features/proof/proofSlice';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { NodeInfo, NodeInterface, TreeNode } from '../../interfaces/interfaces';
 import { renderLetKind, drawerHelpersKind } from '../../interfaces/enum';
@@ -169,7 +169,7 @@ function ruleHelper(rule: string) {
     }
 }
 
-function castProofNodeToTreeNode(node: NodeInterface): TreeNode {
+export function castProofNodeToTreeNode(node: NodeInterface): TreeNode {
     const label = node.hiddenNodes?.length
         ? // Pi node
           `${node.id} : π ➜ ${node.conclusion}`
@@ -201,81 +201,19 @@ function castProofNodeToTreeNode(node: NodeInterface): TreeNode {
 
 function createTree(proof: NodeInterface[], id: number): TreeNode[] {
     const rootNode = proof.find((o) => o.id === id);
-    const tree: TreeNode[] = [],
-        roots: TreeNode[] = [];
+    const tree: TreeNode[] = [];
 
     // Make sure found the root node
     if (rootNode) {
-        const stack: number[] = [rootNode.id];
-        const childrenStack = [-1];
-        const insertedStack: number[] = [];
-
-        let currentNode: any;
         tree.push(castProofNodeToTreeNode(rootNode));
-        insertedStack.push(rootNode.id);
-
-        //While stack isn't empty
-        while (stack.length) {
-            const lastNode = stack[stack.length - 1];
-            let lastChild = childrenStack[childrenStack.length - 1];
-            currentNode = proof.find((o) => o.id === lastNode);
-
-            // If still has children
-            if (lastChild < currentNode.children.length - 1) {
-                lastChild++;
-                stack.push(currentNode.children[lastChild]);
-                childrenStack.push(-1);
-                // Add the node to the tree
-                const nextNode: any = proof.find((o) => o.id === currentNode.children[lastChild]);
-
-                // Avoid duplicate nodes
-                if (insertedStack.indexOf(nextNode.id) === -1) {
-                    tree.push(castProofNodeToTreeNode(nextNode));
-                    insertedStack.push(nextNode.id);
-                }
-            }
-            // Hasn't children
-            else {
-                stack.pop();
-                childrenStack.pop();
-                childrenStack[childrenStack.length - 1]++;
-            }
-        }
-
-        // Make the id's list
-        const map: any = {};
-        let node: TreeNode, i: number;
-
-        // Map the { [node id]: list array id }
-        for (i = 0; i < tree.length; i++) {
-            map[tree[i].id] = i;
-        }
-
-        for (i = 0; i < tree.length; i += 1) {
-            node = tree[i];
-            // For all the parents
-            node.parentsId.forEach((parentId) => {
-                // If this parent was mapped or it's the root node
-                if (!isNaN(map[parentId]) || !i) {
-                    // If the parent is valid and exist in the list
-                    if (!isNaN(parentId) && tree[map[parentId]]) {
-                        tree[map[parentId]].childNodes.push(node);
-                    }
-                    // If root node was already inserted
-                    else if (!roots.length) {
-                        roots.push(node);
-                    }
-                }
-            });
-        }
     }
-    return roots;
+    return tree;
 }
 
 const VisualizerStage: React.FC = () => {
     // Proof data
     const letMap = useAppSelector(selectLetMap);
-    const proof = useAppSelector(selectOriginalProof);
+    const proof = useAppSelector(selectProof);
     const dot = useAppSelector(selectDot);
     const fileID = useAppSelector(selectFileCount);
     const style = useAppSelector(selectStyle);
@@ -300,6 +238,7 @@ const VisualizerStage: React.FC = () => {
         hiddenNodes: [],
         dependencies: [],
     });
+    const [map, setMap] = useState<any>({});
     // Drawer
     const [[ruleHelperIsOpen, argsHelperIsOpen, concHelperIsOpen], dispatchHelper] = useReducer(
         (state: boolean[], action: { type: drawerHelpersKind; payload: boolean }): boolean[] => {
@@ -344,6 +283,12 @@ const VisualizerStage: React.FC = () => {
 
     // Make sure that a new tree is created only when a new dot is used
     useEffect(() => setProofTree(createTree(proof, 0)), [dot]);
+    useEffect(() => {
+        const _map: any = {};
+        // Map the { [node id]: list array id }
+        proof.forEach((n, id) => (_map[n.id] = id));
+        setMap(_map);
+    }, [proof]);
 
     const openDrawer = (nodeInfo: NodeInfo, tree?: TreeNodeInfo[]) => {
         setNodeInfo(nodeInfo);
@@ -503,7 +448,7 @@ const VisualizerStage: React.FC = () => {
         <div onContextMenu={(e) => e.preventDefault()}>
             {proof.length > 1 ? (
                 style === 'graph' ? (
-                    <Canvas key={fileID} openDrawer={openDrawer} createTree={createTree}></Canvas>
+                    <Canvas key={fileID} proof={proof} openDrawer={openDrawer} createTree={createTree}></Canvas>
                 ) : (
                     <VisualizerDirectoryStyle
                         proofTree={proofTree}
@@ -534,6 +479,8 @@ const VisualizerStage: React.FC = () => {
                 <div className={Classes.DRAWER_BODY}>
                     <VisualizerTree
                         darkTheme={darkTheme}
+                        proof={proof}
+                        positionMap={map}
                         content={tree}
                         setNodeInfo={setNodeInfo}
                         originalNodeInfo={originalNodeInfo}
