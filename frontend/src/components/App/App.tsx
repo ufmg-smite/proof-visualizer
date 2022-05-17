@@ -12,7 +12,6 @@ import { selectTheme } from '../../store/features/theme/themeSlice';
 
 const App: React.FC = () => {
     const [dialogIsOpen, setDialogIsOpen] = useState(true);
-    const [dialogContent, setDialogContent] = useState('upload-proof');
     const [drawerIsOpen, setDrawerOpenState] = useReducer((isOpen) => !isOpen, false);
     const darkTheme = useAppSelector(selectTheme);
 
@@ -37,15 +36,12 @@ const App: React.FC = () => {
             <Toaster position={Position.TOP} ref={refHandlers.toaster} />
             <VisualizerNavbar
                 setDialogIsOpen={setDialogIsOpen}
-                setDialogContent={setDialogContent}
                 setDrawerIsOpen={setDrawerOpenState}
                 addErrorToast={addErrorToast}
             ></VisualizerNavbar>
             <VisualizerDialog
                 dialogIsOpen={dialogIsOpen}
                 setDialogIsOpen={setDialogIsOpen}
-                dialogContent={dialogContent}
-                setDialogContent={setDialogContent}
                 addErrorToast={addErrorToast}
             ></VisualizerDialog>
             <VisualizerStage></VisualizerStage>

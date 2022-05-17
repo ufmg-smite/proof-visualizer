@@ -98,7 +98,6 @@ interface DirectoryStyleProps {
 // NAVBAR
 interface NavbarProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
-    setDialogContent: Dispatch<SetStateAction<string>>;
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
     addErrorToast: (err: string) => void;
 }
@@ -110,6 +109,13 @@ interface NavbarPropsAndRedux extends NavbarProps {
     visualInfo: ProofState['visualInfo'];
     hiddenNodes: number[][];
     hideNodes: ActionCreatorWithPayload<number[], string>;
+}
+
+// DIALOG
+interface VisualizerDialogProps {
+    dialogIsOpen: boolean;
+    setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
+    addErrorToast: (err: string) => void;
 }
 
 // TREENODE
@@ -230,6 +236,7 @@ export type {
     DirectoryStyleProps,
     NavbarProps,
     NavbarPropsAndRedux,
+    VisualizerDialogProps,
     TreeNode,
     TreeProps,
     LineProps,

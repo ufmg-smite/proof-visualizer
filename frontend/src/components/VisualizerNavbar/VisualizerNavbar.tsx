@@ -52,7 +52,6 @@ function useWindowSize() {
 
 const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
     setDialogIsOpen,
-    setDialogContent,
     setDrawerIsOpen,
     addErrorToast,
     visualInfo,
@@ -262,7 +261,6 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
 
     const openDialog = (content: string): void => {
         setDialogIsOpen(true);
-        setDialogContent(content);
     };
 
     const findMatchableCmd = (e: React.ChangeEvent<HTMLInputElement>) => {
