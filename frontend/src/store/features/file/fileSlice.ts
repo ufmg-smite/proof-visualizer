@@ -15,8 +15,10 @@ export const fileSlice = createSlice({
     reducers: {
         set: (state, action: PayloadAction<{ name: string; value: string }>) => {
             state.name = action.payload.name;
-            state.value = action.payload.value;
-            state.filesCount++;
+            if (state.value !== action.payload.value) {
+                state.value = action.payload.value;
+                state.filesCount++;
+            }
         },
     },
 });

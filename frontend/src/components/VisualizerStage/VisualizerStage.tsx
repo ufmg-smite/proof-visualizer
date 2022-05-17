@@ -214,7 +214,6 @@ const VisualizerStage: React.FC = () => {
     // Proof data
     const letMap = useAppSelector(selectLetMap);
     const proof = useAppSelector(selectProof);
-    const dot = useAppSelector(selectDot);
     const fileID = useAppSelector(selectFileCount);
     const style = useAppSelector(selectStyle);
     const darkTheme = useAppSelector(selectTheme);
@@ -273,7 +272,7 @@ const VisualizerStage: React.FC = () => {
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
 
     // Make sure that a new tree is created only when a new dot is used
-    useEffect(() => setProofTree(createTree(proof, 0)), [dot]);
+    useEffect(() => setProofTree(createTree(proof, 0)), [fileID]);
     useEffect(() => {
         const _map: any = {};
         // Map the { [node id]: list array id }
