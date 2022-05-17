@@ -438,7 +438,7 @@ const VisualizerStage: React.FC = () => {
         <div onContextMenu={(e) => e.preventDefault()}>
             {proof.length > 1 ? (
                 style === 'graph' ? (
-                    <Canvas key={fileID} proof={proof} openDrawer={openDrawer} createTree={createTree}></Canvas>
+                    <Canvas key={fileID} proof={proof} openDrawer={openDrawer} createTree={createTree} />
                 ) : (
                     <VisualizerDirectoryStyle
                         proofTree={proofTree}
@@ -467,13 +467,15 @@ const VisualizerStage: React.FC = () => {
                 title="Node info"
             >
                 <div className={Classes.DRAWER_BODY}>
-                    <VisualizerTree
-                        darkTheme={darkTheme}
-                        proof={proof}
-                        positionMap={map}
-                        content={tree}
-                        setNodeInfo={setNodeInfo}
-                    ></VisualizerTree>
+                    <div style={{ maxHeight: '500px', overflow: 'auto' }}>
+                        <VisualizerTree
+                            darkTheme={darkTheme}
+                            proof={proof}
+                            positionMap={map}
+                            content={tree}
+                            setNodeInfo={setNodeInfo}
+                        />
+                    </div>
                     <div className={Classes.DIALOG_BODY}>{nodeInfoTable()}</div>
                 </div>
             </Drawer>
