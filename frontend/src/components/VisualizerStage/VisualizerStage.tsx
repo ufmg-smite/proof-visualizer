@@ -8,7 +8,7 @@ import VisualizerDirectoryStyle from './VisualizerDirectoryStyle/VisualizerDirec
 
 import '../../scss/VisualizerStage.scss';
 import { useAppSelector } from '../../store/hooks';
-import { selectDot, selectFileCount } from '../../store/features/file/fileSlice';
+import { selectFileCount } from '../../store/features/file/fileSlice';
 import { selectStyle, selectLetMap, selectProof } from '../../store/features/proof/proofSlice';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { NodeInfo, NodeInterface, TreeNode } from '../../interfaces/interfaces';
@@ -435,49 +435,51 @@ const VisualizerStage: React.FC = () => {
 
     return (
         <div onContextMenu={(e) => e.preventDefault()}>
-            {proof.length > 1 ? (
-                style === 'graph' ? (
-                    <Canvas key={fileID} proof={proof} openDrawer={openDrawer} createTree={createTree} />
-                ) : (
-                    <VisualizerDirectoryStyle
-                        proofTree={proofTree}
-                        ruleHelper={ruleHelper}
-                        indent={() => ''}
-                        translate={() => ''}
-                    />
-                )
-            ) : null}
-            <Drawer
-                className={darkTheme ? 'bp3-dark' : ''}
-                autoFocus={true}
-                canEscapeKeyClose={true}
-                canOutsideClickClose={true}
-                enforceFocus={true}
-                hasBackdrop={false}
-                isOpen={drawerIsOpen}
-                position={Position.BOTTOM}
-                usePortal={true}
-                onClose={(e) => {
-                    e.preventDefault();
-                    setDrawerIsOpen(false);
-                    dispatchHelper({ type: drawerHelpersKind.ALL, payload: false });
-                }}
-                icon="info-sign"
-                title="Node info"
-            >
-                <div className={Classes.DRAWER_BODY}>
-                    <div style={{ maxHeight: '500px', overflow: 'auto' }}>
-                        <VisualizerTree
-                            darkTheme={darkTheme}
-                            proof={proof}
-                            positionMap={map}
-                            content={tree}
-                            setNodeInfo={setNodeInfo}
+            {proof.length > 1 && (
+                <>
+                    {style === 'graph' ? (
+                        <Canvas key={fileID} proof={proof} openDrawer={openDrawer} createTree={createTree} />
+                    ) : (
+                        <VisualizerDirectoryStyle
+                            proofTree={proofTree}
+                            ruleHelper={ruleHelper}
+                            indent={() => ''}
+                            translate={() => ''}
                         />
-                    </div>
-                    <div className={Classes.DIALOG_BODY}>{nodeInfoTable()}</div>
-                </div>
-            </Drawer>
+                    )}
+                    <Drawer
+                        className={darkTheme ? 'bp3-dark' : ''}
+                        autoFocus={true}
+                        canEscapeKeyClose={true}
+                        canOutsideClickClose={true}
+                        enforceFocus={true}
+                        hasBackdrop={false}
+                        isOpen={drawerIsOpen}
+                        position={Position.BOTTOM}
+                        usePortal={true}
+                        onClose={(e) => {
+                            e.preventDefault();
+                            setDrawerIsOpen(false);
+                            dispatchHelper({ type: drawerHelpersKind.ALL, payload: false });
+                        }}
+                        icon="info-sign"
+                        title="Node info"
+                    >
+                        <div className={Classes.DRAWER_BODY}>
+                            <div style={{ maxHeight: '500px', overflow: 'auto' }}>
+                                <VisualizerTree
+                                    darkTheme={darkTheme}
+                                    proof={proof}
+                                    positionMap={map}
+                                    content={tree}
+                                    setNodeInfo={setNodeInfo}
+                                />
+                            </div>
+                            <div className={Classes.DIALOG_BODY}>{nodeInfoTable()}</div>
+                        </div>
+                    </Drawer>
+                </>
+            )}
         </div>
     );
 };

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { connect } from 'react-redux';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
-import { selectDot, selectFileName } from '../../store/features/file/fileSlice';
+import { selectDot, selectFileName, set } from '../../store/features/file/fileSlice';
 import {
     applyView,
     changeStyle,
@@ -15,6 +15,7 @@ import {
     selectHiddenNodes,
     selectView,
     unselectNodes,
+    process,
 } from '../../store/features/proof/proofSlice';
 import { ReduxState, NavbarPropsAndRedux, NavbarProps } from '../../interfaces/interfaces';
 
@@ -22,7 +23,8 @@ import { Alignment, Button, Icon, InputGroup, Navbar, Switch, Menu, MenuItem } f
 import { Popover2 } from '@blueprintjs/popover2';
 import { selectTheme, toggle } from '../../store/features/theme/themeSlice';
 import '../../scss/VisualizerNavbar.scss';
-import { findNode, reRender } from '../../store/features/externalCmd/externalCmd';
+import { allowRenderNewFile, findNode, reRender } from '../../store/features/externalCmd/externalCmd';
+import examples from '../../examples/proofs-examples';
 
 function useWindowSize() {
     // Initialize state with undefined width/height so server and client renders match
@@ -519,13 +521,36 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 </MenuItem>
             </Menu>
         ),
+        examples: (
+            <Menu>
+                {Object.keys(examples).map((ex, id) => {
+                    return (
+                        <MenuItem
+                            key={id}
+                            text={`Example ${id + 1}`}
+                            onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+                                const dot = examples[ex].dot;
+                                e.preventDefault();
+
+                                dispatch(set({ name: `ex-${id + 1}`, value: dot }));
+                                dispatch(allowRenderNewFile());
+                                dispatch(reRender());
+
+                                dispatch(process(dot));
+                            }}
+                        />
+                    );
+                })}
+            </Menu>
+        ),
     };
 
+    const criticalWidth = 1035;
     return (
         <Navbar>
             <Navbar.Group align={Alignment.LEFT}>
                 <Navbar.Heading>
-                    <b>{windowSize.width >= 1035 ? 'Proof Visualizer' : 'PV'}</b>
+                    <b>{windowSize.width >= criticalWidth ? 'Proof Visualizer' : 'PV'}</b>
                 </Navbar.Heading>
                 <Navbar.Divider />
                 <Button
@@ -535,8 +560,15 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     }}
                     className="bp3-minimal"
                     icon="upload"
-                    text={windowSize.width >= 1035 ? 'Upload Proof' : ''}
+                    text={windowSize.width >= criticalWidth ? 'Upload Proof' : ''}
                 />
+                <Popover2 content={fileName ? menus.examples : undefined} placement="bottom-end">
+                    <Button
+                        className="bp3-minimal"
+                        icon="manual"
+                        text={windowSize.width >= criticalWidth ? 'Examples' : ''}
+                    />
+                </Popover2>
             </Navbar.Group>
 
             <Navbar.Group align={Alignment.RIGHT}>
@@ -593,14 +625,14 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             <Button
                                 icon="presentation"
                                 className="bp3-minimal"
-                                text={windowSize.width >= 1035 ? 'Style' : ''}
+                                text={windowSize.width >= criticalWidth ? 'Style' : ''}
                                 disabled={fileName ? false : true}
                             />
                         </Popover2>
                         <Button
                             className="bp3-minimal"
                             icon="applications"
-                            text={windowSize.width >= 1035 ? 'Visualizers' : ''}
+                            text={windowSize.width >= criticalWidth ? 'Visualizers' : ''}
                             disabled={fileName ? false : true}
                             onClick={() => setDrawerIsOpen(true)}
                         />
@@ -612,10 +644,16 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             <Button
                                 className="bp3-minimal"
                                 icon="download"
-                                text={windowSize.width >= 1035 ? 'Download' : ''}
+                                text={windowSize.width >= criticalWidth ? 'Download' : ''}
                                 disabled={fileName ? false : true}
                             />
                         </Popover2>
+                        <Button
+                            className="bp3-minimal"
+                            icon="learning"
+                            text={windowSize.width >= criticalWidth ? 'Tutorial' : ''}
+                            disabled={fileName ? false : true}
+                        />
                         <Navbar.Divider />
                     </>
                 ) : null}
