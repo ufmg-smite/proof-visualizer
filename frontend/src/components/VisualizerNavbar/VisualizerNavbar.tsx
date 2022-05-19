@@ -56,6 +56,8 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
     setDialogIsOpen,
     setDrawerIsOpen,
     addErrorToast,
+    setInTutorial,
+    inTutorial,
     visualInfo,
     proof,
     dot,
@@ -545,12 +547,12 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         ),
     };
 
-    const criticalWidth = 1035;
+    const criticalWidth = 1250;
     return (
         <Navbar>
             <Navbar.Group align={Alignment.LEFT}>
                 <Navbar.Heading>
-                    <b>{windowSize.width >= criticalWidth ? 'Proof Visualizer' : 'PV'}</b>
+                    <b id="proof-visualizer-name">{windowSize.width >= criticalWidth ? 'Proof Visualizer' : 'PV'}</b>
                 </Navbar.Heading>
                 <Navbar.Divider />
                 <Button
@@ -558,12 +560,14 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                         e.preventDefault();
                         openDialog('upload-proof');
                     }}
+                    id="upload-proof-bt"
                     className="bp3-minimal"
                     icon="upload"
                     text={windowSize.width >= criticalWidth ? 'Upload Proof' : ''}
                 />
                 <Popover2 content={fileName ? menus.examples : undefined} placement="bottom-end">
                     <Button
+                        id="examples-bt"
                         className="bp3-minimal"
                         icon="manual"
                         text={windowSize.width >= criticalWidth ? 'Examples' : ''}
@@ -574,7 +578,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
             <Navbar.Group align={Alignment.RIGHT}>
                 {fileName ? (
                     <>
-                        <Navbar.Heading>{fileName}</Navbar.Heading>
+                        <Navbar.Heading id="file-name-title">{fileName}</Navbar.Heading>
                         <Navbar.Divider />
                         <Popover2
                             autoFocus={false}
@@ -623,6 +627,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             disabled={fileName ? false : true}
                         >
                             <Button
+                                id="style-bt"
                                 icon="presentation"
                                 className="bp3-minimal"
                                 text={windowSize.width >= criticalWidth ? 'Style' : ''}
@@ -630,6 +635,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             />
                         </Popover2>
                         <Button
+                            id="visualizers-bt"
                             className="bp3-minimal"
                             icon="applications"
                             text={windowSize.width >= criticalWidth ? 'Visualizers' : ''}
@@ -642,6 +648,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             disabled={fileName ? false : true}
                         >
                             <Button
+                                id="download-bt"
                                 className="bp3-minimal"
                                 icon="download"
                                 text={windowSize.width >= criticalWidth ? 'Download' : ''}
@@ -653,6 +660,9 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             icon="learning"
                             text={windowSize.width >= criticalWidth ? 'Tutorial' : ''}
                             disabled={fileName ? false : true}
+                            onClick={() => {
+                                setInTutorial(!inTutorial);
+                            }}
                         />
                         <Navbar.Divider />
                     </>

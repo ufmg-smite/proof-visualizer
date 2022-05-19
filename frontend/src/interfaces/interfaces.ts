@@ -100,6 +100,8 @@ interface NavbarProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
     addErrorToast: (err: string) => void;
+    inTutorial: boolean;
+    setInTutorial: Dispatch<SetStateAction<boolean>>;
 }
 
 interface NavbarPropsAndRedux extends NavbarProps {
@@ -173,6 +175,23 @@ interface DrawerProps {
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
+// TUTORIAL PROPS
+interface TutorialProps {
+    inTutorial: boolean;
+    setInTutorial: Dispatch<SetStateAction<boolean>>;
+}
+
+interface TutorialPopoverProps {
+    setIsOpen: Dispatch<SetStateAction<boolean>>;
+    nextTutorial: () => void;
+    content: string[];
+    W: number;
+    position: {
+        x: number;
+        y: number;
+    };
+}
+
 // REDUX STATES
 interface ReduxState {
     file: FileState;
@@ -243,6 +262,8 @@ export type {
     LetRenderProps,
     DrawerVisualizerTabProps,
     DrawerProps,
+    TutorialProps,
+    TutorialPopoverProps,
     ReduxState,
     ProofState,
     FileState,

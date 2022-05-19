@@ -1,0 +1,107 @@
+.arrow-up {
+    position: fixed;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+
+    border-bottom: 8px solid;
+}
+
+.tutorial-popover {
+    position: fixed;
+    margin: 0 !important;
+    padding: 0 !important;
+
+    .bp3-icon {
+        margin: 0 !important;
+        cursor: pointer;
+        &:hover {
+            background-color: rgba(0, 0, 0, 0.185);
+        }
+    }
+
+    .bp3-dialog-header {
+        display: flex;
+        justify-content: space-between;
+        height: auto !important;
+        min-height: 0;
+    }
+
+    .cur-page {
+        display: flex;
+    }
+
+    .page-ball {
+        width: 4px;
+        height: 4px;
+        background-color: rgba(189, 189, 189, 0.795);
+        margin-right: 2px;
+        border-radius: 50%;
+        transition: background-color 0.3s ease-out;
+    }
+
+    .page-on {
+        background-color: rgb(255, 255, 255);
+    }
+
+    body {
+        color: inherit;
+        display: grid;
+        grid-template-columns: 13px 1fr 13px;
+    }
+    .next-page {
+        font-weight: bolder;
+        align-self: stretch;
+        display: flex;
+        align-items: center;
+
+        &:hover {
+            cursor: pointer;
+            background-color: rgba(0, 0, 0, 0.63);
+        }
+    }
+    .regress {
+        border-right: rgba(255, 255, 255, 0.397) 1px solid;
+        justify-content: start;
+        grid-column: 1 / 1;
+    }
+    .progress {
+        border-left: rgba(255, 255, 255, 0.397) 1px solid;
+        justify-content: end;
+        place-self: 2;
+    }
+
+    .content {
+        flex-wrap: wrap;
+        margin: 2px 5px;
+        place-self: 1;
+        grid-column: 2 / 2;
+    }
+
+    .bp3-button {
+        padding: 3px;
+        min-height: 0;
+    }
+
+    .bp3-dialog-footer {
+        display: flex;
+        justify-content: end;
+        padding: 2px 0;
+    }
+
+    .bp3-divider {
+        margin-bottom: 1px;
+    }
+}
+
+.tutorial-portal {
+    z-index: 51;
+    pointer-events: none;
+    .bp3-overlay-enter-done {
+        transition: background-color 0.2s ease-out;
+        background-color: rgba(87, 82, 82, 0.233);
+        width: 100%;
+        height: 100%;
+    }
+}

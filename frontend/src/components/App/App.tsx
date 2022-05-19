@@ -9,9 +9,11 @@ import VisualizersDrawer from '../VisualizersDrawer/VisualizersDrawer';
 
 import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
+import VisualizerTutorial from '../VisualizerTutorial/VisualizerPanel';
 
 const App: React.FC = () => {
     const [dialogIsOpen, setDialogIsOpen] = useState(true);
+    const [inTutorial, setInTutorial] = useState(false);
     const [drawerIsOpen, setDrawerOpenState] = useReducer((isOpen) => !isOpen, false);
     const darkTheme = useAppSelector(selectTheme);
 
@@ -32,12 +34,15 @@ const App: React.FC = () => {
     }, [drawerIsOpen]);
 
     return (
-        <div className={darkTheme ? ' bp3-dark' : ''}>
+        <div className={darkTheme ? ' bp3-dark' : ''} style={{ height: '100%' }}>
+            <VisualizerTutorial inTutorial={inTutorial} setInTutorial={setInTutorial} />
             <Toaster position={Position.TOP} ref={refHandlers.toaster} />
             <VisualizerNavbar
                 setDialogIsOpen={setDialogIsOpen}
                 setDrawerIsOpen={setDrawerOpenState}
                 addErrorToast={addErrorToast}
+                inTutorial={inTutorial}
+                setInTutorial={setInTutorial}
             ></VisualizerNavbar>
             <VisualizerDialog
                 dialogIsOpen={dialogIsOpen}
