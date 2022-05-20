@@ -1,5 +1,5 @@
 import { Button, Divider, Icon } from '@blueprintjs/core';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TutorialPopoverProps } from '../../interfaces/interfaces';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { useAppSelector } from '../../store/hooks';
@@ -16,7 +16,9 @@ const TutorialPopover: React.FC<TutorialPopoverProps> = ({
     const darkTheme = useAppSelector(selectTheme);
 
     const renderPageBall = (): JSX.Element[] => {
-        return content.map((_, id) => <div key={id} className={`page-ball ${id === page && 'page-on'}`} />);
+        return content.map((_, id) => (
+            <div key={id} className={`page-ball ${id === page && (darkTheme ? 'page-on' : 'page-on-light')}`} />
+        ));
     };
 
     const changePage = (type: string): void => {
@@ -24,12 +26,26 @@ const TutorialPopover: React.FC<TutorialPopoverProps> = ({
         else setPage(page - 1);
     };
 
+    useEffect(() => {
+        function handleEsc(e: KeyboardEvent): void {
+            e.stopPropagation();
+            if (e.key === 'Escape') {
+                setIsOpen(false);
+            }
+        }
+        window.addEventListener('keydown', handleEsc, false);
+
+        return () => {
+            window.removeEventListener('keydown', handleEsc, false);
+        };
+    }, []);
+
     return (
         <div className={darkTheme ? 'bp3-dark' : ''}>
             <div
                 className="arrow-up"
                 style={{
-                    left: position.x + W / 2 - 4,
+                    left: position.tW,
                     top: position.y - 7,
                     borderBottomColor: darkTheme ? 'rgb(30, 38, 44)' : 'rgb(255,255,255)',
                 }}
@@ -73,6 +89,7 @@ const TutorialPopover: React.FC<TutorialPopoverProps> = ({
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     nextTutorial();
+                                    setPage(0);
                                 }}
                             />
                         </div>

@@ -660,7 +660,9 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             icon="learning"
                             text={windowSize.width >= criticalWidth ? 'Tutorial' : ''}
                             disabled={fileName ? false : true}
-                            onClick={() => {
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                e.currentTarget.blur();
                                 setInTutorial(!inTutorial);
                             }}
                         />

@@ -189,6 +189,7 @@ interface TutorialPopoverProps {
     position: {
         x: number;
         y: number;
+        tW: number;
     };
 }
 

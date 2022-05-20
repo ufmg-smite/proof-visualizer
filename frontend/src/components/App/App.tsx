@@ -9,7 +9,7 @@ import VisualizersDrawer from '../VisualizersDrawer/VisualizersDrawer';
 
 import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
-import VisualizerTutorial from '../VisualizerTutorial/VisualizerPanel';
+import VisualizerTutorial from '../VisualizerTutorial/VisualizerTutorial';
 
 const App: React.FC = () => {
     const [dialogIsOpen, setDialogIsOpen] = useState(true);

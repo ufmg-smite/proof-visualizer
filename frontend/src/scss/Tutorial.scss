@@ -44,6 +44,9 @@
     .page-on {
         background-color: rgb(255, 255, 255);
     }
+    .page-on-light {
+        background-color: rgb(0, 0, 0);
+    }
 
     body {
         color: inherit;
@@ -58,25 +61,28 @@
 
         &:hover {
             cursor: pointer;
-            background-color: rgba(0, 0, 0, 0.63);
+            background-color: rgba(0, 0, 0, 0.315);
         }
     }
     .regress {
         border-right: rgba(255, 255, 255, 0.397) 1px solid;
         justify-content: start;
         grid-column: 1 / 1;
+        border-bottom-left-radius: 6px;
     }
     .progress {
         border-left: rgba(255, 255, 255, 0.397) 1px solid;
         justify-content: end;
         place-self: 2;
+        border-bottom-right-radius: 6px;
     }
 
     .content {
         flex-wrap: wrap;
-        margin: 2px 5px;
+        margin: 5px;
         place-self: 1;
         grid-column: 2 / 2;
+        text-align: justify;
     }
 
     .bp3-button {
