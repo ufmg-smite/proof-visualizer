@@ -4,7 +4,7 @@ import { TutorialProps } from '../../interfaces/interfaces';
 import '../../scss/Tutorial.scss';
 import TutorialPopover from './TutorialPopover';
 
-const W = 180;
+const W = 220;
 const divsIds = [
     'proof-visualizer-name',
     'upload-proof-bt',
