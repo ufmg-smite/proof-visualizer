@@ -102,6 +102,7 @@ interface NavbarProps {
     addErrorToast: (err: string) => void;
     inTutorial: boolean;
     setInTutorial: Dispatch<SetStateAction<boolean>>;
+    setSmtDrawerIsOpen: React.DispatchWithoutAction;
 }
 
 interface NavbarPropsAndRedux extends NavbarProps {
@@ -173,6 +174,12 @@ interface DrawerVisualizerTabProps {
 interface DrawerProps {
     drawerIsOpen: boolean;
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
+}
+
+// SMT DRAWER
+interface SmtDrawerProps {
+    isOpen: boolean;
+    setDrawerIsOpen: React.DispatchWithoutAction;
 }
 
 // TUTORIAL PROPS
@@ -263,6 +270,7 @@ export type {
     LetRenderProps,
     DrawerVisualizerTabProps,
     DrawerProps,
+    SmtDrawerProps,
     TutorialProps,
     TutorialPopoverProps,
     ReduxState,

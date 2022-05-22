@@ -57,6 +57,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
     setDrawerIsOpen,
     addErrorToast,
     setInTutorial,
+    setSmtDrawerIsOpen,
     inTutorial,
     visualInfo,
     proof,
@@ -547,7 +548,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         ),
     };
 
-    const criticalWidth = 1250;
+    const criticalWidth = 1350;
     return (
         <Navbar>
             <Navbar.Group align={Alignment.LEFT}>
@@ -573,6 +574,13 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                         text={windowSize.width >= criticalWidth ? 'Examples' : ''}
                     />
                 </Popover2>
+                <Button
+                    id="source-code-bt"
+                    className="bp3-minimal"
+                    icon="code"
+                    text={windowSize.width >= criticalWidth ? 'Source Code' : ''}
+                    onClick={() => setSmtDrawerIsOpen()}
+                />
             </Navbar.Group>
 
             <Navbar.Group align={Alignment.RIGHT}>

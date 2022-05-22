@@ -10,11 +10,13 @@ import VisualizersDrawer from '../VisualizersDrawer/VisualizersDrawer';
 import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import VisualizerTutorial from '../VisualizerTutorial/VisualizerTutorial';
+import VisualizerSmtDrawer from '../VisualizerSmtDrawer/VisualizerSmtDrawer';
 
 const App: React.FC = () => {
     const [dialogIsOpen, setDialogIsOpen] = useState(true);
     const [inTutorial, setInTutorial] = useState(false);
     const [drawerIsOpen, setDrawerOpenState] = useReducer((isOpen) => !isOpen, false);
+    const [smtDrawerIsOpen, setSmtDrawerIsOpen] = useReducer((isOpen) => !isOpen, false);
     const darkTheme = useAppSelector(selectTheme);
 
     // Toaster
@@ -43,6 +45,7 @@ const App: React.FC = () => {
                 addErrorToast={addErrorToast}
                 inTutorial={inTutorial}
                 setInTutorial={setInTutorial}
+                setSmtDrawerIsOpen={setSmtDrawerIsOpen}
             ></VisualizerNavbar>
             <VisualizerDialog
                 dialogIsOpen={dialogIsOpen}
@@ -53,6 +56,7 @@ const App: React.FC = () => {
             {drawerIsOpen ? (
                 <VisualizersDrawer drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerOpenState}></VisualizersDrawer>
             ) : null}
+            <VisualizerSmtDrawer isOpen={smtDrawerIsOpen} setDrawerIsOpen={setSmtDrawerIsOpen} />
         </div>
     );
 };
