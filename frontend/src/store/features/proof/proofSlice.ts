@@ -23,6 +23,7 @@ const initialState: ProofState = {
     theoryLemmaMap: [],
     visualInfo: [],
     clustersInfos: [],
+    smt: '',
 };
 
 export const proofSlice = createSlice({
@@ -311,6 +312,9 @@ export const proofSlice = createSlice({
                 }
             });
         },
+        setSmt: (state, action: PayloadAction<string>) => {
+            state.smt = action.payload;
+        },
     },
 });
 
@@ -325,6 +329,7 @@ export const {
     changeStyle,
     applyView,
     applyColor,
+    setSmt,
 } = proofSlice.actions;
 
 export const selectProof = (state: RootState): NodeInterface[] => {
@@ -442,6 +447,10 @@ export const selectHiddenNodes = (state: RootState): number[][] => {
 
 export const selectNodeClusters = (state: RootState): ProofState['clustersInfos'] => {
     return state.proof.clustersInfos;
+};
+
+export const selectSmt = (state: RootState): ProofState['smt'] => {
+    return state.proof.smt;
 };
 
 export default proofSlice.reducer;

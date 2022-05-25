@@ -1,16 +1,23 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import MonacoEditor from '@monaco-editor/react';
 import { Drawer, Position, Classes, Button } from '@blueprintjs/core';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { SmtDrawerProps } from '../../interfaces/interfaces';
-import { useAppSelector } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
 import '../../scss/VisualizersDrawer.scss';
+import { selectSmt, setSmt } from '../../store/features/proof/proofSlice';
 
 const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen }: SmtDrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
-    const [text, setText] = useState('');
+    const proofSmt = useAppSelector(selectSmt);
+    const [text, setText] = useState(proofSmt + '\n');
+
+    const dispatch = useAppDispatch();
+    useEffect(() => {
+        if (isOpen) setText(text + '\n');
+    }, [isOpen]);
 
     const options = {
         theme: darkTheme ? 'vs-dark' : 'vs',
@@ -41,6 +48,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                     language="sb"
                     value={text}
                     onChange={(value) => value !== undefined && setText(value)}
+                    onMount={() => setText(text.substring(0, text.length - 1))}
                     options={options}
                 />
                 <Button
@@ -49,7 +57,8 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                     icon="code"
                     text="Upload proof"
                     onClick={() => {
-                        //
+                        dispatch(setSmt(text));
+                        // Run cvc5
                     }}
                 />
             </div>

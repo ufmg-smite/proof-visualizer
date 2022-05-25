@@ -230,6 +230,7 @@ interface ProofState {
         type: ClusterKind;
         color: string;
     }[];
+    smt: string;
 }
 // FILE
 interface FileState {
