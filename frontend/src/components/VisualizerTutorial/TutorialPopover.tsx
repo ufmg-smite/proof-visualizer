@@ -47,7 +47,15 @@ const TutorialPopover: React.FC<TutorialPopoverProps> = ({
                 style={{
                     left: position.tW,
                     top: position.y - 7,
-                    borderBottomColor: darkTheme ? 'rgb(30, 38, 44)' : 'rgb(255,255,255)',
+                    borderBottomColor: darkTheme ? 'rgb(48, 65, 71)' : 'rgb(255,255,255)',
+                }}
+            />
+            <div
+                className="arrow-up arrow-2"
+                style={{
+                    left: position.tW - 2,
+                    top: position.y - 9,
+                    borderBottomColor: darkTheme ? '#bdbdbd' : 'rgba(71, 64, 64, 0.281)',
                 }}
             />
             <div className="tutorial-popover bp3-dialog" style={{ width: W, left: position.x, top: position.y }}>

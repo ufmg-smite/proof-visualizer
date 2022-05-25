@@ -6,6 +6,15 @@
     border-right: 8px solid transparent;
 
     border-bottom: 8px solid;
+    z-index: 52;
+}
+
+.arrow-2 {
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+
+    border-bottom: 10px solid;
+    z-index: inherit;
 }
 
 .tutorial-popover {
