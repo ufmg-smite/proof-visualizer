@@ -17,7 +17,9 @@ const divsIds = [
     'switch-button-dark-theme',
 ];
 const tutorials: string[][] = [
-    ["This website is a SMT solver proofs visualizer. Let's start the tutorial"],
+    [
+        'This website is a SMT solver proofs visualizer. It was developed by \0Vinícius Braga Freire\0https://github.com/vinciusb\0, \0Diego Della Rocca\0https://github.com/diegodrc\0 and \0Haniel Barbosa\0https://github.com/HanielB\0 and was funded by AWS.',
+    ],
     [
         'Here you can upload your proofs to be visualized.',
         'The proofs can have a .dot or .json format.',
@@ -115,6 +117,7 @@ const VisualizerTutorial: React.FC<TutorialProps> = ({ inTutorial, setInTutorial
                     <TutorialPopover
                         setIsOpen={setInTutorial}
                         nextTutorial={increaseStage}
+                        stage={stage}
                         content={tutorials[stage]}
                         W={W}
                         position={position}

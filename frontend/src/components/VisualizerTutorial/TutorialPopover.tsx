@@ -7,6 +7,7 @@ import { useAppSelector } from '../../store/hooks';
 const TutorialPopover: React.FC<TutorialPopoverProps> = ({
     setIsOpen,
     nextTutorial,
+    stage,
     content,
     W,
     position,
@@ -39,6 +40,36 @@ const TutorialPopover: React.FC<TutorialPopoverProps> = ({
             window.removeEventListener('keydown', handleEsc, false);
         };
     }, []);
+
+    const insertAnchors = (text: string): (JSX.Element | string)[] => {
+        const list: (JSX.Element | string)[] = [];
+
+        let i = -1,
+            last = 0;
+        const positions = [0, 0, 0];
+        for (let j = 0; j < text.length; j++) {
+            if (text[j] === '\0') {
+                i++;
+                positions[i] = j;
+            }
+            if (i === 2) {
+                list.push(text.substring(last, positions[0]));
+                const name = text.substring(positions[0] + 1, positions[1]);
+                const link = text.substring(positions[1] + 1, positions[2]);
+                list.push(
+                    <a href={link} target="_blank" rel="noreferrer">
+                        {name}
+                    </a>,
+                );
+
+                last = positions[2] + 1;
+                i = -1;
+            }
+        }
+        list.push(text.substring(last, text.length));
+
+        return list;
+    };
 
     return (
         <div className={darkTheme ? 'bp3-dark' : ''}>
@@ -75,7 +106,7 @@ const TutorialPopover: React.FC<TutorialPopoverProps> = ({
                             {'<'}
                         </div>
                     )}
-                    <p className="content">{content[page]}</p>
+                    <p className="content">{stage ? content[page] : insertAnchors(content[page])}</p>
                     {page < content.length - 1 && (
                         <div
                             className="next-page progress"

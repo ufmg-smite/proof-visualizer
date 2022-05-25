@@ -191,6 +191,7 @@ interface TutorialProps {
 interface TutorialPopoverProps {
     setIsOpen: Dispatch<SetStateAction<boolean>>;
     nextTutorial: () => void;
+    stage: number;
     content: string[];
     W: number;
     position: {
