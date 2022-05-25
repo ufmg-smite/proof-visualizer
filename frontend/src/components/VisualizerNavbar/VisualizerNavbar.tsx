@@ -16,6 +16,7 @@ import {
     selectView,
     unselectNodes,
     process,
+    setSmt,
 } from '../../store/features/proof/proofSlice';
 import { ReduxState, NavbarPropsAndRedux, NavbarProps } from '../../interfaces/interfaces';
 
@@ -533,11 +534,13 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             text={`Example ${id + 1}`}
                             onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
                                 const dot = examples[ex].dot;
+                                const smt = examples[ex].smt;
                                 e.preventDefault();
 
                                 dispatch(set({ name: `ex-${id + 1}`, value: dot }));
                                 dispatch(allowRenderNewFile());
                                 dispatch(reRender());
+                                dispatch(setSmt(smt));
 
                                 dispatch(process(dot));
                             }}

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer, useRef } from 'react';
 
 import MonacoEditor from '@monaco-editor/react';
 import { Drawer, Position, Classes, Button } from '@blueprintjs/core';
@@ -12,12 +12,21 @@ import { selectSmt, setSmt } from '../../store/features/proof/proofSlice';
 const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen }: SmtDrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
     const proofSmt = useAppSelector(selectSmt);
-    const [text, setText] = useState(proofSmt + '\n');
+    const [, forceUpdate] = useReducer((x) => x + 1, 0);
+    const textRef = useRef(proofSmt + '\n');
 
     const dispatch = useAppDispatch();
     useEffect(() => {
-        if (isOpen) setText(text + '\n');
+        if (isOpen) {
+            textRef.current += '\n';
+            forceUpdate();
+        }
     }, [isOpen]);
+
+    useEffect(() => {
+        textRef.current = proofSmt;
+        forceUpdate();
+    }, [proofSmt]);
 
     const options = {
         theme: darkTheme ? 'vs-dark' : 'vs',
@@ -46,18 +55,21 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                 <MonacoEditor
                     height={'300px'}
                     language="sb"
-                    value={text}
-                    onChange={(value) => value !== undefined && setText(value)}
-                    onMount={() => setText(text.substring(0, text.length - 1))}
+                    value={textRef.current}
+                    onChange={(value) => value !== undefined && (textRef.current = value)}
+                    onMount={() => {
+                        textRef.current = textRef.current.substring(0, textRef.current.length - 1);
+                        forceUpdate();
+                    }}
                     options={options}
                 />
                 <Button
-                    style={{ alignSelf: 'end', float: 'right' }}
+                    style={{ alignSelf: 'end', float: 'right', margin: '5px' }}
                     className="bp3-minimal"
                     icon="code"
                     text="Upload proof"
                     onClick={() => {
-                        dispatch(setSmt(text));
+                        dispatch(setSmt(textRef.current));
                         // Run cvc5
                     }}
                 />
