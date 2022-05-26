@@ -54,7 +54,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
             <div className={'smt-drawer ' + Classes.DRAWER_BODY}>
                 <MonacoEditor
                     height={'300px'}
-                    language="sb"
+                    language="graphql"
                     value={textRef.current}
                     onChange={(value) => value !== undefined && (textRef.current = value)}
                     onMount={() => {
