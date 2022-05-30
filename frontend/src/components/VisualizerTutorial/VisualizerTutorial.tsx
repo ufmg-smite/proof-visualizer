@@ -4,11 +4,12 @@ import { TutorialProps } from '../../interfaces/interfaces';
 import '../../scss/Tutorial.scss';
 import TutorialPopover from './TutorialPopover';
 
-const W = 220;
+const W = 340;
 const divsIds = [
     'proof-visualizer-name',
     'upload-proof-bt',
     'examples-bt',
+    'input-smt-bt',
     'file-name-title',
     'command',
     'style-bt',
@@ -18,29 +19,30 @@ const divsIds = [
 ];
 const tutorials: string[][] = [
     [
-        'This website is a SMT solver proofs visualizer. It was developed by \0Vinícius Braga Freire\0https://github.com/vinciusb\0, \0Diego Della Rocca\0https://github.com/diegodrc\0 and \0Haniel Barbosa\0https://github.com/HanielB\0 and was funded by AWS.',
+        'This website is a SMT solver proof visualizer. It was developed by \0Vinícius Braga Freire\0https://github.com/vinciusb\0, \0Diego Della Rocca\0https://github.com/diegodrc\0 and \0Haniel Barbosa\0https://homepages.dcc.ufmg.br/~hbarbosa/\0. It was funded by AWS and the main SMT solver supported is CVC5.',
     ],
     [
         'Here you can upload your proofs to be visualized.',
-        'The proofs can have a .dot or .json format.',
-        'The .json format is obtained in the download section.',
+        'The proofs can have the .dot or .json file extension.',
+        'The .json file is obtained in the download section.',
     ],
-    ['Here you can visualize some examples of differents proofs.'],
+    ['Here you can visualize some examples of different proofs.'],
+    ['Here you can see the examples SMT code or insert your own SMT and run the CVC5 solver to generate a new proof.'],
     ['This is the name of the current proof uploaded'],
     [
-        'This is the command section. Here you can apply some commands that will transform the proof, changing the way you comprehend it.',
-        "Click in the '?' button to see a description of all commands.",
+        'This is the command section. Here you can use some commands that will transform the proof, changing the way you comprehend it.',
+        "Click in the '?' button to see a description of all commands available.",
     ],
     [
         'Here you can change the way the visualizer presents the proof.',
-        "The graph style is the default and it's where the commands transformations happens.",
+        "The graph style is the default and it's where the commands transformations happen.",
         "In the directory style each proof node is a 'folder' and your children nodes are inside it.",
     ],
     [
         'Here you have access to 3 visualizers:',
-        'View: It allow you to change the way the proof nodes are viewed.',
+        'View: It allow you to change the way the proof nodes are visualized.',
         'Let Map: Here you can see a map of all the LETS used inside the proofs. A let is a therm that shorten some expression (e.g.: let1 = (and A B))',
-        'Theory Lemma: It allow you to see all the theory lemmas in the proof construction.',
+        'Theory Lemma: It allow you to see all the theory lemmas in the proof.',
     ],
     [
         'This section allow you to download the proof in different ways.',

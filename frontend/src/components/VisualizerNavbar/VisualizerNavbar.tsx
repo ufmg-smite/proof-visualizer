@@ -414,29 +414,32 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 <MenuItem text="/select">
                     <div className="cmd-desc">
                         <div>
-                            <u className="title">Desc.:</u> Command that select a group of nodes.
+                            <u className="title">Desc.:</u> Command that selects a group of nodes.
                         </div>
                         <div>
-                            <u className="title">Pattern:</u> /select {'<option>'} {'<argument>'}.
+                            <u className="title">Pattern:</u> /select {'<option>'} {'<argument>'}
                         </div>
                         <div>
                             <u className="title">Options:</u>
                             <div className="option">
-                                1 - A list of node {`id's`} wrapped by brackets and separated by commas (and spaces if
-                                wanted) (eg.: [1, 15, 6,3]).
+                                1 - A list of node ids wrapped by brackets and separated by commas (and spaces if
+                                wanted) (eg.: [1, 15, 6, 3]).
                             </div>
                             <div className="option">
-                                2 - A range of node {`id's`} wrapped by brackets and separated by hyphen (and spaces if
-                                wanted) (eg.: [ 4 -15]). This range will include the last element.
+                                2 - A range of node ids wrapped by brackets and separated by hyphen (and spaces if
+                                wanted) (eg.: [4 - 15]). This range will include the last element.
                             </div>
                             <div className="option">
                                 3 - A regex expression used to select all the nodes which the conclusion owns a match
-                                (eg.: /\.*false\.*/ {'->'} selects all the nodes with false anywhere in the conclusion).
-                                <br />
-                                <br />
-                                If wanted to search a match in the rule just insert the --r argument. The --c argument
-                                exists but the /select will by default search in the conclusion.
+                                (eg.: /\.*false\.*/ selects all the nodes with false anywhere in the conclusion).
                             </div>
+                        </div>
+
+                        <div>
+                            <u className="title">Argument:</u> The argument can only be applied with the third option.
+                            <br />
+                            To search a match in the rule just insert the --r argument. The --c argument exists but the
+                            /select will by default search in the conclusion.
                         </div>
                     </div>
                 </MenuItem>
@@ -463,7 +466,8 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             <u className="title">Options:</u>
                             <div className="option">1 - A valid hex color notation (eg.: #A7B).</div>
                             <div className="option">
-                                2 - A color name between: red, orange, yellow, green, blue, purple, brown, gray, white.
+                                2 - A color name among: red🟥, orange🟧, yellow🟨, green🟩, blue🟦, purple🟪, brown🟫,
+                                black⬛ and white⬜.
                             </div>
                         </div>
                         <div>
@@ -516,10 +520,10 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             <u className="title">Desc.:</u> Command that find a node and centralize the canvas at it.
                         </div>
                         <div>
-                            <u className="title">Pattern:</u> /find {'<node number>'} {'<option>'}.
+                            <u className="title">Pattern:</u> /find {'<node number>'} {'<argument>'}.
                         </div>
                         <div>
-                            <u className="title">Option:</u> --s: find and select the node.
+                            <u className="title">Argument:</u> --s: find and select the node.
                         </div>
                     </div>
                 </MenuItem>
@@ -543,6 +547,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                                 dispatch(setSmt(smt));
 
                                 dispatch(process(dot));
+                                // setSmtDrawerIsOpen();
                             }}
                         />
                     );
@@ -578,10 +583,10 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     />
                 </Popover2>
                 <Button
-                    id="source-code-bt"
+                    id="input-smt-bt"
                     className="bp3-minimal"
                     icon="code"
-                    text={windowSize.width >= criticalWidth ? 'Source Code' : ''}
+                    text={windowSize.width >= criticalWidth ? 'SMT Input' : ''}
                     onClick={() => setSmtDrawerIsOpen()}
                 />
             </Navbar.Group>
