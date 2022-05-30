@@ -547,7 +547,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                                 dispatch(setSmt(smt));
 
                                 dispatch(process(dot));
-                                // setSmtDrawerIsOpen();
+                                setSmtDrawerIsOpen();
                             }}
                         />
                     );
