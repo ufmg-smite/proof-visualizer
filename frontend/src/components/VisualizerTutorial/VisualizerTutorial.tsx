@@ -127,7 +127,6 @@ const VisualizerTutorial: React.FC<TutorialProps> = ({ inTutorial, setInTutorial
                 )}
             </div>
         </Portal>
-        // bp3-overlay-backdrop
     );
 };
 

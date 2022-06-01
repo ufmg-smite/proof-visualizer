@@ -1,7 +1,9 @@
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 
 import MonacoEditor from '@monaco-editor/react';
-import { Drawer, Position, Classes, Button, FormGroup, Switch, Divider, InputGroup } from '@blueprintjs/core';
+import { Drawer, Position, Classes, Button, FormGroup, Switch, InputGroup } from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
+
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { SmtDrawerProps } from '../../interfaces/interfaces';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
@@ -11,10 +13,13 @@ import { selectSmt, setSmt } from '../../store/features/proof/proofSlice';
 const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen }: SmtDrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
     const proofSmt = useAppSelector(selectSmt);
+
     const [, forceUpdate] = useReducer((x) => x + 1, 0);
-    const [optionsIsOpen, setOptionsIsOpen] = useReducer((open) => !open, true);
+    const [optionsIsOpen, setOptionsIsOpen] = useReducer((open) => !open, false);
     const textRef = useRef(proofSmt + '\n');
     const [argsType, setArgsType] = useState(true);
+    const [[shouldClusterize, printAsDag], setDefaultOptions] = useState([true, true]);
+    const [customArgs, setCustomArgs] = useState('');
 
     const dispatch = useAppDispatch();
 
@@ -27,6 +32,24 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
         theme: darkTheme ? 'vs-dark' : 'vs',
     };
     const divColor = darkTheme ? 'rgb(255, 255, 255, 0.15)' : 'rgb(0, 0, 0, 0.15)';
+
+    const helpDiv = (
+        <div
+            className={`bp3-menu ${darkTheme ? 'bp3-dark' : ''}`}
+            style={{
+                maxWidth: '200px',
+                padding: '5px 8px !important',
+                boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.651)',
+                textAlign: 'justify',
+            }}
+        >
+            Look at{' '}
+            <a href="https://cvc5.github.io/docs/cvc5-1.0.0/" target="_blank" rel="noreferrer">
+                CVC5 documentation
+            </a>{' '}
+            to understand more about the argument parser.
+        </div>
+    );
 
     return (
         <Drawer
@@ -47,7 +70,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
             icon="applications"
             title="Visualizers"
         >
-            <div className={'smt-drawer ' + Classes.DRAWER_BODY} style={{ overflow: 'hidden' }}>
+            <div className={Classes.DRAWER_BODY} style={{ overflow: 'hidden' }}>
                 <MonacoEditor
                     height={'300px'}
                     language="graphql"
@@ -58,20 +81,21 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                 />
                 <div
                     style={{
+                        height: optionsIsOpen ? '220px' : '0',
                         position: 'relative',
-                        height: optionsIsOpen ? '200px' : '0',
-                        transition: 'height 1s ease-out',
                         overflow: 'auto',
+                        transition: 'height 0.24s ease-out',
                     }}
                 >
                     <Switch
+                        className="switch"
                         label="Default args or custom args"
                         style={{ margin: '10px 20px' }}
                         checked={argsType}
                         onChange={() => setArgsType(!argsType)}
                     />
                     <FormGroup
-                        label="Proof options"
+                        label="Default args"
                         style={{
                             padding: '10px 20px',
                             borderBottom: `1px solid ${divColor}`,
@@ -80,15 +104,46 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                         }}
                         disabled={!argsType}
                     >
-                        <Switch label="Should clusterize proof" disabled={!argsType} />
-                        <Switch label="Should traverse as tree or as DAG" disabled={!argsType} />
+                        <Switch
+                            label="Should clusterize proof"
+                            disabled={!argsType}
+                            checked={shouldClusterize}
+                            onChange={() => setDefaultOptions([!shouldClusterize, printAsDag])}
+                        />
+                        <Switch
+                            label="Should print as tree or as DAG"
+                            disabled={!argsType}
+                            checked={printAsDag}
+                            onChange={() => setDefaultOptions([shouldClusterize, !printAsDag])}
+                        />
                     </FormGroup>
                     <FormGroup
-                        label="Proof options"
+                        label="Custom args"
                         style={{ padding: '10px 20px', marginBottom: '0' }}
                         disabled={argsType}
                     >
-                        <InputGroup id="text-input" placeholder="Placeholder text" disabled={argsType} />
+                        <InputGroup
+                            id="text-input"
+                            placeholder="Placeholder text"
+                            disabled={argsType}
+                            rightElement={
+                                <Popover2
+                                    disabled={argsType}
+                                    content={helpDiv}
+                                    placement="auto"
+                                    modifiers={{
+                                        arrow: { enabled: true },
+                                    }}
+                                    interactionKind={'hover'}
+                                    hoverCloseDelay={200}
+                                    hoverOpenDelay={200}
+                                >
+                                    <Button disabled={argsType} icon="help" className="bp3-minimal" />
+                                </Popover2>
+                            }
+                            value={customArgs}
+                            onChange={(e) => setCustomArgs(e.target.value)}
+                        />
                     </FormGroup>
                 </div>
                 <footer
@@ -104,23 +159,25 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                         text="Options"
                         onClick={() => setOptionsIsOpen()}
                     />
-                    <Button
-                        style={{ float: 'right', margin: '5px' }}
-                        className="bp3-minimal"
-                        icon="code"
-                        text="Upload proof"
-                        onClick={() => {
-                            dispatch(setSmt(textRef.current));
-                            // Run cvc5
-                        }}
-                    />
-                    <Button
-                        style={{ float: 'right', margin: '5px' }}
-                        className="bp3-minimal"
-                        icon="floppy-disk"
-                        text="Save"
-                        onClick={() => dispatch(setSmt(textRef.current))}
-                    />
+                    <div style={{ float: 'right', display: 'flex' }}>
+                        <Button
+                            style={{ margin: '5px' }}
+                            className="bp3-minimal"
+                            icon="floppy-disk"
+                            text="Save"
+                            onClick={() => dispatch(setSmt(textRef.current))}
+                        />
+                        <Button
+                            style={{ margin: '5px' }}
+                            className="bp3-minimal"
+                            icon="code"
+                            text="Upload proof"
+                            onClick={() => {
+                                dispatch(setSmt(textRef.current));
+                                // Run cvc5
+                            }}
+                        />
+                    </div>
                 </footer>
             </div>
         </Drawer>
