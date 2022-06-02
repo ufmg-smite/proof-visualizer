@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import '../../scss/VisualizersDrawer.scss';
-import { Drawer, Position, Classes, Tabs, Tab, TabId, Button } from '@blueprintjs/core';
+import { Drawer, Position, Classes, Tabs, Tab, Button } from '@blueprintjs/core';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { DrawerProps } from '../../interfaces/interfaces';
 
@@ -19,6 +19,15 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
 
     const [tabID, setTabID] = useState('lm');
     const [resizeFlag, setResizeFlag] = useState([false, false]);
+
+    useEffect(() => {
+        // When drawer is initialized it focus the escape button
+        const bt = document
+            .getElementsByClassName('visualizers-drawer')[0]
+            .getElementsByClassName('bp3-button')[0] as HTMLElement;
+        bt.tabIndex = 1;
+        bt.focus();
+    }, []);
 
     const handleTabChange = (newTabId: string, _: any, e: any): void => {
         setTabID(newTabId);
@@ -85,7 +94,7 @@ const VisualizersDrawer: React.FC<DrawerProps> = ({ drawerIsOpen, setDrawerIsOpe
 
     return (
         <Drawer
-            className={darkTheme ? 'bp3-dark' : ''}
+            className={`visualizers-drawer ${darkTheme ? 'bp3-dark' : ''}`}
             style={{ maxHeight: '65%', width: '35%' }}
             autoFocus={true}
             canEscapeKeyClose={true}
