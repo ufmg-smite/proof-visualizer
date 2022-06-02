@@ -362,6 +362,22 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         }
     };
 
+    const runExample = (e: React.MouseEvent<HTMLElement, MouseEvent> | null, ex: string, id: number) => {
+        e?.preventDefault();
+        const dot = examples[ex].dot;
+        const smt = examples[ex].smt;
+
+        dispatch(set({ name: `ex-${id + 1}.dot`, value: dot }));
+        dispatch(allowRenderNewFile());
+        dispatch(reRender());
+        dispatch(setSmt(smt));
+
+        dispatch(process(dot));
+        setSmtDrawerIsOpen();
+    };
+
+    const isPseudoClick = (e: React.KeyboardEvent<HTMLAnchorElement>): boolean => e.key == 'Enter' || e.key == ' ';
+
     const menus = {
         style: (
             <Menu>
@@ -372,6 +388,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                         e.preventDefault();
                         dispatch(changeStyle('graph'));
                     }}
+                    onKeyDown={(e) => isPseudoClick(e) && dispatch(changeStyle('graph'))}
                 />
                 <MenuItem
                     icon="folder-open"
@@ -380,6 +397,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                         e.preventDefault();
                         dispatch(changeStyle('directory'));
                     }}
+                    onKeyDown={(e) => isPseudoClick(e) && dispatch(changeStyle('directory'))}
                 />
             </Menu>
         ),
@@ -550,19 +568,8 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                         <MenuItem
                             key={id}
                             text={`Example ${id + 1}`}
-                            onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                                const dot = examples[ex].dot;
-                                const smt = examples[ex].smt;
-                                e.preventDefault();
-
-                                dispatch(set({ name: `ex-${id + 1}.dot`, value: dot }));
-                                dispatch(allowRenderNewFile());
-                                dispatch(reRender());
-                                dispatch(setSmt(smt));
-
-                                dispatch(process(dot));
-                                setSmtDrawerIsOpen();
-                            }}
+                            onClick={(e) => runExample(e, ex, id)}
+                            onKeyDown={(e) => isPseudoClick(e) && runExample(null, ex, id)}
                         />
                     );
                 })}
