@@ -351,6 +351,17 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         link.click();
     };
 
+    const exportPNG = (e: React.MouseEvent<HTMLElement, MouseEvent> | null) => {
+        e?.preventDefault();
+        const link = document.createElement('a');
+        link.download = fileName ? `${fileName.replaceAll(' ', '_')}.png` : '';
+        const graph = document.getElementsByClassName('konvajs-content');
+        if (graph.length) {
+            link.href = (graph[0].children[0] as HTMLCanvasElement).toDataURL('image/png');
+            link.click();
+        }
+    };
+
     const menus = {
         style: (
             <Menu>
@@ -374,7 +385,15 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         ),
         download: (
             <Menu>
-                <MenuItem icon="layout" text="JSON" onClick={exportJSON} />
+                <MenuItem
+                    icon="layout"
+                    text="JSON"
+                    onClick={exportJSON}
+                    role="button"
+                    onKeyDown={(e) => {
+                        (e.key == 'Enter' || e.key == ' ') && exportJSON();
+                    }}
+                />
                 <MenuItem
                     icon="graph"
                     text="DOT"
@@ -384,14 +403,9 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 <MenuItem
                     icon="square"
                     text="PNG"
-                    onClick={(e: React.MouseEvent<HTMLElement, MouseEvent>) => {
-                        e.preventDefault();
-                        const link = document.createElement('a');
-                        link.download = fileName ? `${fileName.replaceAll(' ', '_')}.png` : '';
-                        link.href = (
-                            document.getElementsByClassName('konvajs-content')[0].children[0] as HTMLCanvasElement
-                        ).toDataURL('image/png');
-                        link.click();
+                    onClick={exportPNG}
+                    onKeyDown={(e) => {
+                        (e.key == 'Enter' || e.key == ' ') && exportPNG(null);
                     }}
                 />
             </Menu>
@@ -541,7 +555,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                                 const smt = examples[ex].smt;
                                 e.preventDefault();
 
-                                dispatch(set({ name: `ex-${id + 1}`, value: dot }));
+                                dispatch(set({ name: `ex-${id + 1}.dot`, value: dot }));
                                 dispatch(allowRenderNewFile());
                                 dispatch(reRender());
                                 dispatch(setSmt(smt));

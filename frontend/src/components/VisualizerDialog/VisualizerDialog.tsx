@@ -78,7 +78,11 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     const dialogProps: DialogProps = { icon: 'upload', title: 'Upload Proof' };
     const dialogBody = (
         <FileInput
-            style={{ outline: inputIsFocused ? '1px white solid' : '', borderRadius: inputIsFocused ? '3px' : '' }}
+            style={{
+                outline: inputIsFocused ? '2px  white solid' : '',
+                border: inputIsFocused ? '2px rgba(125, 188, 255, 0.6) solid' : '',
+                borderRadius: '3px',
+            }}
             text={fileName}
             hasSelection={fileName !== 'Choose file...'}
             onInputChange={async (e) => {
