@@ -30,6 +30,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
 
     const options = {
         theme: darkTheme ? 'vs-dark' : 'vs',
+        tabIndex: 5,
     };
     const divColor = darkTheme ? 'rgb(255, 255, 255, 0.15)' : 'rgb(0, 0, 0, 0.15)';
 
@@ -93,6 +94,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                         style={{ margin: '10px 20px' }}
                         checked={argsType}
                         onChange={() => setArgsType(!argsType)}
+                        tabIndex={4}
                     />
                     <FormGroup
                         label="Default args"
@@ -109,12 +111,14 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                             disabled={!argsType}
                             checked={shouldClusterize}
                             onChange={() => setDefaultOptions([!shouldClusterize, printAsDag])}
+                            tabIndex={4}
                         />
                         <Switch
                             label="Should print as tree or as DAG"
                             disabled={!argsType}
                             checked={printAsDag}
                             onChange={() => setDefaultOptions([shouldClusterize, !printAsDag])}
+                            tabIndex={4}
                         />
                     </FormGroup>
                     <FormGroup
@@ -134,15 +138,15 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                                     modifiers={{
                                         arrow: { enabled: true },
                                     }}
-                                    interactionKind={'hover'}
                                     hoverCloseDelay={200}
                                     hoverOpenDelay={200}
                                 >
-                                    <Button disabled={argsType} icon="help" className="bp3-minimal" />
+                                    <Button disabled={argsType} icon="help" className="bp3-minimal" tabIndex={4} />
                                 </Popover2>
                             }
                             value={customArgs}
                             onChange={(e) => setCustomArgs(e.target.value)}
+                            tabIndex={4}
                         />
                     </FormGroup>
                 </div>
@@ -158,6 +162,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                         icon="more"
                         text="Options"
                         onClick={() => setOptionsIsOpen()}
+                        tabIndex={1}
                     />
                     <div style={{ float: 'right', display: 'flex' }}>
                         <Button
@@ -166,6 +171,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                             icon="floppy-disk"
                             text="Save"
                             onClick={() => dispatch(setSmt(textRef.current))}
+                            tabIndex={2}
                         />
                         <Button
                             style={{ margin: '5px' }}
@@ -176,6 +182,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                                 dispatch(setSmt(textRef.current));
                                 // Run cvc5
                             }}
+                            tabIndex={3}
                         />
                     </div>
                 </footer>

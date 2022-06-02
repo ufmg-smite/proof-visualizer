@@ -41,6 +41,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     const darkTheme = useAppSelector(selectTheme);
     const dispatch = useAppDispatch();
 
+    const [inputIsFocused, setInputIsFocused] = useState(false);
     const [fileName, changeFileName] = useState('Choose file...');
     const [file, changeFile] = useState('');
     const [[focusFlag, flagCount], setFocusFlag] = useReducer(
@@ -77,6 +78,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     const dialogProps: DialogProps = { icon: 'upload', title: 'Upload Proof' };
     const dialogBody = (
         <FileInput
+            style={{ outline: inputIsFocused ? '1px white solid' : '', borderRadius: inputIsFocused ? '3px' : '' }}
             text={fileName}
             hasSelection={fileName !== 'Choose file...'}
             onInputChange={async (e) => {
@@ -93,8 +95,8 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 }
 
                 try {
-                    // Make sure the file was selected and none error
-                    //  of "no file select" will be prompted
+                    // Make sure the file was selected and none error of "no
+                    //  file select" will be prompted
                     if (file) {
                         const fileContents = await readUploadedFileAsText(file);
                         changeFile(fileContents as string);
@@ -108,6 +110,14 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 }
             }}
             fill={true}
+            onFocus={(e) => {
+                e.stopPropagation();
+                setInputIsFocused(true);
+            }}
+            onBlur={(e) => {
+                e.stopPropagation();
+                setInputIsFocused(false);
+            }}
         />
     );
     const succesButton = (
