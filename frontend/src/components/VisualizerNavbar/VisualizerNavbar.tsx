@@ -376,7 +376,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         setSmtDrawerIsOpen();
     };
 
-    const isPseudoClick = (e: React.KeyboardEvent<HTMLAnchorElement>): boolean => e.key == 'Enter' || e.key == ' ';
+    const isPseudoClick = (e: React.KeyboardEvent<HTMLAnchorElement>): boolean => e.key === 'Enter' || e.key === ' ';
 
     const menus = {
         style: (

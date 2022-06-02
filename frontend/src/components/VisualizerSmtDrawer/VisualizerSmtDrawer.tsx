@@ -86,6 +86,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                         position: 'relative',
                         overflow: 'auto',
                         transition: 'height 0.24s ease-out',
+                        visibility: optionsIsOpen ? 'visible' : 'hidden',
                     }}
                 >
                     <Switch
