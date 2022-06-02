@@ -1,4 +1,4 @@
-import { Button, Divider, Icon } from '@blueprintjs/core';
+import { Button, Divider } from '@blueprintjs/core';
 import React, { useEffect, useState } from 'react';
 import { TutorialPopoverProps } from '../../interfaces/interfaces';
 import { selectTheme } from '../../store/features/theme/themeSlice';
@@ -26,6 +26,19 @@ const TutorialPopover: React.FC<TutorialPopoverProps> = ({
         if (type === '>') setPage(page + 1);
         else setPage(page - 1);
     };
+
+    useEffect(() => {
+        const parent = document.getElementsByClassName('tutorial-popover')[0];
+        // Set the focus
+        let bt = parent.getElementsByClassName('next-page progress');
+        if (!bt.length) {
+            bt = parent.getElementsByClassName('bp3-button');
+            // Make sure the next stage button will not be instantly clicked
+            setTimeout(() => (bt[bt.length - 1] as HTMLElement).focus(), 150);
+        } else {
+            (bt[0] as HTMLElement).focus();
+        }
+    }, [stage, page]);
 
     useEffect(() => {
         function handleEsc(e: KeyboardEvent): void {
@@ -92,11 +105,11 @@ const TutorialPopover: React.FC<TutorialPopoverProps> = ({
             <div className="tutorial-popover bp3-dialog" style={{ width: W, left: position.x, top: position.y }}>
                 <div className="bp3-dialog-header">
                     <div className="cur-page">{renderPageBall()}</div>
-                    <Icon icon="small-cross" size={20} onClick={() => setIsOpen(false)} />
+                    <Button icon="small-cross" onClick={() => setIsOpen(false)} tabIndex={-1} />
                 </div>
                 <body>
                     {page > 0 && (
-                        <div
+                        <button
                             className="next-page regress"
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -104,11 +117,11 @@ const TutorialPopover: React.FC<TutorialPopoverProps> = ({
                             }}
                         >
                             {'<'}
-                        </div>
+                        </button>
                     )}
                     <p className="content">{stage ? content[page] : insertAnchors(content[page])}</p>
                     {page < content.length - 1 && (
-                        <div
+                        <button
                             className="next-page progress"
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -116,7 +129,7 @@ const TutorialPopover: React.FC<TutorialPopoverProps> = ({
                             }}
                         >
                             {'>'}
-                        </div>
+                        </button>
                     )}
                 </body>
                 {page === content.length - 1 && (

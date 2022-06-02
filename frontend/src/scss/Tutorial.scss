@@ -35,6 +35,16 @@
         justify-content: space-between;
         height: auto !important;
         min-height: 0;
+
+        .bp3-button {
+            background-color: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+
+            &:hover {
+                background-color: none !important;
+            }
+        }
     }
 
     .cur-page {
@@ -68,9 +78,20 @@
         display: flex;
         align-items: center;
 
+        padding: 0;
+        background-color: transparent;
+        border: 0px;
+        color: inherit;
+        z-index: 30;
+
         &:hover {
             cursor: pointer;
             background-color: rgba(0, 0, 0, 0.315);
+        }
+
+        &:focus {
+            outline: 1px rgba(125, 188, 255, 0.6) solid 1px;
+            border: 1px white solid;
         }
     }
     .regress {

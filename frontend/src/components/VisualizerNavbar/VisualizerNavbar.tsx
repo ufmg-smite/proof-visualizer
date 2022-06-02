@@ -556,6 +556,8 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         ),
     };
 
+    const tabIndex = inTutorial ? -1 : 0;
+
     const criticalWidth = 1350;
     return (
         <Navbar>
@@ -573,6 +575,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     className="bp3-minimal"
                     icon="upload"
                     text={windowSize.width >= criticalWidth ? 'Upload Proof' : ''}
+                    tabIndex={tabIndex}
                 />
                 <Popover2 content={fileName ? menus.examples : undefined} placement="bottom-end">
                     <Button
@@ -580,6 +583,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                         className="bp3-minimal"
                         icon="manual"
                         text={windowSize.width >= criticalWidth ? 'Examples' : ''}
+                        tabIndex={tabIndex}
                     />
                 </Popover2>
                 <Button
@@ -588,6 +592,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     icon="code"
                     text={windowSize.width >= criticalWidth ? 'SMT Input' : ''}
                     onClick={() => setSmtDrawerIsOpen()}
+                    tabIndex={tabIndex}
                 />
             </Navbar.Group>
 
@@ -618,10 +623,16 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                                 onKeyDown={handleInputKeyDown}
                                 rightElement={
                                     <Popover2 content={menus.help} placement="bottom-end">
-                                        <Button icon="help" className="bp3-minimal" />
+                                        <Button
+                                            icon="help"
+                                            className="bp3-minimal"
+                                            onFocusCapture={(e) => inTutorial && e.target.blur()}
+                                            tabIndex={-1}
+                                        />
                                     </Popover2>
                                 }
                                 autoComplete="off"
+                                tabIndex={tabIndex}
                             />
                         </Popover2>
                         <Button
@@ -635,6 +646,8 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                                 setLastCommands(lastCommands);
                                 setCommand('');
                             }}
+                            onFocusCapture={(e) => inTutorial && e.target.blur()}
+                            tabIndex={-1}
                         />
                         <Navbar.Divider />
                         <Popover2
@@ -648,6 +661,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                                 className="bp3-minimal"
                                 text={windowSize.width >= criticalWidth ? 'Style' : ''}
                                 disabled={fileName ? false : true}
+                                tabIndex={tabIndex}
                             />
                         </Popover2>
                         <Button
@@ -657,6 +671,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             text={windowSize.width >= criticalWidth ? 'Visualizers' : ''}
                             disabled={fileName ? false : true}
                             onClick={() => setDrawerIsOpen(true)}
+                            tabIndex={tabIndex}
                         />
                         <Popover2
                             content={fileName ? menus.download : undefined}
@@ -669,6 +684,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                                 icon="download"
                                 text={windowSize.width >= criticalWidth ? 'Download' : ''}
                                 disabled={fileName ? false : true}
+                                tabIndex={tabIndex}
                             />
                         </Popover2>
                         <Button
@@ -681,13 +697,18 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                                 e.currentTarget.blur();
                                 setInTutorial(!inTutorial);
                             }}
+                            tabIndex={tabIndex}
                         />
                         <Navbar.Divider />
                     </>
                 ) : null}
 
                 <span id="switch-button-dark-theme">
-                    <Switch checked={useAppSelector(selectTheme)} onChange={() => dispatch(toggle())} />
+                    <Switch
+                        checked={useAppSelector(selectTheme)}
+                        onChange={() => dispatch(toggle())}
+                        tabIndex={tabIndex}
+                    />
                     <Icon icon={darkTheme ? 'moon' : 'flash'}></Icon>
                 </span>
             </Navbar.Group>
