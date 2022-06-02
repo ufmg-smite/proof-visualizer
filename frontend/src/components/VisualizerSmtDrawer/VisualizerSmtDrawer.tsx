@@ -24,6 +24,15 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
     const dispatch = useAppDispatch();
 
     useEffect(() => {
+        // When smt drawer is initialized it focus the escape button
+        const bt = document
+            .getElementsByClassName('smt-drawer')[0]
+            .getElementsByClassName('bp3-button')[0] as HTMLElement;
+        bt.tabIndex = 1;
+        bt.focus();
+    }, []);
+
+    useEffect(() => {
         textRef.current = proofSmt;
         forceUpdate();
     }, [proofSmt]);
@@ -32,6 +41,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
         theme: darkTheme ? 'vs-dark' : 'vs',
         tabIndex: 5,
     };
+
     const divColor = darkTheme ? 'rgb(255, 255, 255, 0.15)' : 'rgb(0, 0, 0, 0.15)';
 
     const helpDiv = (
@@ -54,7 +64,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
 
     return (
         <Drawer
-            className={darkTheme ? 'bp3-dark' : ''}
+            className={`smt-drawer ${darkTheme ? 'bp3-dark' : ''}`}
             style={{ maxHeight: '65%', width: '35%' }}
             autoFocus={true}
             canEscapeKeyClose={true}
@@ -178,7 +188,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                             style={{ margin: '5px' }}
                             className="bp3-minimal"
                             icon="code"
-                            text="Upload proof"
+                            text="Generate proof"
                             onClick={() => {
                                 dispatch(setSmt(textRef.current));
                                 // Run cvc5
