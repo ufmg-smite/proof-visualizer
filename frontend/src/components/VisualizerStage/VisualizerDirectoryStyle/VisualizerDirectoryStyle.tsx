@@ -6,9 +6,10 @@ import '../../../scss/VisualizerDirectoryStyle.scss';
 import { useAppSelector } from '../../../store/hooks';
 import { selectTheme } from '../../../store/features/theme/themeSlice';
 import { NodeInfo, DirectoryStyleProps } from '../../../interfaces/interfaces';
-import { drawerHelpersKind } from '../../../interfaces/enum';
+import { drawerHelpersKind, renderLetKind } from '../../../interfaces/enum';
 import VisualizerTree from '../../VisualizerTree/VisualizerTree';
-import { selectOriginalProof } from '../../../store/features/proof/proofSlice';
+import { selectLetMap, selectOriginalProof } from '../../../store/features/proof/proofSlice';
+import LetRender from '../../VisualizerLetDrawer/LetRender';
 
 const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
     proofTree,
@@ -16,6 +17,7 @@ const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
     indent,
     translate,
 }: DirectoryStyleProps) => {
+    const letMap = useAppSelector(selectLetMap);
     const proof = useAppSelector(selectOriginalProof);
     const darkTheme = useAppSelector(selectTheme);
     const [nodeInfo, setNodeInfo] = useState<NodeInfo>({
@@ -52,7 +54,21 @@ const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
         // Rule, args, conclusion
         [false, false, false],
     );
+    const [[expandAll, revertAll], dispatchLetExpansion] = useReducer(
+        (state: boolean[], action: { type: renderLetKind; payload: boolean }): boolean[] => {
+            const { type, payload } = action;
+
+            for (let i = 0; i < state.length; i++) {
+                state[i] = i === type ? payload : false;
+            }
+
+            return [...state];
+        },
+        // Expand, revert
+        [false, false],
+    );
     const [positionMap, setMap] = useState<any>({});
+    const [renderID, increaseRenderID] = useReducer((x) => x + 1, 0);
 
     useEffect(() => {
         const _map: any = {};
@@ -60,6 +76,10 @@ const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
         proof.forEach((n, id) => (_map[n.id] = id));
         setMap(_map);
     }, [proof]);
+
+    useEffect(() => {
+        increaseRenderID();
+    }, [nodeInfo]);
 
     const nodeInfoTable = () => {
         return (
@@ -130,24 +150,52 @@ const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                             <strong>CONCLUSION</strong>{' '}
                             {nodeInfo.conclusion.indexOf('let') !== -1 ? (
-                                <Icon
-                                    id="icon"
-                                    icon="translate"
-                                    onClick={() => {
-                                        dispatchHelper({ type: drawerHelpersKind.CONC, payload: !concHelperIsOpen });
-                                    }}
-                                ></Icon>
+                                <>
+                                    <Icon
+                                        id="icon"
+                                        icon="translate"
+                                        onClick={() => {
+                                            dispatchHelper({
+                                                type: drawerHelpersKind.CONC,
+                                                payload: !concHelperIsOpen,
+                                            });
+                                            dispatchLetExpansion({
+                                                type: renderLetKind.EXPAND,
+                                                payload: true,
+                                            });
+                                        }}
+                                    />
+                                    <Icon
+                                        id="icon"
+                                        icon="undo"
+                                        onClick={() => {
+                                            dispatchHelper({
+                                                type: drawerHelpersKind.CONC,
+                                                payload: false,
+                                            });
+                                            dispatchLetExpansion({
+                                                type: renderLetKind.REVERT,
+                                                payload: true,
+                                            });
+                                        }}
+                                    />
+                                </>
                             ) : null}
                         </td>
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
-                            {nodeInfo.conclusion}
                             {nodeInfo.conclusion.indexOf('let') !== -1 ? (
-                                <Collapse isOpen={concHelperIsOpen}>
-                                    <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
-                                        {indent(translate(nodeInfo.conclusion))}
-                                    </Pre>
-                                </Collapse>
-                            ) : null}
+                                <LetRender
+                                    key={renderID}
+                                    id={0}
+                                    toRender={nodeInfo.conclusion}
+                                    letMap={letMap}
+                                    shouldExpand={expandAll}
+                                    shouldRevert={revertAll}
+                                    dispatchExpansion={dispatchLetExpansion}
+                                />
+                            ) : (
+                                nodeInfo.conclusion
+                            )}
                         </td>
                     </tr>
 

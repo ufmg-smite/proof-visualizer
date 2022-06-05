@@ -309,7 +309,7 @@ const VisualizerStage: React.FC = () => {
                                 onClick={() => {
                                     dispatchHelper({ type: drawerHelpersKind.RULE, payload: !ruleHelperIsOpen });
                                 }}
-                            ></Icon>
+                            />
                         </td>
                         <td>
                             {nodeInfo.rule}
@@ -335,7 +335,7 @@ const VisualizerStage: React.FC = () => {
                                                 payload: !argsHelperIsOpen,
                                             });
                                         }}
-                                    ></Icon>
+                                    />
                                 ) : null}
                             </td>
                             <td style={{ maxHeight: '300px', overflow: 'auto' }}>
@@ -369,7 +369,7 @@ const VisualizerStage: React.FC = () => {
                                                 payload: true,
                                             });
                                         }}
-                                    ></Icon>
+                                    />
                                     <Icon
                                         id="icon"
                                         icon="undo"
@@ -383,7 +383,7 @@ const VisualizerStage: React.FC = () => {
                                                 payload: true,
                                             });
                                         }}
-                                    ></Icon>
+                                    />
                                 </>
                             ) : null}
                         </td>
@@ -397,7 +397,9 @@ const VisualizerStage: React.FC = () => {
                                     shouldRevert={revertAll}
                                     dispatchExpansion={dispatchLetExpansion}
                                 />
-                            ) : null}
+                            ) : (
+                                nodeInfo.conclusion
+                            )}
                         </td>
                     </tr>
 
