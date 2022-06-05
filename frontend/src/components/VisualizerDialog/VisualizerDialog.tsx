@@ -80,7 +80,6 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
         <FileInput
             style={{
                 outline: inputIsFocused ? '2px  white solid' : '',
-                border: inputIsFocused ? '2px rgba(125, 188, 255, 0.6) solid' : '',
                 borderRadius: '3px',
             }}
             text={fileName}
