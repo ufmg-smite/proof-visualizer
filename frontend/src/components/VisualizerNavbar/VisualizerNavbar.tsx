@@ -342,8 +342,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
             hiddenNodes: hiddenNodes,
             view: view,
         };
-        const fName = fileName.split('.');
-        fName.splice(fName.length - 1, 1);
+        const fName = fileName.split('.')[0];
 
         const link = document.createElement('a');
         link.download = fName + '.json';
@@ -354,7 +353,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
     const exportPNG = (e: React.MouseEvent<HTMLElement, MouseEvent> | null) => {
         e?.preventDefault();
         const link = document.createElement('a');
-        link.download = fileName ? `${fileName.replaceAll(' ', '_')}.png` : '';
+        link.download = fileName ? `${fileName.split('.')[0].replaceAll(' ', '_')}.png` : '';
         const graph = document.getElementsByClassName('konvajs-content');
         if (graph.length) {
             link.href = (graph[0].children[0] as HTMLCanvasElement).toDataURL('image/png');
@@ -416,7 +415,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     icon="graph"
                     text="DOT"
                     href={`data:attachment/text,${encodeURIComponent(dot ? dot : '')}`}
-                    download={fileName ? `${fileName.replaceAll(' ', '_')}.dot` : ''}
+                    download={fileName ? `${fileName.split('.')[0].replaceAll(' ', '_')}.dot` : ''}
                 />
                 <MenuItem
                     icon="square"
