@@ -380,7 +380,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
 
     const menus = {
         style: (
-            <Menu>
+            <Menu className="nav-menu">
                 <MenuItem
                     icon="diagram-tree"
                     text="Graph"
@@ -402,7 +402,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
             </Menu>
         ),
         download: (
-            <Menu>
+            <Menu className="nav-menu">
                 <MenuItem
                     icon="layout"
                     text="JSON"
@@ -429,7 +429,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
             </Menu>
         ),
         help: (
-            <Menu>
+            <Menu className="nav-menu">
                 <MenuItem text="/view">
                     <div className="cmd-desc">
                         <div>
@@ -562,7 +562,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
             </Menu>
         ),
         examples: (
-            <Menu>
+            <Menu className="nav-menu">
                 {Object.keys(examples).map((ex, id) => {
                     return (
                         <MenuItem
