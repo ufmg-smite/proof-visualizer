@@ -53,6 +53,25 @@ function useWindowSize() {
     return windowSize;
 }
 
+function isNotMozzila() {
+    const userAgent = navigator.userAgent;
+    let browserName;
+
+    if (userAgent.match(/chrome|chromium|crios/i)) {
+        return true;
+    } else if (userAgent.match(/firefox|fxios/i)) {
+        return false;
+    } else if (userAgent.match(/safari/i)) {
+        return true;
+    } else if (userAgent.match(/opr\//i)) {
+        return true;
+    } else if (userAgent.match(/edg/i)) {
+        return true;
+    }
+    return browserName;
+}
+const isNotMozz = isNotMozzila();
+
 const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
     setDialogIsOpen,
     setDrawerIsOpen,
@@ -597,7 +616,11 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     text={windowSize.width >= criticalWidth ? 'Upload Proof' : ''}
                     tabIndex={tabIndex}
                 />
-                <Popover2 content={fileName ? menus.examples : undefined} placement="bottom-end">
+                <Popover2
+                    content={fileName ? menus.examples : undefined}
+                    placement="bottom-end"
+                    modifiers={{ arrow: { enabled: isNotMozz } }}
+                >
                     <Button
                         id="examples-bt"
                         className="bp3-minimal"
@@ -628,6 +651,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             isOpen={matchableCmdIsOpen}
                             disabled={matchableCmd.length === 0}
                             placement="bottom-end"
+                            modifiers={{ arrow: { enabled: isNotMozz } }}
                         >
                             <InputGroup
                                 id="command"
@@ -642,7 +666,11 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                                 }}
                                 onKeyDown={handleInputKeyDown}
                                 rightElement={
-                                    <Popover2 content={menus.help} placement="bottom-end">
+                                    <Popover2
+                                        content={menus.help}
+                                        placement="bottom-end"
+                                        modifiers={{ arrow: { enabled: isNotMozz } }}
+                                    >
                                         <Button
                                             icon="help"
                                             className="bp3-minimal"
@@ -674,6 +702,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             content={fileName ? menus.style : undefined}
                             placement="bottom-end"
                             disabled={fileName ? false : true}
+                            modifiers={{ arrow: { enabled: isNotMozz } }}
                         >
                             <Button
                                 id="style-bt"
@@ -697,6 +726,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                             content={fileName ? menus.download : undefined}
                             placement="bottom-end"
                             disabled={fileName ? false : true}
+                            modifiers={{ arrow: { enabled: isNotMozz } }}
                         >
                             <Button
                                 id="download-bt"
