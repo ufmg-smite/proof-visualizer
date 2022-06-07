@@ -107,10 +107,10 @@ export function processDot(dot: string): [NodeInterface[], ProofState['letMap'],
             const id = parseInt(line.slice(0, line.indexOf('[')).trim());
             const attributes = line.slice(line.indexOf('[') + 1, line.lastIndexOf(']')).trim();
 
-            let label = attributes.slice(attributes.search(/(?<!\\)"/) + 2);
-            label = label.slice(0, label.search(/(?<!\\)"/) - 1);
+            let label = attributes.slice(attributes.search(/[^\\]"/) + 3);
+            label = label.slice(0, label.search(/[^\\]"/));
             let [conclusion, rule, args] = ['', '', ''];
-            [conclusion, rule] = label.split(/(?<!\\)\|/);
+            [conclusion, rule] = label.split(/\|/);
             [rule, args] = rule.indexOf(' :args ') != -1 ? rule.split(' :args ') : [rule, ''];
 
             const comment: string = removeEscapedCharacters(line.slice(line.indexOf('comment'), line.lastIndexOf('"')));
