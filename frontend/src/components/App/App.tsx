@@ -39,20 +39,20 @@ const App: React.FC = () => {
         <div className={darkTheme ? ' bp3-dark' : ''} style={{ height: '100%' }}>
             <VisualizerTutorial inTutorial={inTutorial} setInTutorial={setInTutorial} />
             <Toaster position={Position.TOP} ref={refHandlers.toaster} />
-            {/* <VisualizerNavbar
+            <VisualizerNavbar
                 setDialogIsOpen={setDialogIsOpen}
                 setDrawerIsOpen={setDrawerOpenState}
                 addErrorToast={addErrorToast}
                 inTutorial={inTutorial}
                 setInTutorial={setInTutorial}
                 setSmtDrawerIsOpen={setSmtDrawerIsOpen}
-            ></VisualizerNavbar> */}
+            />
             <VisualizerDialog
                 dialogIsOpen={dialogIsOpen}
                 setDialogIsOpen={setDialogIsOpen}
                 addErrorToast={addErrorToast}
-            ></VisualizerDialog>
-            <VisualizerStage></VisualizerStage>
+            />
+            <VisualizerStage />
             {drawerIsOpen ? (
                 <VisualizersDrawer drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerOpenState}></VisualizersDrawer>
             ) : null}
