@@ -9,10 +9,14 @@ import { SmtDrawerProps } from '../../interfaces/interfaces';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
 import { selectSmt, setSmt } from '../../store/features/proof/proofSlice';
+import Module from '../../wasm/cvc5';
 
 const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen }: SmtDrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
     const proofSmt = useAppSelector(selectSmt);
+
+    const stdoutRef = useRef('');
+    const stderrRef = useRef('');
 
     const [, forceUpdate] = useReducer((x) => x + 1, 0);
     const [optionsIsOpen, setOptionsIsOpen] = useReducer((open) => !open, false);
@@ -20,6 +24,12 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
     const [argsType, setArgsType] = useState(true);
     const [[shouldClusterize, printAsDag], setDefaultOptions] = useState([true, true]);
     const [customArgs, setCustomArgs] = useState('');
+    const defaultArgs = [
+        '--dump-proofs',
+        '--proof-format=dot',
+        '--proof-granularity=theory-rewrite',
+        '--simplification=none',
+    ];
 
     const dispatch = useAppDispatch();
 
@@ -61,6 +71,31 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
             to understand more about the argument parser.
         </div>
     );
+
+    const defaultArgsDiv = (
+        <div
+            className={`bp3-menu ${darkTheme ? 'bp3-dark' : ''}`}
+            style={{
+                maxWidth: '310px',
+                padding: '5px 8px !important',
+                boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.651)',
+                textAlign: 'justify',
+            }}
+        >
+            Default arguments are:{' '}
+            {defaultArgs.reduce((acc: any, str: string) => {
+                return (acc += str + ' ');
+            }, '')}
+        </div>
+    );
+
+    const updateStdout = (str: string) => (stdoutRef.current += str + '\n');
+
+    const updateStderr = (str: string) => (stderrRef.current += str + '\n');
+
+    const postCVC5run = () => {
+        console.log(stderrRef.current);
+    };
 
     return (
         <Drawer
@@ -108,7 +143,23 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                         tabIndex={4}
                     />
                     <FormGroup
-                        label="Default args"
+                        label={
+                            <div>
+                                Default args:{' '}
+                                <Popover2
+                                    disabled={!argsType}
+                                    content={defaultArgsDiv}
+                                    placement="auto"
+                                    modifiers={{
+                                        arrow: { enabled: true },
+                                    }}
+                                    hoverCloseDelay={200}
+                                    hoverOpenDelay={200}
+                                >
+                                    <Button disabled={!argsType} icon="help" className="bp3-minimal" tabIndex={4} />
+                                </Popover2>
+                            </div>
+                        }
                         style={{
                             padding: '10px 20px',
                             borderBottom: `1px solid ${divColor}`,
@@ -191,7 +242,51 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                             text="Generate proof"
                             onClick={() => {
                                 dispatch(setSmt(textRef.current));
+
+                                let args = defaultArgs;
+                                // If is default args
+                                if (argsType) {
+                                    if (shouldClusterize) args.push('--print-dot-clusters');
+                                    if (printAsDag) args.push('--proof-dot-dag');
+                                }
+                                // Custom args
+                                else {
+                                    args = customArgs.split('--');
+                                    args = args
+                                        .map((arg) => arg.trim())
+                                        .filter((arg) => {
+                                            return arg.length !== 0;
+                                        })
+                                        .map((arg) => '--' + arg);
+
+                                    let i = 0;
+                                    // Make sure that the output format is .dot
+                                    const isThereFormat = args.some((arg, id) => {
+                                        i = id;
+                                        return arg.indexOf('--proof-format') !== -1;
+                                    });
+                                    // If there isn't a proof format
+                                    if (!isThereFormat) args.push('--proof-format=dot');
+                                    // Verify is the format is the correct one
+                                    else {
+                                        if (!args[i].match(/--proof-format\s*=\s*dot/)) {
+                                            args[i] = '--proof-format=dot';
+                                        }
+                                    }
+                                }
+
+                                stdoutRef.current = '';
+                                stderrRef.current = '';
+
+                                // --dump-proofs --proof-format=dot --proof-granularity=theory-rewrite --simplification=none
                                 // Run cvc5
+                                Module({
+                                    arguments: args,
+                                    proofTxt: textRef.current,
+                                    out: updateStdout,
+                                    err: updateStderr,
+                                    postCVC5: postCVC5run,
+                                });
                             }}
                             tabIndex={3}
                         />
