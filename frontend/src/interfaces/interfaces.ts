@@ -180,6 +180,7 @@ interface DrawerProps {
 interface SmtDrawerProps {
     isOpen: boolean;
     setDrawerIsOpen: React.DispatchWithoutAction;
+    addErrorToast: (err: string) => void;
 }
 
 // TUTORIAL PROPS

@@ -8,15 +8,18 @@ import { selectTheme } from '../../store/features/theme/themeSlice';
 import { SmtDrawerProps } from '../../interfaces/interfaces';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 
-import { selectSmt, setSmt } from '../../store/features/proof/proofSlice';
+import { process, selectSmt, setSmt } from '../../store/features/proof/proofSlice';
 import Module from '../../wasm/cvc5';
+import { set } from '../../store/features/file/fileSlice';
+import { allowRenderNewFile, reRender } from '../../store/features/externalCmd/externalCmd';
 
-const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen }: SmtDrawerProps) => {
+const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen, addErrorToast }: SmtDrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
     const proofSmt = useAppSelector(selectSmt);
 
     const stdoutRef = useRef('');
     const stderrRef = useRef('');
+    const changeOutRef = useRef(false);
 
     const [, forceUpdate] = useReducer((x) => x + 1, 0);
     const [optionsIsOpen, setOptionsIsOpen] = useReducer((open) => !open, false);
@@ -89,12 +92,38 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
         </div>
     );
 
+    const sanitizeDotResult = (result: string): string => result.replaceAll(/(cvc5> )+/g, '');
+
     const updateStdout = (str: string) => (stdoutRef.current += str + '\n');
 
     const updateStderr = (str: string) => (stderrRef.current += str + '\n');
 
-    const postCVC5run = () => {
-        console.log(stderrRef.current);
+    const postCVC5run = (isThereError: boolean) => {
+        // Sanitize the string
+        stdoutRef.current = sanitizeDotResult(stdoutRef.current).trim();
+        // If there was an error
+        if (isThereError && !stdoutRef.current.length) {
+            const err = stderrRef.current.length
+                ? stderrRef.current
+                : 'Error: Unknown error, check out the arguments parsed or the smt text.';
+            addErrorToast(err);
+        }
+        // Get the result .dot
+        else {
+            dispatch(set({ name: 'own-proof.dot', value: stdoutRef.current }));
+
+            dispatch(allowRenderNewFile());
+            dispatch(reRender());
+
+            dispatch(process(stdoutRef.current));
+        }
+    };
+
+    const cleanStdout = () => {
+        if (!changeOutRef.current) {
+            stdoutRef.current = '';
+            changeOutRef.current = true;
+        }
     };
 
     return (
@@ -277,8 +306,8 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
 
                                 stdoutRef.current = '';
                                 stderrRef.current = '';
+                                changeOutRef.current = false;
 
-                                // --dump-proofs --proof-format=dot --proof-granularity=theory-rewrite --simplification=none
                                 // Run cvc5
                                 Module({
                                     arguments: args,
@@ -286,6 +315,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                                     out: updateStdout,
                                     err: updateStderr,
                                     postCVC5: postCVC5run,
+                                    cleanStdout: cleanStdout,
                                 });
                             }}
                             tabIndex={3}

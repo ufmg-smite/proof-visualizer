@@ -291,7 +291,7 @@ var Module = (() => {
         }
         function postRun() {
             callRuntimeCallbacks(__ATPOSTRUN__);
-            Module['postCVC5']();
+            Module['postCVC5'](false);
         }
         function addOnInit(cb) {
             __ATINIT__.unshift(cb);
@@ -450,6 +450,7 @@ var Module = (() => {
             if (e instanceof ExitStatus || e == 'unwind') {
                 return EXITSTATUS;
             }
+            Module['postCVC5'](true);
             quit_(1, e);
         }
         function ___call_sighandler(fp, sig) {
@@ -737,6 +738,7 @@ var Module = (() => {
                         var result = null;
                         if (typeof window != 'undefined' && typeof window.prompt == 'function') {
                             result = Module['proofTxt'];
+                            Module['cleanStdout']();
                             if (result !== null) {
                                 result += '\n';
                             }

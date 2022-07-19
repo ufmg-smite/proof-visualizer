@@ -57,7 +57,11 @@ const App: React.FC = () => {
                 <VisualizersDrawer drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerOpenState}></VisualizersDrawer>
             ) : null}
             {smtDrawerIsOpen ? (
-                <VisualizerSmtDrawer isOpen={smtDrawerIsOpen} setDrawerIsOpen={setSmtDrawerIsOpen} />
+                <VisualizerSmtDrawer
+                    isOpen={smtDrawerIsOpen}
+                    setDrawerIsOpen={setSmtDrawerIsOpen}
+                    addErrorToast={addErrorToast}
+                />
             ) : null}
         </div>
     );
