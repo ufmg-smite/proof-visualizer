@@ -180,6 +180,7 @@ export const proofSlice = createSlice({
                 .map((hiddenNodesArray) => hiddenNodesArray.filter((id) => hiddens.indexOf(id) === -1))
                 .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
 
+            const color = state.visualInfo[pi].color;
             // Make sure the ids are realocated
             const size = Object.keys(state.visualInfo).length;
             for (let i = pi; i < size - 1; i++) {
@@ -188,11 +189,12 @@ export const proofSlice = createSlice({
             // Delete the last position
             delete state.visualInfo[size - 1];
 
-            // Unselect the hidden nodes
+            // Unselect the hidden nodes and set their color equal to the pi node
             hiddens.forEach(
                 (id) =>
                     (state.visualInfo[id] = {
                         ...state.visualInfo[id],
+                        color: color,
                         selected: false,
                     }),
             );
