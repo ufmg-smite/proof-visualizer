@@ -194,7 +194,7 @@ export const proofSlice = createSlice({
                 (id) =>
                     (state.visualInfo[id] = {
                         ...state.visualInfo[id],
-                        color: color,
+                        color: color !== '#555' ? color : state.visualInfo[id].color,
                         selected: false,
                     }),
             );
