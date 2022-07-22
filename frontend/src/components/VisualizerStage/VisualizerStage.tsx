@@ -1,18 +1,19 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 
 import { Drawer, Position, Classes, Icon, Collapse, Pre, TreeNodeInfo } from '@blueprintjs/core';
 import Canvas from './Canvas/VisualizerCanvas';
 import VisualizerTree from '../VisualizerTree/VisualizerTree';
 import VisualizerDirectoryStyle from './VisualizerDirectoryStyle/VisualizerDirectoryStyle';
-import { processDot } from '../../store/features/proof/auxi';
 
 import '../../scss/VisualizerStage.scss';
 import { useAppSelector } from '../../store/hooks';
-import { selectDot, selectFileCount } from '../../store/features/file/fileSlice';
-import { selectStyle } from '../../store/features/proof/proofSlice';
+import { selectFileCount } from '../../store/features/file/fileSlice';
+import { selectStyle, selectLetMap, selectProof } from '../../store/features/proof/proofSlice';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { NodeInfo, NodeInterface, TreeNode } from '../../interfaces/interfaces';
+import { renderLetKind, drawerHelpersKind } from '../../interfaces/enum';
+import LetRender from '../VisualizerLetDrawer/LetRender';
 
 function ruleHelper(rule: string) {
     switch (rule.split(' ')[0]) {
@@ -168,91 +169,56 @@ function ruleHelper(rule: string) {
     }
 }
 
-const createTree = (proof: NodeInterface[]): any => {
-    const list: TreeNode[] = proof.map((node) => {
-        const label = node.hiddenNodes?.length
-            ? `${node.id} : π ➜ ${node.conclusion}`
-            : `${node.id} : ${node.conclusion}`;
-        return {
-            id: node.id,
-            icon: 'graph',
-            label: label,
-            secondaryLabel: `${node.rule}`,
-            rule: node.rule,
-            args: node.args,
-            conclusion: node.conclusion,
-            parentId: node.parents[0],
-            descendants: node.descendants - 1,
-            nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
-            hiddenNodes: node.hiddenNodes ? node.hiddenNodes.map((node) => node.id) : [],
-            childNodes: [],
-            parentsId: node.parents,
-            hasCaret: Boolean(node.descendants - 1),
-        };
-    });
+export function castProofNodeToTreeNode(node: NodeInterface): TreeNode {
+    const label = node.hiddenNodes?.length
+        ? // Pi node
+          `${node.id} : π ➜ ${node.conclusion}`
+        : node.dependencies.length
+        ? // Node with dependencies
+          `${node.id} : β ➜ ${node.conclusion}`
+        : //Normal node
+          `${node.id} : ${node.conclusion}`;
 
-    const map: any = {},
-        roots: any = [];
-    let node: TreeNode, i;
+    // Create the node tree
+    return {
+        id: node.id,
+        icon: 'graph',
+        label: label,
+        secondaryLabel: `${node.rule}`,
+        rule: node.rule,
+        args: node.args,
+        conclusion: node.conclusion,
+        parentId: node.parents[0],
+        descendants: node.descendants - 1,
+        nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
+        hiddenNodes: node.hiddenNodes ? node.hiddenNodes.map((n) => n.id) : [],
+        childNodes: [],
+        dependencies: node.dependencies,
+        parentsId: node.parents,
+        hasCaret: Boolean(node.descendants - 1),
+    };
+}
 
-    // Map the { [node id]: list array id }
-    for (i = 0; i < list.length; i += 1) {
-        map[list[i].id] = i;
+function createTree(proof: NodeInterface[], id: number): TreeNode[] {
+    const rootNode = proof.find((o) => o.id === id);
+    const tree: TreeNode[] = [];
+
+    // Make sure found the root node
+    if (rootNode) {
+        tree.push(castProofNodeToTreeNode(rootNode));
     }
-
-    for (i = 0; i < list.length; i += 1) {
-        node = list[i];
-        // For all the parents
-        node.parentsId.forEach((parentId) => {
-            // If the parent is valid and exist in the list
-            if (!isNaN(parentId) && list[map[parentId]]) {
-                list[map[parentId]].childNodes.push(node);
-            } else {
-                roots.push(node);
-            }
-        });
-    }
-    return roots;
-};
-
-const indent = (s: string) => {
-    let newS = s.replaceAll(' ', '\n');
-    let i = 0;
-    let pCounter = 0;
-    while (i < newS.length) {
-        if (newS[i] === '(' || newS[i] === '[') pCounter++;
-        else if (newS[i] === ')' || newS[i] === ']') pCounter--;
-        else if (newS[i] === '\n') {
-            if (newS[i + 1] === ')' || newS[i + 1] === ']') {
-                newS = [newS.slice(0, i + 1), '  '.repeat(pCounter - 1), newS.slice(i + 1)].join('');
-                i += pCounter - 1;
-            } else {
-                newS = [newS.slice(0, i + 1), '  '.repeat(pCounter), newS.slice(i + 1)].join('');
-                i += pCounter;
-            }
-        }
-        i++;
-    }
-    return newS;
-};
+    return tree;
+}
 
 const VisualizerStage: React.FC = () => {
-    const dot = useAppSelector(selectDot);
+    // Proof data
+    const letMap = useAppSelector(selectLetMap);
+    const proof = useAppSelector(selectProof);
     const fileID = useAppSelector(selectFileCount);
     const style = useAppSelector(selectStyle);
     const darkTheme = useAppSelector(selectTheme);
-    const [[proof, letMap], setProofAndLet] = useState<[NodeInterface[], any]>([[], '']);
-    const [proofTree, setProofTree] = useState([]);
-    // Make sure that a new tree and proof is created only when a new dot is used
-    useEffect(() => {
-        const [newProof, newLetMap] = processDot(dot ? dot : '');
-        setProofAndLet([newProof, newLetMap]);
-        setProofTree(createTree(newProof));
-    }, [dot]);
-    const [drawerIsOpen, setDrawerIsOpen] = useState(false);
-    const [ruleHelperOpen, setRuleHelperOpen] = useState(false);
-    const [argsTranslatorOpen, setArgsTranslatorOpen] = useState(false);
-    const [conclusionTranslatorOpen, setConclusionTranslatorOpen] = useState(false);
+    // Data structures
+    const [proofTree, setProofTree] = useState<TreeNodeInfo[]>([]);
     const [nodeInfo, setNodeInfo] = useState<NodeInfo>({
         rule: '',
         args: '',
@@ -262,37 +228,65 @@ const VisualizerStage: React.FC = () => {
         hiddenNodes: [],
         dependencies: [],
     });
-    const [nodeInfoCopy, setNodeInfoCopy] = useState<NodeInfo>({
-        rule: '',
-        args: '',
-        conclusion: '',
-        nHided: 0,
-        nDescendants: 0,
-        hiddenNodes: [],
-        dependencies: [],
-    });
-    // TODO: Fazer a chamada do createTree aq dentro pra usar nso drawers, em vez de fazer dentro do canvas
+    const [map, setMap] = useState<any>({});
+    // Drawer
+    const [[ruleHelperIsOpen, argsHelperIsOpen, concHelperIsOpen], dispatchHelper] = useReducer(
+        (state: boolean[], action: { type: drawerHelpersKind; payload: boolean }): boolean[] => {
+            const { type, payload } = action;
+
+            // Act over all the positions
+            if (type === drawerHelpersKind.ALL) {
+                for (let i = 0; i < state.length; i++) {
+                    state[i] = payload;
+                }
+            }
+            // If wanna set a position
+            else if (payload) {
+                // Reset everything and set the wanted
+                for (let i = 0; i < state.length; i++) {
+                    state[i] = i === type ? payload : false;
+                }
+            }
+            // If wanna only reset a position
+            else state[type] = payload;
+
+            return [...state];
+        },
+        // Rule, args, conclusion
+        [false, false, false],
+    );
+    const [[expandAll, revertAll], dispatchLetExpansion] = useReducer(
+        (state: boolean[], action: { type: renderLetKind; payload: boolean }): boolean[] => {
+            const { type, payload } = action;
+
+            for (let i = 0; i < state.length; i++) {
+                state[i] = i === type ? payload : false;
+            }
+
+            return [...state];
+        },
+        // Expand, revert
+        [false, false],
+    );
+    const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
-    const translate = (s: string) => {
-        let newS = s;
-        let i = newS.indexOf('let');
-        while (i !== -1) {
-            const l = newS.slice(i).split(/[ |)|,]/)[0];
-            newS = newS.replace(l, letMap[l]);
-            i = newS.indexOf('let');
-        }
-        return newS;
-    };
+
+    // Make sure that a new tree is created only when a new dot is used
+    useEffect(() => setProofTree(createTree(proof, 0)), [fileID]);
+    useEffect(() => {
+        const _map: any = {};
+        // Map the { [node id]: list array id }
+        proof.forEach((n, id) => (_map[n.id] = id));
+        setMap(_map);
+    }, [proof]);
 
     const openDrawer = (nodeInfo: NodeInfo, tree?: TreeNodeInfo[]) => {
-        setRuleHelperOpen(false);
         setNodeInfo(nodeInfo);
         setTree(tree ? tree : []);
-        setNodeInfoCopy(nodeInfo);
         setDrawerIsOpen(true);
     };
 
-    const nodeInfoTable = () => {
+    const nodeInfoTable = (): JSX.Element => {
         return (
             <table
                 id="table-node-info"
@@ -310,18 +304,16 @@ const VisualizerStage: React.FC = () => {
                         <td>
                             <strong>RULE </strong>
                             <Icon
-                                id="rule-icon"
+                                id="icon"
                                 icon="help"
                                 onClick={() => {
-                                    setArgsTranslatorOpen(false);
-                                    setConclusionTranslatorOpen(false);
-                                    setRuleHelperOpen(!ruleHelperOpen);
+                                    dispatchHelper({ type: drawerHelpersKind.RULE, payload: !ruleHelperIsOpen });
                                 }}
-                            ></Icon>
+                            />
                         </td>
                         <td>
                             {nodeInfo.rule}
-                            <Collapse isOpen={ruleHelperOpen}>
+                            <Collapse isOpen={ruleHelperIsOpen}>
                                 <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
                                     {ruleHelper(nodeInfo.rule)}
                                 </Pre>
@@ -335,22 +327,23 @@ const VisualizerStage: React.FC = () => {
                                 <strong>ARGS</strong>{' '}
                                 {nodeInfo.args.indexOf('let') !== -1 ? (
                                     <Icon
-                                        id="rule-icon"
+                                        id="icon"
                                         icon="translate"
                                         onClick={() => {
-                                            setConclusionTranslatorOpen(false);
-                                            setRuleHelperOpen(false);
-                                            setArgsTranslatorOpen(!argsTranslatorOpen);
+                                            dispatchHelper({
+                                                type: drawerHelpersKind.ARGS,
+                                                payload: !argsHelperIsOpen,
+                                            });
                                         }}
-                                    ></Icon>
+                                    />
                                 ) : null}
                             </td>
                             <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                                 {nodeInfo.args}
                                 {nodeInfo.args.indexOf('let') !== -1 ? (
-                                    <Collapse isOpen={argsTranslatorOpen}>
+                                    <Collapse isOpen={argsHelperIsOpen}>
                                         <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
-                                            {indent(translate(nodeInfo.args))}
+                                            {nodeInfo.args}
                                         </Pre>
                                     </Collapse>
                                 ) : null}
@@ -362,26 +355,51 @@ const VisualizerStage: React.FC = () => {
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                             <strong>CONCLUSION</strong>{' '}
                             {nodeInfo.conclusion.indexOf('let') !== -1 ? (
-                                <Icon
-                                    id="rule-icon"
-                                    icon="translate"
-                                    onClick={() => {
-                                        setArgsTranslatorOpen(false);
-                                        setRuleHelperOpen(false);
-                                        setConclusionTranslatorOpen(!conclusionTranslatorOpen);
-                                    }}
-                                ></Icon>
+                                <>
+                                    <Icon
+                                        id="icon"
+                                        icon="translate"
+                                        onClick={() => {
+                                            dispatchHelper({
+                                                type: drawerHelpersKind.CONC,
+                                                payload: !concHelperIsOpen,
+                                            });
+                                            dispatchLetExpansion({
+                                                type: renderLetKind.EXPAND,
+                                                payload: true,
+                                            });
+                                        }}
+                                    />
+                                    <Icon
+                                        id="icon"
+                                        icon="undo"
+                                        onClick={() => {
+                                            dispatchHelper({
+                                                type: drawerHelpersKind.CONC,
+                                                payload: false,
+                                            });
+                                            dispatchLetExpansion({
+                                                type: renderLetKind.REVERT,
+                                                payload: true,
+                                            });
+                                        }}
+                                    />
+                                </>
                             ) : null}
                         </td>
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
-                            {nodeInfo.conclusion}
                             {nodeInfo.conclusion.indexOf('let') !== -1 ? (
-                                <Collapse isOpen={conclusionTranslatorOpen}>
-                                    <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
-                                        {indent(translate(nodeInfo.conclusion))}
-                                    </Pre>
-                                </Collapse>
-                            ) : null}
+                                <LetRender
+                                    id={0}
+                                    toRender={nodeInfo.conclusion}
+                                    letMap={letMap}
+                                    shouldExpand={expandAll}
+                                    shouldRevert={revertAll}
+                                    dispatchExpansion={dispatchLetExpansion}
+                                />
+                            ) : (
+                                nodeInfo.conclusion
+                            )}
                         </td>
                     </tr>
 
@@ -419,47 +437,51 @@ const VisualizerStage: React.FC = () => {
 
     return (
         <div onContextMenu={(e) => e.preventDefault()}>
-            {proof.length > 1 ? (
-                style === 'graph' ? (
-                    <Canvas key={fileID} openDrawer={openDrawer}></Canvas>
-                ) : (
-                    <VisualizerDirectoryStyle
-                        proofTree={proofTree}
-                        ruleHelper={ruleHelper}
-                        indent={indent}
-                        translate={translate}
-                    />
-                )
-            ) : null}
-            <Drawer
-                className={darkTheme ? 'bp3-dark' : ''}
-                autoFocus={true}
-                canEscapeKeyClose={true}
-                canOutsideClickClose={true}
-                enforceFocus={true}
-                hasBackdrop={false}
-                isOpen={drawerIsOpen}
-                position={Position.BOTTOM}
-                usePortal={true}
-                onClose={(e) => {
-                    e.preventDefault();
-                    setDrawerIsOpen(false);
-                    setArgsTranslatorOpen(false);
-                    setConclusionTranslatorOpen(false);
-                }}
-                icon="info-sign"
-                title="Node info"
-            >
-                <div className={Classes.DRAWER_BODY}>
-                    <VisualizerTree
-                        darkTheme={darkTheme}
-                        content={tree}
-                        setNodeInfo={setNodeInfo}
-                        originalNodeInfo={nodeInfoCopy}
-                    ></VisualizerTree>
-                    <div className={Classes.DIALOG_BODY}>{nodeInfoTable()}</div>
-                </div>
-            </Drawer>
+            {proof.length > 1 && (
+                <>
+                    {style === 'graph' ? (
+                        <Canvas key={fileID} proof={proof} openDrawer={openDrawer} createTree={createTree} />
+                    ) : (
+                        <VisualizerDirectoryStyle
+                            proofTree={proofTree}
+                            ruleHelper={ruleHelper}
+                            indent={() => ''}
+                            translate={() => ''}
+                        />
+                    )}
+                    <Drawer
+                        className={darkTheme ? 'bp3-dark' : ''}
+                        autoFocus={true}
+                        canEscapeKeyClose={true}
+                        canOutsideClickClose={true}
+                        enforceFocus={true}
+                        hasBackdrop={false}
+                        isOpen={drawerIsOpen}
+                        position={Position.BOTTOM}
+                        usePortal={true}
+                        onClose={(e) => {
+                            e.preventDefault();
+                            setDrawerIsOpen(false);
+                            dispatchHelper({ type: drawerHelpersKind.ALL, payload: false });
+                        }}
+                        icon="info-sign"
+                        title="Node info"
+                    >
+                        <div className={Classes.DRAWER_BODY}>
+                            <div style={{ maxHeight: '500px', overflow: 'auto' }}>
+                                <VisualizerTree
+                                    darkTheme={darkTheme}
+                                    proof={proof}
+                                    positionMap={map}
+                                    content={tree}
+                                    setNodeInfo={setNodeInfo}
+                                />
+                            </div>
+                            <div className={Classes.DIALOG_BODY}>{nodeInfoTable()}</div>
+                        </div>
+                    </Drawer>
+                </>
+            )}
         </div>
     );
 };

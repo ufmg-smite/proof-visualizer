@@ -1,7 +1,18 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
-import { processDot, piNodeChildren, piNodeParents, descendants, findNodesClusters } from './auxi';
+import {
+    processDot,
+    piNodeChildren,
+    piNodeParents,
+    descendants,
+    findNodesClusters,
+    groupPiNodeDependencies,
+    sliceNodesCluster,
+    extractTheoryLemmas,
+} from './auxi';
 import { NodeInterface, ProofState } from '../../../interfaces/interfaces';
+import { colorConverter } from '../theme/auxi';
+import { ClusterKind } from '../../../interfaces/enum';
 
 const initialState: ProofState = {
     proof: [],
@@ -9,7 +20,10 @@ const initialState: ProofState = {
     style: 'graph',
     hiddenNodes: [],
     letMap: {},
+    theoryLemmaMap: [],
     visualInfo: [],
+    clustersInfos: [],
+    smt: '',
 };
 
 export const proofSlice = createSlice({
@@ -18,6 +32,9 @@ export const proofSlice = createSlice({
 
     reducers: {
         process: (state, action: PayloadAction<string>) => {
+            // Reset the state
+            state.clustersInfos = [];
+
             let proofJSON;
             let dot = action.payload;
             let isJSON = false;
@@ -29,13 +46,46 @@ export const proofSlice = createSlice({
                 isJSON = true;
             }
 
-            const [proof, letMap] = processDot(dot);
+            const [proof, letMap, clustersColors] = processDot(dot);
             state.proof = proof;
-            state.view = isJSON ? proofJSON.view : 'full';
-            state.hiddenNodes = isJSON ? proofJSON.hiddenNodes : [];
             state.letMap = letMap;
-            if (isJSON) state.visualInfo = proofJSON.visualInfo;
+            state.view = 'full';
+
+            // If there are clusters
+            let clusters: number[][] = [];
+            if (Object.keys(clustersColors).length) {
+                state.view = 'clustered';
+
+                // Slice the clusters
+                const clustersMap: number[] = Array(state.proof.length).fill(-1);
+                clusters = sliceNodesCluster(state.proof, clustersMap);
+
+                // Maps the cluster infos
+                clusters.forEach((cluster) => {
+                    const type = state.proof[cluster[0]].clusterType;
+                    state.clustersInfos.push({
+                        hiddenNodes: cluster,
+                        type: type,
+                        color: colorConverter(clustersColors[type]),
+                    });
+                });
+
+                // Extract the theory lemmas
+                state.theoryLemmaMap = extractTheoryLemmas(state.proof, state.clustersInfos, true);
+            } else {
+                state.theoryLemmaMap = extractTheoryLemmas(state.proof, state.clustersInfos, false);
+            }
+
+            if (isJSON) {
+                state.view = proofJSON.view;
+                state.hiddenNodes = proofJSON.hiddenNodes;
+                state.visualInfo = proofJSON.visualInfo;
+            }
+            // Is .dot
             else {
+                state.hiddenNodes = clusters.filter((c) => c.length > 1);
+
+                // Init the visual info
                 const visualInfo: ProofState['visualInfo'] = {};
                 state.proof.forEach((node) => {
                     visualInfo[node.id] = {
@@ -45,6 +95,17 @@ export const proofSlice = createSlice({
                         selected: false,
                     };
                 });
+
+                let size = state.proof.length;
+                state.clustersInfos.forEach((cluster) => {
+                    visualInfo[cluster.hiddenNodes.length !== 1 ? size++ : cluster.hiddenNodes[0]] = {
+                        color: cluster.color,
+                        x: 0,
+                        y: 0,
+                        selected: false,
+                    };
+                });
+
                 state.visualInfo = visualInfo;
             }
         },
@@ -119,19 +180,21 @@ export const proofSlice = createSlice({
                 .map((hiddenNodesArray) => hiddenNodesArray.filter((id) => hiddens.indexOf(id) === -1))
                 .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
 
+            const color = state.visualInfo[pi].color;
             // Make sure the ids are realocated
             const size = Object.keys(state.visualInfo).length;
-            for (let i = pi; i < size; i++) {
-                state.visualInfo[pi] = state.visualInfo[pi + 1];
+            for (let i = pi; i < size - 1; i++) {
+                state.visualInfo[i] = state.visualInfo[i + 1];
             }
             // Delete the last position
             delete state.visualInfo[size - 1];
 
-            // Unselect the hidden nodes
+            // Unselect the hidden nodes and set their color equal to the pi node
             hiddens.forEach(
                 (id) =>
                     (state.visualInfo[id] = {
                         ...state.visualInfo[id],
+                        color: color !== '#555' ? color : state.visualInfo[id].color,
                         selected: false,
                     }),
             );
@@ -155,7 +218,7 @@ export const proofSlice = createSlice({
                 }
             });
         },
-        changeStyle: (state, action: PayloadAction<'graph' | 'directory'>) => {
+        changeStyle: (state, action: PayloadAction<ProofState['style']>) => {
             switch (action.payload) {
                 case 'graph':
                     state.style = 'graph';
@@ -165,7 +228,7 @@ export const proofSlice = createSlice({
                     break;
             }
         },
-        applyView: (state, action: PayloadAction<'basic' | 'propositional' | 'full'>) => {
+        applyView: (state, action: PayloadAction<ProofState['view']>) => {
             const visualInfoSize = Object.keys(state.visualInfo).length;
             const proofSize = state.proof.length;
             // Delete all the pi nodes
@@ -174,57 +237,72 @@ export const proofSlice = createSlice({
             }
 
             switch (action.payload) {
-                //
-                case 'basic':
-                    state.view = 'basic';
-                    state.hiddenNodes = [
-                        state.proof
-                            .filter((proofNode) => proofNode.views.indexOf('basic') === -1)
-                            .map((proofNode) => proofNode.id),
-                    ];
-
-                    // Set the visual info for the new pi nodes
-                    state.visualInfo = {
-                        ...state.visualInfo,
-                        [Object.keys(state.visualInfo).length]: {
-                            color: '#555',
-                            x: 0,
-                            y: 0,
-                            selected: false,
-                        },
-                    };
-
-                    break;
-                // Hide all nodes that haven't view equal to basic and propositional
-                case 'propositional':
-                    state.view = 'propositional';
-                    state.hiddenNodes = [
-                        // Hide nodes that aren't basics a
-                        // nos q n são basicos (folhas e o no raiz) e nem proposicionais (outra classe q n tem no .dot1)
-                        state.proof
-                            .filter(
-                                (node) =>
-                                    node.views.indexOf('basic') === -1 && node.views.indexOf('propositional') === -1,
-                            )
-                            .map((node) => node.id),
-                    ];
-
-                    // Set the visual info for the new pi nodes
-                    state.visualInfo = {
-                        ...state.visualInfo,
-                        [Object.keys(state.visualInfo).length]: {
-                            color: '#555',
-                            x: 0,
-                            y: 0,
-                            selected: false,
-                        },
-                    };
-
-                    break;
                 // View without hidden Nodes
                 case 'full':
+                    if (state.hiddenNodes.length || state.view === 'colored-full') {
+                        state.proof.forEach((node) => {
+                            state.visualInfo[node.id] = {
+                                color: '#fff',
+                                x: 0,
+                                y: 0,
+                                selected: false,
+                            };
+                        });
+
+                        state.hiddenNodes = [];
+                    }
                     state.view = 'full';
+                    break;
+                // Cluster all the nodes in your respective group
+                case 'clustered':
+                    // If there are clusters infos
+                    if (state.clustersInfos.length) {
+                        state.view = 'clustered';
+
+                        state.hiddenNodes = [];
+                        let size = Object.keys(state.visualInfo).length;
+
+                        state.clustersInfos.forEach((cluster) => {
+                            if (cluster.hiddenNodes.length !== 1) {
+                                state.visualInfo[size++] = {
+                                    color: cluster.color,
+                                    x: 0,
+                                    y: 0,
+                                    selected: false,
+                                };
+
+                                state.hiddenNodes.push(cluster.hiddenNodes);
+                            }
+                            // Cluster with 1 node
+                            else {
+                                state.visualInfo[cluster.hiddenNodes[0]] = {
+                                    color: cluster.color,
+                                    x: 0,
+                                    y: 0,
+                                    selected: false,
+                                };
+                            }
+                        });
+                    }
+                    break;
+                // Apply full view but apply the clustrer color
+                case 'colored-full':
+                    state.view = 'colored-full';
                     state.hiddenNodes = [];
+
+                    // If there are clusters infos
+                    if (state.clustersInfos.length) {
+                        state.clustersInfos.forEach((cluster) => {
+                            cluster.hiddenNodes.forEach((node) => {
+                                state.visualInfo[node] = {
+                                    color: cluster.color,
+                                    x: 0,
+                                    y: 0,
+                                    selected: false,
+                                };
+                            });
+                        });
+                    }
                     break;
             }
         },
@@ -235,6 +313,9 @@ export const proofSlice = createSlice({
                     state.visualInfo[Number(id)].selected = false;
                 }
             });
+        },
+        setSmt: (state, action: PayloadAction<string>) => {
+            state.smt = action.payload;
         },
     },
 });
@@ -250,6 +331,7 @@ export const {
     changeStyle,
     applyView,
     applyColor,
+    setSmt,
 } = proofSlice.actions;
 
 export const selectProof = (state: RootState): NodeInterface[] => {
@@ -260,6 +342,7 @@ export const selectProof = (state: RootState): NodeInterface[] => {
         const dependencies: { [parentId: number]: number[] } = {};
         const children = piNodeChildren(proof, hiddenNodesArray);
         const parents = piNodeParents(proof, hiddenNodesArray, dependencies);
+        const piNodeDependencies = groupPiNodeDependencies(proof, hiddenNodesArray);
 
         const piNodeId = proof.length;
         proof = proof.concat({
@@ -267,12 +350,12 @@ export const selectProof = (state: RootState): NodeInterface[] => {
             conclusion: '∴',
             rule: 'π',
             args: '',
-            views: [],
             children: children,
             parents: parents,
             hiddenNodes: hiddenNodesArray.map((hiddenNode) => proof[hiddenNode]),
             descendants: 1,
-            dependencies: [],
+            dependencies: piNodeDependencies,
+            clusterType: ClusterKind.NONE,
         });
 
         const piNode = proof[piNodeId];
@@ -296,11 +379,13 @@ export const selectProof = (state: RootState): NodeInterface[] => {
                 }),
         );
 
-        // Set the dependencies array of each parent that has deps
+        // Set the dependencies array of each parent that has deps and remove
+        //  the children that are dependencies
         Object.keys(dependencies).forEach((parent) => {
             const parentId = Number(parent);
             proof[parentId] = {
                 ...proof[parentId],
+                children: proof[parentId].children.filter((c) => dependencies[parentId].indexOf(c) === -1),
                 dependencies: [...proof[parentId].dependencies, { piId: piNodeId, depsId: dependencies[parentId] }],
             };
         });
@@ -332,7 +417,11 @@ export const selectProof = (state: RootState): NodeInterface[] => {
     return proof;
 };
 
-export const selectView = (state: RootState): 'basic' | 'propositional' | 'full' => {
+export const selectOriginalProof = (state: RootState): NodeInterface[] => {
+    return state.proof.proof;
+};
+
+export const selectView = (state: RootState): ProofState['view'] => {
     return state.proof.view;
 };
 
@@ -344,6 +433,10 @@ export const selectLetMap = (state: RootState): { [Key: string]: string } => {
     return state.proof.letMap;
 };
 
+export const selectTheoryLemmas = (state: RootState): ProofState['theoryLemmaMap'] => {
+    return state.proof.theoryLemmaMap;
+};
+
 export const selectVisualInfo = (state: RootState): ProofState['visualInfo'] => {
     if (state.proof.proof.length) return state.proof.visualInfo;
     // If there is no proof node
@@ -352,6 +445,14 @@ export const selectVisualInfo = (state: RootState): ProofState['visualInfo'] => 
 
 export const selectHiddenNodes = (state: RootState): number[][] => {
     return state.proof.hiddenNodes;
+};
+
+export const selectNodeClusters = (state: RootState): ProofState['clustersInfos'] => {
+    return state.proof.clustersInfos;
+};
+
+export const selectSmt = (state: RootState): ProofState['smt'] => {
+    return state.proof.smt;
 };
 
 export default proofSlice.reducer;

@@ -28,7 +28,14 @@ import {
     applyView,
     setVisualInfo,
 } from '../../../store/features/proof/proofSlice';
-import { selectFindData, findNode } from '../../../store/features/externalCmd/externalCmd';
+import {
+    selectFindData,
+    findNode,
+    selectRenderData,
+    reRender,
+    addRenderCount,
+    blockRenderNewFile,
+} from '../../../store/features/externalCmd/externalCmd';
 
 const nodeWidth = 300,
     nodeHeight = 130;
@@ -93,13 +100,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             visualInfo: {},
         };
     }
-    // TODO: achar uma maneira melhor de fazer esse firstRender
-    private static renderData = { count: 0, fileChanged: false };
-
-    // Allow to reRender the tree
-    static reRender = () => (Canvas.renderData.count = 0);
-    static blockRender = () => (Canvas.renderData.count = 2);
-    static allowRenderNewFile = () => (Canvas.renderData.fileChanged = true);
 
     static copyNodePosition = (
         visualInfo: ProofState['visualInfo'],
@@ -154,14 +154,14 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     static getDerivedStateFromProps(props: CanvasPropsAndRedux, current_state: CanvasState) {
         const proofChanged = JSON.stringify(current_state.proof) !== JSON.stringify(props.proof);
         const visualInfoChanged = JSON.stringify(current_state.visualInfo) !== JSON.stringify(props.visualInfo);
-        const isNewFile = Canvas.renderData.fileChanged;
-        const stage = current_state.stage;
         const { nodeToFind, findOption } = props.nodeFindData;
+        const { count, fileChanged } = props.renderData;
+        const stage = current_state.stage;
 
         // If there is a node to be found
         if (nodeToFind > -1) {
-            // Valid node
-            if (nodeToFind < props.proof.length) {
+            // Is valid node
+            if (nodeToFind <= props.proof[props.proof.length - 1].id) {
                 // Change the stage position
                 const { x, y } = props.visualInfo[nodeToFind];
                 stage.stageX = current_state.canvasSize.width / 2 - (x + nodeWidth / 2) * stage.stageScale;
@@ -180,7 +180,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         }
 
         // If the proof or visual info changed or we have a new file being uploaded
-        if (proofChanged || visualInfoChanged || isNewFile) {
+        if (proofChanged || visualInfoChanged || fileChanged) {
             // Create the showing nodes array
             const showingNodes: CanvasState['showingNodes'] = {};
             props.proof.forEach((node, id) => {
@@ -188,8 +188,8 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             });
 
             // If has nodes and can render
-            if (showingNodes[0] && Canvas.renderData.count < 2) {
-                Canvas.renderData.count++;
+            if (showingNodes[0] && count < 2) {
+                props.addRenderCount();
 
                 const g = new dagre.graphlib.Graph();
                 g.setGraph({ rankdir: 'BT', ranker: 'tight-tree' });
@@ -230,7 +230,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 props.setVisualInfo(Canvas.copyNodePosition(props.visualInfo, showingNodes));
             }
             // Reset the new file indicator if it's true
-            if (isNewFile) Canvas.renderData.fileChanged = false;
+            if (fileChanged) props.blockRenderNewFile();
 
             return {
                 showingNodes: showingNodes,
@@ -326,25 +326,25 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     /* NODE MENU ACTIONS */
     foldAllDescendants = (): void => {
         const { nodeOnFocus } = this.state;
-        const { foldAllDescendants } = this.props;
+        const { foldAllDescendants, reRender } = this.props;
 
-        Canvas.reRender();
+        reRender();
         foldAllDescendants(nodeOnFocus);
         this.setState({ nodesSelected: [] });
     };
 
     foldSelectedNodes = (): void => {
         const { nodesSelected } = this.state;
-        const { hideNodes } = this.props;
+        const { hideNodes, reRender } = this.props;
 
-        Canvas.reRender();
+        reRender();
         hideNodes(nodesSelected);
         this.setState({ nodesSelected: [] });
     };
 
     unfold = (): void => {
         const { nodeOnFocus, proof } = this.state;
-        const { unhideNodes } = this.props;
+        const { unhideNodes, reRender } = this.props;
 
         // Get the pi node (to be unfold)
         const obj = proof.find((node) => node.id === nodeOnFocus);
@@ -352,7 +352,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const hiddenNodes = obj ? (obj.hiddenNodes ? obj.hiddenNodes : []) : [];
         const hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
 
-        Canvas.reRender();
+        reRender();
         unhideNodes({ pi: nodeOnFocus, hiddens: hiddenIds });
 
         this.setState({ nodesSelected: [] });
@@ -409,45 +409,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     /*TREE*/
     createTree = (id: number): TreeNode[] => {
-        const { proof } = this.state;
-        const rootNode = proof.find((o) => o.id === id);
-        const tree: TreeNode[] = [];
-
-        // Make sure found the node
-        if (rootNode) {
-            let descendants: TreeNode[] = [];
-            // For each children
-            rootNode.children.forEach((childID) => {
-                // Find the child
-                const child = proof.find((o) => o.id === childID);
-
-                // Get the current child tree
-                if (child) descendants = descendants.concat(this.createTree(child.id));
-            });
-
-            const label = rootNode.hiddenNodes?.length
-                ? `${rootNode.id} : π ➜ ${rootNode.conclusion}`
-                : `${rootNode.id} : ${rootNode.conclusion}`;
-
-            // Create the rootNode tree
-            tree.push({
-                id: rootNode.id,
-                icon: 'graph',
-                label: label,
-                secondaryLabel: `${rootNode.rule}`,
-                rule: rootNode.rule,
-                args: rootNode.args,
-                conclusion: rootNode.conclusion,
-                parentId: rootNode.parents[0],
-                descendants: rootNode.descendants - 1,
-                nHided: rootNode.hiddenNodes ? rootNode.hiddenNodes.length : 0,
-                hiddenNodes: rootNode.hiddenNodes ? rootNode.hiddenNodes.map((node) => node.id) : [],
-                childNodes: descendants,
-                parentsId: rootNode.parents,
-                hasCaret: Boolean(descendants.length),
-            });
-        }
-        return tree;
+        return this.props.createTree(this.state.proof, id);
     };
 
     /* UTILS */
@@ -533,13 +495,23 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
 function mapStateToProps(state: ReduxState, ownProps: CanvasProps) {
     return {
-        proof: selectProof(state),
         visualInfo: selectVisualInfo(state),
         nodeFindData: selectFindData(state),
+        renderData: selectRenderData(state),
         ...ownProps,
     };
 }
 
-const mapDispatchToProps = { hideNodes, unhideNodes, foldAllDescendants, applyView, setVisualInfo, findNode };
+const mapDispatchToProps = {
+    hideNodes,
+    unhideNodes,
+    foldAllDescendants,
+    applyView,
+    setVisualInfo,
+    findNode,
+    reRender,
+    addRenderCount,
+    blockRenderNewFile,
+};
 
 export default connect(mapStateToProps, mapDispatchToProps)(Canvas);

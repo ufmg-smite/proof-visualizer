@@ -29,13 +29,12 @@ class Let {
         });
     }
 
-    getTextWidth = (text: string): number => {
+    getTextWidth = (text: string, font: string): number => {
         const canvas = document.createElement('canvas');
         const context = canvas.getContext('2d');
         let size = 0;
         if (context) {
-            context.font =
-                '14px / 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", Icons16, sans-serif';
+            context.font = font;
             size = context.measureText(text).width;
         }
         return size;
@@ -103,16 +102,16 @@ class Let {
         return this.value;
     };
 
-    fitsTheWindow = (windowSize: number): boolean => {
+    fitsTheWindow = (windowSize: number, font: string): boolean => {
         const line = this.lines[this.biggerID];
-        const size = this.getTextWidth(`${'    '.repeat(line.indentLevel)}${line.value}`);
+        const size = this.getTextWidth(`${'    '.repeat(line.indentLevel)}${line.value}`, font);
         return size < windowSize;
     };
 
-    indent = (windowSize: number, mode: boolean): string => {
+    indent = (windowSize: number, mode: boolean, font: string): string => {
         let someDoesntFit;
         if (mode) someDoesntFit = true;
-        else someDoesntFit = this.getTextWidth(this.lines[this.biggerID].value) < windowSize ? false : true;
+        else someDoesntFit = this.getTextWidth(this.lines[this.biggerID].value, font) < windowSize ? false : true;
 
         // While there are lines that doesn't fit the window size
         while (someDoesntFit) {
@@ -164,11 +163,13 @@ class Let {
                 else if (c === ' ') {
                     lastSpace = i;
 
-                    if (indent === thisLevel && thisLine[i - 1] !== ')') {
-                        newLines.push({
-                            value: thisLine.substring(lastUsedSpace + 1, i),
-                            indentLevel: newLines.length ? indent + 1 : indent,
-                        });
+                    if (indent === thisLevel) {
+                        if (thisLine[i - 1] !== ')') {
+                            newLines.push({
+                                value: thisLine.substring(lastUsedSpace + 1, i),
+                                indentLevel: newLines.length ? indent + 1 : indent,
+                            });
+                        }
                         lastUsedSpace = i;
                     }
                 }
@@ -180,7 +181,7 @@ class Let {
             // Find the new biggest line
             this.lines.forEach((line, id) => {
                 // Get the size of this new line
-                const thisSize = this.getTextWidth(`${'    '.repeat(line.indentLevel)}${line.value}`);
+                const thisSize = this.getTextWidth(`${'    '.repeat(line.indentLevel)}${line.value}`, font);
                 if (thisSize > biggestSize) {
                     biggestSize = thisSize;
                     newBiggerID = id;

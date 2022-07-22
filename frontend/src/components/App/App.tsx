@@ -1,19 +1,22 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useReducer, useState } from 'react';
 
 import { Intent, Position, Toaster } from '@blueprintjs/core';
 
 import VisualizerNavbar from '../VisualizerNavbar/VisualizerNavbar';
 import VisualizerDialog from '../VisualizerDialog/VisualizerDialog';
 import VisualizerStage from '../VisualizerStage/VisualizerStage';
-import VisualizerLetDrawer from '../VisualizerLetDrawer/VisualizerLetDrawer';
+import VisualizersDrawer from '../VisualizersDrawer/VisualizersDrawer';
 
 import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
+import VisualizerTutorial from '../VisualizerTutorial/VisualizerTutorial';
+import VisualizerSmtDrawer from '../VisualizerSmtDrawer/VisualizerSmtDrawer';
 
 const App: React.FC = () => {
     const [dialogIsOpen, setDialogIsOpen] = useState(true);
-    const [dialogContent, setDialogContent] = useState('welcome');
-    const [drawerIsOpen, setDrawerIsOpen] = useState(false);
+    const [inTutorial, setInTutorial] = useState(false);
+    const [drawerIsOpen, setDrawerOpenState] = useReducer((isOpen) => !isOpen, false);
+    const [smtDrawerIsOpen, setSmtDrawerIsOpen] = useReducer((isOpen) => !isOpen, false);
     const darkTheme = useAppSelector(selectTheme);
 
     // Toaster
@@ -33,23 +36,32 @@ const App: React.FC = () => {
     }, [drawerIsOpen]);
 
     return (
-        <div className={darkTheme ? ' bp3-dark' : ''}>
+        <div className={darkTheme ? ' bp3-dark' : ''} style={{ height: '100%' }}>
+            <VisualizerTutorial inTutorial={inTutorial} setInTutorial={setInTutorial} />
             <Toaster position={Position.TOP} ref={refHandlers.toaster} />
             <VisualizerNavbar
                 setDialogIsOpen={setDialogIsOpen}
-                setDialogContent={setDialogContent}
-                setDrawerIsOpen={setDrawerIsOpen}
-            ></VisualizerNavbar>
+                setDrawerIsOpen={setDrawerOpenState}
+                addErrorToast={addErrorToast}
+                inTutorial={inTutorial}
+                setInTutorial={setInTutorial}
+                setSmtDrawerIsOpen={setSmtDrawerIsOpen}
+            />
             <VisualizerDialog
                 dialogIsOpen={dialogIsOpen}
                 setDialogIsOpen={setDialogIsOpen}
-                dialogContent={dialogContent}
-                setDialogContent={setDialogContent}
                 addErrorToast={addErrorToast}
-            ></VisualizerDialog>
-            <VisualizerStage></VisualizerStage>
+            />
+            <VisualizerStage />
             {drawerIsOpen ? (
-                <VisualizerLetDrawer drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerIsOpen} />
+                <VisualizersDrawer drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerOpenState}></VisualizersDrawer>
+            ) : null}
+            {smtDrawerIsOpen ? (
+                <VisualizerSmtDrawer
+                    isOpen={smtDrawerIsOpen}
+                    setDrawerIsOpen={setSmtDrawerIsOpen}
+                    addErrorToast={addErrorToast}
+                />
             ) : null}
         </div>
     );

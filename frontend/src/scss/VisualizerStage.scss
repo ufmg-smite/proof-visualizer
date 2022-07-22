@@ -5,18 +5,27 @@
     #table-node-info {
         width: 90%;
         margin: auto;
-        thead {
-            tr {
-                th:first-child {
-                    width: 200px;
-                }
+    }
+}
+
+#table-node-info {
+    thead {
+        tr {
+            th:first-child {
+                width: 200px;
+                min-width: 200px;
             }
         }
-        #rule-icon {
-            color: white;
-        }
-        #pre-rule {
-            white-space: pre-wrap;
-        }
+    }
+    #icon {
+        margin-left: 5px;
+        transition: color ease-out 0.25s;
+    }
+    #icon:hover {
+        color: rgb(87, 191, 255);
+        cursor: pointer;
+    }
+    #pre-rule {
+        white-space: pre-wrap;
     }
 }

@@ -1,6 +1,7 @@
 import { Dispatch, SetStateAction } from 'react';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { TreeNodeInfo } from '@blueprintjs/core';
+import { renderLetKind, ClusterKind } from './enum';
 
 // NODES
 interface NodeInterface {
@@ -8,12 +9,12 @@ interface NodeInterface {
     conclusion: string;
     rule: string;
     args: string;
-    views: string[];
     children: number[];
     parents: number[];
     hiddenNodes?: NodeInterface[];
     descendants: number;
     dependencies: { piId: number; depsId: number[] }[];
+    clusterType: ClusterKind;
 }
 
 interface NodeProps {
@@ -56,18 +57,23 @@ interface NodeInfo {
 // Dividir essas interfaces em funções
 interface CanvasProps {
     openDrawer: (nodeInfo: NodeInfo) => void;
+    createTree: (proof: NodeInterface[], id: number) => TreeNode[];
 }
 
 interface CanvasPropsAndRedux extends CanvasProps {
     proof: NodeInterface[];
     visualInfo: ProofState['visualInfo'];
     nodeFindData: ExternalCmdState['findData'];
+    renderData: ExternalCmdState['renderData'];
 
     hideNodes: ActionCreatorWithPayload<number[], string>;
     unhideNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
     foldAllDescendants: ActionCreatorWithPayload<number>;
     setVisualInfo: ActionCreatorWithPayload<ProofState['visualInfo'], string>;
     findNode: ActionCreatorWithPayload<{ nodeId: number; option: boolean }, string>;
+    reRender: ActionCreatorWithPayload<void, string>;
+    addRenderCount: ActionCreatorWithPayload<void, string>;
+    blockRenderNewFile: ActionCreatorWithPayload<void, string>;
 }
 
 interface CanvasState {
@@ -81,11 +87,22 @@ interface CanvasState {
     visualInfo: ProofState['visualInfo'];
 }
 
+// DIRECTORY STYLE
+interface DirectoryStyleProps {
+    proofTree: TreeNodeInfo[];
+    ruleHelper: (s: string) => string;
+    indent: (s: string) => string;
+    translate: (s: string) => string;
+}
+
 // NAVBAR
 interface NavbarProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
-    setDialogContent: Dispatch<SetStateAction<string>>;
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
+    addErrorToast: (err: string) => void;
+    inTutorial: boolean;
+    setInTutorial: Dispatch<SetStateAction<boolean>>;
+    setSmtDrawerIsOpen: React.DispatchWithoutAction;
 }
 
 interface NavbarPropsAndRedux extends NavbarProps {
@@ -97,28 +114,38 @@ interface NavbarPropsAndRedux extends NavbarProps {
     hideNodes: ActionCreatorWithPayload<number[], string>;
 }
 
+// DIALOG
+interface VisualizerDialogProps {
+    dialogIsOpen: boolean;
+    setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
+    addErrorToast: (err: string) => void;
+}
+
 // TREENODE
 interface TreeNode {
-    id: number;
+    id: NodeProps['id'];
+    conclusion: NodeProps['conclusion'];
+    rule: NodeProps['rule'];
+    args: NodeProps['args'];
+    descendants: NodeProps['nDescendants'];
+    nHided: NodeProps['nHided'];
+    hiddenNodes: NodeProps['hiddenNodes'];
+    dependencies: NodeProps['dependencies'];
+
     icon: 'graph';
     label: string;
     secondaryLabel: string;
-    rule: string;
-    args: string;
-    conclusion: string;
-    parentId: number;
-    descendants: number;
-    nHided: number;
-    hiddenNodes: number[];
-    childNodes: TreeNode[];
-    parentsId: number[];
     hasCaret: boolean | undefined;
+    parentsId: number[];
+    parentId: number;
+    childNodes: TreeNode[];
 }
 
 interface TreeProps {
     darkTheme: boolean;
+    proof: ProofState['proof'];
+    positionMap: any;
     content: TreeNodeInfo[];
-    originalNodeInfo: NodeInfo;
     setNodeInfo: Dispatch<SetStateAction<NodeInfo>>;
 }
 
@@ -127,10 +154,52 @@ interface LineProps {
     points: Array<number>;
 }
 
-// LET DRAWER
-interface letDrawerProps {
+// VISUALIZERS DRAWER
+interface LetRenderProps {
+    id: number;
+    toRender: string;
+    letMap: ProofState['letMap'];
+    shouldExpand: boolean;
+    shouldRevert: boolean;
+    dispatchExpansion: React.Dispatch<{
+        type: renderLetKind;
+        payload: boolean;
+    }>;
+}
+
+interface DrawerVisualizerTabProps {
+    shouldResize: boolean;
+}
+
+interface DrawerProps {
     drawerIsOpen: boolean;
     setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
+}
+
+// SMT DRAWER
+interface SmtDrawerProps {
+    isOpen: boolean;
+    setDrawerIsOpen: React.DispatchWithoutAction;
+    addErrorToast: (err: string) => void;
+}
+
+// TUTORIAL PROPS
+interface TutorialProps {
+    inTutorial: boolean;
+    setInTutorial: Dispatch<SetStateAction<boolean>>;
+}
+
+interface TutorialPopoverProps {
+    setIsOpen: Dispatch<SetStateAction<boolean>>;
+    nextTutorial: () => void;
+    stage: number;
+    content: string[];
+    W: number;
+    position: {
+        x: number;
+        y: number;
+        tW: number;
+    };
 }
 
 // REDUX STATES
@@ -143,12 +212,13 @@ interface ReduxState {
 // PROOFS
 interface ProofState {
     proof: NodeInterface[];
-    view: 'basic' | 'propositional' | 'full';
+    view: 'full' | 'clustered' | 'colored-full';
     style: 'graph' | 'directory';
     hiddenNodes: number[][];
     letMap: {
         [Key: string]: string;
     };
+    theoryLemmaMap: string[];
     visualInfo: {
         [id: number]: {
             color: string;
@@ -157,6 +227,12 @@ interface ProofState {
             selected: boolean;
         };
     };
+    clustersInfos: {
+        hiddenNodes: number[];
+        type: ClusterKind;
+        color: string;
+    }[];
+    smt: string;
 }
 // FILE
 interface FileState {
@@ -187,12 +263,19 @@ export type {
     CanvasProps,
     CanvasPropsAndRedux,
     CanvasState,
+    DirectoryStyleProps,
     NavbarProps,
     NavbarPropsAndRedux,
+    VisualizerDialogProps,
     TreeNode,
     TreeProps,
     LineProps,
-    letDrawerProps,
+    LetRenderProps,
+    DrawerVisualizerTabProps,
+    DrawerProps,
+    SmtDrawerProps,
+    TutorialProps,
+    TutorialPopoverProps,
     ReduxState,
     ProofState,
     FileState,

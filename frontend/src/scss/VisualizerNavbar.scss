@@ -13,8 +13,11 @@
     display: grid;
     grid-auto-flow: row;
     row-gap: 20px;
+    width: 250px;
+    text-align: justify;
+    margin: 0px 8px;
 
-    .title{
+    .title {
         font-weight: bold;
         margin-right: 4px;
     }
@@ -25,4 +28,13 @@
     & .option:last-child {
         margin-bottom: 0px;
     }
+}
+
+.matchable-menu {
+    max-height: 180px;
+    overflow: auto;
+}
+
+.nav-menu {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.671);
 }
