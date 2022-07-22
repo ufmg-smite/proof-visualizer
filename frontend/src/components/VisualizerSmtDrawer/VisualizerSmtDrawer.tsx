@@ -13,6 +13,8 @@ import Module from '../../wasm/cvc5';
 import { set } from '../../store/features/file/fileSlice';
 import { allowRenderNewFile, reRender } from '../../store/features/externalCmd/externalCmd';
 
+import '../../scss/VisualizerSmtDrawer.scss';
+
 const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen, addErrorToast }: SmtDrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
     const proofSmt = useAppSelector(selectSmt);
@@ -84,19 +86,23 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
     );
 
     const defaultArgsDiv = (
-        <div
-            className={`bp3-menu ${darkTheme ? 'bp3-dark' : ''}`}
-            style={{
-                maxWidth: '310px',
-                padding: '5px 8px !important',
-                boxShadow: '0px 0px 15px rgba(0, 0, 0, 0.651)',
-                textAlign: 'justify',
-            }}
-        >
+        <div id="helperDiv" className={`bp3-menu ${darkTheme ? 'bp3-dark' : ''}`}>
             Default arguments are:{' '}
             {defaultArgs.reduce((acc: any, str: string) => {
                 return (acc += str + ' ');
             }, '')}
+        </div>
+    );
+
+    const shouldClusterizeDiv = (
+        <div id="helperDiv" className={`bp3-menu ${darkTheme ? 'bp3-dark' : ''}`}>
+            Whether the proof node clusters (e.g. SAT, CNF, INPUT) will be printed when using the dot format or not.
+        </div>
+    );
+
+    const printAsDagDiv = (
+        <div id="helperDiv" className={`bp3-menu ${darkTheme ? 'bp3-dark' : ''}`}>
+            Indicates if the dot proof will be printed as a DAG or as a tree.
         </div>
     );
 
@@ -148,6 +154,8 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
             onClose={(e) => {
                 e.preventDefault();
                 setDrawerIsOpen();
+                // Save the smt
+                dispatch(setSmt(textRef.current));
             }}
             icon="applications"
             title="Visualizers"
@@ -161,17 +169,8 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                     onMount={() => forceUpdate()}
                     options={options}
                 />
-                <div
-                    style={{
-                        height: optionsIsOpen ? '220px' : '0',
-                        position: 'relative',
-                        overflow: 'auto',
-                        transition: 'height 0.24s ease-out',
-                        visibility: optionsIsOpen ? 'visible' : 'hidden',
-                    }}
-                >
+                <div className={optionsIsOpen ? 'options-sec' : 'options-sec-open'}>
                     <Switch
-                        className="switch"
                         label="Default args or custom args"
                         style={{ margin: '10px 20px' }}
                         checked={argsType}
@@ -186,9 +185,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                                     disabled={!argsType}
                                     content={defaultArgsDiv}
                                     placement="auto"
-                                    modifiers={{
-                                        arrow: { enabled: true },
-                                    }}
+                                    modifiers={{ arrow: { enabled: true } }}
                                     hoverCloseDelay={200}
                                     hoverOpenDelay={200}
                                 >
@@ -196,34 +193,50 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                                 </Popover2>
                             </div>
                         }
-                        style={{
-                            padding: '10px 20px',
-                            borderBottom: `1px solid ${divColor}`,
-                            borderTop: `1px solid ${divColor}`,
-                            marginBottom: '0',
-                        }}
+                        className="args-forms"
+                        style={{ borderBottom: `1px solid ${divColor}`, borderTop: `1px solid ${divColor}` }}
                         disabled={!argsType}
                     >
-                        <Switch
-                            label="Should clusterize proof"
-                            disabled={!argsType}
-                            checked={shouldClusterize}
-                            onChange={() => setDefaultOptions([!shouldClusterize, printAsDag])}
-                            tabIndex={4}
-                        />
-                        <Switch
-                            label="Should print as tree or as DAG"
-                            disabled={!argsType}
-                            checked={printAsDag}
-                            onChange={() => setDefaultOptions([shouldClusterize, !printAsDag])}
-                            tabIndex={4}
-                        />
+                        <div className="default-option-div">
+                            <Switch
+                                label="Should clusterize proof"
+                                disabled={!argsType}
+                                checked={shouldClusterize}
+                                onChange={() => setDefaultOptions([!shouldClusterize, printAsDag])}
+                                tabIndex={4}
+                            />
+                            <Popover2
+                                disabled={!argsType}
+                                content={shouldClusterizeDiv}
+                                placement="auto"
+                                modifiers={{ arrow: { enabled: true } }}
+                                hoverCloseDelay={200}
+                                hoverOpenDelay={200}
+                            >
+                                <Button disabled={!argsType} icon="help" className="bp3-minimal" tabIndex={4} />
+                            </Popover2>
+                        </div>
+                        <div className="default-option-div">
+                            <Switch
+                                label="Should print as tree or as DAG"
+                                disabled={!argsType}
+                                checked={printAsDag}
+                                onChange={() => setDefaultOptions([shouldClusterize, !printAsDag])}
+                                tabIndex={4}
+                            />
+                            <Popover2
+                                disabled={!argsType}
+                                content={printAsDagDiv}
+                                placement="auto"
+                                modifiers={{ arrow: { enabled: true } }}
+                                hoverCloseDelay={200}
+                                hoverOpenDelay={200}
+                            >
+                                <Button disabled={!argsType} icon="help" className="bp3-minimal" tabIndex={4} />
+                            </Popover2>
+                        </div>
                     </FormGroup>
-                    <FormGroup
-                        label="Custom args"
-                        style={{ padding: '10px 20px', marginBottom: '0' }}
-                        disabled={argsType}
-                    >
+                    <FormGroup label="Custom args" className="args-forms" disabled={argsType}>
                         <InputGroup
                             id="text-input"
                             placeholder="Placeholder text"
@@ -233,9 +246,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                                     disabled={argsType}
                                     content={helpDiv}
                                     placement="auto"
-                                    modifiers={{
-                                        arrow: { enabled: true },
-                                    }}
+                                    modifiers={{ arrow: { enabled: true } }}
                                     hoverCloseDelay={200}
                                     hoverOpenDelay={200}
                                 >
@@ -255,8 +266,8 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                     }}
                 >
                     <Button
-                        style={{ float: 'left', margin: '5px' }}
-                        className="bp3-minimal"
+                        style={{ float: 'left' }}
+                        className="bp3-minimal margin-5"
                         icon="more"
                         text="Options"
                         onClick={() => setOptionsIsOpen()}
@@ -264,16 +275,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                     />
                     <div style={{ float: 'right', display: 'flex' }}>
                         <Button
-                            style={{ margin: '5px' }}
-                            className="bp3-minimal"
-                            icon="floppy-disk"
-                            text="Save"
-                            onClick={() => dispatch(setSmt(textRef.current))}
-                            tabIndex={2}
-                        />
-                        <Button
-                            style={{ margin: '5px' }}
-                            className="bp3-minimal"
+                            className="bp3-minimal margin-5"
                             icon="code"
                             text="Generate proof"
                             onClick={() => {
