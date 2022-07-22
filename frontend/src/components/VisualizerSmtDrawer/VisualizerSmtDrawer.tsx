@@ -316,16 +316,23 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                                 stderrRef.current = '';
                                 changeOutRef.current = false;
 
-                                // Run cvc5
-                                Module({
-                                    arguments: args,
-                                    proofTxt: textRef.current,
-                                    out: updateStdout,
-                                    err: updateStderr,
-                                    postCVC5: postCVC5run,
-                                    cleanStdout: cleanStdout,
-                                    binaryFileName: 'cvc5.wasm',
-                                });
+                                // Only calls web assembly when there is some text on the code editor
+                                if (textRef.current.trim().length) {
+                                    // Run cvc5
+                                    Module({
+                                        arguments: args,
+                                        proofTxt: textRef.current,
+                                        out: updateStdout,
+                                        err: updateStderr,
+                                        postCVC5: postCVC5run,
+                                        cleanStdout: cleanStdout,
+                                        binaryFileName: 'cvc5.wasm',
+                                    });
+                                }
+                                // There isn't text in the code editor
+                                else {
+                                    addErrorToast('Error: Empty proof in the code editor.');
+                                }
                             }}
                             tabIndex={3}
                         />
