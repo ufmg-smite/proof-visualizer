@@ -46,6 +46,18 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
         forceUpdate();
     }, [proofSmt]);
 
+    useEffect(() => {
+        // If it's custom args
+        if (!argsType) {
+            // Copy the default args to the custom args, because the probability
+            // that the user will use one of these flags is high
+            let newArgs = defaultArgs.reduce((acc, arg) => (acc += arg + ' '), '');
+            if (shouldClusterize) newArgs += ' --print-dot-clusters';
+            if (printAsDag) newArgs += ' --proof-dot-dag';
+            setCustomArgs(newArgs);
+        }
+    }, [argsType]);
+
     const options = {
         theme: darkTheme ? 'vs-dark' : 'vs',
         tabIndex: 5,
