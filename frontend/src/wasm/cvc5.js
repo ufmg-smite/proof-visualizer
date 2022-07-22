@@ -1,6 +1,49 @@
-var Module = (() => {
-    var _scriptDir = 'http://localhost:3000/proof-visualizer/';
+/* eslint-disable */
+/*
+Author: Vinícius Braga Freire (vinicius.braga.freire@gmail.com)
+Description: WebAssembly glue code used to run cvc5 inside React web application.
+Compilation: the glue code and wasm were generated through the cvc5 bash in the 
+                https://github.com/ufmg-smite/cvc5-wasm repository. The flags 
+                passed to the emscripten compiler were:
+    -s EXPORTED_FUNCTIONS=_main             # Add the main as an exported 
+                                            # function, but it's not necessary 
+                                            # because the main() is already 
+                                            # called when the Module is called.
+    -s EXPORTED_RUNTIME_METHODS=ccall,cwrap # Export JS functions that allow the 
+                                            # user to call an exported function.
+    -s INCOMING_MODULE_JS_API=arguments     # Add the argument parsing to the 
+                                            # Module.
+    -s INVOKE_RUN=1                         # Whether we will run the main() 
+                                            # function.
+    -s EXIT_RUNTIME=0                       # If 0, the runtime is not quit when 
+                                            # main() completes (allowing code to
+                                            # run afterwards, for example from 
+                                            # the browser main event loop).
+    -s ENVIRONMENT=web                      # Signs that the wasm will run in 
+                                            # the browser.
+    -s MODULARIZE                           # Make the glue code as an 
+                                            # exportable function, just like a 
+                                            # Module.
+Observations: The modifications made in the original glue code are the ones that
+                precedes of comments with //.
+              The changed functions/parts of the code to look at are:
+                - The definition of the wasm file base directory
+                - The definition of the out and err functions
+                - The read of the arguments passed through the Module
+                - The postRun function
+                - The read of the wasm file name passed through the Module
+                - The handleException function
+                - The get_char function
+                - The run function
+Last Update: 22/07/2022
+*/
 
+var Module = (() => {
+    // The base directory to the wasm file
+    var _scriptDir = 'http://localhost:3000/proof-visualizer/';
+    // var _scriptDir = 'https://ufmg-smite.github.io/proof-visualizer/';
+
+    // This function is responsible for running the web assembly
     return function (Module) {
         Module = Module || {};
 
@@ -71,10 +114,17 @@ var Module = (() => {
             setWindowTitle = (title) => (document.title = title);
         } else {
         }
+        // The out variable is the function that updates the stdout varible
+        // (it's in the react scope) and its argument is a string (the content
+        //  of the current stdout line to be written)
         var out = Module['out'];
+        // The err is the same thing as out, but related to stderr
         var err = Module['err'];
         Object.assign(Module, moduleOverrides);
         moduleOverrides = null;
+        // Assign the arguments passed through the Module (defined in the react
+        // scope) to a local variable. These arguments are arranged in an array
+        // of strings
         if (Module['arguments']) arguments_ = Module['arguments'];
         var wasmBinary;
         var noExitRuntime = true;
@@ -289,8 +339,11 @@ var Module = (() => {
         function preMain() {
             callRuntimeCallbacks(__ATMAIN__);
         }
+        // Function called after the cvc5 execution and no error happend
         function postRun() {
             callRuntimeCallbacks(__ATPOSTRUN__);
+            // Handle with the post cvc5 (end of execution) operations in the
+            // react scope. Signs that no error happend.
             Module['postCVC5'](false);
         }
         function addOnInit(cb) {
@@ -334,7 +387,8 @@ var Module = (() => {
             return filename.startsWith(dataURIPrefix);
         }
         var wasmBinaryFile;
-        wasmBinaryFile = 'cvc5.wasm';
+        // Definition of the binary file name
+        wasmBinaryFile = Module['binaryFileName'];
         if (!isDataURI(wasmBinaryFile)) {
             wasmBinaryFile = locateFile(wasmBinaryFile);
         }
@@ -446,10 +500,13 @@ var Module = (() => {
             }
             return func;
         }
+        // Function called after the cvc5 execution when an error happend
         function handleException(e) {
             if (e instanceof ExitStatus || e == 'unwind') {
                 return EXITSTATUS;
             }
+            // Handle with the post cvc5 (end of execution) operations in the
+            // react scope and signs that a error happend.
             Module['postCVC5'](true);
             quit_(1, e);
         }
@@ -737,7 +794,19 @@ var Module = (() => {
                     if (!tty.input.length) {
                         var result = null;
                         if (typeof window != 'undefined' && typeof window.prompt == 'function') {
+                            // Read the smt text send through the Module and
+                            //  pass it to the web assembly binary program as a
+                            //  'stdin' buffer
                             result = Module['proofTxt'];
+                            // Call a function that cleans the 'stdout' variable
+                            //  in the react scope only a single time (at the
+                            //  first time it's called).
+                            // It's necessary becasuse cvc5, when running in the
+                            //  browser, identify at first time that there is no
+                            //  content in the 'stdin', then it generates an
+                            //  default cvc5 message about the library. This
+                            //  function only make sure that this 'trash' message
+                            //  is removed from the output.
                             Module['cleanStdout']();
                             if (result !== null) {
                                 result += '\n';
@@ -3652,7 +3721,10 @@ var Module = (() => {
                 calledMain = true;
             }
         }
+        // Function responsable for running the cvc5 web assembly code with the
+        //  arguments passed to the Module.
         function run(args) {
+            // Get the arguments passed to the Module (an array of strings)
             args = args || arguments_;
             if (runDependencies > 0) {
                 return;
@@ -3669,7 +3741,9 @@ var Module = (() => {
                 initRuntime();
                 preMain();
                 readyPromiseResolve(Module);
+                // Call the execution of the main function
                 if (shouldRunNow) callMain(args);
+                // Call the post run function when no error happen
                 postRun();
             }
             {

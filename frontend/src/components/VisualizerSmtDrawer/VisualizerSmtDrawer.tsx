@@ -27,12 +27,8 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
     const [argsType, setArgsType] = useState(true);
     const [[shouldClusterize, printAsDag], setDefaultOptions] = useState([true, true]);
     const [customArgs, setCustomArgs] = useState('');
-    const defaultArgs = [
-        '--dump-proofs',
-        '--proof-format=dot',
-        '--proof-granularity=theory-rewrite',
-        '--simplification=none',
-    ];
+    // The default arguments used in the proof generation
+    const defaultArgs = ['--dump-proofs', '--proof-format=dot', '--proof-granularity=theory-rewrite'];
 
     const dispatch = useAppDispatch();
 
@@ -92,12 +88,11 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
         </div>
     );
 
+    // Remove the cvc5> prompt message from the stdout
     const sanitizeDotResult = (result: string): string => result.replaceAll(/(cvc5> )+/g, '');
-
     const updateStdout = (str: string) => (stdoutRef.current += str + '\n');
-
     const updateStderr = (str: string) => (stderrRef.current += str + '\n');
-
+    // Function called post the cvc5 execution
     const postCVC5run = (isThereError: boolean) => {
         // Sanitize the string
         stdoutRef.current = sanitizeDotResult(stdoutRef.current).trim();
@@ -118,7 +113,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
             dispatch(process(stdoutRef.current));
         }
     };
-
+    // Clean the output a single time during the cvc5 execution
     const cleanStdout = () => {
         if (!changeOutRef.current) {
             stdoutRef.current = '';
@@ -275,11 +270,13 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                                 let args = defaultArgs;
                                 // If is default args
                                 if (argsType) {
+                                    // Add the arguments selected by the user
                                     if (shouldClusterize) args.push('--print-dot-clusters');
                                     if (printAsDag) args.push('--proof-dot-dag');
                                 }
                                 // Custom args
                                 else {
+                                    // Split the arguments into an array
                                     args = customArgs.split('--');
                                     args = args
                                         .map((arg) => arg.trim())
@@ -297,13 +294,12 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                                     // If there isn't a proof format
                                     if (!isThereFormat) args.push('--proof-format=dot');
                                     // Verify is the format is the correct one
-                                    else {
-                                        if (!args[i].match(/--proof-format\s*=\s*dot/)) {
-                                            args[i] = '--proof-format=dot';
-                                        }
+                                    else if (!args[i].match(/--proof-format\s*=\s*dot/)) {
+                                        args[i] = '--proof-format=dot';
                                     }
                                 }
 
+                                // Reset the stdout and stderr before executing cvc5
                                 stdoutRef.current = '';
                                 stderrRef.current = '';
                                 changeOutRef.current = false;
@@ -316,6 +312,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                                     err: updateStderr,
                                     postCVC5: postCVC5run,
                                     cleanStdout: cleanStdout,
+                                    binaryFileName: 'cvc5.wasm',
                                 });
                             }}
                             tabIndex={3}
