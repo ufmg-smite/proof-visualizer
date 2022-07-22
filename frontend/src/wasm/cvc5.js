@@ -40,8 +40,9 @@ Last Update: 22/07/2022
 
 var Module = (() => {
     // The base directory to the wasm file
-    var _scriptDir = 'http://localhost:3000/proof-visualizer/';
-    // var _scriptDir = 'https://ufmg-smite.github.io/proof-visualizer/';
+    var _scriptDir = window.location.href.match(/proof-visualizer\//)
+        ? window.location.href
+        : window.location.href + 'proof-visualizer/';
 
     // This function is responsible for running the web assembly
     return function (Module) {
