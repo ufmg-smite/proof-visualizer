@@ -29,9 +29,9 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 ## WebAssembly
 
-The proof visualizer allows to run the CVC5 solver inside the browser. The WebAssembly binary used to run this in the browser uses [emscripten](https://emscripten.org/).\
+The proof visualizer allows to run the CVC5 solver inside the browser. The WebAssembly binary used to run this in the browser uses [emscripten](https://emscripten.org/).
 
-The [CVC5-WASM](https://github.com/ufmg-smite/cvc5-wasm) repository was built to give an easy way to compile the library to WebAssembly. This repository is able to generate the .wasm file needed to run the library inside the web app.\
+The [CVC5-WASM](https://github.com/ufmg-smite/cvc5-wasm) repository was built to give an easy way to compile the library to WebAssembly. This repository is able to generate the .wasm file needed to run the library inside the web app.
 
 As the expectations to support this app are not that long, the user is able to use the CVC5-WASM repository, generate a .wasm file and substitute the current .wasm file located at `/frontend/public/cvc5.wasm` , then using a more recent version of CVC5.
 
