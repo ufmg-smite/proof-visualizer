@@ -40,9 +40,7 @@ Last Update: 22/07/2022
 
 var Module = (() => {
     // The base directory to the wasm file
-    var _scriptDir = window.location.href.match(/proof-visualizer\//)
-        ? window.location.href
-        : window.location.href + 'proof-visualizer/';
+    _scriptDir = window.location.origin + '/proof-visualizer/';
 
     // This function is responsible for running the web assembly
     return function (Module) {
