@@ -181,6 +181,8 @@ interface SmtDrawerProps {
     isOpen: boolean;
     setDrawerIsOpen: React.DispatchWithoutAction;
     addErrorToast: (err: string) => void;
+    smtOptions: { argsType: boolean; customArgs: string };
+    setSmtOptions: Dispatch<SetStateAction<SmtDrawerProps['smtOptions']>>;
 }
 
 // TUTORIAL PROPS

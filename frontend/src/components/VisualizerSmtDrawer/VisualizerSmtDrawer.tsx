@@ -15,7 +15,13 @@ import { allowRenderNewFile, reRender } from '../../store/features/externalCmd/e
 
 import '../../scss/VisualizerSmtDrawer.scss';
 
-const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen, addErrorToast }: SmtDrawerProps) => {
+const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
+    isOpen,
+    setDrawerIsOpen,
+    addErrorToast,
+    smtOptions,
+    setSmtOptions,
+}: SmtDrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
     const proofSmt = useAppSelector(selectSmt);
 
@@ -23,13 +29,13 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
     const stderrRef = useRef('');
     const changeOutRef = useRef(false);
 
-    const [, forceUpdate] = useReducer((x) => x + 1, 0);
+    const [updateCounter, forceUpdate] = useReducer((x) => x + 1, 0);
     const [spinnerOn, setSpinnerOn] = useState(false);
     const [optionsIsOpen, setOptionsIsOpen] = useReducer((open) => !open, false);
     const textRef = useRef(proofSmt + '\n');
-    const [argsType, setArgsType] = useState(true);
+    const [argsType, setArgsType] = useState(smtOptions.argsType);
     const [[shouldClusterize, printAsDag], setDefaultOptions] = useState([true, true]);
-    const [customArgs, setCustomArgs] = useState('');
+    const [customArgs, setCustomArgs] = useState(smtOptions.customArgs);
 
     // The default arguments used in the proof generation
     const defaultArgs = ['--dump-proofs', '--proof-format=dot', '--proof-granularity=theory-rewrite'];
@@ -52,7 +58,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
 
     useEffect(() => {
         // If it's custom args
-        if (!argsType) {
+        if (!argsType && updateCounter) {
             // Copy the default args to the custom args, because the probability
             // that the user will use one of these flags is high
             let newArgs = defaultArgs.reduce((acc, arg) => (acc += arg + ' '), '');
@@ -61,6 +67,13 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
             setCustomArgs(newArgs);
         }
     }, [argsType]);
+
+    useEffect(() => {
+        // When component unmount
+        return () => {
+            setSmtOptions({ argsType, customArgs });
+        };
+    }, [argsType, customArgs]);
 
     const options = {
         theme: darkTheme ? 'vs-dark' : 'vs',
