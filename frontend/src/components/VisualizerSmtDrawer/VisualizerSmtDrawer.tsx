@@ -49,6 +49,10 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
             .getElementsByClassName('bp3-button')[0] as HTMLElement;
         bt.tabIndex = 1;
         bt.focus();
+
+        // Remove the overlay when oppening the smt drawer
+        const parent = document.getElementsByClassName('smt-drawer')[0].parentElement;
+        if (parent) parent.className = '';
     }, []);
 
     useEffect(() => {
@@ -69,7 +73,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
     }, [argsType]);
 
     useEffect(() => {
-        // When component unmount
+        // When component unmount, make sure that the custom args are saved
         return () => {
             setSmtOptions({ argsType, customArgs });
         };
@@ -162,7 +166,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
             style={{ maxHeight: '65%', width: '35%' }}
             autoFocus={true}
             canEscapeKeyClose={true}
-            canOutsideClickClose={true}
+            canOutsideClickClose={false}
             enforceFocus={false}
             hasBackdrop={false}
             isOpen={isOpen}
@@ -174,8 +178,8 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
                 // Save the smt
                 dispatch(setSmt(textRef.current));
             }}
-            icon="applications"
-            title="Visualizers"
+            icon="code"
+            title="SMT Input"
         >
             <div className={Classes.DRAWER_BODY} style={{ overflow: 'hidden' }}>
                 <MonacoEditor
