@@ -97,7 +97,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
             }}
         >
             Look at{' '}
-            <a href="https://cvc5.github.io/docs/cvc5-1.0.0/" target="_blank" rel="noreferrer">
+            <a href="https://cvc5.github.io/docs/cvc5-1.0.0/options.html" target="_blank" rel="noreferrer">
                 CVC5 documentation
             </a>{' '}
             to understand more about the argument parser.
