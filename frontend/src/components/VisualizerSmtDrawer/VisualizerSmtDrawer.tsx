@@ -1,7 +1,7 @@
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 
 import MonacoEditor from '@monaco-editor/react';
-import { Drawer, Position, Classes, Button, FormGroup, Switch, InputGroup } from '@blueprintjs/core';
+import { Drawer, Position, Classes, Button, FormGroup, Switch, InputGroup, Overlay, Spinner } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 
 import { selectTheme } from '../../store/features/theme/themeSlice';
@@ -15,7 +15,13 @@ import { allowRenderNewFile, reRender } from '../../store/features/externalCmd/e
 
 import '../../scss/VisualizerSmtDrawer.scss';
 
-const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen, addErrorToast }: SmtDrawerProps) => {
+const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
+    isOpen,
+    setDrawerIsOpen,
+    addErrorToast,
+    smtOptions,
+    setSmtOptions,
+}: SmtDrawerProps) => {
     const darkTheme = useAppSelector(selectTheme);
     const proofSmt = useAppSelector(selectSmt);
 
@@ -23,12 +29,14 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
     const stderrRef = useRef('');
     const changeOutRef = useRef(false);
 
-    const [, forceUpdate] = useReducer((x) => x + 1, 0);
+    const [updateCounter, forceUpdate] = useReducer((x) => x + 1, 0);
+    const [spinnerOn, setSpinnerOn] = useState(false);
     const [optionsIsOpen, setOptionsIsOpen] = useReducer((open) => !open, false);
     const textRef = useRef(proofSmt + '\n');
-    const [argsType, setArgsType] = useState(true);
+    const [argsType, setArgsType] = useState(smtOptions.argsType);
     const [[shouldClusterize, printAsDag], setDefaultOptions] = useState([true, true]);
-    const [customArgs, setCustomArgs] = useState('');
+    const [customArgs, setCustomArgs] = useState(smtOptions.customArgs);
+
     // The default arguments used in the proof generation
     const defaultArgs = ['--dump-proofs', '--proof-format=dot', '--proof-granularity=theory-rewrite'];
 
@@ -41,6 +49,10 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
             .getElementsByClassName('bp3-button')[0] as HTMLElement;
         bt.tabIndex = 1;
         bt.focus();
+
+        // Remove the overlay when oppening the smt drawer
+        const parent = document.getElementsByClassName('smt-drawer')[0].parentElement;
+        if (parent) parent.className = '';
     }, []);
 
     useEffect(() => {
@@ -50,7 +62,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
 
     useEffect(() => {
         // If it's custom args
-        if (!argsType) {
+        if (!argsType && updateCounter) {
             // Copy the default args to the custom args, because the probability
             // that the user will use one of these flags is high
             let newArgs = defaultArgs.reduce((acc, arg) => (acc += arg + ' '), '');
@@ -59,6 +71,13 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
             setCustomArgs(newArgs);
         }
     }, [argsType]);
+
+    useEffect(() => {
+        // When component unmount, make sure that the custom args are saved
+        return () => {
+            setSmtOptions({ argsType, customArgs });
+        };
+    }, [argsType, customArgs]);
 
     const options = {
         theme: darkTheme ? 'vs-dark' : 'vs',
@@ -112,6 +131,8 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
     const updateStderr = (str: string) => (stderrRef.current += str + '\n');
     // Function called post the cvc5 execution
     const postCVC5run = (isThereError: boolean) => {
+        // Turn off the spin
+        setSpinnerOn(false);
         // Sanitize the string
         stdoutRef.current = sanitizeDotResult(stdoutRef.current).trim();
         // If there was an error
@@ -145,7 +166,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
             style={{ maxHeight: '65%', width: '35%' }}
             autoFocus={true}
             canEscapeKeyClose={true}
-            canOutsideClickClose={true}
+            canOutsideClickClose={false}
             enforceFocus={false}
             hasBackdrop={false}
             isOpen={isOpen}
@@ -157,8 +178,8 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                 // Save the smt
                 dispatch(setSmt(textRef.current));
             }}
-            icon="applications"
-            title="Visualizers"
+            icon="code"
+            title="SMT Input"
         >
             <div className={Classes.DRAWER_BODY} style={{ overflow: 'hidden' }}>
                 <MonacoEditor
@@ -279,6 +300,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                             icon="code"
                             text="Generate proof"
                             onClick={() => {
+                                setSpinnerOn(true);
                                 dispatch(setSmt(textRef.current));
 
                                 let args = defaultArgs;
@@ -334,12 +356,21 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({ isOpen, setDrawerIsOpen
                                 // There isn't text in the code editor
                                 else {
                                     addErrorToast('Error: Empty proof in the code editor.');
+                                    setSpinnerOn(false);
                                 }
                             }}
                             tabIndex={3}
                         />
                     </div>
                 </footer>
+                <Overlay isOpen={spinnerOn} className="spinner-overlay">
+                    <div className="overlay-container">
+                        <div className="spinner-info">
+                            <h1>CVC5 is running!</h1>
+                            <Spinner intent="primary" size={80} />
+                        </div>
+                    </div>
+                </Overlay>
             </div>
         </Drawer>
     );

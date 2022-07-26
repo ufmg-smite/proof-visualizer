@@ -17,6 +17,7 @@ const App: React.FC = () => {
     const [inTutorial, setInTutorial] = useState(false);
     const [drawerIsOpen, setDrawerOpenState] = useReducer((isOpen) => !isOpen, false);
     const [smtDrawerIsOpen, setSmtDrawerIsOpen] = useReducer((isOpen) => !isOpen, false);
+    const [smtOptions, setSmtOptions] = useState({ argsType: true, customArgs: '' });
     const darkTheme = useAppSelector(selectTheme);
 
     // Toaster
@@ -61,6 +62,8 @@ const App: React.FC = () => {
                     isOpen={smtDrawerIsOpen}
                     setDrawerIsOpen={setSmtDrawerIsOpen}
                     addErrorToast={addErrorToast}
+                    smtOptions={smtOptions}
+                    setSmtOptions={setSmtOptions}
                 />
             ) : null}
         </div>
