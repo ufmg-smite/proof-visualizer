@@ -1,26 +1,26 @@
 {
   "files": {
     "main.css": "/proof-visualizer/static/css/main.95c291bb.chunk.css",
-    "main.js": "/proof-visualizer/static/js/main.c06bad46.chunk.js",
-    "main.js.map": "/proof-visualizer/static/js/main.c06bad46.chunk.js.map",
-    "runtime-main.js": "/proof-visualizer/static/js/runtime-main.d75e5d78.js",
-    "runtime-main.js.map": "/proof-visualizer/static/js/runtime-main.d75e5d78.js.map",
+    "main.js": "/proof-visualizer/static/js/main.fdf6eaba.chunk.js",
+    "main.js.map": "/proof-visualizer/static/js/main.fdf6eaba.chunk.js.map",
+    "runtime-main.js": "/proof-visualizer/static/js/runtime-main.857effb0.js",
+    "runtime-main.js.map": "/proof-visualizer/static/js/runtime-main.857effb0.js.map",
     "static/css/2.d62c656f.chunk.css": "/proof-visualizer/static/css/2.d62c656f.chunk.css",
-    "static/js/2.24ed784d.chunk.js": "/proof-visualizer/static/js/2.24ed784d.chunk.js",
-    "static/js/2.24ed784d.chunk.js.map": "/proof-visualizer/static/js/2.24ed784d.chunk.js.map",
-    "static/js/3.f8c14311.chunk.js": "/proof-visualizer/static/js/3.f8c14311.chunk.js",
-    "static/js/3.f8c14311.chunk.js.map": "/proof-visualizer/static/js/3.f8c14311.chunk.js.map",
+    "static/js/2.391f3e24.chunk.js": "/proof-visualizer/static/js/2.391f3e24.chunk.js",
+    "static/js/2.391f3e24.chunk.js.map": "/proof-visualizer/static/js/2.391f3e24.chunk.js.map",
+    "static/js/3.b896ad78.chunk.js": "/proof-visualizer/static/js/3.b896ad78.chunk.js",
+    "static/js/3.b896ad78.chunk.js.map": "/proof-visualizer/static/js/3.b896ad78.chunk.js.map",
     "index.html": "/proof-visualizer/index.html",
     "static/css/2.d62c656f.chunk.css.map": "/proof-visualizer/static/css/2.d62c656f.chunk.css.map",
     "static/css/main.95c291bb.chunk.css.map": "/proof-visualizer/static/css/main.95c291bb.chunk.css.map",
-    "static/js/2.24ed784d.chunk.js.LICENSE.txt": "/proof-visualizer/static/js/2.24ed784d.chunk.js.LICENSE.txt",
+    "static/js/2.391f3e24.chunk.js.LICENSE.txt": "/proof-visualizer/static/js/2.391f3e24.chunk.js.LICENSE.txt",
     "static/media/index.scss": "/proof-visualizer/static/media/icons-20.cde033c5.eot"
   },
   "entrypoints": [
-    "static/js/runtime-main.d75e5d78.js",
+    "static/js/runtime-main.857effb0.js",
     "static/css/2.d62c656f.chunk.css",
-    "static/js/2.24ed784d.chunk.js",
+    "static/js/2.391f3e24.chunk.js",
     "static/css/main.95c291bb.chunk.css",
-    "static/js/main.c06bad46.chunk.js"
+    "static/js/main.fdf6eaba.chunk.js"
   ]
 }
