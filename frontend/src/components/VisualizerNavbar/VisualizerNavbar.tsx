@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { connect } from 'react-redux';
 import { useAppSelector, useAppDispatch } from '../../store/hooks';
 import { selectDot, selectFileName, set } from '../../store/features/file/fileSlice';
@@ -26,6 +27,7 @@ import { selectTheme, toggle } from '../../store/features/theme/themeSlice';
 import '../../scss/VisualizerNavbar.scss';
 import { allowRenderNewFile, findNode, reRender } from '../../store/features/externalCmd/externalCmd';
 import examples from '../../examples/proofs-examples';
+import { ConvertToSVG } from './SVGConverter';
 
 function useWindowSize() {
     // Initialize state with undefined width/height so server and client renders match
@@ -380,6 +382,20 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         }
     };
 
+    const exportSVG = (e: React.MouseEvent<HTMLElement, MouseEvent> | null) => {
+        e?.preventDefault();
+
+        const el = ConvertToSVG(proof, visualInfo);
+        const svg = renderToStaticMarkup(el);
+
+        // Download the svg content
+        const base64doc = btoa(unescape(encodeURIComponent(svg)));
+        const a = document.createElement('a');
+        a.download = fileName ? `${fileName.split('.')[0].replace(/\s+/g, '_')}.svg` : 'download.svg';
+        a.href = 'data:image/svg+xml;base64,' + base64doc;
+        a.click();
+    };
+
     const runExample = (e: React.MouseEvent<HTMLElement, MouseEvent> | null, ex: string, id: number) => {
         e?.preventDefault();
         const dot = examples[ex].dot;
@@ -442,6 +458,14 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     onClick={exportPNG}
                     onKeyDown={(e) => {
                         (e.key == 'Enter' || e.key == ' ') && exportPNG(null);
+                    }}
+                />
+                <MenuItem
+                    icon="widget"
+                    text="SVG"
+                    onClick={exportSVG}
+                    onKeyDown={(e) => {
+                        (e.key == 'Enter' || e.key == ' ') && exportSVG(null);
                     }}
                 />
             </Menu>
