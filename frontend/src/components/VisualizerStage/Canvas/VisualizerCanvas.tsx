@@ -20,7 +20,7 @@ import '../../../scss/VisualizerCanvas.scss';
 
 import { CanvasProps, CanvasState } from '../../../interfaces/interfaces';
 import { connect } from 'react-redux';
-import { selectProof, selectVisualInfo } from '../../../store/features/proof/proofSlice';
+import { selectVisualInfo } from '../../../store/features/proof/proofSlice';
 import {
     hideNodes,
     unhideNodes,
