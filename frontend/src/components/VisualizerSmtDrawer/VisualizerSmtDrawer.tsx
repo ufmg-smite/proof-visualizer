@@ -1,7 +1,7 @@
 import React, { useEffect, useReducer, useRef, useState } from 'react';
 
 import MonacoEditor from '@monaco-editor/react';
-import { Drawer, Position, Classes, Button, FormGroup, Switch, InputGroup, Overlay, Spinner } from '@blueprintjs/core';
+import { Drawer, Position, Classes, Button, FormGroup, Switch, InputGroup } from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 
 import { selectTheme } from '../../store/features/theme/themeSlice';
@@ -11,7 +11,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { process, selectSmt, setSmt } from '../../store/features/proof/proofSlice';
 import Module from '../../wasm/cvc5';
 import { set } from '../../store/features/file/fileSlice';
-import { allowRenderNewFile, reRender } from '../../store/features/externalCmd/externalCmd';
+import { allowRenderNewFile, reRender, setSpinner } from '../../store/features/externalCmd/externalCmd';
 
 import '../../scss/VisualizerSmtDrawer.scss';
 
@@ -30,12 +30,13 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
     const changeOutRef = useRef(false);
 
     const [updateCounter, forceUpdate] = useReducer((x) => x + 1, 0);
-    const [spinnerOn, setSpinnerOn] = useState(false);
+    const [errorCounter, forceError] = useReducer((x) => x + 1, 0);
     const [optionsIsOpen, setOptionsIsOpen] = useReducer((open) => !open, false);
     const textRef = useRef(proofSmt + '\n');
     const [argsType, setArgsType] = useState(smtOptions.argsType);
     const [[shouldClusterize, printAsDag], setDefaultOptions] = useState([true, true]);
     const [customArgs, setCustomArgs] = useState(smtOptions.customArgs);
+    const [err, setErr] = useState('');
 
     // The default arguments used in the proof generation
     const defaultArgs = ['--dump-proofs', '--proof-format=dot', '--proof-granularity=theory-rewrite'];
@@ -78,6 +79,10 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
             setSmtOptions({ argsType, customArgs });
         };
     }, [argsType, customArgs]);
+
+    useEffect(() => {
+        if (errorCounter) addErrorToast(err);
+    }, [errorCounter]);
 
     const options = {
         theme: darkTheme ? 'vs-dark' : 'vs',
@@ -131,16 +136,19 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
     const updateStderr = (str: string) => (stderrRef.current += str + '\n');
     // Function called post the cvc5 execution
     const postCVC5run = (isThereError: boolean) => {
-        // Turn off the spin
-        setSpinnerOn(false);
         // Sanitize the string
         stdoutRef.current = sanitizeDotResult(stdoutRef.current).trim();
         // If there was an error
         if (isThereError && !stdoutRef.current.length) {
-            const err = stderrRef.current.length
-                ? stderrRef.current
-                : 'Error: Unknown error, check out the arguments parsed or the smt text.';
-            addErrorToast(err);
+            // Change the spin message to render
+            dispatch(setSpinner('off'));
+
+            setErr(
+                stderrRef.current.length
+                    ? stderrRef.current
+                    : 'Error: Unknown error, check out the arguments parsed or the smt text.',
+            );
+            forceError();
         }
         // Get the result .dot
         else {
@@ -150,6 +158,9 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
             dispatch(reRender());
 
             dispatch(process(stdoutRef.current));
+
+            // Change the spin message to render
+            dispatch(setSpinner('render'));
         }
     };
     // Clean the output a single time during the cvc5 execution
@@ -300,7 +311,6 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
                             icon="code"
                             text="Generate proof"
                             onClick={() => {
-                                setSpinnerOn(true);
                                 dispatch(setSmt(textRef.current));
 
                                 let args = defaultArgs;
@@ -342,6 +352,8 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
 
                                 // Only calls web assembly when there is some text on the code editor
                                 if (textRef.current.trim().length) {
+                                    dispatch(setSpinner('cvc5'));
+
                                     // Run cvc5
                                     Module({
                                         arguments: args,
@@ -356,21 +368,12 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
                                 // There isn't text in the code editor
                                 else {
                                     addErrorToast('Error: Empty proof in the code editor.');
-                                    setSpinnerOn(false);
                                 }
                             }}
                             tabIndex={3}
                         />
                     </div>
                 </footer>
-                <Overlay isOpen={spinnerOn} className="spinner-overlay">
-                    <div className="overlay-container">
-                        <div className="spinner-info">
-                            <h1>CVC5 is running!</h1>
-                            <Spinner intent="primary" size={80} />
-                        </div>
-                    </div>
-                </Overlay>
             </div>
         </Drawer>
     );

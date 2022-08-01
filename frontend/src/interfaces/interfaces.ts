@@ -65,6 +65,7 @@ interface CanvasPropsAndRedux extends CanvasProps {
     visualInfo: ProofState['visualInfo'];
     nodeFindData: ExternalCmdState['findData'];
     renderData: ExternalCmdState['renderData'];
+    spinner: ExternalCmdState['spinner'];
 
     hideNodes: ActionCreatorWithPayload<number[], string>;
     unhideNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
@@ -74,6 +75,7 @@ interface CanvasPropsAndRedux extends CanvasProps {
     reRender: ActionCreatorWithPayload<void, string>;
     addRenderCount: ActionCreatorWithPayload<void, string>;
     blockRenderNewFile: ActionCreatorWithPayload<void, string>;
+    setSpinner: ActionCreatorWithPayload<ExternalCmdState['spinner'], string>;
 }
 
 interface CanvasState {
@@ -256,6 +258,7 @@ interface ExternalCmdState {
         count: number;
         fileChanged: boolean;
     };
+    spinner: 'off' | 'cvc5' | 'render';
 }
 
 export type {

@@ -21,13 +21,7 @@ import '../../../scss/VisualizerCanvas.scss';
 import { CanvasProps, CanvasState } from '../../../interfaces/interfaces';
 import { connect } from 'react-redux';
 import { selectVisualInfo } from '../../../store/features/proof/proofSlice';
-import {
-    hideNodes,
-    unhideNodes,
-    foldAllDescendants,
-    applyView,
-    setVisualInfo,
-} from '../../../store/features/proof/proofSlice';
+import { hideNodes, unhideNodes, foldAllDescendants, setVisualInfo } from '../../../store/features/proof/proofSlice';
 import {
     selectFindData,
     findNode,
@@ -35,6 +29,8 @@ import {
     reRender,
     addRenderCount,
     blockRenderNewFile,
+    setSpinner,
+    selectSpinner,
 } from '../../../store/features/externalCmd/externalCmd';
 
 const nodeWidth = 300,
@@ -239,6 +235,10 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 visualInfo: props.visualInfo,
                 stage: stage,
             };
+        }
+        // Disable the render spinner if the rendering have finished
+        else if (props.spinner === 'render' && count === 2) {
+            setTimeout(() => props.setSpinner('off'), 100);
         }
         return { stage: stage };
     }
@@ -498,6 +498,7 @@ function mapStateToProps(state: ReduxState, ownProps: CanvasProps) {
         visualInfo: selectVisualInfo(state),
         nodeFindData: selectFindData(state),
         renderData: selectRenderData(state),
+        spinner: selectSpinner(state),
         ...ownProps,
     };
 }
@@ -506,12 +507,12 @@ const mapDispatchToProps = {
     hideNodes,
     unhideNodes,
     foldAllDescendants,
-    applyView,
     setVisualInfo,
     findNode,
     reRender,
     addRenderCount,
     blockRenderNewFile,
+    setSpinner,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Canvas);
