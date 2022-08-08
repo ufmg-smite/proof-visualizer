@@ -39,7 +39,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
     const [err, setErr] = useState('');
 
     // The default arguments used in the proof generation
-    const defaultArgs = ['--dump-proofs', '--proof-format=dot', '--proof-granularity=theory-rewrite'];
+    const defaultArgs = ['--dump-proofs', '--proof-format=dot', '--proof-granularity=theory-rewrite', '--dag-thresh=0'];
 
     const dispatch = useAppDispatch();
 
