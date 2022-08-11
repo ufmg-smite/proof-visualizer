@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction } from 'react';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { TreeNodeInfo } from '@blueprintjs/core';
 import { renderLetKind, ClusterKind } from './enum';
+import { BaseUndo } from './undoClasses';
 
 // NODES
 interface NodeInterface {
@@ -38,7 +39,7 @@ interface NodeProps {
     toggleNodeSelection: (id: number) => void;
     updateNodePosition: (key: number, x: number, y: number) => void;
     openDrawer: (nodeInfo: NodeInfo, tree?: Array<TreeNode>) => void;
-    onDragEnd: () => void;
+    onDragEnd: (nodeID: number) => void;
     createTree: (id: number) => TreeNode[];
 }
 
@@ -66,6 +67,7 @@ interface CanvasPropsAndRedux extends CanvasProps {
     nodeFindData: ExternalCmdState['findData'];
     renderData: ExternalCmdState['renderData'];
     spinner: ExternalCmdState['spinner'];
+    topUndo: BaseUndo;
 
     hideNodes: ActionCreatorWithPayload<number[], string>;
     unhideNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
@@ -76,6 +78,8 @@ interface CanvasPropsAndRedux extends CanvasProps {
     addRenderCount: ActionCreatorWithPayload<void, string>;
     blockRenderNewFile: ActionCreatorWithPayload<void, string>;
     setSpinner: ActionCreatorWithPayload<ExternalCmdState['spinner'], string>;
+    addUndo: ActionCreatorWithPayload<BaseUndo, string>;
+    undo: ActionCreatorWithPayload<string, string>;
 }
 
 interface CanvasState {
@@ -237,6 +241,7 @@ interface ProofState {
         color: string;
     }[];
     smt: string;
+    undoStack: BaseUndo[];
 }
 // FILE
 interface FileState {

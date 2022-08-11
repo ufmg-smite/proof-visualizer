@@ -5,7 +5,6 @@ import dagre from 'dagre';
 import Node from './VisualizerNode';
 import Line from './VisualizerLine';
 import Menu from './VisualizerMenu';
-
 import {
     NodeProps,
     LineProps,
@@ -20,8 +19,16 @@ import '../../../scss/VisualizerCanvas.scss';
 
 import { CanvasProps, CanvasState } from '../../../interfaces/interfaces';
 import { connect } from 'react-redux';
-import { selectVisualInfo } from '../../../store/features/proof/proofSlice';
-import { hideNodes, unhideNodes, foldAllDescendants, setVisualInfo } from '../../../store/features/proof/proofSlice';
+import {
+    selectVisualInfo,
+    hideNodes,
+    unhideNodes,
+    foldAllDescendants,
+    setVisualInfo,
+    addUndo,
+    undo,
+    selectTopUndo,
+} from '../../../store/features/proof/proofSlice';
 import {
     selectFindData,
     findNode,
@@ -32,6 +39,7 @@ import {
     setSpinner,
     selectSpinner,
 } from '../../../store/features/externalCmd/externalCmd';
+import { MoveUndo } from '../../../interfaces/undoClasses';
 
 const nodeWidth = 300,
     nodeHeight = 130;
@@ -422,12 +430,14 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         points: [from.x + 150, from.y, to.x + 150, to.y + 105],
     });
 
-    saveNodePosition = (): void => {
-        const { visualInfo, setVisualInfo } = this.props;
+    saveNodePosition = (nodeID: number): void => {
+        const { visualInfo, setVisualInfo, addUndo } = this.props;
         const { showingNodes } = this.state;
 
         // Get the current position of the nodes and create a proofState with them included
         setVisualInfo(Canvas.copyNodePosition(visualInfo, showingNodes));
+        // Add an action to the undo stack
+        addUndo(new MoveUndo([nodeID], visualInfo[nodeID].x, visualInfo[nodeID].y));
     };
 
     updateNodePosition = (key: number, x: number, y: number): void => {
@@ -444,13 +454,22 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         this.setState({ showingNodes, showingEdges });
     };
 
+    handleKeyDown = (e: React.KeyboardEvent) => {
+        const { topUndo, undo } = this.props;
+        e.stopPropagation();
+        // CTRL + Z
+        if (e.ctrlKey && e.key === 'z' && topUndo) {
+            undo(topUndo.constructor.name);
+        }
+    };
+
     render(): JSX.Element {
         const { canvasSize, stage, showingNodes, showingEdges, nodesSelected, nodeOnFocus, proof } = this.state;
         const color = showingNodes[nodeOnFocus] ? showingNodes[nodeOnFocus].props.color : '';
         const found = proof.find((o) => o.id === nodeOnFocus);
 
         return (
-            <div>
+            <div tabIndex={1} onKeyDown={this.handleKeyDown}>
                 <Menu
                     unfold={this.unfold}
                     foldSelectedNodes={this.foldSelectedNodes}
@@ -499,6 +518,7 @@ function mapStateToProps(state: ReduxState, ownProps: CanvasProps) {
         nodeFindData: selectFindData(state),
         renderData: selectRenderData(state),
         spinner: selectSpinner(state),
+        topUndo: selectTopUndo(state),
         ...ownProps,
     };
 }
@@ -513,6 +533,8 @@ const mapDispatchToProps = {
     addRenderCount,
     blockRenderNewFile,
     setSpinner,
+    addUndo,
+    undo,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Canvas);

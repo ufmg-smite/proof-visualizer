@@ -154,7 +154,7 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
             onDragMove={(e) => {
                 updateNodePosition(id, e.target.attrs.x, e.target.attrs.y);
             }}
-            onDragEnd={onDragEnd}
+            onDragEnd={() => onDragEnd(id)}
             x={x}
             y={y}
             onClick={handleClick}

@@ -13,6 +13,14 @@ import {
 import { NodeInterface, ProofState } from '../../../interfaces/interfaces';
 import { colorConverter } from '../theme/auxi';
 import { ClusterKind } from '../../../interfaces/enum';
+import { BaseUndo, ColorUndo, MoveUndo } from '../../../interfaces/undoClasses';
+
+const STACK_MAX_SIZE = 5;
+
+const addToStack = (state: any, action: PayloadAction<BaseUndo>) => {
+    if (state.undoStack.length === STACK_MAX_SIZE) state.undoStack.shift();
+    state.undoStack.push(action.payload);
+};
 
 const initialState: ProofState = {
     proof: [],
@@ -24,6 +32,7 @@ const initialState: ProofState = {
     visualInfo: [],
     clustersInfos: [],
     smt: '',
+    undoStack: [],
 };
 
 export const proofSlice = createSlice({
@@ -307,15 +316,58 @@ export const proofSlice = createSlice({
             }
         },
         applyColor: (state, action: PayloadAction<string>) => {
+            const nodes: number[] = [],
+                colors: string[] = [];
             Object.keys(state.visualInfo).forEach((id) => {
-                if (state.visualInfo[Number(id)].selected) {
-                    state.visualInfo[Number(id)].color = action.payload;
-                    state.visualInfo[Number(id)].selected = false;
+                const nodeID = Number(id);
+                if (state.visualInfo[nodeID].selected) {
+                    nodes.push(nodeID);
+                    colors.push(state.visualInfo[nodeID].color);
+
+                    state.visualInfo[nodeID].color = action.payload;
+                    state.visualInfo[nodeID].selected = false;
                 }
             });
+            //
+            if (nodes.length) addToStack(state, { payload: new ColorUndo(nodes, colors), type: 'string' });
         },
         setSmt: (state, action: PayloadAction<string>) => {
             state.smt = action.payload;
+        },
+        addUndo: addToStack,
+        undo: (state, action: PayloadAction<string>) => {
+            const topUndo = state.undoStack[state.undoStack.length - 1];
+            const { nodes } = topUndo;
+            switch (action.payload) {
+                case 'MoveUndo':
+                    const { x, y } = topUndo as MoveUndo;
+                    state.visualInfo[nodes[0]] = {
+                        ...state.visualInfo[nodes[0]],
+                        x,
+                        y,
+                    };
+
+                    break;
+                case 'ColorUndo':
+                    const { color } = topUndo as ColorUndo;
+                    nodes.forEach((node, id) => {
+                        state.visualInfo[node] = {
+                            ...state.visualInfo[node],
+                            color: color[id],
+                        };
+                    });
+
+                    break;
+                case 'FoldUndo':
+                    break;
+                case 'HideUndo':
+                    break;
+                case 'UnfoldUndo':
+                    break;
+                case 'SelectUndo':
+                    break;
+            }
+            state.undoStack.pop();
         },
     },
 });
@@ -332,6 +384,8 @@ export const {
     applyView,
     applyColor,
     setSmt,
+    addUndo,
+    undo,
 } = proofSlice.actions;
 
 export const selectProof = (state: RootState): NodeInterface[] => {
@@ -454,5 +508,7 @@ export const selectNodeClusters = (state: RootState): ProofState['clustersInfos'
 export const selectSmt = (state: RootState): ProofState['smt'] => {
     return state.proof.smt;
 };
+
+export const selectTopUndo = (state: RootState): BaseUndo => state.proof.undoStack[state.proof.undoStack.length - 1];
 
 export default proofSlice.reducer;
