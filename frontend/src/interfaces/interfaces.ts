@@ -70,7 +70,7 @@ interface CanvasPropsAndRedux extends CanvasProps {
     topUndo: BaseUndo;
 
     hideNodes: ActionCreatorWithPayload<number[], string>;
-    unhideNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
+    unfoldNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
     foldAllDescendants: ActionCreatorWithPayload<number>;
     setVisualInfo: ActionCreatorWithPayload<ProofState['visualInfo'], string>;
     findNode: ActionCreatorWithPayload<{ nodeId: number; option: boolean }, string>;
@@ -80,6 +80,10 @@ interface CanvasPropsAndRedux extends CanvasProps {
     setSpinner: ActionCreatorWithPayload<ExternalCmdState['spinner'], string>;
     addUndo: ActionCreatorWithPayload<BaseUndo, string>;
     undo: ActionCreatorWithPayload<string, string>;
+    selectNodes: ActionCreatorWithPayload<number[], string>;
+    unselectNodes: ActionCreatorWithPayload<number[], string>;
+    applyColor: ActionCreatorWithPayload<string, string>;
+    moveNode: ActionCreatorWithPayload<{ id: number; x: number; y: number }, string>;
 }
 
 interface CanvasState {

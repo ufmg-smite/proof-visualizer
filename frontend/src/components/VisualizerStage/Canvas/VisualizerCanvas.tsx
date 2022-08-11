@@ -22,12 +22,16 @@ import { connect } from 'react-redux';
 import {
     selectVisualInfo,
     hideNodes,
-    unhideNodes,
+    unfoldNodes,
     foldAllDescendants,
     setVisualInfo,
     addUndo,
     undo,
     selectTopUndo,
+    selectNodes,
+    unselectNodes,
+    applyColor,
+    moveNode,
 } from '../../../store/features/proof/proofSlice';
 import {
     selectFindData,
@@ -39,7 +43,6 @@ import {
     setSpinner,
     selectSpinner,
 } from '../../../store/features/externalCmd/externalCmd';
-import { MoveUndo } from '../../../interfaces/undoClasses';
 
 const nodeWidth = 300,
     nodeHeight = 130;
@@ -352,7 +355,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     unfold = (): void => {
         const { nodeOnFocus, proof } = this.state;
-        const { unhideNodes, reRender } = this.props;
+        const { unfoldNodes, reRender } = this.props;
 
         // Get the pi node (to be unfold)
         const obj = proof.find((node) => node.id === nodeOnFocus);
@@ -361,56 +364,35 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
 
         reRender();
-        unhideNodes({ pi: nodeOnFocus, hiddens: hiddenIds });
+        unfoldNodes({ pi: nodeOnFocus, hiddens: hiddenIds });
 
         this.setState({ nodesSelected: [] });
     };
 
     changeNodeColor = (color: string): void => {
         const { showingNodes, nodesSelected, nodeOnFocus } = this.state;
-        const { setVisualInfo } = this.props;
-        let { visualInfo } = this.props;
+        const { applyColor, selectNodes } = this.props;
 
-        // Save the current position
-        nodesSelected.forEach((nodeId) => {
-            visualInfo = {
-                ...visualInfo,
-                [nodeId]: {
-                    ...visualInfo[nodeId],
-                    color: color,
-                    selected: false,
-                },
-            };
-        });
+        // Select the node in focus to set the color later
         if (!nodesSelected.length && showingNodes[nodeOnFocus]) {
-            visualInfo = {
-                ...visualInfo,
-                [nodeOnFocus]: { ...visualInfo[nodeOnFocus], color: color, selected: false },
-            };
+            selectNodes([nodeOnFocus]);
         }
 
-        setVisualInfo(visualInfo);
+        applyColor(color);
         this.setState({ nodesSelected: [] });
     };
 
     toggleNodeSelection = (id: number): void => {
         let { nodesSelected } = this.state;
-        const { visualInfo, setVisualInfo } = this.props;
+        const { visualInfo, unselectNodes, selectNodes } = this.props;
 
         if (visualInfo[id].selected) {
+            unselectNodes([id]);
             nodesSelected = nodesSelected.filter((nodeId) => nodeId !== id);
         } else {
+            selectNodes([id]);
             nodesSelected.push(id);
         }
-
-        // Save the current position
-        setVisualInfo({
-            ...visualInfo,
-            [id]: {
-                ...visualInfo[id],
-                selected: !visualInfo[id].selected,
-            },
-        });
 
         this.setState({ nodesSelected });
     };
@@ -431,13 +413,11 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     });
 
     saveNodePosition = (nodeID: number): void => {
-        const { visualInfo, setVisualInfo, addUndo } = this.props;
+        const { moveNode } = this.props;
         const { showingNodes } = this.state;
 
-        // Get the current position of the nodes and create a proofState with them included
-        setVisualInfo(Canvas.copyNodePosition(visualInfo, showingNodes));
-        // Add an action to the undo stack
-        addUndo(new MoveUndo([nodeID], visualInfo[nodeID].x, visualInfo[nodeID].y));
+        const thisNode = showingNodes[nodeID];
+        moveNode({ id: nodeID, x: thisNode.props.x, y: thisNode.props.y });
     };
 
     updateNodePosition = (key: number, x: number, y: number): void => {
@@ -525,7 +505,7 @@ function mapStateToProps(state: ReduxState, ownProps: CanvasProps) {
 
 const mapDispatchToProps = {
     hideNodes,
-    unhideNodes,
+    unfoldNodes,
     foldAllDescendants,
     setVisualInfo,
     findNode,
@@ -535,6 +515,10 @@ const mapDispatchToProps = {
     setSpinner,
     addUndo,
     undo,
+    selectNodes,
+    unselectNodes,
+    applyColor,
+    moveNode,
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Canvas);

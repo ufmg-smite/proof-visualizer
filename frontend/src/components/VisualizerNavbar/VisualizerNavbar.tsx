@@ -10,7 +10,7 @@ import {
     applyColor,
     hideNodes,
     foldAllDescendants,
-    unhideNodes,
+    unfoldNodes,
     selectVisualInfo,
     selectProof,
     selectHiddenNodes,
@@ -267,7 +267,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
                     // Re-render the canvas and update the store
                     dispatch(reRender());
-                    dispatch(unhideNodes({ pi: id, hiddens: hiddenIds }));
+                    dispatch(unfoldNodes({ pi: id, hiddens: hiddenIds }));
                 }
             }
         },

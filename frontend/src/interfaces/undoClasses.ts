@@ -1,12 +1,3 @@
-export enum UndoKind {
-    MOVE,
-    COLOR,
-    FOLD,
-    HIDE,
-    UNFOLD,
-    SELECT,
-}
-
 export class BaseUndo {
     nodes: number[];
 
@@ -32,6 +23,12 @@ export class ColorUndo extends BaseUndo {
     constructor(nodes: number[], color: string[]) {
         super(nodes);
         this.color = color;
+    }
+}
+
+export class UnfoldUndo extends BaseUndo {
+    constructor(nodes: number[]) {
+        super(nodes);
     }
 }
 
