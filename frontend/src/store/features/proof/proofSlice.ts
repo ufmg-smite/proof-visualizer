@@ -5,6 +5,7 @@ import { NodeInterface, ProofState } from '../../../interfaces/interfaces';
 import { ClusterKind } from '../../../interfaces/enum';
 import { BaseUndo } from '../../../interfaces/undoClasses';
 import reducers from './reducers';
+import Deque from 'double-ended-queue';
 
 const initialState: ProofState = {
     proof: [],
@@ -16,7 +17,7 @@ const initialState: ProofState = {
     visualInfo: [],
     clustersInfos: [],
     smt: '',
-    undoStack: [],
+    undoQueue: new Deque<BaseUndo>(),
 };
 
 export const proofSlice = createSlice({
@@ -163,6 +164,7 @@ export const selectSmt = (state: RootState): ProofState['smt'] => {
     return state.proof.smt;
 };
 
-export const selectTopUndo = (state: RootState): BaseUndo => state.proof.undoStack[state.proof.undoStack.length - 1];
-
+export const selectTopUndo = (state: RootState): BaseUndo | undefined => {
+    return state.proof.undoQueue.peekBack();
+};
 export default proofSlice.reducer;

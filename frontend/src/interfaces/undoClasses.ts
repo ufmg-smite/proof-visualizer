@@ -27,13 +27,25 @@ export class ColorUndo extends BaseUndo {
 }
 
 export class UnfoldUndo extends BaseUndo {
-    constructor(nodes: number[]) {
+    positions: { [id: number]: { x: number; y: number } };
+    colors: { [id: number]: string };
+
+    constructor(
+        nodes: number[],
+        positions: { [id: number]: { x: number; y: number } },
+        colors: { [id: number]: string },
+    ) {
         super(nodes);
+        this.positions = positions;
+        this.colors = colors;
     }
 }
 
 export class FoldUndo extends BaseUndo {
-    constructor(nodes: number[]) {
+    positions: { [id: number]: { x: number; y: number } };
+
+    constructor(nodes: number[], positions: { [id: number]: { x: number; y: number } }) {
         super(nodes);
+        this.positions = positions;
     }
 }

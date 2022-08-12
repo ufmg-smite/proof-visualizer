@@ -3,6 +3,7 @@ import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { TreeNodeInfo } from '@blueprintjs/core';
 import { renderLetKind, ClusterKind } from './enum';
 import { BaseUndo } from './undoClasses';
+import Deque from 'double-ended-queue';
 
 // NODES
 interface NodeInterface {
@@ -67,7 +68,7 @@ interface CanvasPropsAndRedux extends CanvasProps {
     nodeFindData: ExternalCmdState['findData'];
     renderData: ExternalCmdState['renderData'];
     spinner: ExternalCmdState['spinner'];
-    topUndo: BaseUndo;
+    topUndo: BaseUndo | undefined;
 
     hideNodes: ActionCreatorWithPayload<number[], string>;
     unfoldNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
@@ -245,7 +246,7 @@ interface ProofState {
         color: string;
     }[];
     smt: string;
-    undoStack: BaseUndo[];
+    undoQueue: Deque<BaseUndo>;
 }
 // FILE
 interface FileState {
