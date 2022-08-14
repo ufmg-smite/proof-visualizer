@@ -144,17 +144,19 @@ function foldAllDescendants(state: Draft<ProofState>, action: PayloadAction<numb
     // Set the visual info for the new pi node and the root node
     const objs = Object.keys(state.visualInfo);
     const piNodeId = objs.length;
+    // Set new visual info for the nodes
     state.visualInfo[action.payload] = {
-            ...state.visualInfo[action.payload],
-            selected: false,
+        ...state.visualInfo[action.payload],
+        selected: false,
     };
     state.visualInfo[piNodeId] = {
-            color: '#555',
-            x: 0,
-            y: 0,
-            selected: false,
+        color: '#555',
+        x: 0,
+        y: 0,
+        selected: false,
     };
 
+    // Save the position of all nodes
     const pos: { [id: number]: { x: number; y: number } } = {};
     objs.forEach((key) => {
         const id = Number(key);
@@ -196,9 +198,9 @@ function unfoldNodes(state: Draft<ProofState>, action: PayloadAction<{ pi: numbe
         // Save all the hidden nodes colors
         colors[id] = state.visualInfo[id].color;
         state.visualInfo[id] = {
-                ...state.visualInfo[id],
-                color: color !== '#555' ? color : state.visualInfo[id].color,
-                selected: false,
+            ...state.visualInfo[id],
+            color: color !== '#555' ? color : state.visualInfo[id].color,
+            selected: false,
         };
     });
     colors[size - 1] = color;
@@ -355,7 +357,7 @@ function setSmt(state: Draft<ProofState>, action: PayloadAction<string>): void {
 function undo(state: Draft<ProofState>, action: PayloadAction<string>): void {
     const topUndo = state.undoQueue.pop();
     if (topUndo) {
-    const { nodes } = topUndo;
+        const { nodes } = topUndo;
         if (action.payload === 'MoveUndo') {
             const { x, y } = topUndo as MoveUndo;
             state.visualInfo[nodes[0]] = {
@@ -380,7 +382,6 @@ function undo(state: Draft<ProofState>, action: PayloadAction<string>): void {
                 if (equal) id = a;
                 return !equal;
             });
-
             delete state.visualInfo[state.proof.length + id];
             // Put all the nodes in the older position
             Object.keys(positions).forEach((key) => {
@@ -405,7 +406,7 @@ function undo(state: Draft<ProofState>, action: PayloadAction<string>): void {
                 const id = Number(key);
                 state.visualInfo[id].color = colors[id];
             });
-    }
+        }
     }
 }
 
