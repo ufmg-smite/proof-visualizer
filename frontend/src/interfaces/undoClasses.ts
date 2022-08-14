@@ -29,18 +29,15 @@ export class ColorUndo extends BaseUndo {
 export class UnfoldUndo extends BaseUndo {
     positions: { [id: number]: { x: number; y: number } };
     colors: { [id: number]: string };
-    hiddenId: number;
 
     constructor(
         nodes: number[],
         positions: { [id: number]: { x: number; y: number } },
         colors: { [id: number]: string },
-        hiddenId: number,
     ) {
         super(nodes);
         this.positions = positions;
         this.colors = colors;
-        this.hiddenId = hiddenId;
     }
 }
 
