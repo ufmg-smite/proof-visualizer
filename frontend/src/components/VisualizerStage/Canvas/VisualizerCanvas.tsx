@@ -354,17 +354,11 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     unfold = (): void => {
-        const { nodeOnFocus, proof } = this.state;
+        const { nodeOnFocus } = this.state;
         const { unfoldNodes, reRender } = this.props;
 
-        // Get the pi node (to be unfold)
-        const obj = proof.find((node) => node.id === nodeOnFocus);
-        // Get the hidden nodes and their ids
-        const hiddenNodes = obj ? (obj.hiddenNodes ? obj.hiddenNodes : []) : [];
-        const hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
-
         reRender();
-        unfoldNodes({ pi: nodeOnFocus, hiddens: hiddenIds });
+        unfoldNodes(nodeOnFocus);
 
         this.setState({ nodesSelected: [] });
     };

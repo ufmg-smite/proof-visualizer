@@ -66,12 +66,10 @@ function process(state: Draft<ProofState>, action: PayloadAction<string>): void 
     }
     // Is .dot
     else {
-        state.hiddenNodes = clusters.filter((c) => c.length > 1);
-
         // Init the visual info
-        const visualInfo: ProofState['visualInfo'] = {};
+        state.visualInfo = {};
         state.proof.forEach((node) => {
-            visualInfo[node.id] = {
+            state.visualInfo[node.id] = {
                 color: '#fff',
                 x: 0,
                 y: 0,
@@ -80,51 +78,55 @@ function process(state: Draft<ProofState>, action: PayloadAction<string>): void 
         });
 
         let size = state.proof.length;
-        state.clustersInfos.forEach((cluster) => {
-            visualInfo[cluster.hiddenNodes.length !== 1 ? size++ : cluster.hiddenNodes[0]] = {
-                color: cluster.color,
+        state.hiddenNodes = [];
+        state.clustersInfos.forEach(({ hiddenNodes, type, color }) => {
+            let index;
+            if (hiddenNodes.length > 1) {
+                state.hiddenNodes.push(hiddenNodes);
+                index = size++;
+            } else index = hiddenNodes[0];
+            state.visualInfo[index] = {
+                color: color,
                 x: 0,
                 y: 0,
                 selected: false,
             };
         });
-
-        state.visualInfo = visualInfo;
     }
+    // Set all the hidden nodes as hidden
+    state.hiddenNodes.forEach((hiddenNodesArray, i) => {
+        const piID = state.proof.length + i;
+        hiddenNodesArray.forEach((node) => (state.proof[node].isHidden = piID));
+    });
 }
 
 function hideNodes(state: Draft<ProofState>, action: PayloadAction<number[]>): void {
-    const toHideNodes = action.payload.filter(
-        (id) =>
-            id > 0 &&
-            id < state.proof.length &&
-            state.hiddenNodes.every((hiddenNodesArray) => hiddenNodesArray.indexOf(id) === -1),
-    );
+    const size = state.proof.length + state.hiddenNodes.length;
+
+    const toHideNodes = action.payload.filter((id) => id > 0 && id < state.proof.length && !state.proof[id].isHidden);
 
     const clusters = findNodesClusters(state.proof, toHideNodes);
     // If there are clusters to hide
     if (clusters.length) {
-        const objs = Object.keys(state.visualInfo);
-        const oldGreatesPiNode = state.proof.length + state.hiddenNodes.length;
-        state.hiddenNodes = state.hiddenNodes
-            .concat(clusters)
-            .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
+        state.hiddenNodes = state.hiddenNodes.concat(clusters);
+
+        // Save the position of all nodes
+        const pos: { id: number; x: number; y: number }[] = [];
+        for (let id = 0; id < size; id++) {
+            pos.push({ id: id, x: state.visualInfo[id].x, y: state.visualInfo[id].y });
+        }
 
         // Set the visual info for the new pi nodes
-        for (let i = 0; i < clusters.length; i++) {
-            state.visualInfo[oldGreatesPiNode + i] = {
+        clusters.forEach((cluster, i) => {
+            state.visualInfo[size + i] = {
                 color: '#555',
                 x: 0,
                 y: 0,
                 selected: false,
             };
-        }
 
-        // Save the position of all nodes
-        const pos: { id: number; x: number; y: number }[] = [];
-        objs.forEach((key) => {
-            const id = Number(key);
-            pos.push({ id: id, x: state.visualInfo[id].x, y: state.visualInfo[id].y });
+            const piID = size + i;
+            cluster.forEach((nodeID) => (state.proof[nodeID].isHidden = piID));
         });
 
         // Add undo action
@@ -135,70 +137,61 @@ function hideNodes(state: Draft<ProofState>, action: PayloadAction<number[]>): v
 }
 
 function foldAllDescendants(state: Draft<ProofState>, action: PayloadAction<number>): void {
-    state.hiddenNodes = state.hiddenNodes
-        .concat([
-            [action.payload, ...descendants(state.proof, action.payload)].filter(
-                (id, index, self) =>
-                    id > 0 &&
-                    id < state.proof.length &&
-                    state.hiddenNodes.every((hiddenNodesArray) => hiddenNodesArray.indexOf(id) === -1) &&
-                    self.indexOf(id) === index,
-            ),
-        ])
-        .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
+    const size = state.proof.length + state.hiddenNodes.length;
+    const hashMap: { [nodeID: number]: boolean } = {};
+    const newHidden = [action.payload, ...descendants(state.proof, action.payload)].filter((id) => {
+        let isTheFirst = true;
+        if (hashMap[id]) isTheFirst = false;
+        else hashMap[id] = true;
 
-    // Set the visual info for the new pi node and the root node
-    const objs = Object.keys(state.visualInfo);
-    const piNodeId = objs.length;
-    // Set new visual info for the nodes
-    state.visualInfo[action.payload].selected = false;
-    state.visualInfo[piNodeId] = {
-        color: '#555',
-        x: 0,
-        y: 0,
-        selected: false,
-    };
-
-    // Save the position of all nodes
-    const pos: { id: number; x: number; y: number }[] = [];
-    objs.forEach((key) => {
-        const id = Number(key);
-        pos.push({ id: id, x: state.visualInfo[id].x, y: state.visualInfo[id].y });
+        return id > 0 && id < state.proof.length && isTheFirst && !state.proof[id].isHidden;
     });
 
-    // Add undo action
-    addUndo(state, { payload: new FoldUndo([], pos), type: 'string' });
+    // If the array is valid to become a pi node
+    if (newHidden.length > 1) {
+        state.hiddenNodes = state.hiddenNodes.concat([newHidden]);
+        newHidden.forEach((nodeID) => (state.proof[nodeID].isHidden = size));
+
+        // Set the visual info for the new pi node and the root node
+        state.visualInfo[action.payload].selected = false;
+        state.visualInfo[size] = {
+            color: '#555',
+            x: 0,
+            y: 0,
+            selected: false,
+        };
+
+        // Save the position of all nodes
+        const pos: { id: number; x: number; y: number }[] = [];
+        for (let id = 0; id < size; id++) {
+            pos.push({ id: id, x: state.visualInfo[id].x, y: state.visualInfo[id].y });
+        }
+
+        // Add undo action
+        addUndo(state, { payload: new FoldUndo([], pos), type: 'string' });
+    }
 }
 
-function unfoldNodes(state: Draft<ProofState>, action: PayloadAction<{ pi: number; hiddens: number[] }>): void {
-    const { pi, hiddens } = action.payload;
-    state.hiddenNodes = state.hiddenNodes
-        .map((hiddenNodesArray) => hiddenNodesArray.filter((id) => hiddens.indexOf(id) === -1))
-        .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
-
+function unfoldNodes(state: Draft<ProofState>, action: PayloadAction<number>): void {
+    const pi = action.payload;
+    const hiddenID = pi - state.proof.length;
+    const hiddens = state.hiddenNodes[hiddenID];
+    const size = state.proof.length + state.hiddenNodes.length;
     const color = state.visualInfo[pi].color;
-    const pos: { id: number; x: number; y: number }[] = [];
-    const objs = Object.keys(state.visualInfo);
-    const size = objs.length;
 
     // Save all the positions
-    objs.forEach((key) => {
-        const id = Number(key);
+    const pos: { id: number; x: number; y: number }[] = [];
+    for (let id = 0; id < size; id++) {
         pos.push({ id: id, x: state.visualInfo[id].x, y: state.visualInfo[id].y });
-    });
-
-    // Make sure the ids are realocated
-    for (let i = pi; i < size - 1; i++) {
-        state.visualInfo[i] = state.visualInfo[i + 1];
     }
-    // Delete the last position
-    delete state.visualInfo[size - 1];
 
-    const colors: { id: number; color: string }[] = [];
     // Unselect the hidden nodes and set their color equal to the pi node
+    const colors: { id: number; color: string }[] = [];
     hiddens.forEach((id) => {
         // Save all the hidden nodes colors
         colors.push({ id: id, color: state.visualInfo[id].color });
+        // Signalize nodes are unhided
+        state.proof[id].isHidden = undefined;
         state.visualInfo[id] = {
             ...state.visualInfo[id],
             color: color !== '#555' ? color : state.visualInfo[id].color,
@@ -207,8 +200,18 @@ function unfoldNodes(state: Draft<ProofState>, action: PayloadAction<{ pi: numbe
     });
     colors.push({ id: pi, color: color });
 
+    // Remove the pi node array
+    state.hiddenNodes.splice(hiddenID, 1);
+
+    // Make sure the ids are realocated
+    for (let i = pi; i < size - 1; i++) {
+        state.visualInfo[i] = state.visualInfo[i + 1];
+    }
+    // Delete the last position
+    delete state.visualInfo[size - 1];
+
     // Add undo action
-    addUndo(state, { payload: new UnfoldUndo(action.payload.hiddens, pos, colors), type: 'string' });
+    addUndo(state, { payload: new UnfoldUndo([...hiddens], pos, colors), type: 'string' });
 }
 
 function setVisualInfo(state: Draft<ProofState>, action: PayloadAction<ProofState['visualInfo']>): void {
@@ -377,6 +380,8 @@ function undo(state: Draft<ProofState>, action: PayloadAction<string>): void {
             });
         } else if (action.payload === 'FoldUndo') {
             const { positions } = topUndo as FoldUndo;
+            // Make sure the node is not hidden
+            state.hiddenNodes[state.hiddenNodes.length - 1].forEach((node) => (state.proof[node].isHidden = undefined));
             // Remove the old pi node
             state.hiddenNodes.splice(state.hiddenNodes.length - 1, 1);
             delete state.visualInfo[state.proof.length + state.hiddenNodes.length];
@@ -390,6 +395,8 @@ function undo(state: Draft<ProofState>, action: PayloadAction<string>): void {
             // Remove the old pi nodes
             for (let len = state.proof.length + state.hiddenNodes.length, i = 0; i < nPiNodes; i++) {
                 delete state.visualInfo[--len];
+                // Make sure the node is not hidden
+                state.hiddenNodes[nPiNodes - i - 1].forEach((node) => (state.proof[node].isHidden = undefined));
             }
             state.hiddenNodes.splice(state.hiddenNodes.length - nPiNodes, nPiNodes);
 
@@ -405,6 +412,8 @@ function undo(state: Draft<ProofState>, action: PayloadAction<string>): void {
             const oldPiNum = colors[colors.length - 1].id;
             const newSize = state.proof.length + state.hiddenNodes.length;
             state.hiddenNodes.splice(oldPiNum - state.proof.length, 0, nodes);
+            // Make sure all the hidden nodes will be signalized as hidden
+            nodes.forEach((nodeID) => (state.proof[nodeID].isHidden = oldPiNum));
             // Shift the pi nodes visual info
             for (i = newSize; i > oldPiNum; i--) {
                 state.visualInfo[i] = state.visualInfo[i - 1];

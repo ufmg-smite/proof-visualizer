@@ -14,6 +14,7 @@ interface NodeInterface {
     children: number[];
     parents: number[];
     hiddenNodes?: NodeInterface[];
+    isHidden?: number;
     descendants: number;
     dependencies: { piId: number; depsId: number[] }[];
     clusterType: ClusterKind;
@@ -71,7 +72,7 @@ interface CanvasPropsAndRedux extends CanvasProps {
     topUndo: BaseUndo | undefined;
 
     hideNodes: ActionCreatorWithPayload<number[], string>;
-    unfoldNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
+    unfoldNodes: ActionCreatorWithPayload<number, string>;
     foldAllDescendants: ActionCreatorWithPayload<number>;
     setVisualInfo: ActionCreatorWithPayload<ProofState['visualInfo'], string>;
     findNode: ActionCreatorWithPayload<{ nodeId: number; option: boolean }, string>;
