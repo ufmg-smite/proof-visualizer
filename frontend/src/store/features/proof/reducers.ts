@@ -102,30 +102,21 @@ function hideNodes(state: Draft<ProofState>, action: PayloadAction<number[]>): v
     );
 
     const clusters = findNodesClusters(state.proof, toHideNodes);
+    const oldGreatesPiNode = state.proof.length + state.hiddenNodes.length;
     state.hiddenNodes = state.hiddenNodes.concat(clusters).filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
 
     // Set the visual info for the new pi nodes
-    const piNodeId = Object.keys(state.visualInfo).length;
     for (let i = 0; i < clusters.length; i++) {
-        state.visualInfo = {
-            ...state.visualInfo,
-            [piNodeId + i]: {
+        state.visualInfo[oldGreatesPiNode + i] = {
                 color: '#555',
                 x: 0,
                 y: 0,
                 selected: false,
-            },
         };
     }
 
     // Unselect the selected nodes
-    toHideNodes.forEach(
-        (id) =>
-            (state.visualInfo[id] = {
-                ...state.visualInfo[id],
-                selected: false,
-            }),
-    );
+    toHideNodes.forEach((id) => (state.visualInfo[id].selected = false));
 }
 
 function foldAllDescendants(state: Draft<ProofState>, action: PayloadAction<number>): void {
@@ -145,10 +136,7 @@ function foldAllDescendants(state: Draft<ProofState>, action: PayloadAction<numb
     const objs = Object.keys(state.visualInfo);
     const piNodeId = objs.length;
     // Set new visual info for the nodes
-    state.visualInfo[action.payload] = {
-        ...state.visualInfo[action.payload],
-        selected: false,
-    };
+    state.visualInfo[action.payload].selected = false;
     state.visualInfo[piNodeId] = {
         color: '#555',
         x: 0,
@@ -157,10 +145,10 @@ function foldAllDescendants(state: Draft<ProofState>, action: PayloadAction<numb
     };
 
     // Save the position of all nodes
-    const pos: { [id: number]: { x: number; y: number } } = {};
+    const pos: { id: number; x: number; y: number }[] = [];
     objs.forEach((key) => {
         const id = Number(key);
-        pos[id] = { x: state.visualInfo[id].x, y: state.visualInfo[id].y };
+        pos.push({ id: id, x: state.visualInfo[id].x, y: state.visualInfo[id].y });
     });
 
     // Add undo action
@@ -177,33 +165,35 @@ function unfoldNodes(state: Draft<ProofState>, action: PayloadAction<{ pi: numbe
         .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
 
     const color = state.visualInfo[pi].color;
-    // Make sure the ids are realocated
+    const pos: { id: number; x: number; y: number }[] = [];
     const objs = Object.keys(state.visualInfo);
     const size = objs.length;
-    const pos: { [id: number]: { x: number; y: number } } = {};
+
+    // Save all the positions
     objs.forEach((key) => {
         const id = Number(key);
-        pos[id] = { x: state.visualInfo[id].x, y: state.visualInfo[id].y };
+        pos.push({ id: id, x: state.visualInfo[id].x, y: state.visualInfo[id].y });
     });
 
+    // Make sure the ids are realocated
     for (let i = pi; i < size - 1; i++) {
         state.visualInfo[i] = state.visualInfo[i + 1];
     }
     // Delete the last position
     delete state.visualInfo[size - 1];
 
-    const colors: { [id: number]: string } = {};
+    const colors: { id: number; color: string }[] = [];
     // Unselect the hidden nodes and set their color equal to the pi node
     hiddens.forEach((id) => {
         // Save all the hidden nodes colors
-        colors[id] = state.visualInfo[id].color;
+        colors.push({ id: id, color: state.visualInfo[id].color });
         state.visualInfo[id] = {
             ...state.visualInfo[id],
             color: color !== '#555' ? color : state.visualInfo[id].color,
             selected: false,
         };
     });
-    colors[size - 1] = color;
+    colors.push({ id: pi, color: color });
 
     // Add undo action
     addUndo(state, { payload: new UnfoldUndo(action.payload.hiddens, pos, colors), type: 'string' });
@@ -375,36 +365,35 @@ function undo(state: Draft<ProofState>, action: PayloadAction<string>): void {
             });
         } else if (action.payload === 'FoldUndo') {
             const { positions } = topUndo as FoldUndo;
-            let id = 0;
-            // Find the pi node and remove it
-            state.hiddenNodes = state.hiddenNodes.filter((arr, a) => {
-                const equal = arr.every((node, i) => node === nodes[i]);
-                if (equal) id = a;
-                return !equal;
-            });
-            delete state.visualInfo[state.proof.length + id];
+            // Remove the old pi node
+            state.hiddenNodes.splice(state.hiddenNodes.length - 1, 1);
+            delete state.visualInfo[state.proof.length + state.hiddenNodes.length];
             // Put all the nodes in the older position
-            Object.keys(positions).forEach((key) => {
-                const id = Number(key);
-                const pos = positions[id];
-                state.visualInfo[id].x = pos.x;
-                state.visualInfo[id].y = pos.y;
+            positions.forEach(({ id, x, y }) => {
+                state.visualInfo[id].x = x;
+                state.visualInfo[id].y = y;
             });
         } else if (action.payload === 'HideUndo') {
         } else if (action.payload === 'UnfoldUndo') {
             const { positions, colors } = topUndo as UnfoldUndo;
-            hideNodes(state, { payload: nodes, type: 'string' });
+            let i;
+            // Create the old pi node in the right position
+            const oldPiNum = colors[colors.length - 1].id;
+            const newSize = state.proof.length + state.hiddenNodes.length;
+            state.hiddenNodes.splice(oldPiNum - state.proof.length, 0, nodes);
+            // Shift the pi nodes visual info
+            for (i = newSize; i > oldPiNum; i--) {
+                state.visualInfo[i] = state.visualInfo[i - 1];
+            }
+            state.visualInfo[i] = { x: 0, y: 0, color: '', selected: false };
             // Put all the nodes in the older position
-            Object.keys(positions).forEach((key) => {
-                const id = Number(key);
-                const pos = positions[id];
-                state.visualInfo[id].x = pos.x;
-                state.visualInfo[id].y = pos.y;
+            positions.forEach(({ id, x, y }) => {
+                state.visualInfo[id].x = x;
+                state.visualInfo[id].y = y;
             });
             // Set the old color of all the hidden nodes
-            Object.keys(colors).forEach((key) => {
-                const id = Number(key);
-                state.visualInfo[id].color = colors[id];
+            colors.forEach(({ id, color }) => {
+                state.visualInfo[id].color = color;
             });
         }
     }
