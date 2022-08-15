@@ -1,4 +1,4 @@
-import { FoldUndo, UnfoldUndo } from './../../../interfaces/undoClasses';
+import { FoldUndo, HideUndo, UnfoldUndo } from './../../../interfaces/undoClasses';
 import { Draft, PayloadAction } from '@reduxjs/toolkit';
 import { processDot, descendants, findNodesClusters, sliceNodesCluster, extractTheoryLemmas } from './auxi';
 import { ProofState } from '../../../interfaces/interfaces';
@@ -102,19 +102,34 @@ function hideNodes(state: Draft<ProofState>, action: PayloadAction<number[]>): v
     );
 
     const clusters = findNodesClusters(state.proof, toHideNodes);
-    const oldGreatesPiNode = state.proof.length + state.hiddenNodes.length;
-    state.hiddenNodes = state.hiddenNodes.concat(clusters).filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
+    // If there are clusters to hide
+    if (clusters.length) {
+        const objs = Object.keys(state.visualInfo);
+        const oldGreatesPiNode = state.proof.length + state.hiddenNodes.length;
+        state.hiddenNodes = state.hiddenNodes
+            .concat(clusters)
+            .filter((hiddenNodesArray) => hiddenNodesArray.length > 0);
 
-    // Set the visual info for the new pi nodes
-    for (let i = 0; i < clusters.length; i++) {
-        state.visualInfo[oldGreatesPiNode + i] = {
+        // Set the visual info for the new pi nodes
+        for (let i = 0; i < clusters.length; i++) {
+            state.visualInfo[oldGreatesPiNode + i] = {
                 color: '#555',
                 x: 0,
                 y: 0,
                 selected: false,
-        };
-    }
+            };
+        }
 
+        // Save the position of all nodes
+        const pos: { id: number; x: number; y: number }[] = [];
+        objs.forEach((key) => {
+            const id = Number(key);
+            pos.push({ id: id, x: state.visualInfo[id].x, y: state.visualInfo[id].y });
+        });
+
+        // Add undo action
+        addUndo(state, { payload: new HideUndo([], pos, clusters.length), type: 'string' });
+    }
     // Unselect the selected nodes
     toHideNodes.forEach((id) => (state.visualInfo[id].selected = false));
 }
@@ -152,10 +167,7 @@ function foldAllDescendants(state: Draft<ProofState>, action: PayloadAction<numb
     });
 
     // Add undo action
-    addUndo(state, {
-        payload: new FoldUndo(state.hiddenNodes[state.hiddenNodes.length - 1], pos),
-        type: 'string',
-    });
+    addUndo(state, { payload: new FoldUndo([], pos), type: 'string' });
 }
 
 function unfoldNodes(state: Draft<ProofState>, action: PayloadAction<{ pi: number; hiddens: number[] }>): void {
@@ -374,6 +386,18 @@ function undo(state: Draft<ProofState>, action: PayloadAction<string>): void {
                 state.visualInfo[id].y = y;
             });
         } else if (action.payload === 'HideUndo') {
+            const { positions, nPiNodes } = topUndo as HideUndo;
+            // Remove the old pi nodes
+            for (let len = state.proof.length + state.hiddenNodes.length, i = 0; i < nPiNodes; i++) {
+                delete state.visualInfo[--len];
+            }
+            state.hiddenNodes.splice(state.hiddenNodes.length - nPiNodes, nPiNodes);
+
+            // Put all the nodes in the older position
+            positions.forEach(({ id, x, y }) => {
+                state.visualInfo[id].x = x;
+                state.visualInfo[id].y = y;
+            });
         } else if (action.payload === 'UnfoldUndo') {
             const { positions, colors } = topUndo as UnfoldUndo;
             let i;

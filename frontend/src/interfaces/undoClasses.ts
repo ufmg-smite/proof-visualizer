@@ -49,3 +49,14 @@ export class FoldUndo extends BaseUndo {
         this.positions = positions;
     }
 }
+
+export class HideUndo extends BaseUndo {
+    positions: { id: number; x: number; y: number }[];
+    nPiNodes: number;
+
+    constructor(nodes: number[], positions: { id: number; x: number; y: number }[], nPiNodes: number) {
+        super(nodes);
+        this.positions = positions;
+        this.nPiNodes = nPiNodes;
+    }
+}
