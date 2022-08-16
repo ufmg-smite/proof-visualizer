@@ -331,19 +331,23 @@ function applyView(state: Draft<ProofState>, action: PayloadAction<ProofState['v
 }
 
 function applyColor(state: Draft<ProofState>, action: PayloadAction<string>): void {
-    const nodes: number[] = [],
-        colors: string[] = [];
+    const colorMap: { [color: string]: number[] } = {};
+    let nodesLen = 0;
     for (let nodeID = 0; nodeID < state.proof.length + state.hiddenNodes.length; nodeID++) {
-        if (state.visualInfo[nodeID].selected) {
-            nodes.push(nodeID);
-            colors.push(state.visualInfo[nodeID].color);
+        const thisInfo = state.visualInfo[nodeID];
+        if (thisInfo.selected) {
+            if (colorMap[thisInfo.color]) colorMap[thisInfo.color].push(nodeID);
+            else {
+                colorMap[thisInfo.color] = [nodeID];
+            }
+            nodesLen++;
 
-            state.visualInfo[nodeID].color = action.payload;
-            state.visualInfo[nodeID].selected = false;
+            thisInfo.color = action.payload;
+            thisInfo.selected = false;
         }
     }
     //
-    if (nodes.length) addUndo(state, { payload: new ColorUndo(nodes, colors), type: 'string' });
+    if (nodesLen) addUndo(state, { payload: new ColorUndo([], colorMap), type: 'string' });
 }
 
 function moveNode(state: Draft<ProofState>, action: PayloadAction<{ id: number; x: number; y: number }>): void {
@@ -374,12 +378,9 @@ function undo(state: Draft<ProofState>, action: PayloadAction<string>): void {
                 y,
             };
         } else if (action.payload === 'ColorUndo') {
-            const { color } = topUndo as ColorUndo;
-            nodes.forEach((node, id) => {
-                state.visualInfo[node] = {
-                    ...state.visualInfo[node],
-                    color: color[id],
-                };
+            const { colorMap } = topUndo as ColorUndo;
+            Object.keys(colorMap).forEach((color) => {
+                colorMap[color].forEach((node) => (state.visualInfo[node].color = color));
             });
         } else if (action.payload === 'FoldUndo') {
             const { positions } = topUndo as FoldUndo;

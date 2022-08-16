@@ -18,11 +18,11 @@ export class MoveUndo extends BaseUndo {
 }
 
 export class ColorUndo extends BaseUndo {
-    color: string[];
+    colorMap: { [color: string]: number[] };
 
-    constructor(nodes: number[], color: string[]) {
+    constructor(nodes: number[], color: { [color: string]: number[] }) {
         super(nodes);
-        this.color = color;
+        this.colorMap = color;
     }
 }
 
