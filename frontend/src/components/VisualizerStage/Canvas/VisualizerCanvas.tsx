@@ -25,9 +25,7 @@ import {
     unfoldNodes,
     foldAllDescendants,
     setVisualInfo,
-    addUndo,
     undo,
-    selectTopUndo,
     selectNodes,
     unselectNodes,
     applyColor,
@@ -429,11 +427,11 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     handleKeyDown = (e: React.KeyboardEvent) => {
-        const { topUndo, undo } = this.props;
+        const { undo } = this.props;
         e.stopPropagation();
         // CTRL + Z
-        if (e.ctrlKey && e.key === 'z' && topUndo) {
-            undo(topUndo.constructor.name);
+        if (e.ctrlKey && e.key === 'z') {
+            undo();
         }
     };
 
@@ -492,7 +490,6 @@ function mapStateToProps(state: ReduxState, ownProps: CanvasProps) {
         nodeFindData: selectFindData(state),
         renderData: selectRenderData(state),
         spinner: selectSpinner(state),
-        topUndo: selectTopUndo(state),
         ...ownProps,
     };
 }
@@ -507,7 +504,6 @@ const mapDispatchToProps = {
     addRenderCount,
     blockRenderNewFile,
     setSpinner,
-    addUndo,
     undo,
     selectNodes,
     unselectNodes,

@@ -2,8 +2,6 @@ import { Dispatch, SetStateAction } from 'react';
 import { ActionCreatorWithPayload } from '@reduxjs/toolkit';
 import { TreeNodeInfo } from '@blueprintjs/core';
 import { renderLetKind, ClusterKind } from './enum';
-import { BaseUndo } from './undoClasses';
-import Deque from 'double-ended-queue';
 
 // NODES
 interface NodeInterface {
@@ -69,7 +67,6 @@ interface CanvasPropsAndRedux extends CanvasProps {
     nodeFindData: ExternalCmdState['findData'];
     renderData: ExternalCmdState['renderData'];
     spinner: ExternalCmdState['spinner'];
-    topUndo: BaseUndo | undefined;
 
     hideNodes: ActionCreatorWithPayload<number[], string>;
     unfoldNodes: ActionCreatorWithPayload<number, string>;
@@ -80,8 +77,7 @@ interface CanvasPropsAndRedux extends CanvasProps {
     addRenderCount: ActionCreatorWithPayload<void, string>;
     blockRenderNewFile: ActionCreatorWithPayload<void, string>;
     setSpinner: ActionCreatorWithPayload<ExternalCmdState['spinner'], string>;
-    addUndo: ActionCreatorWithPayload<BaseUndo, string>;
-    undo: ActionCreatorWithPayload<string, string>;
+    undo: ActionCreatorWithPayload<void, string>;
     selectNodes: ActionCreatorWithPayload<number[], string>;
     unselectNodes: ActionCreatorWithPayload<number[], string>;
     applyColor: ActionCreatorWithPayload<string, string>;
@@ -247,7 +243,6 @@ interface ProofState {
         color: string;
     }[];
     smt: string;
-    undoQueue: Deque<BaseUndo>;
 }
 // FILE
 interface FileState {

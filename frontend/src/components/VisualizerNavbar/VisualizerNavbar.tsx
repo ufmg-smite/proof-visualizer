@@ -254,7 +254,6 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
             }
         },
         ['/unfold']: (cmds: string[]) => {
-            let hiddenIds: number[];
             // If there is a number argument
             if (cmds[1] && !isNaN(Number(cmds[1]))) {
                 const id = Number(cmds[1]);
@@ -262,12 +261,9 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 const obj = proof.find((node) => node.id === id);
                 // If it's a pi node
                 if (obj && obj.hiddenNodes?.length) {
-                    // Get the hidden nodes and their ids
-                    const hiddenNodes = obj.hiddenNodes ? obj.hiddenNodes : [];
-                    hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
                     // Re-render the canvas and update the store
                     dispatch(reRender());
-                    dispatch(unfoldNodes({ pi: id, hiddens: hiddenIds }));
+                    dispatch(unfoldNodes(id));
                 }
             }
         },
