@@ -200,8 +200,11 @@ export const piNodeParents = (
 };
 
 export const descendants = (proof: NodeInterface[], nodeId: number): number[] => {
-    return proof[nodeId].children.concat(
-        proof[nodeId].children.reduce((acc: number[], childId) => acc.concat(descendants(proof, childId)), []),
+    const validChildren = proof[nodeId].children.filter((node) => !proof[node].isHidden);
+    return validChildren.concat(
+        validChildren.reduce((acc: number[], childId) => {
+            return acc.concat(descendants(proof, childId));
+        }, []),
     );
 };
 
