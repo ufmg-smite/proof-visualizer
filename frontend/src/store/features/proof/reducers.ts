@@ -371,8 +371,7 @@ function setSmt(state: Draft<ProofState>, action: PayloadAction<string>): void {
 function undo(state: Draft<ProofState>, action: PayloadAction<void>): void {
     const topUndo = undoQueue.pop();
     if (topUndo) {
-        const { nodes } = topUndo,
-            name = topUndo.constructor.name;
+        const { nodes, name } = topUndo;
         if (name === 'MoveUndo') {
             const { x, y } = topUndo as MoveUndo;
             state.visualInfo[nodes[0]] = {

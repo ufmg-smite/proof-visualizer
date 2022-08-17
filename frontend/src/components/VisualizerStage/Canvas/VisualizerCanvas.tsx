@@ -334,11 +334,12 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     /* NODE MENU ACTIONS */
     foldAllDescendants = (): void => {
-        const { nodeOnFocus } = this.state;
-        const { foldAllDescendants, reRender } = this.props;
+        const { nodeOnFocus, nodesSelected } = this.state;
+        const { foldAllDescendants, reRender, unselectNodes } = this.props;
 
         reRender();
         foldAllDescendants(nodeOnFocus);
+        unselectNodes(nodesSelected);
         this.setState({ nodesSelected: [] });
     };
 
@@ -430,7 +431,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const { undo } = this.props;
         e.stopPropagation();
         // CTRL + Z
-        if (e.ctrlKey && e.key === 'z') {
+        if (e.ctrlKey && e.key.toLowerCase() === 'z') {
             undo();
         }
     };
