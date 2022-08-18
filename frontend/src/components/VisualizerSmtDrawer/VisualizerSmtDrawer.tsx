@@ -185,7 +185,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
             usePortal={false}
             onClose={(e) => {
                 e.preventDefault();
-                setDrawerIsOpen();
+                setDrawerIsOpen(false);
                 // Save the smt
                 dispatch(setSmt(textRef.current));
             }}

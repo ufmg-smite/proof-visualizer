@@ -1,7 +1,7 @@
 import { FoldUndo, HideUndo, UnfoldUndo } from './../../../interfaces/undoClasses';
 import { Draft, PayloadAction } from '@reduxjs/toolkit';
 import { processDot, descendants, findNodesClusters, sliceNodesCluster, extractTheoryLemmas } from './auxi';
-import { ProofState } from '../../../interfaces/interfaces';
+import { ExternalCmdState, ProofState } from '../../../interfaces/interfaces';
 import { colorConverter } from '../theme/auxi';
 import { BaseUndo, ColorUndo, MoveUndo } from '../../../interfaces/undoClasses';
 import Deque from 'double-ended-queue';
@@ -232,6 +232,16 @@ function setVisualInfo(state: Draft<ProofState>, action: PayloadAction<ProofStat
     state.visualInfo = action.payload;
 }
 
+function selectByArea(state: Draft<ProofState>, action: PayloadAction<ExternalCmdState['selectData']>): void {
+    const { upperL, lowerR } = action.payload;
+    const size = state.proof.length + state.hiddenNodes.length;
+    for (let i = 0; i < size; i++) {
+        const thisNode = state.visualInfo[i];
+        if (upperL.x <= thisNode.x && thisNode.x <= lowerR.x && upperL.y <= thisNode.y && thisNode.y <= lowerR.y) {
+            thisNode.selected = true;
+        }
+    }
+}
 function selectNodes(state: Draft<ProofState>, action: PayloadAction<number[]>): void {
     const len = state.proof.length + state.hiddenNodes.length;
     action.payload.forEach((id) => {
@@ -444,6 +454,7 @@ const reducers = {
     foldAllDescendants,
     unfoldNodes,
     setVisualInfo,
+    selectByArea,
     selectNodes,
     unselectNodes,
     changeStyle,

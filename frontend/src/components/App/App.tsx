@@ -16,8 +16,15 @@ import { selectSpinner } from '../../store/features/externalCmd/externalCmd';
 const App: React.FC = () => {
     const [dialogIsOpen, setDialogIsOpen] = useState(true);
     const [inTutorial, setInTutorial] = useState(false);
-    const [drawerIsOpen, setDrawerOpenState] = useReducer((isOpen) => !isOpen, false);
-    const [smtDrawerIsOpen, setSmtDrawerIsOpen] = useReducer((isOpen) => !isOpen, false);
+    const [drawerIsOpen, setDrawerOpenState] = useState(false);
+    const [smtDrawerIsOpen, setSmtDrawerIsOpen] = useState(false);
+    const [, disableAllDrawers] = useReducer(() => {
+        if (dialogIsOpen) setDialogIsOpen(false);
+        if (inTutorial) setInTutorial(false);
+        if (drawerIsOpen) setDrawerOpenState(false);
+        if (smtDrawerIsOpen) setSmtDrawerIsOpen(false);
+        return null;
+    }, null);
     const [smtOptions, setSmtOptions] = useState({ argsType: true, customArgs: '' });
     const darkTheme = useAppSelector(selectTheme);
     const spinner = useAppSelector(selectSpinner);
@@ -55,7 +62,7 @@ const App: React.FC = () => {
                 setDialogIsOpen={setDialogIsOpen}
                 addErrorToast={addErrorToast}
             />
-            <VisualizerStage />
+            <VisualizerStage disableExternalDrawers={disableAllDrawers} />
             {drawerIsOpen ? (
                 <VisualizersDrawer drawerIsOpen={drawerIsOpen} setDrawerIsOpen={setDrawerOpenState}></VisualizersDrawer>
             ) : null}

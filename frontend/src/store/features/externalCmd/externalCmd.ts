@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
-import { ExternalCmdState } from '../../../interfaces/interfaces';
+import { ExternalCmdState, SelectionSquare } from '../../../interfaces/interfaces';
 
 const initialState: ExternalCmdState = {
     findData: {
@@ -12,6 +12,7 @@ const initialState: ExternalCmdState = {
         fileChanged: false,
     },
     spinner: 'off',
+    selectData: { upperL: { x: -1, y: -1 }, lowerR: { x: -1, y: -1 } },
 };
 
 export const externalCmd = createSlice({
@@ -39,11 +40,22 @@ export const externalCmd = createSlice({
         setSpinner: (state, action: PayloadAction<'off' | 'cvc5' | 'render'>) => {
             state.spinner = action.payload;
         },
+        setSelectArea: (state, action: PayloadAction<SelectionSquare>) => {
+            state.selectData = action.payload;
+        },
     },
 });
 
-export const { findNode, reRender, addRenderCount, blockRender, allowRenderNewFile, blockRenderNewFile, setSpinner } =
-    externalCmd.actions;
+export const {
+    findNode,
+    reRender,
+    addRenderCount,
+    blockRender,
+    allowRenderNewFile,
+    blockRenderNewFile,
+    setSpinner,
+    setSelectArea,
+} = externalCmd.actions;
 
 export const selectFindData = (state: RootState): { nodeToFind: number; findOption: boolean } =>
     state.externalCmd.findData;
@@ -52,5 +64,7 @@ export const selectRenderData = (state: RootState): { count: number; fileChanged
     state.externalCmd.renderData;
 
 export const selectSpinner = (state: RootState): ExternalCmdState['spinner'] => state.externalCmd.spinner;
+
+export const selectSelectData = (state: RootState): ExternalCmdState['selectData'] => state.externalCmd.selectData;
 
 export default externalCmd.reducer;

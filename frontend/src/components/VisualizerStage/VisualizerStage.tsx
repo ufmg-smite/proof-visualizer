@@ -11,9 +11,10 @@ import { useAppSelector } from '../../store/hooks';
 import { selectFileCount } from '../../store/features/file/fileSlice';
 import { selectStyle, selectLetMap, selectProof } from '../../store/features/proof/proofSlice';
 import { selectTheme } from '../../store/features/theme/themeSlice';
-import { NodeInfo, NodeInterface, TreeNode } from '../../interfaces/interfaces';
+import { NodeInfo, NodeInterface, TreeNode, VisualizerStageProps } from '../../interfaces/interfaces';
 import { renderLetKind, drawerHelpersKind } from '../../interfaces/enum';
 import LetRender from '../VisualizerLetDrawer/LetRender';
+import SelectOvelay from './SelectOverlay';
 
 function ruleHelper(rule: string) {
     switch (rule.split(' ')[0]) {
@@ -210,7 +211,7 @@ function createTree(proof: NodeInterface[], id: number): TreeNode[] {
     return tree;
 }
 
-const VisualizerStage: React.FC = () => {
+const VisualizerStage: React.FC<VisualizerStageProps> = ({ disableExternalDrawers }: VisualizerStageProps) => {
     // Proof data
     const letMap = useAppSelector(selectLetMap);
     const proof = useAppSelector(selectProof);
@@ -270,7 +271,31 @@ const VisualizerStage: React.FC = () => {
     );
     const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
+    // Select overlay
+    const [isSelecting, setIsSelecting] = useReducer(
+        (state: boolean, action: { type: 'invert' | 'set'; payload: boolean }): boolean => {
+            switch (action.type) {
+                case 'invert':
+                    return !state;
+                case 'set':
+                    return action.payload;
+            }
+        },
+        false,
+    );
 
+    // At the beggining
+    useEffect(() => {
+        function handleKeyDown(e: KeyboardEvent) {
+            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's' && style === 'graph') {
+                disableExternalDrawers();
+                setDrawerIsOpen(false);
+                setIsSelecting({ type: 'invert', payload: false });
+            }
+        }
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, []);
     // Make sure that a new tree is created only when a new dot is used
     useEffect(() => setProofTree(createTree(proof, 0)), [fileID]);
     useEffect(() => {
@@ -440,7 +465,10 @@ const VisualizerStage: React.FC = () => {
             {proof.length > 1 && (
                 <>
                     {style === 'graph' ? (
-                        <Canvas key={fileID} proof={proof} openDrawer={openDrawer} createTree={createTree} />
+                        <div style={{ height: '100%', position: 'relative' }}>
+                            <SelectOvelay isSelecting={isSelecting} setIsSelecting={setIsSelecting} />
+                            <Canvas key={fileID} proof={proof} openDrawer={openDrawer} createTree={createTree} />
+                        </div>
                     ) : (
                         <VisualizerDirectoryStyle
                             proofTree={proofTree}

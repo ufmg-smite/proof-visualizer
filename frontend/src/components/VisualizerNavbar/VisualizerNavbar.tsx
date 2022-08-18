@@ -403,7 +403,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         dispatch(setSmt(smt));
 
         dispatch(process(dot));
-        setSmtDrawerIsOpen();
+        setSmtDrawerIsOpen(true);
     };
 
     const isPseudoClick = (e: React.KeyboardEvent<HTMLAnchorElement>): boolean => e.key === 'Enter' || e.key === ' ';
@@ -654,7 +654,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     className="bp3-minimal"
                     icon="code"
                     text={windowSize.width >= criticalWidth ? 'SMT Input' : ''}
-                    onClick={() => setSmtDrawerIsOpen()}
+                    onClick={() => setSmtDrawerIsOpen(true)}
                     tabIndex={tabIndex}
                 />
             </Navbar.Group>

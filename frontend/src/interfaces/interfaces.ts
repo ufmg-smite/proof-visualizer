@@ -54,6 +54,11 @@ interface NodeInfo {
     dependencies: NodeProps['dependencies'];
 }
 
+// VISUALIZER STAGE
+interface VisualizerStageProps {
+    disableExternalDrawers: React.DispatchWithoutAction;
+}
+
 // CANVAS
 // Dividir essas interfaces em funções
 interface CanvasProps {
@@ -67,12 +72,15 @@ interface CanvasPropsAndRedux extends CanvasProps {
     nodeFindData: ExternalCmdState['findData'];
     renderData: ExternalCmdState['renderData'];
     spinner: ExternalCmdState['spinner'];
+    selectData: ExternalCmdState['selectData'];
 
     hideNodes: ActionCreatorWithPayload<number[], string>;
     unfoldNodes: ActionCreatorWithPayload<number, string>;
     foldAllDescendants: ActionCreatorWithPayload<number>;
     setVisualInfo: ActionCreatorWithPayload<ProofState['visualInfo'], string>;
     findNode: ActionCreatorWithPayload<{ nodeId: number; option: boolean }, string>;
+    setSelectArea: ActionCreatorWithPayload<SelectionSquare, string>;
+    selectByArea: ActionCreatorWithPayload<SelectionSquare, string>;
     reRender: ActionCreatorWithPayload<void, string>;
     addRenderCount: ActionCreatorWithPayload<void, string>;
     blockRenderNewFile: ActionCreatorWithPayload<void, string>;
@@ -103,6 +111,17 @@ interface DirectoryStyleProps {
     translate: (s: string) => string;
 }
 
+// SELECT OVERLAY
+interface SelectionSquare {
+    upperL: { x: number; y: number };
+    lowerR: { x: number; y: number };
+}
+
+interface SelectOverlayProps {
+    isSelecting: boolean;
+    setIsSelecting: React.Dispatch<{ type: 'invert' | 'set'; payload: boolean }>;
+}
+
 // NAVBAR
 interface NavbarProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
@@ -110,7 +129,7 @@ interface NavbarProps {
     addErrorToast: (err: string) => void;
     inTutorial: boolean;
     setInTutorial: Dispatch<SetStateAction<boolean>>;
-    setSmtDrawerIsOpen: React.DispatchWithoutAction;
+    setSmtDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 interface NavbarPropsAndRedux extends NavbarProps {
@@ -187,7 +206,7 @@ interface DrawerProps {
 // SMT DRAWER
 interface SmtDrawerProps {
     isOpen: boolean;
-    setDrawerIsOpen: React.DispatchWithoutAction;
+    setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
     addErrorToast: (err: string) => void;
     smtOptions: { argsType: boolean; customArgs: string };
     setSmtOptions: Dispatch<SetStateAction<SmtDrawerProps['smtOptions']>>;
@@ -265,16 +284,20 @@ interface ExternalCmdState {
         fileChanged: boolean;
     };
     spinner: 'off' | 'cvc5' | 'render';
+    selectData: SelectionSquare;
 }
 
 export type {
     NodeInterface,
     NodeProps,
     NodeInfo,
+    VisualizerStageProps,
     CanvasProps,
     CanvasPropsAndRedux,
     CanvasState,
     DirectoryStyleProps,
+    SelectionSquare,
+    SelectOverlayProps,
     NavbarProps,
     NavbarPropsAndRedux,
     VisualizerDialogProps,

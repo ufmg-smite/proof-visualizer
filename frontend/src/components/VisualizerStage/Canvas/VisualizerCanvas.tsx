@@ -30,6 +30,7 @@ import {
     unselectNodes,
     applyColor,
     moveNode,
+    selectByArea,
 } from '../../../store/features/proof/proofSlice';
 import {
     selectFindData,
@@ -40,6 +41,8 @@ import {
     blockRenderNewFile,
     setSpinner,
     selectSpinner,
+    selectSelectData,
+    setSelectArea,
 } from '../../../store/features/externalCmd/externalCmd';
 
 const nodeWidth = 300,
@@ -161,7 +164,26 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const visualInfoChanged = JSON.stringify(current_state.visualInfo) !== JSON.stringify(props.visualInfo);
         const { nodeToFind, findOption } = props.nodeFindData;
         const { count, fileChanged } = props.renderData;
-        const stage = current_state.stage;
+        const { selectData, selectByArea, setSelectArea } = props;
+        const { stage } = current_state;
+
+        // If there is any select square to be converted
+        if (selectData.lowerR.x !== -1) {
+            // Convert the dimensions of the square to fit the offset and scale
+            const converted = {
+                upperL: {
+                    x: (selectData.upperL.x - stage.stageX) / stage.stageScale,
+                    y: (selectData.upperL.y - stage.stageY) / stage.stageScale,
+                },
+                lowerR: {
+                    x: (selectData.lowerR.x - stage.stageX) / stage.stageScale,
+                    y: (selectData.lowerR.y - stage.stageY) / stage.stageScale,
+                },
+            };
+            // Search and select the nodes
+            selectByArea(converted);
+            setSelectArea({ upperL: { x: -1, y: -1 }, lowerR: { x: -1, y: -1 } });
+        }
 
         // If there is a node to be found
         if (nodeToFind > -1) {
@@ -429,7 +451,6 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     handleKeyDown = (e: React.KeyboardEvent) => {
         const { undo } = this.props;
-        e.stopPropagation();
         // CTRL + Z
         if (e.ctrlKey && e.key.toLowerCase() === 'z') {
             undo();
@@ -459,7 +480,15 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                 <Stage
                     draggable
                     onDragMove={() => null}
-                    onDragEnd={() => null}
+                    onDragEnd={(e) =>
+                        this.setState({
+                            stage: {
+                                stageScale: this.state.stage.stageScale,
+                                stageX: e.target.x(),
+                                stageY: e.target.y(),
+                            },
+                        })
+                    }
                     width={canvasSize.width}
                     height={canvasSize.height}
                     onWheel={(e) => this.setState({ stage: handleWheel(e) })}
@@ -491,6 +520,7 @@ function mapStateToProps(state: ReduxState, ownProps: CanvasProps) {
         nodeFindData: selectFindData(state),
         renderData: selectRenderData(state),
         spinner: selectSpinner(state),
+        selectData: selectSelectData(state),
         ...ownProps,
     };
 }
@@ -501,6 +531,8 @@ const mapDispatchToProps = {
     foldAllDescendants,
     setVisualInfo,
     findNode,
+    setSelectArea,
+    selectByArea,
     reRender,
     addRenderCount,
     blockRenderNewFile,
