@@ -465,10 +465,10 @@ const VisualizerStage: React.FC<VisualizerStageProps> = ({ disableExternalDrawer
             {proof.length > 1 && (
                 <>
                     {style === 'graph' ? (
-                        <div style={{ height: '100%', position: 'relative' }}>
+                        <>
                             <SelectOvelay isSelecting={isSelecting} setIsSelecting={setIsSelecting} />
                             <Canvas key={fileID} proof={proof} openDrawer={openDrawer} createTree={createTree} />
-                        </div>
+                        </>
                     ) : (
                         <VisualizerDirectoryStyle
                             proofTree={proofTree}

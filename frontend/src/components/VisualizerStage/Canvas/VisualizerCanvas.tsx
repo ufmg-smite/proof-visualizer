@@ -463,7 +463,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const found = proof.find((o) => o.id === nodeOnFocus);
 
         return (
-            <div tabIndex={1} onKeyDown={this.handleKeyDown}>
+            <div tabIndex={1} onKeyDown={this.handleKeyDown} style={{ overflow: 'hidden' }}>
                 <Menu
                     unfold={this.unfold}
                     foldSelectedNodes={this.foldSelectedNodes}

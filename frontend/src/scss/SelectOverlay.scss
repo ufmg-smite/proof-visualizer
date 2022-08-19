@@ -1,6 +1,6 @@
 .select-overlay {
     position: absolute;
-    height: 100%;
+    height: calc(100% - 50px);
     width: 100%;
     z-index: 3;
     transition: background-color 0.2s ease-out, opacity 0.2s ease-out;
