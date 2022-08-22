@@ -12,7 +12,8 @@ const initialState: ProofState = {
     hiddenNodes: [],
     letMap: {},
     theoryLemmaMap: [],
-    visualInfo: [],
+    visualInfo: {},
+    nodesSelected: [],
     clustersInfos: [],
     smt: '',
 };
@@ -159,6 +160,10 @@ export const selectNodeClusters = (state: RootState): ProofState['clustersInfos'
 
 export const selectSmt = (state: RootState): ProofState['smt'] => {
     return state.proof.smt;
+};
+
+export const selectNodesSelected = (state: RootState): ProofState['nodesSelected'] => {
+    return state.proof.nodesSelected;
 };
 
 export default proofSlice.reducer;

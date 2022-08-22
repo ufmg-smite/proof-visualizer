@@ -69,12 +69,13 @@ interface CanvasProps {
 interface CanvasPropsAndRedux extends CanvasProps {
     proof: NodeInterface[];
     visualInfo: ProofState['visualInfo'];
+    nodesSelected: ProofState['nodesSelected'];
     nodeFindData: ExternalCmdState['findData'];
     renderData: ExternalCmdState['renderData'];
     spinner: ExternalCmdState['spinner'];
     selectData: ExternalCmdState['selectData'];
 
-    hideNodes: ActionCreatorWithPayload<number[], string>;
+    hideNodes: ActionCreatorWithPayload<void, string>;
     unfoldNodes: ActionCreatorWithPayload<number, string>;
     foldAllDescendants: ActionCreatorWithPayload<number>;
     setVisualInfo: ActionCreatorWithPayload<ProofState['visualInfo'], string>;
@@ -87,7 +88,7 @@ interface CanvasPropsAndRedux extends CanvasProps {
     setSpinner: ActionCreatorWithPayload<ExternalCmdState['spinner'], string>;
     undo: ActionCreatorWithPayload<void, string>;
     selectNodes: ActionCreatorWithPayload<number[], string>;
-    unselectNodes: ActionCreatorWithPayload<number[], string>;
+    unselectNodes: ActionCreatorWithPayload<{ nodes: number[]; cleanAll: boolean }, string>;
     applyColor: ActionCreatorWithPayload<string, string>;
     moveNode: ActionCreatorWithPayload<{ id: number; x: number; y: number }, string>;
 }
@@ -98,9 +99,9 @@ interface CanvasState {
     showingNodes: { [id: number]: JSX.Element };
     showingEdges: { [id: string]: JSX.Element };
     nodeOnFocus: number;
-    nodesSelected: Array<number>;
     proof: NodeInterface[];
     visualInfo: ProofState['visualInfo'];
+    selectCount: number;
 }
 
 // DIRECTORY STYLE
@@ -138,7 +139,7 @@ interface NavbarPropsAndRedux extends NavbarProps {
     view: string;
     visualInfo: ProofState['visualInfo'];
     hiddenNodes: number[][];
-    hideNodes: ActionCreatorWithPayload<number[], string>;
+    hideNodes: ActionCreatorWithPayload<void, string>;
 }
 
 // DIALOG
@@ -256,6 +257,7 @@ interface ProofState {
             selected: boolean;
         };
     };
+    nodesSelected: number[];
     clustersInfos: {
         hiddenNodes: number[];
         type: ClusterKind;

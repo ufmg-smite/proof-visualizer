@@ -31,6 +31,7 @@ import {
     applyColor,
     moveNode,
     selectByArea,
+    selectNodesSelected,
 } from '../../../store/features/proof/proofSlice';
 import {
     selectFindData,
@@ -103,9 +104,9 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             showingNodes: {},
             showingEdges: {},
             nodeOnFocus: NaN,
-            nodesSelected: [],
             proof: [],
             visualInfo: {},
+            selectCount: 0,
         };
     }
 
@@ -164,26 +165,29 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const visualInfoChanged = JSON.stringify(current_state.visualInfo) !== JSON.stringify(props.visualInfo);
         const { nodeToFind, findOption } = props.nodeFindData;
         const { count, fileChanged } = props.renderData;
-        const { selectData, selectByArea, setSelectArea } = props;
+        const { selectData, setSelectArea, selectByArea, selectNodes } = props;
         const { stage } = current_state;
 
         // If there is any select square to be converted
         if (selectData.lowerR.x !== -1) {
-            // Convert the dimensions of the square to fit the offset and scale
-            const converted = {
-                upperL: {
-                    x: (selectData.upperL.x - stage.stageX) / stage.stageScale,
-                    y: (selectData.upperL.y - stage.stageY) / stage.stageScale,
-                },
-                lowerR: {
-                    x: (selectData.lowerR.x - stage.stageX) / stage.stageScale,
-                    y: (selectData.lowerR.y - stage.stageY) / stage.stageScale,
-                },
-            };
-            // Search and select the nodes
-            selectByArea(converted);
-            setSelectArea({ upperL: { x: -1, y: -1 }, lowerR: { x: -1, y: -1 } });
-        }
+            current_state.selectCount++;
+            if (current_state.selectCount === 1) {
+                // Convert the dimensions of the square to fit the offset and scale
+                const converted = {
+                    upperL: {
+                        x: (selectData.upperL.x - stage.stageX) / stage.stageScale,
+                        y: (selectData.upperL.y - stage.stageY) / stage.stageScale,
+                    },
+                    lowerR: {
+                        x: (selectData.lowerR.x - stage.stageX) / stage.stageScale,
+                        y: (selectData.lowerR.y - stage.stageY) / stage.stageScale,
+                    },
+                };
+
+                selectByArea(converted);
+                setSelectArea({ upperL: { x: -1, y: -1 }, lowerR: { x: -1, y: -1 } });
+            }
+        } else current_state.selectCount = 0;
 
         // If there is a node to be found
         if (nodeToFind > -1) {
@@ -196,10 +200,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
                 // Select the finded node
                 if (findOption) {
-                    props.setVisualInfo({
-                        ...props.visualInfo,
-                        [nodeToFind]: { ...props.visualInfo[nodeToFind], selected: true },
-                    });
+                    selectNodes([nodeToFind]);
                 }
             }
             // Reset the node finder
@@ -356,22 +357,18 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
     /* NODE MENU ACTIONS */
     foldAllDescendants = (): void => {
-        const { nodeOnFocus, nodesSelected } = this.state;
-        const { foldAllDescendants, reRender, unselectNodes } = this.props;
+        const { nodeOnFocus } = this.state;
+        const { foldAllDescendants, reRender } = this.props;
 
         reRender();
         foldAllDescendants(nodeOnFocus);
-        unselectNodes(nodesSelected);
-        this.setState({ nodesSelected: [] });
     };
 
     foldSelectedNodes = (): void => {
-        const { nodesSelected } = this.state;
         const { hideNodes, reRender } = this.props;
 
         reRender();
-        hideNodes(nodesSelected);
-        this.setState({ nodesSelected: [] });
+        hideNodes();
     };
 
     unfold = (): void => {
@@ -380,36 +377,28 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
 
         reRender();
         unfoldNodes(nodeOnFocus);
-
-        this.setState({ nodesSelected: [] });
     };
 
     changeNodeColor = (color: string): void => {
-        const { showingNodes, nodesSelected, nodeOnFocus } = this.state;
+        const { showingNodes, nodeOnFocus } = this.state;
         const { applyColor, selectNodes } = this.props;
 
         // Select the node in focus to set the color later
-        if (!nodesSelected.length && showingNodes[nodeOnFocus]) {
+        if (showingNodes[nodeOnFocus]) {
             selectNodes([nodeOnFocus]);
         }
 
         applyColor(color);
-        this.setState({ nodesSelected: [] });
     };
 
     toggleNodeSelection = (id: number): void => {
-        let { nodesSelected } = this.state;
         const { visualInfo, unselectNodes, selectNodes } = this.props;
 
         if (visualInfo[id].selected) {
-            unselectNodes([id]);
-            nodesSelected = nodesSelected.filter((nodeId) => nodeId !== id);
+            unselectNodes({ nodes: [id], cleanAll: false });
         } else {
             selectNodes([id]);
-            nodesSelected.push(id);
         }
-
-        this.setState({ nodesSelected });
     };
 
     /*TREE*/
@@ -458,8 +447,9 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
     };
 
     render(): JSX.Element {
-        const { canvasSize, stage, showingNodes, showingEdges, nodesSelected, nodeOnFocus, proof } = this.state;
+        const { canvasSize, stage, showingNodes, showingEdges, nodeOnFocus, proof } = this.state;
         const color = showingNodes[nodeOnFocus] ? showingNodes[nodeOnFocus].props.color : '';
+        const { nodesSelected } = this.props;
         const found = proof.find((o) => o.id === nodeOnFocus);
 
         return (
@@ -471,7 +461,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
                     changeNodeColor={this.changeNodeColor}
                     options={{
                         unfold: showingNodes[nodeOnFocus] ? Boolean(showingNodes[nodeOnFocus].props.nHided) : false,
-                        foldSelected: nodesSelected.length && nodesSelected.includes(nodeOnFocus) ? true : false,
+                        foldSelected: nodesSelected.length > 1 && nodesSelected.includes(nodeOnFocus),
                         foldAllDescendants:
                             Boolean(found?.children.length) && !Boolean(found?.hiddenNodes?.length) && found?.id != 0,
                     }}
@@ -521,6 +511,7 @@ function mapStateToProps(state: ReduxState, ownProps: CanvasProps) {
         renderData: selectRenderData(state),
         spinner: selectSpinner(state),
         selectData: selectSelectData(state),
+        nodesSelected: selectNodesSelected(state),
         ...ownProps,
     };
 }

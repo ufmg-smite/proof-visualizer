@@ -188,7 +188,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         },
         ['/unselect']: (cmds: string[]) => {
             const allNodesIds = proof.map((node) => node.id);
-            dispatch(unselectNodes(allNodesIds));
+            dispatch(unselectNodes({ nodes: allNodesIds, cleanAll: true }));
         },
         ['/color']: (cmds: string[]) => {
             if (cmds[1]) {
@@ -231,15 +231,9 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         },
         ['/hide']: (cmds: string[]) => {
             // Hide all the selected nodes
-            const hiddenIds = Object.keys(visualInfo)
-                .map((id) => Number(id))
-                .filter((id) => visualInfo[id].selected);
-            // Make sure there are nodes selected
-            if (hiddenIds.length > 1) {
                 // Re-render the canvas and update the store
                 dispatch(reRender());
-                dispatch(hideNodes(hiddenIds));
-            }
+            dispatch(hideNodes());
         },
         ['/fold']: (cmds: string[]) => {
             // If the option is a number
