@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { SelectOverlayProps } from '../../interfaces/interfaces';
 
 import '../../scss/SelectOverlay.scss';
@@ -8,10 +8,11 @@ import { useAppDispatch } from '../../store/hooks';
 const overlayColor = '#00000028';
 
 const SelectOvelay: React.FC<SelectOverlayProps> = ({ isSelecting, setIsSelecting }: SelectOverlayProps) => {
+    const [, forceUpdate] = useReducer((x) => x + 1, 0);
     const isDraggingRef = useRef(false);
     const [isInverted, setIsInverted] = useState({ x: false, y: false });
-    const [start, setStart] = useState({ x: 10, y: 10 });
-    const [curPos, setCurPos] = useState({ x: 10, y: 10 });
+    const startRef = useRef({ x: 10, y: 10 });
+    const posRef = useRef({ x: 10, y: 10 });
     const dispatch = useAppDispatch();
 
     useEffect(() => {
@@ -36,9 +37,9 @@ const SelectOvelay: React.FC<SelectOverlayProps> = ({ isSelecting, setIsSelectin
     useEffect(() => {
         if (isSelecting) {
             isDraggingRef.current = false;
+            startRef.current = { x: 10, y: 10 };
+            posRef.current = { x: 10, y: 10 };
             setIsInverted({ x: false, y: false });
-            setStart({ x: 10, y: 10 });
-            setCurPos({ x: 10, y: 10 });
         }
     }, [isSelecting]);
 
@@ -52,7 +53,8 @@ const SelectOvelay: React.FC<SelectOverlayProps> = ({ isSelecting, setIsSelectin
     const handleMouseDown = (e: React.MouseEvent) => {
         const { offsetX, offsetY } = e.nativeEvent;
         isDraggingRef.current = true;
-        setStart({ x: offsetX, y: offsetY });
+        startRef.current = { x: offsetX, y: offsetY };
+        forceUpdate();
     };
 
     const handleMouseUp = (e: React.MouseEvent | MouseEvent) => {
@@ -61,54 +63,55 @@ const SelectOvelay: React.FC<SelectOverlayProps> = ({ isSelecting, setIsSelectin
         setIsSelecting({ type: 'set', payload: false });
 
         // Call the selection
-        let leftX = start.x,
-            leftY = start.y,
-            rightX = curPos.x,
-            rightY = curPos.y;
+        let leftX = startRef.current.x,
+            leftY = startRef.current.y,
+            rightX = posRef.current.x,
+            rightY = posRef.current.y;
         if (isInverted.x) {
-            leftX = curPos.x;
-            rightX = start.x;
+            leftX = posRef.current.x;
+            rightX = startRef.current.x;
         }
         if (isInverted.y) {
-            leftY = curPos.y;
-            rightY = start.y;
+            leftY = posRef.current.y;
+            rightY = startRef.current.y;
         }
         dispatch(setSelectArea({ upperL: { x: leftX, y: leftY }, lowerR: { x: rightX, y: rightY } }));
     };
 
     const handleMove = (e: React.MouseEvent) => {
         const { offsetX, offsetY } = e.nativeEvent;
-        setCurPos({ x: offsetX, y: offsetY });
+        posRef.current = { x: offsetX, y: offsetY };
 
         if (isDraggingRef.current) {
             let xInverted = false,
                 yInverted = false;
-            if (start.x > offsetX) {
+            if (startRef.current.x > offsetX) {
                 xInverted = true;
             }
-            if (start.y > offsetY) {
+            if (startRef.current.y > offsetY) {
                 yInverted = true;
             }
             setIsInverted({ x: xInverted, y: yInverted });
         }
+        forceUpdate();
     };
 
     const gridColumns = useMemo(() => {
-        const difX = Math.abs(start.x - curPos.x);
+        const difX = Math.abs(startRef.current.x - posRef.current.x);
         return isDraggingRef.current
             ? isInverted.x
-                ? `${curPos.x}px ${difX}px 1fr`
-                : `${start.x}px ${difX}px 1fr`
-            : `${curPos.x}px 2px 1fr`;
-    }, [curPos.x]);
+                ? `${posRef.current.x}px ${difX}px 1fr`
+                : `${startRef.current.x}px ${difX}px 1fr`
+            : `${posRef.current.x}px 2px 1fr`;
+    }, [posRef.current]);
     const gridRows = useMemo(() => {
-        const difY = Math.abs(start.y - curPos.y);
+        const difY = Math.abs(startRef.current.y - posRef.current.y);
         return isDraggingRef.current
             ? isInverted.y
-                ? `${curPos.y}px ${difY}px 1fr`
-                : `${start.y}px ${difY}px 1fr`
-            : `${curPos.y}px 2px 1fr`;
-    }, [curPos.y]);
+                ? `${posRef.current.y}px ${difY}px 1fr`
+                : `${startRef.current.y}px ${difY}px 1fr`
+            : `${posRef.current.y}px 2px 1fr`;
+    }, [posRef.current]);
     const color = useMemo(() => (isDraggingRef.current ? overlayColor : 'red'), [isDraggingRef.current]);
 
     return (
