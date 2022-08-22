@@ -80,8 +80,9 @@ interface CanvasPropsAndRedux extends CanvasProps {
     foldAllDescendants: ActionCreatorWithPayload<number>;
     setVisualInfo: ActionCreatorWithPayload<ProofState['visualInfo'], string>;
     findNode: ActionCreatorWithPayload<{ nodeId: number; option: boolean }, string>;
-    setSelectArea: ActionCreatorWithPayload<SelectionSquare, string>;
-    selectByArea: ActionCreatorWithPayload<SelectionSquare, string>;
+    setSelectArea: ActionCreatorWithPayload<ExternalCmdState['selectData'], string>;
+    selectByArea: ActionCreatorWithPayload<ExternalCmdState['selectData']['square'], string>;
+    unselectByArea: ActionCreatorWithPayload<ExternalCmdState['selectData']['square'], string>;
     reRender: ActionCreatorWithPayload<void, string>;
     addRenderCount: ActionCreatorWithPayload<void, string>;
     blockRenderNewFile: ActionCreatorWithPayload<void, string>;
@@ -120,7 +121,11 @@ interface SelectionSquare {
 
 interface SelectOverlayProps {
     isSelecting: boolean;
-    setIsSelecting: React.Dispatch<{ type: 'invert' | 'set'; payload: boolean }>;
+    selectMode: boolean;
+    setIsSelecting: React.Dispatch<{
+        type: 'invert' | 'set' | 'change-mode';
+        payload: { value: boolean; key: 's' | 'u' | 'n' };
+    }>;
 }
 
 // NAVBAR
@@ -286,7 +291,7 @@ interface ExternalCmdState {
         fileChanged: boolean;
     };
     spinner: 'off' | 'cvc5' | 'render';
-    selectData: SelectionSquare;
+    selectData: { type: boolean; square: SelectionSquare };
 }
 
 export type {

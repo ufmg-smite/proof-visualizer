@@ -7,13 +7,25 @@ import { useAppDispatch } from '../../store/hooks';
 
 const overlayColor = '#00000028';
 
-const SelectOvelay: React.FC<SelectOverlayProps> = ({ isSelecting, setIsSelecting }: SelectOverlayProps) => {
+const SelectOvelay: React.FC<SelectOverlayProps> = ({
+    isSelecting,
+    selectMode,
+    setIsSelecting,
+}: SelectOverlayProps) => {
     const [, forceUpdate] = useReducer((x) => x + 1, 0);
     const isDraggingRef = useRef(false);
-    const [isInverted, setIsInverted] = useState({ x: false, y: false });
     const startRef = useRef({ x: 10, y: 10 });
     const posRef = useRef({ x: 10, y: 10 });
+    const [isInverted, setIsInverted] = useState({ x: false, y: false });
+    const [selectColor, setSelectColor] = useState(selectMode ? 'blue' : 'red');
+    const [color, setColor] = useState(isDraggingRef.current ? overlayColor : selectColor);
     const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        const newSelectColor = selectMode ? 'blue' : 'red';
+        setSelectColor(newSelectColor);
+        setColor(isDraggingRef.current ? overlayColor : newSelectColor);
+    }, [selectMode, isDraggingRef.current]);
 
     useEffect(() => {
         if (isSelecting) {
@@ -60,7 +72,7 @@ const SelectOvelay: React.FC<SelectOverlayProps> = ({ isSelecting, setIsSelectin
     const handleMouseUp = (e: React.MouseEvent | MouseEvent) => {
         e.stopPropagation();
         // Turn off the selector
-        setIsSelecting({ type: 'set', payload: false });
+        setIsSelecting({ type: 'set', payload: { value: false, key: 'n' } });
 
         // Call the selection
         let leftX = startRef.current.x,
@@ -75,7 +87,12 @@ const SelectOvelay: React.FC<SelectOverlayProps> = ({ isSelecting, setIsSelectin
             leftY = posRef.current.y;
             rightY = startRef.current.y;
         }
-        dispatch(setSelectArea({ upperL: { x: leftX, y: leftY }, lowerR: { x: rightX, y: rightY } }));
+        dispatch(
+            setSelectArea({
+                type: selectMode,
+                square: { upperL: { x: leftX, y: leftY }, lowerR: { x: rightX, y: rightY } },
+            }),
+        );
     };
 
     const handleMove = (e: React.MouseEvent) => {
@@ -112,7 +129,6 @@ const SelectOvelay: React.FC<SelectOverlayProps> = ({ isSelecting, setIsSelectin
                 : `${startRef.current.y}px ${difY}px 1fr`
             : `${posRef.current.y}px 2px 1fr`;
     }, [posRef.current]);
-    const color = useMemo(() => (isDraggingRef.current ? overlayColor : 'red'), [isDraggingRef.current]);
 
     return (
         <div
@@ -129,12 +145,12 @@ const SelectOvelay: React.FC<SelectOverlayProps> = ({ isSelecting, setIsSelectin
             onDragStart={(e) => e.preventDefault()}
         >
             <div id="1" className="square" style={{ backgroundColor: overlayColor }}></div>
-            <div id="2" className="square" style={{ backgroundColor: color }}></div>
+            <div id="2" className="square" style={{ backgroundColor: color, borderBottomColor: selectColor }}></div>
             <div id="3" className="square" style={{ backgroundColor: overlayColor }}></div>
-            <div id="4" className="square" style={{ backgroundColor: color }}></div>
-            <div id="5" className="square" style={{ backgroundColor: color }}></div>
+            <div id="4" className="square" style={{ backgroundColor: color, borderRightColor: selectColor }}></div>
+            <div id="5" className="square" style={{ backgroundColor: color, borderLeftColor: selectColor }}></div>
             <div id="6" className="square" style={{ backgroundColor: overlayColor }}></div>
-            <div id="7" className="square" style={{ backgroundColor: color }}></div>
+            <div id="7" className="square" style={{ backgroundColor: color, borderTopColor: selectColor }}></div>
             <div id="8" className="square" style={{ backgroundColor: overlayColor }}></div>
         </div>
     );

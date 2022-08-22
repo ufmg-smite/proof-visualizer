@@ -231,8 +231,8 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         },
         ['/hide']: (cmds: string[]) => {
             // Hide all the selected nodes
-                // Re-render the canvas and update the store
-                dispatch(reRender());
+            // Re-render the canvas and update the store
+            dispatch(reRender());
             dispatch(hideNodes());
         },
         ['/fold']: (cmds: string[]) => {
@@ -613,7 +613,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
 
     const criticalWidth = 1350;
     return (
-        <Navbar>
+        <Navbar id="main-navbar">
             <Navbar.Group align={Alignment.LEFT}>
                 <Navbar.Heading>
                     <b id="proof-visualizer-name">{windowSize.width >= criticalWidth ? 'Proof Visualizer' : 'PV'}</b>

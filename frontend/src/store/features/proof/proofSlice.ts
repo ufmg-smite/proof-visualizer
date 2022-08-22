@@ -31,6 +31,7 @@ export const {
     unfoldNodes,
     setVisualInfo,
     selectByArea,
+    unselectByArea,
     selectNodes,
     unselectNodes,
     changeStyle,

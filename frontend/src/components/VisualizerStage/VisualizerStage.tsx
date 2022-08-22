@@ -272,25 +272,41 @@ const VisualizerStage: React.FC<VisualizerStageProps> = ({ disableExternalDrawer
     const [drawerIsOpen, setDrawerIsOpen] = useState(false);
     const [tree, setTree] = useState<TreeNodeInfo[]>([]);
     // Select overlay
-    const [isSelecting, setIsSelecting] = useReducer(
-        (state: boolean, action: { type: 'invert' | 'set'; payload: boolean }): boolean => {
+    const [[isSelecting, selectMode], setIsSelecting] = useReducer(
+        (
+            state: boolean[],
+            action: { type: 'invert' | 'set' | 'change-mode'; payload: { value: boolean; key: 's' | 'u' | 'n' } },
+        ): boolean[] => {
             switch (action.type) {
                 case 'invert':
-                    return !state;
+                    state[0] = !state[0];
+                    break;
                 case 'set':
-                    return action.payload;
+                    state[0] = action.payload.value;
+                    break;
+                case 'change-mode':
+                    if (!state[0]) {
+                        state[0] = true;
+                        state[1] = action.payload.key !== 's';
+                    } else if ((state[1] && action.payload.key === 's') || (!state[1] && action.payload.key === 'u')) {
+                        state[1] = !state[1];
+                    } else state[0] = false;
+
+                    break;
             }
+            return [...state];
         },
-        false,
+        [false, false],
     );
 
     // At the beggining
     useEffect(() => {
         function handleKeyDown(e: KeyboardEvent) {
-            if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 's' && style === 'graph') {
+            const key = e.key.toLowerCase();
+            if (e.ctrlKey && e.shiftKey && style === 'graph' && (key === 's' || key === 'u')) {
                 disableExternalDrawers();
                 setDrawerIsOpen(false);
-                setIsSelecting({ type: 'invert', payload: false });
+                setIsSelecting({ type: 'change-mode', payload: { value: false, key } });
             }
         }
         window.addEventListener('keydown', handleKeyDown);
@@ -466,7 +482,11 @@ const VisualizerStage: React.FC<VisualizerStageProps> = ({ disableExternalDrawer
                 <>
                     {style === 'graph' ? (
                         <>
-                            <SelectOvelay isSelecting={isSelecting} setIsSelecting={setIsSelecting} />
+                            <SelectOvelay
+                                isSelecting={isSelecting}
+                                selectMode={selectMode}
+                                setIsSelecting={setIsSelecting}
+                            />
                             <Canvas key={fileID} proof={proof} openDrawer={openDrawer} createTree={createTree} />
                         </>
                     ) : (

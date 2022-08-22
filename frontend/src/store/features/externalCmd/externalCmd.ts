@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../../store';
-import { ExternalCmdState, SelectionSquare } from '../../../interfaces/interfaces';
+import { ExternalCmdState } from '../../../interfaces/interfaces';
 
 const initialState: ExternalCmdState = {
     findData: {
@@ -12,7 +12,7 @@ const initialState: ExternalCmdState = {
         fileChanged: false,
     },
     spinner: 'off',
-    selectData: { upperL: { x: -1, y: -1 }, lowerR: { x: -1, y: -1 } },
+    selectData: { type: false, square: { upperL: { x: -1, y: -1 }, lowerR: { x: -1, y: -1 } } },
 };
 
 export const externalCmd = createSlice({
@@ -40,7 +40,7 @@ export const externalCmd = createSlice({
         setSpinner: (state, action: PayloadAction<'off' | 'cvc5' | 'render'>) => {
             state.spinner = action.payload;
         },
-        setSelectArea: (state, action: PayloadAction<SelectionSquare>) => {
+        setSelectArea: (state, action: PayloadAction<ExternalCmdState['selectData']>) => {
             state.selectData = action.payload;
         },
     },

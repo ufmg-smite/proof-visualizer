@@ -32,6 +32,7 @@ import {
     moveNode,
     selectByArea,
     selectNodesSelected,
+    unselectByArea,
 } from '../../../store/features/proof/proofSlice';
 import {
     selectFindData,
@@ -165,27 +166,29 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const visualInfoChanged = JSON.stringify(current_state.visualInfo) !== JSON.stringify(props.visualInfo);
         const { nodeToFind, findOption } = props.nodeFindData;
         const { count, fileChanged } = props.renderData;
-        const { selectData, setSelectArea, selectByArea, selectNodes } = props;
+        const { selectData, setSelectArea, unselectByArea, selectByArea, selectNodes } = props;
         const { stage } = current_state;
 
         // If there is any select square to be converted
-        if (selectData.lowerR.x !== -1) {
+        if (selectData.square.lowerR.x !== -1) {
             current_state.selectCount++;
             if (current_state.selectCount === 1) {
                 // Convert the dimensions of the square to fit the offset and scale
                 const converted = {
                     upperL: {
-                        x: (selectData.upperL.x - stage.stageX) / stage.stageScale,
-                        y: (selectData.upperL.y - stage.stageY) / stage.stageScale,
+                        x: (selectData.square.upperL.x - stage.stageX) / stage.stageScale,
+                        y: (selectData.square.upperL.y - stage.stageY) / stage.stageScale,
                     },
                     lowerR: {
-                        x: (selectData.lowerR.x - stage.stageX) / stage.stageScale,
-                        y: (selectData.lowerR.y - stage.stageY) / stage.stageScale,
+                        x: (selectData.square.lowerR.x - stage.stageX) / stage.stageScale,
+                        y: (selectData.square.lowerR.y - stage.stageY) / stage.stageScale,
                     },
                 };
 
-                selectByArea(converted);
-                setSelectArea({ upperL: { x: -1, y: -1 }, lowerR: { x: -1, y: -1 } });
+                if (selectData.type) {
+                    unselectByArea(converted);
+                } else selectByArea(converted);
+                setSelectArea({ type: false, square: { upperL: { x: -1, y: -1 }, lowerR: { x: -1, y: -1 } } });
             }
         } else current_state.selectCount = 0;
 
@@ -524,6 +527,7 @@ const mapDispatchToProps = {
     findNode,
     setSelectArea,
     selectByArea,
+    unselectByArea,
     reRender,
     addRenderCount,
     blockRenderNewFile,

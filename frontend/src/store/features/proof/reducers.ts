@@ -246,7 +246,7 @@ function setVisualInfo(state: Draft<ProofState>, action: PayloadAction<ProofStat
     state.visualInfo = action.payload;
 }
 
-function selectByArea(state: Draft<ProofState>, action: PayloadAction<ExternalCmdState['selectData']>): void {
+function selectByArea(state: Draft<ProofState>, action: PayloadAction<ExternalCmdState['selectData']['square']>): void {
     const { upperL, lowerR } = action.payload;
     const size = state.proof.length + state.hiddenNodes.length;
     for (let i = 0; i < size; i++) {
@@ -260,6 +260,27 @@ function selectByArea(state: Draft<ProofState>, action: PayloadAction<ExternalCm
         ) {
             thisNode.selected = true;
             state.nodesSelected.push(i);
+        }
+    }
+}
+
+function unselectByArea(
+    state: Draft<ProofState>,
+    action: PayloadAction<ExternalCmdState['selectData']['square']>,
+): void {
+    const { upperL, lowerR } = action.payload;
+    const size = state.proof.length + state.hiddenNodes.length;
+    for (let i = 0; i < size; i++) {
+        const thisNode = state.visualInfo[i];
+        if (
+            upperL.x <= thisNode.x &&
+            thisNode.x <= lowerR.x &&
+            upperL.y <= thisNode.y &&
+            thisNode.y <= lowerR.y &&
+            thisNode.selected
+        ) {
+            thisNode.selected = false;
+            state.nodesSelected = state.nodesSelected.filter((node) => node !== i);
         }
     }
 }
@@ -488,6 +509,7 @@ const reducers = {
     unfoldNodes,
     setVisualInfo,
     selectByArea,
+    unselectByArea,
     selectNodes,
     unselectNodes,
     changeStyle,
