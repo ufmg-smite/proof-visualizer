@@ -74,6 +74,18 @@ function isNotMozzila() {
 }
 const isNotMozz = isNotMozzila();
 
+const colorMap: { [name: string]: string } = {
+    red: '#f72b34',
+    orange: '#ff8334',
+    yellow: '#ffc149',
+    green: '#60aa51',
+    blue: '#0097e4',
+    purple: '#a73da5',
+    brown: '#a95a49',
+    gray: '#464646',
+    white: '#f0f0f0',
+};
+
 const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
     setDialogIsOpen,
     setDrawerIsOpen,
@@ -198,35 +210,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     return;
                 }
                 // Default colors
-                switch (cmds[1]) {
-                    case 'red':
-                        dispatch(applyColor('#f72b34'));
-                        break;
-                    case 'orange':
-                        dispatch(applyColor('#ff8334'));
-                        break;
-                    case 'yellow':
-                        dispatch(applyColor('#ffc149'));
-                        break;
-                    case 'green':
-                        dispatch(applyColor('#60aa51'));
-                        break;
-                    case 'blue':
-                        dispatch(applyColor('#0097e4'));
-                        break;
-                    case 'purple':
-                        dispatch(applyColor('#a73da5'));
-                        break;
-                    case 'brown':
-                        dispatch(applyColor('#a95a49'));
-                        break;
-                    case 'gray':
-                        dispatch(applyColor('#464646'));
-                        break;
-                    case 'white':
-                        dispatch(applyColor('#f0f0f0'));
-                        break;
-                }
+                if (colorMap[cmds[1]]) dispatch(applyColor(colorMap[cmds[1]]));
             }
         },
         ['/hide']: (cmds: string[]) => {
@@ -268,7 +252,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 dispatch(
                     findNode({
                         nodeId: Number(cmds[1]),
-                        option: cmds[2] === '--s' ? true : false,
+                        option: cmds[2] === '--s',
                     }),
                 );
             }
