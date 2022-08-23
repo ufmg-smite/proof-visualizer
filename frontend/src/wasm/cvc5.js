@@ -35,12 +35,12 @@ Observations: The modifications made in the original glue code are the ones that
                 - The handleException function
                 - The get_char function
                 - The run function
-Last Update: 22/07/2022
+Last Update: 05/08/2022
 */
 
 var Module = (() => {
     // The base directory to the wasm file
-    _scriptDir = window.location.origin + '/proof-visualizer/';
+    var _scriptDir = window.location.origin + '/proof-visualizer/';
 
     // This function is responsible for running the web assembly
     return function (Module) {
@@ -138,69 +138,6 @@ var Module = (() => {
                 abort(text);
             }
         }
-        function getCFunc(ident) {
-            var func = Module['_' + ident];
-            return func;
-        }
-        function ccall(ident, returnType, argTypes, args, opts) {
-            var toC = {
-                string: function (str) {
-                    var ret = 0;
-                    if (str !== null && str !== undefined && str !== 0) {
-                        var len = (str.length << 2) + 1;
-                        ret = stackAlloc(len);
-                        stringToUTF8(str, ret, len);
-                    }
-                    return ret;
-                },
-                array: function (arr) {
-                    var ret = stackAlloc(arr.length);
-                    writeArrayToMemory(arr, ret);
-                    return ret;
-                },
-            };
-            function convertReturnValue(ret) {
-                if (returnType === 'string') {
-                    return UTF8ToString(ret);
-                }
-                if (returnType === 'boolean') return Boolean(ret);
-                return ret;
-            }
-            var func = getCFunc(ident);
-            var cArgs = [];
-            var stack = 0;
-            if (args) {
-                for (var i = 0; i < args.length; i++) {
-                    var converter = toC[argTypes[i]];
-                    if (converter) {
-                        if (stack === 0) stack = stackSave();
-                        cArgs[i] = converter(args[i]);
-                    } else {
-                        cArgs[i] = args[i];
-                    }
-                }
-            }
-            var ret = func.apply(null, cArgs);
-            function onDone(ret) {
-                if (stack !== 0) stackRestore(stack);
-                return convertReturnValue(ret);
-            }
-            ret = onDone(ret);
-            return ret;
-        }
-        function cwrap(ident, returnType, argTypes, opts) {
-            argTypes = argTypes || [];
-            var numericArgs = argTypes.every(function (type) {
-                return type === 'number';
-            });
-            var numericRet = returnType !== 'string';
-            if (numericRet && numericArgs && !opts) {
-                return getCFunc(ident);
-            }
-            return function () {
-                return ccall(ident, returnType, argTypes, arguments, opts);
-            };
-        }
         var UTF8Decoder = typeof TextDecoder != 'undefined' ? new TextDecoder('utf8') : undefined;
         function UTF8ArrayToString(heapOrArray, idx, maxBytesToRead) {
             var endIdx = idx + maxBytesToRead;
@@ -208,31 +145,30 @@ var Module = (() => {
             while (heapOrArray[endPtr] && !(endPtr >= endIdx)) ++endPtr;
             if (endPtr - idx > 16 && heapOrArray.buffer && UTF8Decoder) {
                 return UTF8Decoder.decode(heapOrArray.subarray(idx, endPtr));
-            } else {
-                var str = '';
-                while (idx < endPtr) {
-                    var u0 = heapOrArray[idx++];
-                    if (!(u0 & 128)) {
-                        str += String.fromCharCode(u0);
-                        continue;
-                    }
-                    var u1 = heapOrArray[idx++] & 63;
-                    if ((u0 & 224) == 192) {
-                        str += String.fromCharCode(((u0 & 31) << 6) | u1);
-                        continue;
-                    }
-                    var u2 = heapOrArray[idx++] & 63;
-                    if ((u0 & 240) == 224) {
-                        u0 = ((u0 & 15) << 12) | (u1 << 6) | u2;
-                    } else {
-                        u0 = ((u0 & 7) << 18) | (u1 << 12) | (u2 << 6) | (heapOrArray[idx++] & 63);
-                    }
-                    if (u0 < 65536) {
-                        str += String.fromCharCode(u0);
-                    } else {
-                        var ch = u0 - 65536;
-                        str += String.fromCharCode(55296 | (ch >> 10), 56320 | (ch & 1023));
-                    }
+            }
+            var str = '';
+            while (idx < endPtr) {
+                var u0 = heapOrArray[idx++];
+                if (!(u0 & 128)) {
+                    str += String.fromCharCode(u0);
+                    continue;
+                }
+                var u1 = heapOrArray[idx++] & 63;
+                if ((u0 & 224) == 192) {
+                    str += String.fromCharCode(((u0 & 31) << 6) | u1);
+                    continue;
+                }
+                var u2 = heapOrArray[idx++] & 63;
+                if ((u0 & 240) == 224) {
+                    u0 = ((u0 & 15) << 12) | (u1 << 6) | u2;
+                } else {
+                    u0 = ((u0 & 7) << 18) | (u1 << 12) | (u2 << 6) | (heapOrArray[idx++] & 63);
+                }
+                if (u0 < 65536) {
+                    str += String.fromCharCode(u0);
+                } else {
+                    var ch = u0 - 65536;
+                    str += String.fromCharCode(55296 | (ch >> 10), 56320 | (ch & 1023));
                 }
             }
             return str;
@@ -273,35 +209,22 @@ var Module = (() => {
             heap[outIdx] = 0;
             return outIdx - startIdx;
         }
-        function stringToUTF8(str, outPtr, maxBytesToWrite) {
-            return stringToUTF8Array(str, HEAPU8, outPtr, maxBytesToWrite);
-        }
         function lengthBytesUTF8(str) {
             var len = 0;
             for (var i = 0; i < str.length; ++i) {
-                var u = str.charCodeAt(i);
-                if (u >= 55296 && u <= 57343) u = (65536 + ((u & 1023) << 10)) | (str.charCodeAt(++i) & 1023);
-                if (u <= 127) ++len;
-                else if (u <= 2047) len += 2;
-                else if (u <= 65535) len += 3;
-                else len += 4;
+                var c = str.charCodeAt(i);
+                if (c <= 127) {
+                    len++;
+                } else if (c <= 2047) {
+                    len += 2;
+                } else if (c >= 55296 && c <= 57343) {
+                    len += 4;
+                    ++i;
+                } else {
+                    len += 3;
+                }
             }
             return len;
-        }
-        function allocateUTF8OnStack(str) {
-            var size = lengthBytesUTF8(str) + 1;
-            var ret = stackAlloc(size);
-            stringToUTF8Array(str, HEAP8, ret, size);
-            return ret;
-        }
-        function writeArrayToMemory(array, buffer) {
-            HEAP8.set(array, buffer);
-        }
-        function writeAsciiToMemory(str, buffer, dontAddNull) {
-            for (var i = 0; i < str.length; ++i) {
-                HEAP8[buffer++ >> 0] = str.charCodeAt(i);
-            }
-            if (!dontAddNull) HEAP8[buffer >> 0] = 0;
         }
         var buffer, HEAP8, HEAPU8, HEAP16, HEAPU16, HEAP32, HEAPU32, HEAPF32, HEAPF64;
         function updateGlobalBufferAndViews(buf) {
@@ -398,9 +321,8 @@ var Module = (() => {
                 }
                 if (readBinary) {
                     return readBinary(file);
-                } else {
-                    throw 'both async and sync fetching of the wasm failed';
                 }
+                throw 'both async and sync fetching of the wasm failed';
             } catch (err) {
                 abort(err);
             }
@@ -485,19 +407,15 @@ var Module = (() => {
         }
         var tempDouble;
         var tempI64;
+        function ExitStatus(status) {
+            this.name = 'ExitStatus';
+            this.message = 'Program terminated with exit(' + status + ')';
+            this.status = status;
+        }
         function callRuntimeCallbacks(callbacks) {
             while (callbacks.length > 0) {
                 callbacks.shift()(Module);
             }
-        }
-        var wasmTableMirror = [];
-        function getWasmTableEntry(funcPtr) {
-            var func = wasmTableMirror[funcPtr];
-            if (!func) {
-                if (funcPtr >= wasmTableMirror.length) wasmTableMirror.length = funcPtr + 1;
-                wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr);
-            }
-            return func;
         }
         // Function called after the cvc5 execution when an error happend
         function handleException(e) {
@@ -508,6 +426,18 @@ var Module = (() => {
             // react scope and signs that a error happend.
             Module['postCVC5'](true);
             quit_(1, e);
+        }
+        function writeArrayToMemory(array, buffer) {
+            HEAP8.set(array, buffer);
+        }
+        var wasmTableMirror = [];
+        function getWasmTableEntry(funcPtr) {
+            var func = wasmTableMirror[funcPtr];
+            if (!func) {
+                if (funcPtr >= wasmTableMirror.length) wasmTableMirror.length = funcPtr + 1;
+                wasmTableMirror[funcPtr] = func = wasmTable.get(funcPtr);
+            }
+            return func;
         }
         function ___call_sighandler(fp, sig) {
             getWasmTableEntry(fp)(sig);
@@ -662,14 +592,11 @@ var Module = (() => {
         function getRandomDevice() {
             if (typeof crypto == 'object' && typeof crypto['getRandomValues'] == 'function') {
                 var randomBuffer = new Uint8Array(1);
-                return function () {
+                return () => {
                     crypto.getRandomValues(randomBuffer);
                     return randomBuffer[0];
                 };
-            } else
-                return function () {
-                    abort('randomDevice');
-                };
+            } else return () => abort('randomDevice');
         }
         var PATH_FS = {
             resolve: function () {
@@ -724,6 +651,13 @@ var Module = (() => {
                 return outputParts.join('/');
             },
         };
+        function intArrayFromString(stringy, dontAddNull, length) {
+            var len = length > 0 ? length : lengthBytesUTF8(stringy) + 1;
+            var u8array = new Array(len);
+            var numBytesWritten = stringToUTF8Array(stringy, u8array, 0, u8array.length);
+            if (dontAddNull) u8array.length = numBytesWritten;
+            return u8array;
+        }
         var TTY = {
             ttys: [],
             init: function () {},
@@ -1162,12 +1096,12 @@ var Module = (() => {
             var dep = !noRunDep ? getUniqueRunDependency('al ' + url) : '';
             readAsync(
                 url,
-                function (arrayBuffer) {
+                (arrayBuffer) => {
                     assert(arrayBuffer, 'Loading data file "' + url + '" failed (no arrayBuffer).');
                     onload(new Uint8Array(arrayBuffer));
                     if (dep) removeRunDependency(dep);
                 },
-                function (event) {
+                (event) => {
                     if (onerror) {
                         onerror();
                     } else {
@@ -2251,11 +2185,10 @@ var Module = (() => {
             },
             findObject: (path, dontResolveLastLink) => {
                 var ret = FS.analyzePath(path, dontResolveLastLink);
-                if (ret.exists) {
-                    return ret.object;
-                } else {
+                if (!ret.exists) {
                     return null;
                 }
+                return ret.object;
             },
             analyzePath: (path, dontResolveLastLink) => {
                 try {
@@ -2444,9 +2377,8 @@ var Module = (() => {
                             throw new Error("Couldn't load " + url + '. Status: ' + xhr.status);
                         if (xhr.response !== undefined) {
                             return new Uint8Array(xhr.response || []);
-                        } else {
-                            return intArrayFromString(xhr.responseText || '', true);
                         }
+                        return intArrayFromString(xhr.responseText || '', true);
                     };
                     var lazyArray = this;
                     lazyArray.setDataGetter((chunkNum) => {
@@ -2722,14 +2654,12 @@ var Module = (() => {
                     throw e;
                 }
                 HEAP32[buf >> 2] = stat.dev;
-                HEAP32[(buf + 4) >> 2] = 0;
                 HEAP32[(buf + 8) >> 2] = stat.ino;
                 HEAP32[(buf + 12) >> 2] = stat.mode;
                 HEAP32[(buf + 16) >> 2] = stat.nlink;
                 HEAP32[(buf + 20) >> 2] = stat.uid;
                 HEAP32[(buf + 24) >> 2] = stat.gid;
                 HEAP32[(buf + 28) >> 2] = stat.rdev;
-                HEAP32[(buf + 32) >> 2] = 0;
                 (tempI64 = [
                     stat.size >>> 0,
                     ((tempDouble = stat.size),
@@ -2743,12 +2673,42 @@ var Module = (() => {
                     (HEAP32[(buf + 44) >> 2] = tempI64[1]);
                 HEAP32[(buf + 48) >> 2] = 4096;
                 HEAP32[(buf + 52) >> 2] = stat.blocks;
-                HEAP32[(buf + 56) >> 2] = (stat.atime.getTime() / 1e3) | 0;
-                HEAP32[(buf + 60) >> 2] = 0;
-                HEAP32[(buf + 64) >> 2] = (stat.mtime.getTime() / 1e3) | 0;
-                HEAP32[(buf + 68) >> 2] = 0;
-                HEAP32[(buf + 72) >> 2] = (stat.ctime.getTime() / 1e3) | 0;
-                HEAP32[(buf + 76) >> 2] = 0;
+                (tempI64 = [
+                    Math.floor(stat.atime.getTime() / 1e3) >>> 0,
+                    ((tempDouble = Math.floor(stat.atime.getTime() / 1e3)),
+                    +Math.abs(tempDouble) >= 1
+                        ? tempDouble > 0
+                            ? (Math.min(+Math.floor(tempDouble / 4294967296), 4294967295) | 0) >>> 0
+                            : ~~+Math.ceil((tempDouble - +(~~tempDouble >>> 0)) / 4294967296) >>> 0
+                        : 0),
+                ]),
+                    (HEAP32[(buf + 56) >> 2] = tempI64[0]),
+                    (HEAP32[(buf + 60) >> 2] = tempI64[1]);
+                HEAP32[(buf + 64) >> 2] = 0;
+                (tempI64 = [
+                    Math.floor(stat.mtime.getTime() / 1e3) >>> 0,
+                    ((tempDouble = Math.floor(stat.mtime.getTime() / 1e3)),
+                    +Math.abs(tempDouble) >= 1
+                        ? tempDouble > 0
+                            ? (Math.min(+Math.floor(tempDouble / 4294967296), 4294967295) | 0) >>> 0
+                            : ~~+Math.ceil((tempDouble - +(~~tempDouble >>> 0)) / 4294967296) >>> 0
+                        : 0),
+                ]),
+                    (HEAP32[(buf + 72) >> 2] = tempI64[0]),
+                    (HEAP32[(buf + 76) >> 2] = tempI64[1]);
+                HEAP32[(buf + 80) >> 2] = 0;
+                (tempI64 = [
+                    Math.floor(stat.ctime.getTime() / 1e3) >>> 0,
+                    ((tempDouble = Math.floor(stat.ctime.getTime() / 1e3)),
+                    +Math.abs(tempDouble) >= 1
+                        ? tempDouble > 0
+                            ? (Math.min(+Math.floor(tempDouble / 4294967296), 4294967295) | 0) >>> 0
+                            : ~~+Math.ceil((tempDouble - +(~~tempDouble >>> 0)) / 4294967296) >>> 0
+                        : 0),
+                ]),
+                    (HEAP32[(buf + 88) >> 2] = tempI64[0]),
+                    (HEAP32[(buf + 92) >> 2] = tempI64[1]);
+                HEAP32[(buf + 96) >> 2] = 0;
                 (tempI64 = [
                     stat.ino >>> 0,
                     ((tempDouble = stat.ino),
@@ -2758,8 +2718,8 @@ var Module = (() => {
                             : ~~+Math.ceil((tempDouble - +(~~tempDouble >>> 0)) / 4294967296) >>> 0
                         : 0),
                 ]),
-                    (HEAP32[(buf + 80) >> 2] = tempI64[0]),
-                    (HEAP32[(buf + 84) >> 2] = tempI64[1]);
+                    (HEAP32[(buf + 104) >> 2] = tempI64[0]),
+                    (HEAP32[(buf + 108) >> 2] = tempI64[1]);
                 return 0;
             },
             doMsync: function (addr, stream, len, flags, offset) {
@@ -2876,7 +2836,7 @@ var Module = (() => {
                         return 0;
                     }
                     default:
-                        abort('bad ioctl syscall ' + op);
+                        return -28;
                 }
             } catch (e) {
                 if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e;
@@ -2932,13 +2892,12 @@ var Module = (() => {
                     var pipe = stream.node.pipe;
                     if ((stream.flags & 2097155) === 1) {
                         return 256 | 4;
-                    } else {
-                        if (pipe.buckets.length > 0) {
-                            for (var i = 0; i < pipe.buckets.length; i++) {
-                                var bucket = pipe.buckets[i];
-                                if (bucket.offset - bucket.roffset > 0) {
-                                    return 64 | 1;
-                                }
+                    }
+                    if (pipe.buckets.length > 0) {
+                        for (var i = 0; i < pipe.buckets.length; i++) {
+                            var bucket = pipe.buckets[i];
+                            if (bucket.offset - bucket.roffset > 0) {
+                                return 64 | 1;
                             }
                         }
                     }
@@ -3166,6 +3125,12 @@ var Module = (() => {
             }
             return getEnvStrings.strings;
         }
+        function writeAsciiToMemory(str, buffer, dontAddNull) {
+            for (var i = 0; i < str.length; ++i) {
+                HEAP8[buffer++ >> 0] = str.charCodeAt(i);
+            }
+            if (!dontAddNull) HEAP8[buffer >> 0] = 0;
+        }
         function _environ_get(__environ, environ_buf) {
             var bufSize = 0;
             getEnvStrings().forEach(function (string, i) {
@@ -3186,9 +3151,18 @@ var Module = (() => {
             HEAPU32[penviron_buf_size >> 2] = bufSize;
             return 0;
         }
-        function _exit(status) {
-            exit(status);
+        function _proc_exit(code) {
+            EXITSTATUS = code;
+            if (!keepRuntimeAlive()) {
+                ABORT = true;
+            }
+            quit_(code, new ExitStatus(code));
         }
+        function exitJS(status, implicit) {
+            EXITSTATUS = status;
+            _proc_exit(status);
+        }
+        var _exit = exitJS;
         function _fd_close(fd) {
             try {
                 var stream = SYSCALLS.getStreamFromFD(fd);
@@ -3283,9 +3257,6 @@ var Module = (() => {
                 if (typeof FS == 'undefined' || !(e instanceof FS.ErrnoError)) throw e;
                 return e.errno;
             }
-        }
-        function _proc_exit(code) {
-            procExit(code);
         }
         function __isLeapYear(year) {
             return year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
@@ -3432,12 +3403,10 @@ var Module = (() => {
                 if (compareByDay(firstWeekStartThisYear, thisDate) <= 0) {
                     if (compareByDay(firstWeekStartNextYear, thisDate) <= 0) {
                         return thisDate.getFullYear() + 1;
-                    } else {
-                        return thisDate.getFullYear();
                     }
-                } else {
-                    return thisDate.getFullYear() - 1;
+                    return thisDate.getFullYear();
                 }
+                return thisDate.getFullYear() - 1;
             }
             var EXPANSION_RULES_2 = {
                 '%a': function (date) {
@@ -3499,9 +3468,8 @@ var Module = (() => {
                 '%p': function (date) {
                     if (date.tm_hour >= 0 && date.tm_hour < 12) {
                         return 'AM';
-                    } else {
-                        return 'PM';
                     }
+                    return 'PM';
                 },
                 '%S': function (date) {
                     return leadingNulls(date.tm_sec, 2);
@@ -3577,6 +3545,12 @@ var Module = (() => {
         function _strftime_l(s, maxsize, format, tm) {
             return _strftime(s, maxsize, format, tm);
         }
+        function allocateUTF8OnStack(str) {
+            var size = lengthBytesUTF8(str) + 1;
+            var ret = stackAlloc(size);
+            stringToUTF8Array(str, HEAP8, ret, size);
+            return ret;
+        }
         var FSNode = function (parent, name, mode, rdev) {
             if (!parent) {
                 parent = this;
@@ -3623,13 +3597,6 @@ var Module = (() => {
         });
         FS.FSNode = FSNode;
         FS.staticInit();
-        function intArrayFromString(stringy, dontAddNull, length) {
-            var len = length > 0 ? length : lengthBytesUTF8(stringy) + 1;
-            var u8array = new Array(len);
-            var numBytesWritten = stringToUTF8Array(stringy, u8array, 0, u8array.length);
-            if (dontAddNull) u8array.length = numBytesWritten;
-            return u8array;
-        }
         var asmLibraryArg = {
             s: ___call_sighandler,
             a: ___cxa_allocate_exception,
@@ -3671,30 +3638,16 @@ var Module = (() => {
         var _malloc = (Module['_malloc'] = function () {
             return (_malloc = Module['_malloc'] = Module['asm']['F']).apply(null, arguments);
         });
-        var stackSave = (Module['stackSave'] = function () {
-            return (stackSave = Module['stackSave'] = Module['asm']['G']).apply(null, arguments);
-        });
-        var stackRestore = (Module['stackRestore'] = function () {
-            return (stackRestore = Module['stackRestore'] = Module['asm']['H']).apply(null, arguments);
-        });
         var stackAlloc = (Module['stackAlloc'] = function () {
-            return (stackAlloc = Module['stackAlloc'] = Module['asm']['I']).apply(null, arguments);
+            return (stackAlloc = Module['stackAlloc'] = Module['asm']['G']).apply(null, arguments);
         });
         var ___cxa_is_pointer_type = (Module['___cxa_is_pointer_type'] = function () {
-            return (___cxa_is_pointer_type = Module['___cxa_is_pointer_type'] = Module['asm']['J']).apply(
+            return (___cxa_is_pointer_type = Module['___cxa_is_pointer_type'] = Module['asm']['H']).apply(
                 null,
                 arguments,
             );
         });
-        Module['ccall'] = ccall;
-        Module['cwrap'] = cwrap;
         var calledRun;
-        function ExitStatus(status) {
-            this.name = 'ExitStatus';
-            this.message = 'Program terminated with exit(' + status + ')';
-            this.status = status;
-        }
-        var calledMain = false;
         dependenciesFulfilled = function runCaller() {
             if (!calledRun) run();
             if (!calledRun) dependenciesFulfilled = runCaller;
@@ -3712,12 +3665,10 @@ var Module = (() => {
             HEAP32[argv_ptr] = 0;
             try {
                 var ret = entryFunction(argc, argv);
-                exit(ret, true);
+                exitJS(ret, true);
                 return ret;
             } catch (e) {
                 return handleException(e);
-            } finally {
-                calledMain = true;
             }
         }
         // Function responsable for running the cvc5 web assembly code with the
@@ -3748,18 +3699,6 @@ var Module = (() => {
             {
                 doRun();
             }
-        }
-        Module['run'] = run;
-        function exit(status, implicit) {
-            EXITSTATUS = status;
-            procExit(status);
-        }
-        function procExit(code) {
-            EXITSTATUS = code;
-            if (!keepRuntimeAlive()) {
-                ABORT = true;
-            }
-            quit_(code, new ExitStatus(code));
         }
         var shouldRunNow = true;
         run();

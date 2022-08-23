@@ -10,7 +10,7 @@ import {
     applyColor,
     hideNodes,
     foldAllDescendants,
-    unhideNodes,
+    unfoldNodes,
     selectVisualInfo,
     selectProof,
     selectHiddenNodes,
@@ -188,7 +188,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         },
         ['/unselect']: (cmds: string[]) => {
             const allNodesIds = proof.map((node) => node.id);
-            dispatch(unselectNodes(allNodesIds));
+            dispatch(unselectNodes({ nodes: allNodesIds, cleanAll: true }));
         },
         ['/color']: (cmds: string[]) => {
             if (cmds[1]) {
@@ -231,15 +231,9 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         },
         ['/hide']: (cmds: string[]) => {
             // Hide all the selected nodes
-            const hiddenIds = Object.keys(visualInfo)
-                .map((id) => Number(id))
-                .filter((id) => visualInfo[id].selected);
-            // Make sure there are nodes selected
-            if (hiddenIds.length > 1) {
-                // Re-render the canvas and update the store
-                dispatch(reRender());
-                dispatch(hideNodes(hiddenIds));
-            }
+            // Re-render the canvas and update the store
+            dispatch(reRender());
+            dispatch(hideNodes());
         },
         ['/fold']: (cmds: string[]) => {
             // If the option is a number
@@ -254,7 +248,6 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
             }
         },
         ['/unfold']: (cmds: string[]) => {
-            let hiddenIds: number[];
             // If there is a number argument
             if (cmds[1] && !isNaN(Number(cmds[1]))) {
                 const id = Number(cmds[1]);
@@ -262,12 +255,9 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                 const obj = proof.find((node) => node.id === id);
                 // If it's a pi node
                 if (obj && obj.hiddenNodes?.length) {
-                    // Get the hidden nodes and their ids
-                    const hiddenNodes = obj.hiddenNodes ? obj.hiddenNodes : [];
-                    hiddenIds = hiddenNodes ? hiddenNodes.map((node) => node.id) : [];
                     // Re-render the canvas and update the store
                     dispatch(reRender());
-                    dispatch(unhideNodes({ pi: id, hiddens: hiddenIds }));
+                    dispatch(unfoldNodes(id));
                 }
             }
         },
@@ -407,7 +397,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         dispatch(setSmt(smt));
 
         dispatch(process(dot));
-        setSmtDrawerIsOpen();
+        setSmtDrawerIsOpen(true);
     };
 
     const isPseudoClick = (e: React.KeyboardEvent<HTMLAnchorElement>): boolean => e.key === 'Enter' || e.key === ' ';
@@ -623,7 +613,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
 
     const criticalWidth = 1350;
     return (
-        <Navbar>
+        <Navbar id="main-navbar">
             <Navbar.Group align={Alignment.LEFT}>
                 <Navbar.Heading>
                     <b id="proof-visualizer-name">{windowSize.width >= criticalWidth ? 'Proof Visualizer' : 'PV'}</b>
@@ -658,7 +648,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
                     className="bp3-minimal"
                     icon="code"
                     text={windowSize.width >= criticalWidth ? 'SMT Input' : ''}
-                    onClick={() => setSmtDrawerIsOpen()}
+                    onClick={() => setSmtDrawerIsOpen(true)}
                     tabIndex={tabIndex}
                 />
             </Navbar.Group>

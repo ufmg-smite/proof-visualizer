@@ -11,6 +11,8 @@ const initialState: ExternalCmdState = {
         count: 0,
         fileChanged: false,
     },
+    spinner: 'off',
+    selectData: { type: false, square: { upperL: { x: -1, y: -1 }, lowerR: { x: -1, y: -1 } } },
 };
 
 export const externalCmd = createSlice({
@@ -35,16 +37,34 @@ export const externalCmd = createSlice({
         blockRenderNewFile: (state) => {
             state.renderData.fileChanged = false;
         },
+        setSpinner: (state, action: PayloadAction<'off' | 'cvc5' | 'render'>) => {
+            state.spinner = action.payload;
+        },
+        setSelectArea: (state, action: PayloadAction<ExternalCmdState['selectData']>) => {
+            state.selectData = action.payload;
+        },
     },
 });
 
-export const { findNode, reRender, addRenderCount, blockRender, allowRenderNewFile, blockRenderNewFile } =
-    externalCmd.actions;
+export const {
+    findNode,
+    reRender,
+    addRenderCount,
+    blockRender,
+    allowRenderNewFile,
+    blockRenderNewFile,
+    setSpinner,
+    setSelectArea,
+} = externalCmd.actions;
 
 export const selectFindData = (state: RootState): { nodeToFind: number; findOption: boolean } =>
     state.externalCmd.findData;
 
 export const selectRenderData = (state: RootState): { count: number; fileChanged: boolean } =>
     state.externalCmd.renderData;
+
+export const selectSpinner = (state: RootState): ExternalCmdState['spinner'] => state.externalCmd.spinner;
+
+export const selectSelectData = (state: RootState): ExternalCmdState['selectData'] => state.externalCmd.selectData;
 
 export default externalCmd.reducer;

@@ -16,6 +16,7 @@ const divsIds = [
     'visualizers-bt',
     'download-bt',
     'switch-button-dark-theme',
+    'main-navbar',
 ];
 const tutorials: string[][] = [
     [
@@ -51,6 +52,12 @@ const tutorials: string[][] = [
         '.PNG prints the proof in the current state (i.e. includes all the transformations) into a image.',
     ],
     ['Allow to change between dark/light mode.'],
+    [
+        'When working at the Canvas, you can use special commands.',
+        'CTRL+Z:\n when the Canvas is on focus, undo some actions: fold, unfold, hide, color and move',
+        "CTRL+SHIFT+S:\n when the Canvas is on focus, open a selection tool allowing the user to select the nodes inside the selected area. Pressing again this shortcut turns the tool off. To select a node it's necessary to select the top-left corner.",
+        'CTRL+SHIFT+U:\n similar to the previous command, allow the user to unselect nodes in a given area.',
+    ],
 ];
 
 // panel stack

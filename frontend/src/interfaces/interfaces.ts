@@ -12,6 +12,7 @@ interface NodeInterface {
     children: number[];
     parents: number[];
     hiddenNodes?: NodeInterface[];
+    isHidden?: number;
     descendants: number;
     dependencies: { piId: number; depsId: number[] }[];
     clusterType: ClusterKind;
@@ -38,7 +39,7 @@ interface NodeProps {
     toggleNodeSelection: (id: number) => void;
     updateNodePosition: (key: number, x: number, y: number) => void;
     openDrawer: (nodeInfo: NodeInfo, tree?: Array<TreeNode>) => void;
-    onDragEnd: () => void;
+    onDragEnd: (nodeID: number) => void;
     createTree: (id: number) => TreeNode[];
 }
 
@@ -53,6 +54,11 @@ interface NodeInfo {
     dependencies: NodeProps['dependencies'];
 }
 
+// VISUALIZER STAGE
+interface VisualizerStageProps {
+    disableExternalDrawers: React.DispatchWithoutAction;
+}
+
 // CANVAS
 // Dividir essas interfaces em funções
 interface CanvasProps {
@@ -63,17 +69,29 @@ interface CanvasProps {
 interface CanvasPropsAndRedux extends CanvasProps {
     proof: NodeInterface[];
     visualInfo: ProofState['visualInfo'];
+    nodesSelected: ProofState['nodesSelected'];
     nodeFindData: ExternalCmdState['findData'];
     renderData: ExternalCmdState['renderData'];
+    spinner: ExternalCmdState['spinner'];
+    selectData: ExternalCmdState['selectData'];
 
-    hideNodes: ActionCreatorWithPayload<number[], string>;
-    unhideNodes: ActionCreatorWithPayload<{ pi: number; hiddens: number[] }, string>;
+    hideNodes: ActionCreatorWithPayload<void, string>;
+    unfoldNodes: ActionCreatorWithPayload<number, string>;
     foldAllDescendants: ActionCreatorWithPayload<number>;
     setVisualInfo: ActionCreatorWithPayload<ProofState['visualInfo'], string>;
     findNode: ActionCreatorWithPayload<{ nodeId: number; option: boolean }, string>;
+    setSelectArea: ActionCreatorWithPayload<ExternalCmdState['selectData'], string>;
+    selectByArea: ActionCreatorWithPayload<ExternalCmdState['selectData']['square'], string>;
+    unselectByArea: ActionCreatorWithPayload<ExternalCmdState['selectData']['square'], string>;
     reRender: ActionCreatorWithPayload<void, string>;
     addRenderCount: ActionCreatorWithPayload<void, string>;
     blockRenderNewFile: ActionCreatorWithPayload<void, string>;
+    setSpinner: ActionCreatorWithPayload<ExternalCmdState['spinner'], string>;
+    undo: ActionCreatorWithPayload<void, string>;
+    selectNodes: ActionCreatorWithPayload<number[], string>;
+    unselectNodes: ActionCreatorWithPayload<{ nodes: number[]; cleanAll: boolean }, string>;
+    applyColor: ActionCreatorWithPayload<string, string>;
+    moveNode: ActionCreatorWithPayload<{ id: number; x: number; y: number }, string>;
 }
 
 interface CanvasState {
@@ -82,9 +100,9 @@ interface CanvasState {
     showingNodes: { [id: number]: JSX.Element };
     showingEdges: { [id: string]: JSX.Element };
     nodeOnFocus: number;
-    nodesSelected: Array<number>;
     proof: NodeInterface[];
     visualInfo: ProofState['visualInfo'];
+    selectCount: number;
 }
 
 // DIRECTORY STYLE
@@ -95,6 +113,21 @@ interface DirectoryStyleProps {
     translate: (s: string) => string;
 }
 
+// SELECT OVERLAY
+interface SelectionSquare {
+    upperL: { x: number; y: number };
+    lowerR: { x: number; y: number };
+}
+
+interface SelectOverlayProps {
+    isSelecting: boolean;
+    selectMode: boolean;
+    setIsSelecting: React.Dispatch<{
+        type: 'invert' | 'set' | 'change-mode';
+        payload: { value: boolean; key: 's' | 'u' | 'n' };
+    }>;
+}
+
 // NAVBAR
 interface NavbarProps {
     setDialogIsOpen: Dispatch<SetStateAction<boolean>>;
@@ -102,7 +135,7 @@ interface NavbarProps {
     addErrorToast: (err: string) => void;
     inTutorial: boolean;
     setInTutorial: Dispatch<SetStateAction<boolean>>;
-    setSmtDrawerIsOpen: React.DispatchWithoutAction;
+    setSmtDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
 }
 
 interface NavbarPropsAndRedux extends NavbarProps {
@@ -111,7 +144,7 @@ interface NavbarPropsAndRedux extends NavbarProps {
     view: string;
     visualInfo: ProofState['visualInfo'];
     hiddenNodes: number[][];
-    hideNodes: ActionCreatorWithPayload<number[], string>;
+    hideNodes: ActionCreatorWithPayload<void, string>;
 }
 
 // DIALOG
@@ -179,7 +212,7 @@ interface DrawerProps {
 // SMT DRAWER
 interface SmtDrawerProps {
     isOpen: boolean;
-    setDrawerIsOpen: React.DispatchWithoutAction;
+    setDrawerIsOpen: Dispatch<SetStateAction<boolean>>;
     addErrorToast: (err: string) => void;
     smtOptions: { argsType: boolean; customArgs: string };
     setSmtOptions: Dispatch<SetStateAction<SmtDrawerProps['smtOptions']>>;
@@ -229,6 +262,7 @@ interface ProofState {
             selected: boolean;
         };
     };
+    nodesSelected: number[];
     clustersInfos: {
         hiddenNodes: number[];
         type: ClusterKind;
@@ -256,16 +290,21 @@ interface ExternalCmdState {
         count: number;
         fileChanged: boolean;
     };
+    spinner: 'off' | 'cvc5' | 'render';
+    selectData: { type: boolean; square: SelectionSquare };
 }
 
 export type {
     NodeInterface,
     NodeProps,
     NodeInfo,
+    VisualizerStageProps,
     CanvasProps,
     CanvasPropsAndRedux,
     CanvasState,
     DirectoryStyleProps,
+    SelectionSquare,
+    SelectOverlayProps,
     NavbarProps,
     NavbarPropsAndRedux,
     VisualizerDialogProps,

@@ -15,6 +15,8 @@ interface ArrowProps {
 
 const arrowTriangleH = 15;
 const arrowTriangleW = 5;
+const fontSize = 15;
+const fontFamily = 'Arial';
 
 const Arrow: React.FC<ArrowProps> = ({ origin, end }: ArrowProps) => {
     const h = origin.y - end.y;
@@ -62,45 +64,85 @@ function CreateNode(node: NodeInterface, visualInfo: ProofState['visualInfo'], l
     };
 
     return (
-        <g style={{ transform: `translate(${newX}px,${newY}px)` }}>
-            <rect x={0} y={0} width={300} height={35} strokeWidth="1" fill={color} stroke="black" />
-            <rect x={0} y={35} width={300} height={35} strokeWidth="1" fill={color} stroke="black" />
-            <rect x={0} y={70} width={50} height={35} strokeWidth="1" fill={color} stroke="black" />
-            <rect x={50} y={70} width={250} height={35} strokeWidth="1" fill={color} stroke="black" />
+        <>
             {node.children.map((child, id) => {
                 return (
                     <Arrow
                         key={id}
                         origin={{
-                            x: visualInfo[child].x - x + 150,
-                            y: visualInfo[child].y - y,
+                            x: visualInfo[child].x - smallestX + 150,
+                            y: visualInfo[child].y - smallestY,
                         }}
-                        end={{ x: 150, y: 105 }}
+                        end={{ x: newX + 150, y: newY + 105 }}
                     />
                 );
             })}
-            <text x={150} y={21} fontSize="15" fill={fill} dominantBaseline="middle" textAnchor="middle">
+            <rect x={newX + 0} y={newY + 0} width={300} height={35} strokeWidth="1" fill={color} stroke="black" />
+            <rect x={newX + 0} y={newY + 35} width={300} height={35} strokeWidth="1" fill={color} stroke="black" />
+            <rect x={newX + 0} y={newY + 70} width={50} height={35} strokeWidth="1" fill={color} stroke="black" />
+            <rect x={newX + 50} y={newY + 70} width={250} height={35} strokeWidth="1" fill={color} stroke="black" />
+            <text
+                x={newX + 150}
+                y={newY + 21}
+                fontSize={fontSize}
+                fill={fill}
+                dominantBaseline="middle"
+                textAnchor="middle"
+                fontFamily={fontFamily}
+            >
                 {node.conclusion}
             </text>
-            <text x={150} y={56} fontSize="15" fill={fill} dominantBaseline="middle" textAnchor="middle">
+            <text
+                x={newX + 150}
+                y={newY + 56}
+                fontSize={fontSize}
+                fill={fill}
+                dominantBaseline="middle"
+                textAnchor="middle"
+                fontFamily={fontFamily}
+            >
                 {infos.rule}
             </text>
-            <text x={25} y={91} fontSize="15" fill={fill} dominantBaseline="middle" textAnchor="middle">
+            <text
+                x={newX + 25}
+                y={newY + 91}
+                fontSize={fontSize}
+                fill={fill}
+                dominantBaseline="middle"
+                textAnchor="middle"
+                fontFamily={fontFamily}
+            >
                 {node.id.toString()}
             </text>
-            <text x={175} y={91} fontSize="15" fill={fill} dominantBaseline="middle" textAnchor="middle">
+            <text
+                x={newX + 175}
+                y={newY + 91}
+                fontSize={fontSize}
+                fill={fill}
+                dominantBaseline="middle"
+                textAnchor="middle"
+                fontFamily={fontFamily}
+            >
                 {infos.nHided + infos.nDescendants}
             </text>
             {node.dependencies.length ? (
                 <>
-                    <circle cx={350} cy={53} r={25} strokeWidth="1" fill={color} stroke="black" />
-                    <Arrow origin={{ x: 325, y: 53 }} end={{ x: 300, y: 53 }} />
-                    <text x={350} y={53} fontSize="15" fill={fill} dominantBaseline="middle" textAnchor="middle">
+                    <circle cx={newX + 350} cy={newY + 53} r={25} strokeWidth="1" fill={color} stroke="black" />
+                    <Arrow origin={{ x: newX + 325, y: newY + 53 }} end={{ x: newX + 300, y: newY + 53 }} />
+                    <text
+                        x={newX + 350}
+                        y={newY + 53}
+                        fontSize={fontSize}
+                        fill={fill}
+                        dominantBaseline="middle"
+                        textAnchor="middle"
+                        fontFamily={fontFamily}
+                    >
                         {infos.dependencies}
                     </text>
                 </>
             ) : null}
-        </g>
+        </>
     );
 }
 
