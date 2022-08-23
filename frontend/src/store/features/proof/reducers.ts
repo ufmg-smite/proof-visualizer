@@ -29,6 +29,7 @@ function process(state: Draft<ProofState>, action: PayloadAction<string>): void 
     // Reset the state
     state.clustersInfos = [];
     state.nodesSelected = [];
+    state.hiddenNodes = [];
 
     let proofJSON;
     let dot = action.payload;
@@ -95,7 +96,6 @@ function process(state: Draft<ProofState>, action: PayloadAction<string>): void 
         });
 
         let size = state.proof.length;
-        clearHiddenNodes(state, { payload: null, type: 'string' });
         state.clustersInfos.forEach(({ hiddenNodes, color }) => {
             let index;
             if (hiddenNodes.length > 1) {
