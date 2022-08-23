@@ -277,24 +277,28 @@ const VisualizerStage: React.FC<VisualizerStageProps> = ({ disableExternalDrawer
             state: boolean[],
             action: { type: 'invert' | 'set' | 'change-mode'; payload: { value: boolean; key: 's' | 'u' | 'n' } },
         ): boolean[] => {
+            const newState = [...state];
             switch (action.type) {
                 case 'invert':
-                    state[0] = !state[0];
+                    newState[0] = !newState[0];
                     break;
                 case 'set':
-                    state[0] = action.payload.value;
+                    newState[0] = action.payload.value;
                     break;
                 case 'change-mode':
-                    if (!state[0]) {
-                        state[0] = true;
-                        state[1] = action.payload.key !== 's';
-                    } else if ((state[1] && action.payload.key === 's') || (!state[1] && action.payload.key === 'u')) {
-                        state[1] = !state[1];
-                    } else state[0] = false;
+                    if (!newState[0]) {
+                        newState[0] = true;
+                        newState[1] = action.payload.key !== 's';
+                    } else if (
+                        (newState[1] && action.payload.key === 's') ||
+                        (!newState[1] && action.payload.key === 'u')
+                    ) {
+                        newState[1] = !newState[1];
+                    } else newState[0] = false;
 
                     break;
             }
-            return [...state];
+            return newState;
         },
         [false, false],
     );
