@@ -81,6 +81,21 @@ function CreateNode(node: NodeInterface, visualInfo: ProofState['visualInfo'], l
             <rect x={newX + 0} y={newY + 35} width={300} height={35} strokeWidth="1" fill={color} stroke="black" />
             <rect x={newX + 0} y={newY + 70} width={50} height={35} strokeWidth="1" fill={color} stroke="black" />
             <rect x={newX + 50} y={newY + 70} width={250} height={35} strokeWidth="1" fill={color} stroke="black" />
+            <defs>
+                <clipPath id={'clip-conc-' + node.id}>
+                    <rect x={newX} y={newY} width={300} height={35} />
+                </clipPath>
+                <clipPath id={'clip-rule-' + node.id}>
+                    <rect x={newX} y={newY + 35} width={300} height={35} />
+                </clipPath>
+                <clipPath id={'clip-id-' + node.id}>
+                    <rect x={newX} y={newY + 70} width={50} height={35} />
+                </clipPath>
+                <clipPath id={'clip-hidden-' + node.id}>
+                    <rect x={newX + 50} y={newY + 70} width={250} height={35} />
+                </clipPath>
+            </defs>
+
             <text
                 x={newX + 150}
                 y={newY + 21}
@@ -89,6 +104,7 @@ function CreateNode(node: NodeInterface, visualInfo: ProofState['visualInfo'], l
                 dominantBaseline="middle"
                 textAnchor="middle"
                 fontFamily={fontFamily}
+                clipPath={`url(#clip-conc-${node.id})`}
             >
                 {node.conclusion}
             </text>
@@ -100,6 +116,7 @@ function CreateNode(node: NodeInterface, visualInfo: ProofState['visualInfo'], l
                 dominantBaseline="middle"
                 textAnchor="middle"
                 fontFamily={fontFamily}
+                clipPath={`url(#clip-rule-${node.id})`}
             >
                 {infos.rule}
             </text>
@@ -111,6 +128,7 @@ function CreateNode(node: NodeInterface, visualInfo: ProofState['visualInfo'], l
                 dominantBaseline="middle"
                 textAnchor="middle"
                 fontFamily={fontFamily}
+                clipPath={`url(#clip-id-${node.id})`}
             >
                 {node.id.toString()}
             </text>
@@ -122,6 +140,7 @@ function CreateNode(node: NodeInterface, visualInfo: ProofState['visualInfo'], l
                 dominantBaseline="middle"
                 textAnchor="middle"
                 fontFamily={fontFamily}
+                clipPath={`url(#clip-hidden-${node.id})`}
             >
                 {infos.nHided + infos.nDescendants}
             </text>
