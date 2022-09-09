@@ -93,21 +93,31 @@ is a way to pass the
 example below is based on a .js created with the following flags:
 \begin{itemize}
     \item \textbf{-s EXPORTED\_FUNCTIONS=\_main}: Adds \textsf{main()} as an
-    exported function, but it's not needed since the \textsf{main()} is already
-    called when the Module is called.
-    %% HB: not clear what ``when the module is called'' means or why this makes
-    %% in to necessary to export main. You need to explain what a module is and
-    %% how it relates with what you've been describing.
-    \item \textbf{-s EXPORTED\_RUNTIME\_METHODS=ccall,cwrap}: Exports JS functions that allow the user to call a single exported function.
-    %% HB: clarify which function is exported, not clear from value of the option
-    \item \textbf{-s INCOMING\_MODULE\_JS\_API=arguments}: Adds the argument passing to the Module.
-    %% HB: change notation to clarify ``arguments'' is to be replaced by
-    %% whatever arguments are passed (if I understand correctly)
+    exported function, allowing it to be called separated from the Module main 
+    call. The Module is the main object of this glue code and \href{https://github.com/ufmg-smite/proof-visualizer/blob/main/frontend/src/components/VisualizerSmtDrawer/VisualizerSmtDrawer.tsx#L358-L366}{when called}
+     it runs the main function of the C/C++ code compiled. Then, this -s 
+     EXPORTED\_FUNCTIONS=\_main is redundant since the \textsf{main()} can 
+     already be called through the Module.
+    
+    The EXPORTED\_FUNCTIONS would be useful if, for an example, the user wanted 
+    only to call the cvc5 function responsible for printing the proofs. Then, it
+    would be possible to print proofs inside .js without running the entire 
+    cvc5.
+    \item \textbf{-s EXPORTED\_RUNTIME\_METHODS=ccall,cwrap}: Exports .js 
+    functions built by Emscripten that allow an interface between the web 
+    assembly and javascript. One example are \href{https://emscripten.org/docs/porting/connecting_cpp_and_javascript/Interacting-with-code.html#calling-compiled-c-functions-from-javascript-using-ccall-cwrap}{ccall and cwrap}
+    , that allow the the user to call an exported function (from the 
+    EXPORTED\_FUNCTIONS option) and pass to its arguments and get the returned 
+    value.
+    \item \textbf{-s INCOMING\_MODULE\_JS\_API=arguments}: Allow the user to 
+    pass the \textsf{argv} through the Module. In this example, the arguments 
+    are going to be all the cvc5 flags (--dump-proofs, --dag-thresh=0, ...) that
+     are normally passed through command line.
     \item \textbf{-s INVOKE\_RUN=1}: Whether we will run the \textsf{main()} function.
     \item \textbf{-s EXIT\_RUNTIME=0}: If 0, the runtime does not quit when
     \textsf{main()} completes (allowing code to run afterwards, for example from
-    the browser main event loop).
-    %% HB: unclear what this could be used for
+    the browser main event loop). It is used to call the cvc5 multiple times in 
+    the web application instead of one single time.
     \item \textbf{-s ENVIRONMENT=web}: Signalize that the wasm will run in a web environment.
     \item \textbf{-s MODULARIZE}: Make the glue code as an exportable function, just like a Module.
 \end{itemize}
@@ -117,8 +127,6 @@ Feel free to take a look at my own modified
   code}. This code has a shortened documentation for each of the changes I've
 made in the original file. Search for each comment in the file and you will
 reach every change I've made.
-%% It'd be good to give and overview of the changes before you start detailing
-%% them below.
 
 The \href{https://github.com/ufmg-smite/proof-visualizer/blob/main/frontend/src/wasm/cvc5.js#L43}{first change} needed refers to how the glue code will find your .wasm file. The code bellow shows it:
 
@@ -162,7 +170,7 @@ Module({
     proofTxt: textRef.current,
     out: updateStdout,
     err: updateStderr,
-    postcvc5: postcvc5run,
+    postCVC5: postCVC5run,
     cleanStdout: cleanStdout,
     binaryFileName: 'cvc5.wasm',
 });
@@ -211,7 +219,13 @@ result = Module['proofTxt'];
 Module['cleanStdout']();
 \end{lstlisting}
 
-In the end, when the web assembly finally finishes it calls a function called postRun, that deals with the post run methods. We can utilize this function to do any behavior post run we want. In this case in specific since the run of the wasm is async, \href{https://github.com/ufmg-smite/proof-visualizer/blob/main/frontend/src/wasm/cvc5.js#L264-L270}{we used this function} to call an external function postcvc5 that signalize to the ReactJS that the run is over so it can use the result in the out buffer as it please. The code bellow shows us it:
+In the end, when the web assembly finally finishes it calls a function called 
+postRun, that deals with the post run methods. We can utilize this function to 
+do any behavior post run we want. In this case in specific since the run of the 
+wasm is async, \href{https://github.com/ufmg-smite/proof-visualizer/blob/main/frontend/src/wasm/cvc5.js#L264-L270}{we used this function} 
+to call an external function postCVC5 that signalize to the ReactJS that the run
+is over so it can use the result in the out buffer as it please. The code 
+bellow shows us it:
 
 \begin{lstlisting}[language=JavaScript]
 // Function called after the cvc5 execution and no error happend
@@ -219,11 +233,15 @@ function postRun() {
     callRuntimeCallbacks(__ATPOSTRUN__);
     // Handle with the post cvc5 (end of execution) operations in the
     // react scope. Signs that no error happend.
-    Module['postcvc5'](false);
+    Module['postCVC5'](false);
 }
 \end{lstlisting}
 
-In a case where an error happens during the execution of the assembly file, then the \href{https://github.com/ufmg-smite/proof-visualizer/blob/main/frontend/src/wasm/cvc5.js#L420-L429 }{\textbf{handleException} function} is called. You can observe bellow that it also calls the function \textbf{Module['postcvc5']}, but now it pass an argument signalizing that an error happened.
+In a case where an error happens during the execution of the assembly file, then
+the \href{https://github.com/ufmg-smite/proof-visualizer/blob/main/frontend/src/wasm/cvc5.js#L420-L429 }{\textbf{handleException} function}
+is called. You can observe bellow that it also calls the function 
+\textbf{Module['postCVC5']}, but now it pass an argument signalizing that an 
+error happened.
 
 \begin{lstlisting}[language=JavaScript]
 // Function called after the cvc5 execution when an error happend
@@ -233,7 +251,7 @@ function handleException(e) {
     }
     // Handle with the post cvc5 (end of execution) operations in the
     // react scope and signs that a error happend.
-    Module['postcvc5'](true);
+    Module['postCVC5'](true);
     quit_(1, e);
 }
 \end{lstlisting}
