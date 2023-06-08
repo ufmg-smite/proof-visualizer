@@ -254,7 +254,6 @@ function unfoldNodes(state: Draft<ProofState>, action: PayloadAction<number>): v
     }
     // Delete the last position
     delete state.visualInfo[size - 1];
-    console.log(JSON.stringify(state.visualInfo));
 
     // Add undo action
     addUndo(new UnfoldUndo([...hiddens], pos, colors));
