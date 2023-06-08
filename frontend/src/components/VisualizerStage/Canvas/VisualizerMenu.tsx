@@ -4,6 +4,7 @@ import { colorConverter } from '../../../store/features/theme/auxi';
 
 const Menu = ({
     unfold,
+    unfoldNext,
     foldSelectedNodes,
     foldAllDescendants,
     changeNodeColor,
@@ -11,6 +12,7 @@ const Menu = ({
     options,
 }: {
     unfold: () => void;
+    unfoldNext: () => void;
     foldSelectedNodes: () => void;
     foldAllDescendants: () => void;
     changeNodeColor: (color: string) => void;
@@ -27,13 +29,22 @@ const Menu = ({
         <div className="bp3-popover2-content">
             <ul id="menu" className="bp3-menu">
                 {options.unfold ? (
-                    <li className="">
-                        <a className="bp3-menu-item" onClick={() => unfold()}>
-                            <div className="bp3-text-overflow-ellipsis bp3-fill bp3-icon-eye-open">
-                                <span> Unfold</span>
-                            </div>
-                        </a>
-                    </li>
+                    <>
+                        <li className="">
+                            <a className="bp3-menu-item" onClick={() => unfold()}>
+                                <div className="bp3-text-overflow-ellipsis bp3-fill bp3-icon-eye-open">
+                                    <span> Unfold</span>
+                                </div>
+                            </a>
+                        </li>
+                        <li className="">
+                            <a className="bp3-menu-item" onClick={() => unfoldNext()}>
+                                <div className="bp3-text-overflow-ellipsis bp3-fill bp3-icon-eye-open">
+                                    <span> Unfold Next</span>
+                                </div>
+                            </a>
+                        </li>
+                    </>
                 ) : null}
                 {options.foldSelected ? (
                     <li className="">

@@ -23,6 +23,7 @@ import {
     selectVisualInfo,
     hideNodes,
     unfoldNodes,
+    unfoldNextNode,
     foldAllDescendants,
     setVisualInfo,
     undo,
@@ -142,14 +143,14 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             conclusion: node.conclusion,
             rule: node.rule,
             args: node.args,
-            x: visualInfo.x,
-            y: visualInfo.y,
+            x: visualInfo?.x || 0,
+            y: visualInfo?.y || 0,
             nHided: node.hiddenNodes ? node.hiddenNodes.length : 0,
             nDescendants: node.descendants - 1,
             hiddenNodes: node.hiddenNodes ? node.hiddenNodes.map((node) => node.id) : [],
             dependencies: node.dependencies ? node.dependencies : [],
-            selected: visualInfo.selected,
-            color: visualInfo.color,
+            selected: visualInfo?.selected || false,
+            color: visualInfo?.color || '#fff',
             setNodeOnFocus: () => undefined,
             toggleNodeSelection: () => undefined,
             updateNodePosition: () => undefined,
@@ -382,6 +383,14 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         unfoldNodes(nodeOnFocus);
     };
 
+    unfoldNext = (): void => {
+        const { nodeOnFocus } = this.state;
+        const { unfoldNextNode, reRender } = this.props;
+
+        reRender();
+        unfoldNextNode(nodeOnFocus);
+    };
+
     changeNodeColor = (color: string): void => {
         const { showingNodes, nodeOnFocus } = this.state;
         const { applyColor, selectNodes } = this.props;
@@ -459,6 +468,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             <div tabIndex={1} onKeyDown={this.handleKeyDown} style={{ overflow: 'hidden' }}>
                 <Menu
                     unfold={this.unfold}
+                    unfoldNext={this.unfoldNext}
                     foldSelectedNodes={this.foldSelectedNodes}
                     foldAllDescendants={this.foldAllDescendants}
                     changeNodeColor={this.changeNodeColor}
@@ -522,6 +532,7 @@ function mapStateToProps(state: ReduxState, ownProps: CanvasProps) {
 const mapDispatchToProps = {
     hideNodes,
     unfoldNodes,
+    unfoldNextNode,
     foldAllDescendants,
     setVisualInfo,
     findNode,

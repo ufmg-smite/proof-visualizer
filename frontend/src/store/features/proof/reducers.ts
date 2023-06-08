@@ -115,6 +115,25 @@ function process(state: Draft<ProofState>, action: PayloadAction<string>): void 
         const piID = state.proof.length + i;
         hiddenNodesArray.forEach((node) => (state.proof[node].isHidden = piID));
     });
+
+    // Fold nodes if proof is too large
+    if (state.proof.length > 1000) {
+        const piNode = state.proof.reduce(
+            (acc, curr) => {
+                if (curr.parents.find((i) => i > 4)) {
+                    if (curr.descendants > acc.max) {
+                        acc = {
+                            id: curr.id,
+                            max: curr.descendants,
+                        };
+                    }
+                }
+                return acc;
+            },
+            { id: -1, max: -1 },
+        );
+        foldAllDescendants(state, { payload: piNode.id } as PayloadAction<number>);
+    }
 }
 
 function hideNodes(state: Draft<ProofState>, action: PayloadAction<void>): void {
@@ -235,7 +254,54 @@ function unfoldNodes(state: Draft<ProofState>, action: PayloadAction<number>): v
     }
     // Delete the last position
     delete state.visualInfo[size - 1];
+    console.log(JSON.stringify(state.visualInfo));
 
+    // Add undo action
+    addUndo(new UnfoldUndo([...hiddens], pos, colors));
+    // Unselect all the nodes
+    unselectNodes(state, { payload: { nodes: state.nodesSelected, cleanAll: true }, type: 'string' });
+}
+
+function unfoldNextNode(state: Draft<ProofState>, action: PayloadAction<number>): void {
+    const pi = action.payload;
+    const hiddenID = pi - state.proof.length;
+    const hiddens = state.hiddenNodes[hiddenID];
+    // const size = state.proof.length + 1;
+    const size = state.proof.length + state.hiddenNodes.length;
+    const color = state.visualInfo[pi].color;
+
+    // Save all the positions
+    const pos: { id: number; x: number; y: number }[] = [];
+    for (let id = 0; id < size; id++) {
+        pos.push({ id: id, x: state.visualInfo[id].x, y: state.visualInfo[id].y });
+    }
+
+    // Unselect the hidden nodes and set their color equal to the pi node
+    const colors: { id: number; color: string }[] = [];
+    const firstHidden = hiddens[0];
+    // Save all the hidden nodes colors
+    colors.push({ id: firstHidden, color: state.visualInfo[firstHidden].color });
+    // Signalize nodes are unhided
+    state.proof[firstHidden].isHidden = undefined;
+    state.visualInfo[firstHidden] = {
+        ...state.visualInfo[firstHidden],
+        color: color !== '#555' ? color : state.visualInfo[firstHidden].color,
+        selected: false,
+    };
+    // });
+    colors.push({ id: pi, color: color });
+
+    // Remove the pi node array
+    state.hiddenNodes[hiddenID].splice(0, 1);
+
+    // Make sure the ids are realocated
+    for (let i = pi; i < size - 1; i++) {
+        state.visualInfo[i] = state.visualInfo[i + 1];
+    }
+    // Delete the last position
+    if (state.hiddenNodes[hiddenID].length === 1) {
+        delete state.visualInfo[size - 1];
+    }
     // Add undo action
     addUndo(new UnfoldUndo([...hiddens], pos, colors));
     // Unselect all the nodes
@@ -507,6 +573,7 @@ const reducers = {
     hideNodes,
     foldAllDescendants,
     unfoldNodes,
+    unfoldNextNode,
     setVisualInfo,
     selectByArea,
     unselectByArea,

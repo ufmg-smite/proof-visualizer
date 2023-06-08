@@ -76,6 +76,7 @@ interface CanvasPropsAndRedux extends CanvasProps {
     selectData: ExternalCmdState['selectData'];
 
     hideNodes: ActionCreatorWithPayload<void, string>;
+    unfoldNextNode: ActionCreatorWithPayload<number, string>;
     unfoldNodes: ActionCreatorWithPayload<number, string>;
     foldAllDescendants: ActionCreatorWithPayload<number>;
     setVisualInfo: ActionCreatorWithPayload<ProofState['visualInfo'], string>;
