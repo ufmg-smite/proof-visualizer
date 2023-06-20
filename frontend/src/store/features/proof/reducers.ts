@@ -265,7 +265,6 @@ function unfoldNextNode(state: Draft<ProofState>, action: PayloadAction<number>)
     const pi = action.payload;
     const hiddenID = pi - state.proof.length;
     const hiddens = state.hiddenNodes[hiddenID];
-    // const size = state.proof.length + 1;
     const size = state.proof.length + state.hiddenNodes.length;
     const color = state.visualInfo[pi].color;
 
@@ -287,19 +286,65 @@ function unfoldNextNode(state: Draft<ProofState>, action: PayloadAction<number>)
         color: color !== '#555' ? color : state.visualInfo[firstHidden].color,
         selected: false,
     };
-    // });
     colors.push({ id: pi, color: color });
-
-    // Remove the pi node array
     state.hiddenNodes[hiddenID].splice(0, 1);
 
+    // we need to call findNodeClusters to find out if the hidden nodes are clusterable.
+    // if they are clusterable, we can just show the next node.
+    // Otherwise, we need to show all the hidden nodes
+    const nodeClusters = findNodesClusters(state.proof, state.hiddenNodes[hiddenID]);
+    if (nodeClusters.length) {
+        // save the hidden nodes before we mutate it.
+        // It will be used to reset the isHidden status of the nodes that are not hidden anymore
+        const prevHiddenNodes = state.hiddenNodes[hiddenID];
+
+        // Remove the pi node array
+        state.hiddenNodes.splice(hiddenID, 1);
+
+        // add the clusters to the hidden nodes state
+        nodeClusters.forEach((cluster) => {
+            state.hiddenNodes.push(cluster);
+        });
+
+        // loop over current state hidden nodes and previous state hidden nodes
+        state.hiddenNodes.forEach((currentHiddenNode) => {
+            prevHiddenNodes.forEach((prevHiddenNode) => {
+                // If a hidden node from the previous state does not exist in the current state
+                if (!currentHiddenNode.includes(prevHiddenNode)) {
+                    // Reset its 'isHidden' status in the proof
+                    state.proof[prevHiddenNode].isHidden = undefined;
+                }
+            });
+        });
+
+        // update visual info
+        nodeClusters.forEach((_cluster, i) => {
+            const piID = size + i;
+            state.visualInfo[piID] = {
+                color: '#555',
+                x: 0,
+                y: 0,
+                selected: false,
+            };
+        });
+    } else {
+        state.hiddenNodes[hiddenID].forEach((id) => {
+            // Save all the hidden nodes colors
+            colors.push({ id: id, color: state.visualInfo[id].color });
+            // Signalize nodes are unhided
+            state.proof[id].isHidden = undefined;
+            // update visual info
+            state.visualInfo[id] = {
+                ...state.visualInfo[id],
+                color: color !== '#555' ? color : state.visualInfo[id].color,
+                selected: false,
+            };
+        });
+        state.hiddenNodes.splice(hiddenID, 1);
+    }
     // Make sure the ids are realocated
     for (let i = pi; i < size - 1; i++) {
         state.visualInfo[i] = state.visualInfo[i + 1];
-    }
-    // Delete the last position
-    if (state.hiddenNodes[hiddenID].length === 1) {
-        delete state.visualInfo[size - 1];
     }
     // Add undo action
     addUndo(new UnfoldUndo([...hiddens], pos, colors));
