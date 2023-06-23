@@ -91,9 +91,10 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                     target.files &&
                     target.files[0] &&
                     target.files[0].name.split('.').slice(-1)[0] !== 'dot' &&
+                    target.files[0].name.split('.').slice(-1)[0] !== 'alethe' &&
                     target.files[0].name.split('.').slice(-1)[0] !== 'json'
                 ) {
-                    addErrorToast('Sorry! Our app only support DOT and JSON files.');
+                    addErrorToast('Sorry! Our app only support DOT, ALETHE and JSON files.');
                     return;
                 }
 
