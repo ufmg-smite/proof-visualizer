@@ -26,6 +26,204 @@ function removeEscapedCharacters(s: string): string {
     return newS;
 }
 
+const ALETHE_IDENTIFIERS = {
+    assume: {
+        value: '(assume',
+        length: 7,
+    },
+    step: {
+        value: '(step',
+        length: 5,
+    },
+    conclusion: {
+        value: '(cl',
+        length: 3,
+    },
+    rule: {
+        value: ':rule',
+        length: 5,
+    },
+    premises: {
+        value: ':premises',
+        length: 9,
+    },
+    arguments: {
+        value: ':args',
+        length: 5,
+    },
+    discharge: {
+        value: ':discharge',
+        length: 10,
+    },
+} as const;
+
+function isStepLine(line: string) {
+    return /^\(step.*\)$/.test(line);
+}
+
+function isAssumeLine(line: string) {
+    return /^\(assume.*\)$/.test(line);
+}
+
+function parseRule(line: string) {
+    const rule =
+        line.includes(':premises') || line.includes(':discharge')
+            ? line.match(/:rule.+?(?=(:discharge|:premises))/g)
+            : line.match(/:rule.+/g);
+    return rule ? rule[0].replace(':rule', '').replace(')', '').trim() : '';
+}
+
+const parseAletheId = (line: string) => {
+    const aletheId = line.match(/step.+(?=\(cl)/g);
+    return aletheId ? aletheId[0].replace('step', '').trim() : '';
+};
+
+function filterUndesiredLines(line: string) {
+    return Boolean(line) && !line.includes('anchor');
+}
+
+function findDescendants(nodes: NodeInterface[], nodeId: number) {
+    // Find the node with the given id
+    const node = nodes.find((n) => n.id === nodeId);
+
+    // If the node doesn't exist, return an empty array
+    if (!node) return [];
+    // This array will hold the ids of all the descendants
+    let descendants: number[] = [];
+
+    // For each child of the node
+    for (const childId of node.children) {
+        // Add the child to the descendants
+        descendants.push(childId);
+
+        // And add all of the child's descendants to the descendants
+        descendants = descendants.concat(findDescendants(nodes, childId));
+    }
+    // Return the list of descendants
+    return descendants;
+}
+
+function joinStrings(string1: string, string2: string) {
+    if (!string1) {
+        return string2;
+    }
+    if (!string2) {
+        return string1;
+    }
+    return `${string1} ${string2}`;
+}
+
+function findEnclosedText(str: string, word: string) {
+    const wordIndex = str.indexOf(word);
+    if (wordIndex === -1) {
+        return '';
+    }
+
+    const openingParenIndex = str.indexOf('(', wordIndex + word.length);
+    if (openingParenIndex === -1) {
+        return '';
+    }
+
+    let depth = 1;
+    let closingParenIndex = openingParenIndex;
+    while (depth !== 0 && closingParenIndex < str.length) {
+        closingParenIndex++;
+        if (str[closingParenIndex] === '(') {
+            depth++;
+        } else if (str[closingParenIndex] === ')') {
+            depth--;
+        }
+    }
+
+    if (depth !== 0) {
+        throw new Error('No matching closing parenthesis');
+    }
+
+    // slice is exclusive for the end index, so we add 1 to include the closing parenthesis
+    return str.slice(openingParenIndex + 1, closingParenIndex);
+}
+
+function nonNullable<T>(value: T): value is NonNullable<T> {
+    return value !== null && value !== undefined;
+}
+
+type PreProccessedNodeInterface = Pick<
+    NodeInterface,
+    'id' | 'conclusion' | 'rule' | 'args' | 'parents' | 'dependencies' | 'descendants' | 'clusterType'
+> & { children: Array<() => number | undefined> };
+
+export function processAlethe(aletheProof: string): [NodeInterface[], ProofState['letMap'], ClusterColorMap] {
+    const nodes: NodeInterface[] = [];
+    const aletheIdToNodeId = new Map<string, number>();
+    const preProcNodes: PreProccessedNodeInterface[] = [];
+
+    const parsedProof = aletheProof.split('\n').reverse().filter(filterUndesiredLines);
+    parsedProof.forEach((line, index) => {
+        if (isStepLine(line)) {
+            const aletheId = parseAletheId(line);
+            aletheIdToNodeId.set(aletheId, index);
+            const conclusion = findEnclosedText(line, aletheId).slice(2).trim();
+            const rule = parseRule(line);
+            const premises = findEnclosedText(line, ALETHE_IDENTIFIERS.premises.value);
+            const args = findEnclosedText(line, ALETHE_IDENTIFIERS.arguments.value);
+            const discharge = findEnclosedText(line, ALETHE_IDENTIFIERS.discharge.value);
+            // children must be resolved by the end of the loop, because by then we will have all the alethe nodes parsed and therefore the currting below will not return undefined
+            const children = premises ? premises.split(' ').map((premise) => () => aletheIdToNodeId.get(premise)) : [];
+            if (rule === 'subproof') {
+                // if current node has rule of type subproof, then the next node is it's immediate child
+                children.push(() => index + 1);
+            }
+            preProcNodes[index] = {
+                id: index,
+                conclusion: conclusion,
+                rule: rule,
+                args: joinStrings(args, discharge),
+                children: children,
+                parents: preProcNodes[index]?.parents || [],
+                descendants: 0,
+                dependencies: [],
+                clusterType: ClusterKind.NONE,
+            };
+        } else if (isAssumeLine(line)) {
+            const aletheId = line.match(/assume(.*?)\(/)?.[1].trim() || '';
+            aletheIdToNodeId.set(aletheId, index);
+            const conclusion = line.slice(line.indexOf(aletheId) + aletheId.length + 1, -1).trim();
+            preProcNodes[index] = {
+                id: index,
+                conclusion: conclusion,
+                rule: 'assume',
+                args: '',
+                children: [],
+                parents: preProcNodes[index]?.parents || [],
+                descendants: 0,
+                dependencies: [],
+                clusterType: ClusterKind.NONE,
+            };
+        }
+    });
+    // here, we resolved the children. Now we can resolve the parents.
+    preProcNodes.forEach((node) => {
+        const children = node.children.map((child) => child()).filter(nonNullable);
+        nodes.push({ ...node, children });
+    });
+    // here, we resolved the parents. Now we can resolve the descendants.
+    nodes.forEach((node) => {
+        const parents = nodes.reduce<number[]>((acc, curr) => {
+            if (curr.children.includes(node.id)) acc.push(curr.id);
+            return acc;
+        }, []);
+        node.parents = parents;
+    });
+    // resolved the descendants.
+    nodes.forEach((node) => {
+        const desc = findDescendants(nodes, node.id);
+        node.descendants = desc.length;
+    });
+
+    // we are ignoring nodeClusters for now.
+    return [nodes, {}, {}];
+}
+
 export function processDot(dot: string): [NodeInterface[], ProofState['letMap'], ClusterColorMap] {
     const nodes: NodeInterface[] = [
         {
