@@ -1,6 +1,13 @@
 import { FoldUndo, HideUndo, UnfoldUndo } from './../../../interfaces/undoClasses';
 import { Draft, PayloadAction } from '@reduxjs/toolkit';
-import { processDot, descendants, findNodesClusters, sliceNodesCluster, extractTheoryLemmas } from './auxi';
+import {
+    processDot,
+    descendants,
+    findNodesClusters,
+    sliceNodesCluster,
+    extractTheoryLemmas,
+    processAlethe,
+} from './auxi';
 import { ExternalCmdState, ProofState } from '../../../interfaces/interfaces';
 import { colorConverter } from '../theme/auxi';
 import { BaseUndo, ColorUndo, MoveUndo } from '../../../interfaces/undoClasses';
@@ -32,17 +39,20 @@ function process(state: Draft<ProofState>, action: PayloadAction<string>): void 
     state.hiddenNodes = [];
 
     let proofJSON;
-    let dot = action.payload;
+    let payloadProof = action.payload;
     let isJSON = false;
 
     // If the payload is a .json file
-    if (dot.indexOf('{"dot":"') !== -1) {
-        proofJSON = JSON.parse(dot);
-        dot = proofJSON.dot;
+    if (payloadProof.indexOf('{"dot":"') !== -1) {
+        proofJSON = JSON.parse(payloadProof);
+        payloadProof = proofJSON.dot;
         isJSON = true;
     }
 
-    const [proof, letMap, clustersColors] = processDot(dot);
+    // TODO: find a better way to figure out which parser to use.
+    const [proof, letMap, clustersColors] = payloadProof.includes('digraph proof')
+        ? processDot(payloadProof)
+        : processAlethe(payloadProof);
     state.proof = proof;
     state.letMap = letMap;
     state.view = 'full';
