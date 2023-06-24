@@ -1,4 +1,6 @@
-import proofReducer, { ProofState, process, hideNodes, unhideNodes, applyView, changeStyle } from './proofSlice';
+import { ClusterKind } from '../../../interfaces/enum';
+import { ProofState } from '../../../interfaces/interfaces';
+import proofReducer, { process, applyView, changeStyle } from './proofSlice';
 
 describe('proof reducer', () => {
     const initialState: ProofState = {
@@ -7,7 +9,11 @@ describe('proof reducer', () => {
         style: 'graph',
         hiddenNodes: [],
         letMap: {},
-        visualInfo: [],
+        visualInfo: {},
+        clustersInfos: [],
+        nodesSelected: [],
+        smt: '',
+        theoryLemmaMap: [],
     };
 
     const proofExample: ProofState = {
@@ -17,40 +23,44 @@ describe('proof reducer', () => {
                 conclusion: 'SCOPE((not a), a)',
                 rule: '(not (and (not a) a))',
                 args: '',
-                views: ['basic'],
                 children: [1],
                 parents: [NaN],
                 descendants: 1,
+                dependencies: [],
+                clusterType: ClusterKind.NONE,
             },
             {
                 id: 1,
                 conclusion: 'CHAIN_RESOLUTION(true, a)',
                 rule: 'false',
                 args: '',
-                views: ['propositional'],
                 children: [2, 3],
                 parents: [0],
                 descendants: 2,
+                dependencies: [],
+                clusterType: ClusterKind.NONE,
             },
             {
                 id: 2,
                 conclusion: 'ASSUME(a)',
                 rule: 'a',
                 args: '',
-                views: [''],
                 children: [],
                 parents: [1],
                 descendants: 0,
+                dependencies: [],
+                clusterType: ClusterKind.NONE,
             },
             {
                 id: 3,
                 conclusion: 'ASSUME((not a))',
                 rule: '(not a)',
                 args: '',
-                views: [''],
                 children: [],
                 parents: [1],
                 descendants: 0,
+                dependencies: [],
+                clusterType: ClusterKind.NONE,
             },
         ],
         view: 'full',
@@ -58,47 +68,37 @@ describe('proof reducer', () => {
         hiddenNodes: [[2]],
         letMap: {},
         visualInfo: [],
+        clustersInfos: [],
+        nodesSelected: [],
+        smt: '',
+        theoryLemmaMap: [],
     };
 
     it('should handle initial state', () => {
-        expect(proofReducer(undefined, { type: 'unknown' })).toEqual({
+        const result = proofReducer(undefined, { type: 'unknown' });
+        expect(result).toEqual({
             proof: [],
             view: 'full',
             style: 'graph',
             hiddenNodes: [],
+            letMap: {},
+            theoryLemmaMap: [],
+            visualInfo: {},
+            nodesSelected: [],
+            clustersInfos: [],
+            smt: '',
         });
     });
 
     it('should handle process', () => {
         const actual = proofReducer(
             initialState,
-            process(
-                'digraph proof {\n\trankdir="BT";\n\tnode [shape=record];\n\t0 [label="{SCOPE((not a), a)|(not (and (not a) a))}", class = " basic ", comment = "{\'subProofQty\':1}" ];\n\t1 [label="{CHAIN_RESOLUTION(true, a)|false}", class = " propositional ", comment = "{\'subProofQty\':2}" ];\n\t2 [label="{ASSUME(a)|a}", comment = "{\'subProofQty\':0}"];\n\t3 [label="{ASSUME((not a))|(not a)}", comment = "{\'subProofQty\':0}"];\n\t1->0;\n\t2->1;\n\t3->1;\n}',
-            ),
+            process({
+                proof: 'digraph proof {\n\trankdir="BT";\n\tnode [shape=record];\n\t0 [label="{SCOPE((not a), a)|(not (and (not a) a))}", class = " basic ", comment = "{\'subProofQty\':1}" ];\n\t1 [label="{CHAIN_RESOLUTION(true, a)|false}", class = " propositional ", comment = "{\'subProofQty\':2}" ];\n\t2 [label="{ASSUME(a)|a}", comment = "{\'subProofQty\':0}"];\n\t3 [label="{ASSUME((not a))|(not a)}", comment = "{\'subProofQty\':0}"];\n\t1->0;\n\t2->1;\n\t3->1;\n}',
+                fileExtension: 'dot',
+            }),
         );
         expect(actual.proof).toEqual(proofExample.proof);
-    });
-
-    it('should handle hide node', () => {
-        const actual = proofReducer(proofExample, hideNodes([3]));
-        expect(actual.hiddenNodes).toEqual([[2], [3]]);
-    });
-
-    it('should handle unhide node', () => {
-        const actual = proofReducer(proofExample, unhideNodes([2]));
-        expect(actual.hiddenNodes).toEqual([]);
-    });
-
-    it('should handle apply view - basic', () => {
-        const actual = proofReducer(proofExample, applyView('basic'));
-        expect(actual.view).toEqual('basic');
-        expect(actual.hiddenNodes).toEqual([[1, 2, 3]]);
-    });
-
-    it('should handle apply view - propositional', () => {
-        const actual = proofReducer(proofExample, applyView('propositional'));
-        expect(actual.view).toEqual('propositional');
-        expect(actual.hiddenNodes).toEqual([[2, 3]]);
     });
 
     it('should handle apply view - full', () => {

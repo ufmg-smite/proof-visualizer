@@ -1,4 +1,5 @@
-import counterReducer, { ThemeState, toggle } from './themeSlice';
+import { ThemeState } from '../../../interfaces/interfaces';
+import counterReducer, { toggle } from './themeSlice';
 
 describe('file reducer', () => {
     const initialState: ThemeState = {
