@@ -380,7 +380,7 @@ const VisualizerNavbar: React.FC<NavbarPropsAndRedux> = ({
         dispatch(reRender());
         dispatch(setSmt(smt));
 
-        dispatch(process(dot));
+        dispatch(process({ proof: dot, fileExtension: 'dot' }));
         setSmtDrawerIsOpen(true);
     };
 
