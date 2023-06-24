@@ -27,34 +27,13 @@ function removeEscapedCharacters(s: string): string {
 }
 
 const ALETHE_IDENTIFIERS = {
-    assume: {
-        value: '(assume',
-        length: 7,
-    },
-    step: {
-        value: '(step',
-        length: 5,
-    },
-    conclusion: {
-        value: '(cl',
-        length: 3,
-    },
-    rule: {
-        value: ':rule',
-        length: 5,
-    },
-    premises: {
-        value: ':premises',
-        length: 9,
-    },
-    arguments: {
-        value: ':args',
-        length: 5,
-    },
-    discharge: {
-        value: ':discharge',
-        length: 10,
-    },
+    assume: '(assume',
+    step: '(step',
+    conclusion: '(cl',
+    rule: ':rule',
+    premises: ':premises',
+    arguments: ':args',
+    discharge: ':discharge',
 } as const;
 
 function isStepLine(line: string) {
@@ -66,11 +45,8 @@ function isAssumeLine(line: string) {
 }
 
 function parseRule(line: string) {
-    const rule =
-        line.includes(':premises') || line.includes(':discharge')
-            ? line.match(/:rule.+?(?=(:discharge|:premises))/g)
-            : line.match(/:rule.+/g);
-    return rule ? rule[0].replace(':rule', '').replace(')', '').trim() : '';
+    const rule = line.match(/(:rule.+?(?=(:discharge|:premises))|:rule.+)/g);
+    return rule ? rule[0].replace(/:rule|\)/g, '').trim() : '';
 }
 
 const parseAletheId = (line: string) => {
@@ -135,10 +111,6 @@ function findEnclosedText(str: string, word: string) {
         }
     }
 
-    if (depth !== 0) {
-        throw new Error('No matching closing parenthesis');
-    }
-
     // slice is exclusive for the end index, so we add 1 to include the closing parenthesis
     return str.slice(openingParenIndex + 1, closingParenIndex);
 }
@@ -161,9 +133,9 @@ export function processAlethe(aletheProof: string): [NodeInterface[], ProofState
             aletheIdToNodeId.set(aletheId, index);
             const conclusion = findEnclosedText(line, aletheId).slice(2).trim();
             const rule = parseRule(line);
-            const premises = findEnclosedText(line, ALETHE_IDENTIFIERS.premises.value);
-            const args = findEnclosedText(line, ALETHE_IDENTIFIERS.arguments.value);
-            const discharge = findEnclosedText(line, ALETHE_IDENTIFIERS.discharge.value);
+            const premises = findEnclosedText(line, ALETHE_IDENTIFIERS.premises);
+            const args = findEnclosedText(line, ALETHE_IDENTIFIERS.arguments);
+            const discharge = findEnclosedText(line, ALETHE_IDENTIFIERS.discharge);
             // children must be resolved by the end of the loop, because by then we will have all the alethe nodes parsed and therefore the currting below will not return undefined
             const children = premises ? premises.split(' ').map((premise) => () => aletheIdToNodeId.get(premise)) : [];
             if (rule === 'subproof') {
