@@ -147,10 +147,7 @@ function nonNullable<T>(value: T): value is NonNullable<T> {
     return value !== null && value !== undefined;
 }
 
-type PreProccessedNodeInterface = Pick<
-    NodeInterface,
-    'id' | 'conclusion' | 'rule' | 'args' | 'parents' | 'dependencies' | 'descendants' | 'clusterType'
-> & { children: Array<() => number | undefined> };
+type PreProccessedNodeInterface = Omit<NodeInterface, 'children'> & { children: Array<() => number | undefined> };
 
 export function processAlethe(aletheProof: string): [NodeInterface[], ProofState['letMap'], ClusterColorMap] {
     const nodes: NodeInterface[] = [];
