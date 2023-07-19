@@ -118,20 +118,15 @@ function process(state: Draft<ProofState>, action: PayloadAction<string>): void 
 
     // Fold nodes if proof is too large
     if (state.proof.length > 1000) {
-        const piNode = state.proof.reduce(
-            (acc, curr) => {
-                if (curr.parents.find((i) => i > 4)) {
-                    if (curr.descendants > acc.max) {
-                        acc = {
-                            id: curr.id,
-                            max: curr.descendants,
-                        };
-                    }
-                }
-                return acc;
-            },
-            { id: -1, max: -1 },
-        );
+        let piNode = { id: -1, max: -1 };
+        state.proof.forEach((node) => {
+            if (node.id >= 5 && node.descendants > piNode.max) {
+                piNode = {
+                    id: node.id,
+                    max: node.descendants,
+                };
+            }
+        });
         foldAllDescendants(state, { payload: piNode.id } as PayloadAction<number>);
     }
 }
