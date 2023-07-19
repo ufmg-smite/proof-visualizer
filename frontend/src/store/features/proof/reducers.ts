@@ -294,8 +294,8 @@ function unfoldNextNode(state: Draft<ProofState>, action: PayloadAction<number>)
     // Otherwise, we need to show all the hidden nodes
     const nodeClusters = findNodesClusters(state.proof, state.hiddenNodes[hiddenID]);
     if (nodeClusters.length) {
-        // save the hidden nodes before we mutate it.
-        // It will be used to reset the isHidden status of the nodes that are not hidden anymore
+        // Save the hidden nodes before we mutate it
+        // It will be used to reset the isHidden status of the nodes that are not longer hidden
         const prevHiddenNodes = state.hiddenNodes[hiddenID];
 
         // Remove the pi node array
@@ -306,15 +306,14 @@ function unfoldNextNode(state: Draft<ProofState>, action: PayloadAction<number>)
             state.hiddenNodes.push(cluster);
         });
 
-        // loop over current state hidden nodes and previous state hidden nodes
-        state.hiddenNodes.forEach((currentHiddenNode) => {
-            prevHiddenNodes.forEach((prevHiddenNode) => {
-                // If a hidden node from the previous state does not exist in the current state
-                if (!currentHiddenNode.includes(prevHiddenNode)) {
-                    // Reset its 'isHidden' status in the proof
-                    state.proof[prevHiddenNode].isHidden = undefined;
-                }
-            });
+        // Contains all the nodes that should be hidden
+        const flatSet = new Set();
+        state.hiddenNodes.forEach((hidVec) => hidVec.forEach((node) => flatSet.add(node)));
+        prevHiddenNodes.forEach((node) => {
+            // If the current node was removed from any of the clusters, then we should set him as visible
+            if (!flatSet.has(node)) {
+                state.proof[node].isHidden = undefined;
+            }
         });
 
         // update visual info
@@ -328,6 +327,7 @@ function unfoldNextNode(state: Draft<ProofState>, action: PayloadAction<number>)
             };
         });
     } else {
+        // Updates all the hidden nodes infos since they are no longer hidden
         state.hiddenNodes[hiddenID].forEach((id) => {
             // Save all the hidden nodes colors
             colors.push({ id: id, color: state.visualInfo[id].color });
@@ -340,6 +340,7 @@ function unfoldNextNode(state: Draft<ProofState>, action: PayloadAction<number>)
                 selected: false,
             };
         });
+        // Removes this pi node
         state.hiddenNodes.splice(hiddenID, 1);
     }
     // Make sure the ids are realocated
