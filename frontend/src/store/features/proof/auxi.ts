@@ -231,7 +231,7 @@ export const findNodesClusters = (proof: NodeInterface[], hiddenNodesArray: numb
             parents.forEach((p, hiddenID) => {
                 // If those nodes have some parent in commom and they weren't verified yet
                 if (parents[hiddenID].length && parent.some((_p) => p.indexOf(_p) !== -1)) {
-                    clusters[clusters.length - 1].push(hiddenNodes[hiddenID]);
+                    if (hiddenNodes[hiddenID]) clusters[clusters.length - 1].push(hiddenNodes[hiddenID]);
                     // Removes these parents from the array, making shure they will not get verified again (already clustered)
                     parents[hiddenID] = [];
                     // Increases the number o clustered nodes
@@ -253,7 +253,7 @@ export const findNodesClusters = (proof: NodeInterface[], hiddenNodesArray: numb
                 // If this parentCluster (cluster) is parent of the current cluster
                 if (parentCluster.some((hiddenID) => clusterParents.indexOf(hiddenID) !== -1)) {
                     // Group the nodes couple in one single cluster (the parent cluster)
-                    clusters[id] = clusters[id].concat(clusters[clusterID]);
+                    if (clusters[clusterID]) clusters[id] = clusters[id].concat(clusters[clusterID]);
                     clusters.splice(clusterID, 1);
                     clusterID--;
                 }
