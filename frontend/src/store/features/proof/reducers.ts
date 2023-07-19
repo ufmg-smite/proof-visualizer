@@ -7,6 +7,7 @@ import { BaseUndo, ColorUndo, MoveUndo } from '../../../interfaces/undoClasses';
 import Deque from 'double-ended-queue';
 
 const STACK_MAX_SIZE = 20;
+const LARGE_PROOF_SIZE = 1000 as const;
 const undoQueue = new Deque<BaseUndo>();
 
 function addUndo(undo: BaseUndo): void {
@@ -117,9 +118,10 @@ function process(state: Draft<ProofState>, action: PayloadAction<string>): void 
     });
 
     // Fold nodes if proof is too large
-    if (state.proof.length > 1000) {
+    if (state.proof.length > LARGE_PROOF_SIZE) {
         let piNode = { id: -1, max: -1 };
         state.proof.forEach((node) => {
+            // id >=5 is an arbitrary value
             if (node.id >= 5 && node.descendants > piNode.max) {
                 piNode = {
                     id: node.id,
