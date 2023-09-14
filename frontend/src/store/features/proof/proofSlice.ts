@@ -29,6 +29,7 @@ export const {
     hideNodes,
     foldAllDescendants,
     unfoldNodes,
+    unfoldNextNode,
     setVisualInfo,
     selectByArea,
     unselectByArea,

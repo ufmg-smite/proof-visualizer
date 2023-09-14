@@ -7,6 +7,7 @@ import { BaseUndo, ColorUndo, MoveUndo } from '../../../interfaces/undoClasses';
 import Deque from 'double-ended-queue';
 
 const STACK_MAX_SIZE = 20;
+const LARGE_PROOF_SIZE = 1000 as const;
 const undoQueue = new Deque<BaseUndo>();
 
 function addUndo(undo: BaseUndo): void {
@@ -115,6 +116,21 @@ function process(state: Draft<ProofState>, action: PayloadAction<string>): void 
         const piID = state.proof.length + i;
         hiddenNodesArray.forEach((node) => (state.proof[node].isHidden = piID));
     });
+
+    // Fold nodes if proof is too large
+    if (state.proof.length > LARGE_PROOF_SIZE) {
+        let piNode = { id: -1, max: -1 };
+        state.proof.forEach((node) => {
+            // id >=5 is an arbitrary value
+            if (node.id >= 5 && node.descendants > piNode.max) {
+                piNode = {
+                    id: node.id,
+                    max: node.descendants,
+                };
+            }
+        });
+        foldAllDescendants(state, { payload: piNode.id } as PayloadAction<number>);
+    }
 }
 
 function hideNodes(state: Draft<ProofState>, action: PayloadAction<void>): void {
@@ -236,6 +252,98 @@ function unfoldNodes(state: Draft<ProofState>, action: PayloadAction<number>): v
     // Delete the last position
     delete state.visualInfo[size - 1];
 
+    // Add undo action
+    addUndo(new UnfoldUndo([...hiddens], pos, colors));
+    // Unselect all the nodes
+    unselectNodes(state, { payload: { nodes: state.nodesSelected, cleanAll: true }, type: 'string' });
+}
+
+function unfoldNextNode(state: Draft<ProofState>, action: PayloadAction<number>): void {
+    const pi = action.payload;
+    const hiddenID = pi - state.proof.length;
+    const hiddens = state.hiddenNodes[hiddenID];
+    const size = state.proof.length + state.hiddenNodes.length;
+    const color = state.visualInfo[pi].color;
+
+    // Save all the positions
+    const pos: { id: number; x: number; y: number }[] = [];
+    for (let id = 0; id < size; id++) {
+        pos.push({ id: id, x: state.visualInfo[id].x, y: state.visualInfo[id].y });
+    }
+
+    // Unselect the hidden nodes and set their color equal to the pi node
+    const colors: { id: number; color: string }[] = [];
+    const firstHidden = hiddens[0];
+    // Save all the hidden nodes colors
+    colors.push({ id: firstHidden, color: state.visualInfo[firstHidden].color });
+    // Signalize nodes are unhided
+    state.proof[firstHidden].isHidden = undefined;
+    state.visualInfo[firstHidden] = {
+        ...state.visualInfo[firstHidden],
+        color: color !== '#555' ? color : state.visualInfo[firstHidden].color,
+        selected: false,
+    };
+    colors.push({ id: pi, color: color });
+    state.hiddenNodes[hiddenID].splice(0, 1);
+
+    // we need to call findNodeClusters to find out if the hidden nodes are clusterable.
+    // if they are clusterable, we can just show the next node.
+    // Otherwise, we need to show all the hidden nodes
+    const nodeClusters = findNodesClusters(state.proof, state.hiddenNodes[hiddenID]);
+    if (nodeClusters.length) {
+        // Save the hidden nodes before we mutate it
+        // It will be used to reset the isHidden status of the nodes that are not longer hidden
+        const prevHiddenNodes = state.hiddenNodes[hiddenID];
+
+        // Remove the pi node array
+        state.hiddenNodes.splice(hiddenID, 1);
+
+        // add the clusters to the hidden nodes state
+        nodeClusters.forEach((cluster) => {
+            state.hiddenNodes.push(cluster);
+        });
+
+        // Contains all the nodes that should be hidden
+        const flatSet = new Set();
+        state.hiddenNodes.forEach((hidVec) => hidVec.forEach((node) => flatSet.add(node)));
+        prevHiddenNodes.forEach((node) => {
+            // If the current node was removed from any of the clusters, then we should set him as visible
+            if (!flatSet.has(node)) {
+                state.proof[node].isHidden = undefined;
+            }
+        });
+
+        // update visual info
+        nodeClusters.forEach((_cluster, i) => {
+            const piID = size + i;
+            state.visualInfo[piID] = {
+                color: '#555',
+                x: 0,
+                y: 0,
+                selected: false,
+            };
+        });
+    } else {
+        // Updates all the hidden nodes infos since they are no longer hidden
+        state.hiddenNodes[hiddenID].forEach((id) => {
+            // Save all the hidden nodes colors
+            colors.push({ id: id, color: state.visualInfo[id].color });
+            // Signalize nodes are unhided
+            state.proof[id].isHidden = undefined;
+            // update visual info
+            state.visualInfo[id] = {
+                ...state.visualInfo[id],
+                color: color !== '#555' ? color : state.visualInfo[id].color,
+                selected: false,
+            };
+        });
+        // Removes this pi node
+        state.hiddenNodes.splice(hiddenID, 1);
+    }
+    // Make sure the ids are realocated
+    for (let i = pi; i < size - 1; i++) {
+        state.visualInfo[i] = state.visualInfo[i + 1];
+    }
     // Add undo action
     addUndo(new UnfoldUndo([...hiddens], pos, colors));
     // Unselect all the nodes
@@ -507,6 +615,7 @@ const reducers = {
     hideNodes,
     foldAllDescendants,
     unfoldNodes,
+    unfoldNextNode,
     setVisualInfo,
     selectByArea,
     unselectByArea,

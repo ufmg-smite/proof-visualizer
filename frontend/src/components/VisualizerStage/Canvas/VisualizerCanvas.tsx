@@ -23,6 +23,7 @@ import {
     selectVisualInfo,
     hideNodes,
     unfoldNodes,
+    unfoldNextNode,
     foldAllDescendants,
     setVisualInfo,
     undo,
@@ -382,6 +383,14 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         unfoldNodes(nodeOnFocus);
     };
 
+    unfoldNext = (): void => {
+        const { nodeOnFocus } = this.state;
+        const { unfoldNextNode, reRender } = this.props;
+
+        reRender();
+        unfoldNextNode(nodeOnFocus);
+    };
+
     changeNodeColor = (color: string): void => {
         const { showingNodes, nodeOnFocus } = this.state;
         const { applyColor, selectNodes } = this.props;
@@ -459,6 +468,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
             <div tabIndex={1} onKeyDown={this.handleKeyDown} style={{ overflow: 'hidden' }}>
                 <Menu
                     unfold={this.unfold}
+                    unfoldNext={this.unfoldNext}
                     foldSelectedNodes={this.foldSelectedNodes}
                     foldAllDescendants={this.foldAllDescendants}
                     changeNodeColor={this.changeNodeColor}
@@ -522,6 +532,7 @@ function mapStateToProps(state: ReduxState, ownProps: CanvasProps) {
 const mapDispatchToProps = {
     hideNodes,
     unfoldNodes,
+    unfoldNextNode,
     foldAllDescendants,
     setVisualInfo,
     findNode,
