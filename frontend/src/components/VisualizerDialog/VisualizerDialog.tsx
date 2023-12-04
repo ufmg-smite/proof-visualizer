@@ -11,11 +11,14 @@ import { set } from '../../store/features/file/fileSlice';
 import { process } from '../../store/features/proof/proofSlice';
 import { allowRenderNewFile, blockRender, reRender } from '../../store/features/externalCmd/externalCmd';
 import { VisualizerDialogProps } from '../../interfaces/interfaces';
+import { FILE_EXTENSIONS, FileExtension } from '../../store/features/proof/reducers';
 
 interface DialogProps {
     icon: IconName | MaybeElement;
     title: React.ReactNode;
 }
+
+type FileName = 'Choose file...' | `${string}.${FileExtension}`;
 
 const readUploadedFileAsText = (inputFile: File) => {
     const temporaryFileReader = new FileReader();
@@ -42,7 +45,7 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
     const dispatch = useAppDispatch();
 
     const [inputIsFocused, setInputIsFocused] = useState(false);
-    const [fileName, changeFileName] = useState('Choose file...');
+    const [fileName, changeFileName] = useState<FileName>('Choose file...');
     const [file, changeFile] = useState('');
     const [[focusFlag, flagCount], setFocusFlag] = useReducer(
         (state: number[], newFlag: number): number[] => [newFlag, state[1] + 1],
@@ -91,9 +94,10 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                     target.files &&
                     target.files[0] &&
                     target.files[0].name.split('.').slice(-1)[0] !== 'dot' &&
+                    target.files[0].name.split('.').slice(-1)[0] !== 'alethe' &&
                     target.files[0].name.split('.').slice(-1)[0] !== 'json'
                 ) {
-                    addErrorToast('Sorry! Our app only support DOT and JSON files.');
+                    addErrorToast('Sorry! Our app only support DOT, ALETHE and JSON files.');
                     return;
                 }
 
@@ -103,7 +107,8 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                     if (file) {
                         const fileContents = await readUploadedFileAsText(file);
                         changeFile(fileContents as string);
-                        changeFileName(file.name);
+                        // type casting here is "safe" because cases where the file does not end with .dot, .alethe or .json were already handled above
+                        changeFileName(file.name as FileName);
 
                         // If succeded, set the focus of the page to the upload button
                         setFocusFlag(2);
@@ -129,11 +134,12 @@ const VisualizerDialog: React.FC<VisualizerDialogProps> = ({
                 dispatch(set({ name: fileName, value: file }));
 
                 dispatch(allowRenderNewFile());
-                const ext = fileName.split('.').pop();
-                if (ext === 'json') dispatch(blockRender());
-                else if (ext === 'dot') dispatch(reRender());
-
-                dispatch(process(file));
+                const ext = fileName.split('.').at(-1) as FileExtension;
+                if (FILE_EXTENSIONS.includes(ext)) {
+                    if (ext === 'json') dispatch(blockRender());
+                    else if (ext === 'dot' || ext === 'alethe') dispatch(reRender());
+                    dispatch(process({ proof: file, fileExtension: ext }));
+                }
                 closeDialog();
             }}
             intent={Intent.SUCCESS}

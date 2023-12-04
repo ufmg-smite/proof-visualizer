@@ -157,7 +157,7 @@ const VisualizerSmtDrawer: React.FC<SmtDrawerProps> = ({
             dispatch(allowRenderNewFile());
             dispatch(reRender());
 
-            dispatch(process(stdoutRef.current));
+            dispatch(process({ proof: stdoutRef.current, fileExtension: 'dot' }));
 
             // Change the spin message to render
             dispatch(setSpinner('render'));

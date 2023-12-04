@@ -1,6 +1,13 @@
 import { FoldUndo, HideUndo, UnfoldUndo } from './../../../interfaces/undoClasses';
 import { Draft, PayloadAction } from '@reduxjs/toolkit';
-import { processDot, descendants, findNodesClusters, sliceNodesCluster, extractTheoryLemmas } from './auxi';
+import {
+    processDot,
+    descendants,
+    findNodesClusters,
+    sliceNodesCluster,
+    extractTheoryLemmas,
+    processAlethe,
+} from './auxi';
 import { ExternalCmdState, ProofState } from '../../../interfaces/interfaces';
 import { colorConverter } from '../theme/auxi';
 import { BaseUndo, ColorUndo, MoveUndo } from '../../../interfaces/undoClasses';
@@ -9,6 +16,8 @@ import Deque from 'double-ended-queue';
 const STACK_MAX_SIZE = 20;
 const LARGE_PROOF_SIZE = 1000 as const;
 const undoQueue = new Deque<BaseUndo>();
+export const FILE_EXTENSIONS = ['dot', 'alethe', 'json'] as const;
+export type FileExtension = typeof FILE_EXTENSIONS[number];
 
 function addUndo(undo: BaseUndo): void {
     // Ensures max size
@@ -26,24 +35,27 @@ function clearHiddenNodes(state: Draft<ProofState>, action: PayloadAction<null>)
     state.hiddenNodes = [];
 }
 
-function process(state: Draft<ProofState>, action: PayloadAction<string>): void {
+function process(
+    state: Draft<ProofState>,
+    action: PayloadAction<{ proof: string; fileExtension: FileExtension }>,
+): void {
     // Reset the state
     state.clustersInfos = [];
     state.nodesSelected = [];
     state.hiddenNodes = [];
 
     let proofJSON;
-    let dot = action.payload;
-    let isJSON = false;
+    let payloadProof = action.payload.proof;
+    const fileExtension = action.payload.fileExtension;
 
     // If the payload is a .json file
-    if (dot.indexOf('{"dot":"') !== -1) {
-        proofJSON = JSON.parse(dot);
-        dot = proofJSON.dot;
-        isJSON = true;
+    if (fileExtension === 'json') {
+        proofJSON = JSON.parse(payloadProof);
+        payloadProof = proofJSON.dot;
     }
 
-    const [proof, letMap, clustersColors] = processDot(dot);
+    const [proof, letMap, clustersColors] =
+        fileExtension === 'alethe' ? processAlethe(payloadProof) : processDot(payloadProof);
     state.proof = proof;
     state.letMap = letMap;
     state.view = 'full';
@@ -73,7 +85,7 @@ function process(state: Draft<ProofState>, action: PayloadAction<string>): void 
         state.theoryLemmaMap = extractTheoryLemmas(state.proof, state.clustersInfos, false);
     }
 
-    if (isJSON) {
+    if (fileExtension === 'json') {
         state.view = proofJSON.view;
         state.hiddenNodes = proofJSON.hiddenNodes;
         state.visualInfo = proofJSON.visualInfo;
@@ -83,7 +95,7 @@ function process(state: Draft<ProofState>, action: PayloadAction<string>): void 
             if (state.visualInfo[i].selected) state.nodesSelected.push(i);
         }
     }
-    // Is .dot
+    // Is .dot or .alethe
     else {
         // Init the visual info
         state.visualInfo = {};
