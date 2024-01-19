@@ -30,6 +30,26 @@ See the section about [deployment](https://facebook.github.io/create-react-app/d
 
 Builds the app and publish it at the `homepage` URL given in the package.json.
 
+### Troubleshooting
+
+If you get the following error:
+
+```
+Error: error:0308010C:digital envelope routines::unsupported
+    at new Hash (node:internal/crypto/hash:71:19)
+    at Object.createHash (node:crypto:133:10)
+...
+```
+
+then set `NODE_OPTIONS=--openssl-legacy-provider` first. An example for Windows is:
+
+```bat
+set NODE_OPTIONS=--openssl-legacy-provider
+npm start
+```
+
+A more proper fix is planned.
+
 ## WebAssembly
 
 The proof visualizer allows to run the CVC5 solver inside the browser. The WebAssembly binary used to run this in the browser is compiled via [emscripten](https://emscripten.org/).
