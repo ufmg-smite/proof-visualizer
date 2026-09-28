@@ -1,164 +1,185 @@
 import { ClusterKind } from '../../../interfaces/enum';
 import { NodeInterface, ProofState } from '../../../interfaces/interfaces';
+import { DotStatement, parseDot, subgraphNodes } from './dot';
 
 interface ClusterColorMap {
     [type: number]: string;
 }
 
-function removeEscapedCharacters(s: string): string {
-    let newS = '';
-    for (let i = 0; i < s.length; i += 1) {
-        if (
-            !(
-                s[i] === '\\' &&
-                (s[i + 1] === '"' ||
-                    s[i + 1] === '>' ||
-                    s[i + 1] === '<' ||
-                    s[i + 1] === '{' ||
-                    s[i + 1] === '}' ||
-                    s[i + 1] === '|')
-            )
-        ) {
-            newS += s[i];
-        }
-    }
-
-    return newS;
+interface ProcessedDot {
+    nodes: NodeInterface[];
+    letMap: ProofState['letMap'];
+    clusterColors: ClusterColorMap;
+    subproofs: ProofState['subproofs'];
 }
 
-export function processDot(dot: string): [NodeInterface[], ProofState['letMap'], ClusterColorMap] {
-    const nodes: NodeInterface[] = [
-        {
-            id: 0,
-            conclusion: '',
-            rule: '',
-            args: '',
-            children: [],
-            parents: [NaN],
-            descendants: 0,
-            dependencies: [],
-            clusterType: ClusterKind.NONE,
-        },
-    ];
-    let comment: string | null = dot.slice(dot.indexOf('comment='));
-    comment = comment
-        ? removeEscapedCharacters(
-              removeEscapedCharacters(comment.slice(comment.indexOf('=') + 2, comment.indexOf(';') - 1)),
-          )
-        : null;
+const clusterKinds: { [label: string]: ClusterKind } = {
+    SAT: ClusterKind.SAT,
+    CNF: ClusterKind.CNF,
+    TL: ClusterKind.TL,
+    PP: ClusterKind.PP,
+    IN: ClusterKind.IN,
+};
 
-    const clustersInfos: ClusterColorMap = {};
-    const lines = dot
-        .slice(dot.indexOf('{') + 1, dot.lastIndexOf('}') - 2)
-        .replace(/(\n|\t)/gm, '')
-        .split(';');
-    lines.forEach((line) => {
-        if (line.search('subgraph') !== -1) {
-            // Get the label of this node subgraph
-            let label = '';
-            let idx = line.indexOf('label="') + 7;
-            while (line[idx] !== '"') {
-                label += line[idx];
-                idx++;
-            }
-
-            // Get the label of this node subgraph
-            let color = '';
-            idx = line.indexOf('bgcolor="') + 9;
-            while (line[idx] !== '"') {
-                color += line[idx];
-                idx++;
-            }
-
-            // Get the nodes ID's
-            const numbers = line
-                .substring(idx + 1, line.length - 1)
-                .split(/\s/)
-                .filter((str) => str.length)
-                .map((num) => Number(num));
-
-            let thisType: ClusterKind;
-            switch (label) {
-                case 'SAT':
-                    thisType = ClusterKind.SAT;
-                    break;
-                case 'CNF':
-                    thisType = ClusterKind.CNF;
-                    break;
-                case 'TL':
-                    thisType = ClusterKind.TL;
-                    break;
-                case 'PP':
-                    thisType = ClusterKind.PP;
-                    break;
-                case 'IN':
-                    thisType = ClusterKind.IN;
-                    break;
-                default:
-                    thisType = ClusterKind.NONE;
-            }
-
-            // Assign the type for each node
-            numbers.forEach((num) => {
-                nodes[num].clusterType = thisType;
-            });
-            clustersInfos[thisType] = color;
-        } else if (line.search('label') !== -1) {
-            const id = parseInt(line.slice(0, line.indexOf('[')).trim());
-            const attributes = line.slice(line.indexOf('[') + 1, line.lastIndexOf(']')).trim();
-
-            let label = attributes.slice(attributes.search(/[^\\]"/) + 3);
-            label = label.slice(0, label.search(/[^\\]"/));
-            let [conclusion, rule, args] = ['', '', ''];
-            [conclusion, rule] = label.split(/\|/);
-            [rule, args] = rule.indexOf(' :args ') != -1 ? rule.split(' :args ') : [rule, ''];
-
-            const comment: string = removeEscapedCharacters(line.slice(line.indexOf('comment'), line.lastIndexOf('"')));
-            const commentJSON = JSON.parse(comment.slice(comment.indexOf('"') + 1).replace(/'/g, '"'));
-
-            if (!nodes[id]) {
-                nodes[id] = {
-                    id: id,
-                    conclusion: '',
-                    rule: '',
-                    args: '',
-                    children: [],
-                    parents: [NaN],
-                    descendants: 0,
-                    dependencies: [],
-                    clusterType: ClusterKind.NONE,
-                };
-            }
-            nodes[id].conclusion = removeEscapedCharacters(conclusion);
-            nodes[id].rule = removeEscapedCharacters(rule);
-            nodes[id].args = removeEscapedCharacters(args);
-            nodes[id].descendants = commentJSON.subProofQty;
-        } else if (line.search('->') !== -1) {
-            const [child, parent] = line.split('->').map((x) => parseInt(x.trim()));
-            nodes[parent].children.push(child);
-            // If there isn't a child node
-            if (!nodes[child]) {
-                nodes[child] = {
-                    id: child,
-                    conclusion: '',
-                    rule: '',
-                    args: '',
-                    children: [],
-                    parents: [],
-                    descendants: 0,
-                    dependencies: [],
-                    clusterType: ClusterKind.NONE,
-                };
-            }
-            // If there is and is an invalid parent
-            else if (isNaN(nodes[child].parents[0])) {
-                nodes[child].parents = [];
-            }
-            nodes[child].parents.push(parent);
+// Splits a record label into its fields and removes the escapes of record labels from each field.
+// Labels are either "{conclusion|rule}", as printed by cvc5, or "{step id|conclusion|rule}".
+function splitRecordLabel(label: string): string[] {
+    if (label.startsWith('{') && label.endsWith('}') && label[label.length - 2] !== '\\') {
+        label = label.slice(1, -1);
+    }
+    const fields: string[] = [];
+    let field = '';
+    for (let i = 0; i < label.length; i++) {
+        if (label[i] === '\\' && i + 1 < label.length) {
+            const next = label[++i];
+            field += 'lnr'.includes(next) ? '\n' : next;
+        } else if (label[i] === '|') {
+            fields.push(field);
+            field = '';
+        } else {
+            field += label[i];
         }
+    }
+    fields.push(field);
+    return fields.map((f) => f.trim());
+}
+
+function newNode(id: number): NodeInterface {
+    return {
+        id: id,
+        conclusion: '',
+        rule: '',
+        args: '',
+        children: [],
+        parents: [],
+        descendants: 0,
+        dependencies: [],
+        clusterType: ClusterKind.NONE,
+    };
+}
+
+export function processDot(dot: string): ProcessedDot {
+    const graph = parseDot(dot);
+    const nodes: NodeInterface[] = [];
+    let letMap: ProofState['letMap'] = {};
+    const clusterColors: ClusterColorMap = {};
+    // The nodes of each subproof cluster, with the index of the enclosing one
+    const clusters: { members: number[]; parent: number }[] = [];
+
+    const proofNodeId = (id: string): number => (/^[0-9]+$/.test(id) ? Number(id) : NaN);
+    const getNode = (id: number): NodeInterface => {
+        if (!nodes[id]) nodes[id] = newNode(id);
+        return nodes[id];
+    };
+
+    const visit = (statements: DotStatement[], cluster: number): void => {
+        statements.forEach((statement) => {
+            if (statement.type === 'attribute') {
+                // The graph comment carries the let map
+                if (cluster === -1 && statement.target === 'graph' && statement.attributes.comment) {
+                    const comment = JSON.parse(statement.attributes.comment);
+                    if (comment.letMap) letMap = comment.letMap;
+                }
+            } else if (statement.type === 'node') {
+                const id = proofNodeId(statement.id);
+                // Nodes without a numeric ID, such as a legend, are not part of the proof
+                if (isNaN(id)) return;
+                const node = getNode(id);
+                const { label, comment } = statement.attributes;
+                if (label !== undefined) {
+                    const fields = splitRecordLabel(label);
+                    const [stepId, conclusion, rule] =
+                        fields.length >= 3 ? fields : ['', fields[0], fields.length > 1 ? fields[1] : ''];
+                    const argsIdx = rule.indexOf(' :args ');
+                    if (stepId) node.stepId = stepId;
+                    node.conclusion = conclusion;
+                    node.rule = argsIdx === -1 ? rule : rule.slice(0, argsIdx);
+                    node.args = argsIdx === -1 ? '' : rule.slice(argsIdx + ' :args '.length);
+                }
+                if (comment !== undefined) {
+                    const subProofQty = JSON.parse(comment).subProofQty;
+                    if (subProofQty !== undefined) node.descendants = subProofQty;
+                }
+            } else if (statement.type === 'edge') {
+                // Edges go from a premise to the step that uses it
+                for (let i = 0; i + 1 < statement.chain.length; i++) {
+                    statement.chain[i].forEach((from) => {
+                        statement.chain[i + 1].forEach((to) => {
+                            const [premise, step] = [proofNodeId(from), proofNodeId(to)];
+                            if (isNaN(premise) || isNaN(step)) return;
+                            getNode(step).children.push(premise);
+                            getNode(premise).parents.push(step);
+                        });
+                    });
+                }
+            } else {
+                const label = statement.statements.reduce(
+                    (acc: string | undefined, s) =>
+                        s.type === 'attribute' && s.target === 'graph' && s.attributes.label !== undefined
+                            ? s.attributes.label
+                            : acc,
+                    undefined,
+                );
+                const members = subgraphNodes(statement)
+                    .map(proofNodeId)
+                    .filter((id) => !isNaN(id));
+
+                // cvc5 lists the nodes of each kind of cluster (SAT, CNF, ...) in a subgraph
+                if (label !== undefined && clusterKinds[label] !== undefined) {
+                    const kind = clusterKinds[label];
+                    members.forEach((id) => (getNode(id).clusterType = kind));
+                    const color = statement.statements.reduce(
+                        (acc, s) => (s.type === 'attribute' && s.attributes.bgcolor ? s.attributes.bgcolor : acc),
+                        '',
+                    );
+                    clusterColors[kind] = color;
+                    visit(statement.statements, cluster);
+                }
+                // Other clusters are subproofs
+                else if (statement.id?.startsWith('cluster')) {
+                    clusters.push({ members: members, parent: cluster });
+                    visit(statement.statements, clusters.length - 1);
+                } else {
+                    visit(statement.statements, cluster);
+                }
+            }
+        });
+    };
+    visit(graph.statements, -1);
+
+    for (let id = 0; id < nodes.length; id++) getNode(id);
+
+    // Nodes that are not premises of any step have NaN as their parent
+    nodes.forEach((node) => {
+        if (!node.parents.length) node.parents = [NaN];
     });
 
-    return comment ? [nodes, JSON.parse(comment)['letMap'], clustersInfos] : [nodes, {}, clustersInfos];
+    // If the tree sizes were not given, compute them
+    if (nodes.some((node) => !node.descendants)) {
+        const sizes: number[] = [];
+        const treeSize = (id: number): number => {
+            if (sizes[id] === undefined) {
+                sizes[id] = 1;
+                sizes[id] = nodes[id].children.reduce((acc, child) => acc + treeSize(child), 1);
+            }
+            return sizes[id];
+        };
+        nodes.forEach((node) => {
+            if (!node.descendants) node.descendants = treeSize(node.id);
+        });
+    }
+
+    // A subproof folds into all its nodes but the steps concluding it, which are the ones that no
+    // other node of the subproof uses
+    const subproofs = clusters.map(({ members, parent }) => {
+        const memberSet = new Set(members);
+        return {
+            nodes: members.filter((id) => nodes[id].parents.some((p) => memberSet.has(p))).sort((a, b) => a - b),
+            parent: parent,
+        };
+    });
+
+    return { nodes, letMap, clusterColors, subproofs };
 }
 
 export const piNodeParents = (

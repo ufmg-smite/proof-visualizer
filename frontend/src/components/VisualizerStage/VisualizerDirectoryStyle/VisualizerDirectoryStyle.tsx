@@ -10,6 +10,7 @@ import { drawerHelpersKind, renderLetKind } from '../../../interfaces/enum';
 import VisualizerTree from '../../VisualizerTree/VisualizerTree';
 import { selectLetMap, selectOriginalProof } from '../../../store/features/proof/proofSlice';
 import LetRender from '../../VisualizerLetDrawer/LetRender';
+import { hasLets } from '../../VisualizerLetDrawer/let';
 
 const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
     proofTree,
@@ -95,6 +96,14 @@ const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
                     </tr>
                 </thead>
                 <tbody>
+                    {nodeInfo.stepId ? (
+                        <tr>
+                            <td>
+                                <strong>STEP</strong>
+                            </td>
+                            <td>{nodeInfo.stepId}</td>
+                        </tr>
+                    ) : null}
                     <tr>
                         <td>
                             <strong>RULE </strong>
@@ -120,7 +129,7 @@ const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
                         <tr>
                             <td>
                                 <strong>ARGS</strong>{' '}
-                                {nodeInfo.args.indexOf('let') !== -1 ? (
+                                {hasLets(nodeInfo.args, letMap) ? (
                                     <Icon
                                         id="icon"
                                         icon="translate"
@@ -135,7 +144,7 @@ const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
                             </td>
                             <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                                 {nodeInfo.args}
-                                {nodeInfo.args.indexOf('let') !== -1 ? (
+                                {hasLets(nodeInfo.args, letMap) ? (
                                     <Collapse isOpen={argsHelperIsOpen}>
                                         <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
                                             {indent(translate(nodeInfo.args))}
@@ -149,7 +158,7 @@ const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
                     <tr>
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                             <strong>CONCLUSION</strong>{' '}
-                            {nodeInfo.conclusion.indexOf('let') !== -1 ? (
+                            {hasLets(nodeInfo.conclusion, letMap) ? (
                                 <>
                                     <Icon
                                         id="icon"
@@ -183,7 +192,7 @@ const VisualizerDirectoryStyle: React.FC<DirectoryStyleProps> = ({
                             ) : null}
                         </td>
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
-                            {nodeInfo.conclusion.indexOf('let') !== -1 ? (
+                            {hasLets(nodeInfo.conclusion, letMap) ? (
                                 <LetRender
                                     key={renderID}
                                     id={0}

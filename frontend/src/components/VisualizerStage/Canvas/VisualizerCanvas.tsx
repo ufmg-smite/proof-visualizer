@@ -140,6 +140,7 @@ class Canvas extends Component<CanvasPropsAndRedux, CanvasState> {
         const visualInfo = visualInfos[node.id];
         return {
             id: node.id,
+            stepId: node.stepId,
             conclusion: node.conclusion,
             rule: node.rule,
             args: node.args,

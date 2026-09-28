@@ -3,7 +3,7 @@ import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { LetRenderProps } from '../../interfaces/interfaces';
 import { renderLetKind } from '../../interfaces/enum';
-import Let from './let';
+import Let, { findLets } from './let';
 import { Pre } from '@blueprintjs/core';
 
 const font = '13px monospace';
@@ -32,12 +32,8 @@ const LetRender: React.FC<LetRenderProps> = ({
 
     const initializeLet = (key = 'this', lets: { [key: string]: Let } = {}) => {
         const currentLet = letMapS[key];
-        const indices: { [key: number]: string } = {};
-
         // Finds all occurences of let in the currentLet
-        [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
-            if (match.index) indices[match.index] = match[0];
-        });
+        const indices = findLets(currentLet, letMap);
 
         // Call recursive for all the external lets
         Object.keys(indices).forEach((indice) => {
@@ -123,23 +119,16 @@ const LetRender: React.FC<LetRenderProps> = ({
         // Waits for the width to be updated and the DOM element to be updated
         if (width) {
             let currentLet = letMapS[key];
-            let indices: { [key: number]: string } = {};
-
             // Finds all occurences of let in the currentLet
-            [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
-                if (match.index !== undefined) indices[match.index] = match[0];
-            });
+            let indices = findLets(currentLet, letMap);
 
             // If doesn't fits, then indent
             if (!lets[key].fitsTheWindow(width, font)) {
                 currentLet = lets[key].indent(width, true, font);
                 letMapS[key] = currentLet;
 
-                indices = {};
                 // Finds all occurences of let in the currentLet after indentation
-                [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
-                    if (match.index) indices[match.index] = match[0];
-                });
+                indices = findLets(currentLet, letMap);
             }
             // If fits
             else {
@@ -155,11 +144,8 @@ const LetRender: React.FC<LetRenderProps> = ({
                     currentLet = lets[key].indent(width, false, font);
                     letMapS[key] = currentLet;
 
-                    indices = {};
                     // Finds all occurences of let in the currentLet after indentation
-                    [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
-                        if (match.index) indices[match.index] = match[0];
-                    });
+                    indices = findLets(currentLet, letMap);
                 }
             }
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Button, Classes } from '@blueprintjs/core';
 
-import Let from './let';
+import Let, { findLets } from './let';
 import '../../scss/Let.scss';
 import { useAppSelector } from '../../store/hooks';
 import { selectTheme } from '../../store/features/theme/themeSlice';
@@ -40,11 +40,8 @@ const VisualizerLetDrawer: React.FC<DrawerVisualizerTabProps> = ({ shouldResize 
         // Init the let ref
         Object.keys(letMap).forEach((key) => {
             const currentLet = letMap[key];
-            const indices: { [key: number]: string } = {};
             // Finds all occurences of let in the currentLet
-            [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
-                if (match.index) indices[match.index] = match[0];
-            });
+            const indices = findLets(currentLet, letMap);
 
             letsRef.current[key] = new Let(key, currentLet, letsRef.current, indices);
         });
@@ -109,10 +106,7 @@ const VisualizerLetDrawer: React.FC<DrawerVisualizerTabProps> = ({ shouldResize 
             }
 
             // Finds all occurences of let in the currentLet
-            const indices: { [key: number]: string } = {};
-            [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
-                if (match.index) indices[match.index] = match[0];
-            });
+            const indices = findLets(currentLet, letMap);
 
             const arr: (JSX.Element | string)[] = [];
             let start = 0;

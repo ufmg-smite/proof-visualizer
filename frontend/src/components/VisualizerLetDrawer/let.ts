@@ -214,3 +214,40 @@ class Let {
 }
 
 export default Let;
+
+// Characters that can occur in an SMT-LIB simple symbol besides letters and digits
+const symbolChars = 'A-Za-z0-9~!@$%^&*_\\-+=<>.?/';
+let cachedRegex: { names: string; regex: RegExp | null } = { names: '', regex: null };
+
+// Finds the occurrences of the names bound in the let map in a text, as a map from their index to
+// the name. A name only occurs where it is a whole symbol, not part of a larger one.
+export function findLets(text: string, letMap: { [key: string]: string }): { [key: number]: string } {
+    const names = Object.keys(letMap);
+    const key = names.join(' ');
+    if (cachedRegex.names !== key) {
+        // Longer names first, so that a name is not matched as a prefix of another
+        const alternatives = names
+            .sort((a, b) => b.length - a.length)
+            .map((name) => name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
+            .join('|');
+        cachedRegex = {
+            names: key,
+            regex: names.length ? new RegExp(`(^|[^${symbolChars}])(${alternatives})(?![${symbolChars}])`, 'g') : null,
+        };
+    }
+
+    const indices: { [key: number]: string } = {};
+    const regex = cachedRegex.regex;
+    if (regex) {
+        regex.lastIndex = 0;
+        let match;
+        while ((match = regex.exec(text)) !== null) {
+            indices[match.index + match[1].length] = match[2];
+        }
+    }
+    return indices;
+}
+
+export function hasLets(text: string, letMap: { [key: string]: string }): boolean {
+    return Object.keys(findLets(text, letMap)).length > 0;
+}

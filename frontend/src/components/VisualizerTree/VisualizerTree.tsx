@@ -30,6 +30,7 @@ const VisualizerTree: React.FC<TreeProps> = ({ darkTheme, proof, positionMap, co
     const handleNodeClick = (nodeData: any, _nodePath: number[], e: React.MouseEvent<HTMLElement>) => {
         const toBeShow: any = selected !== nodeData.id ? nodeData : nodes[0];
         setNodeInfo({
+            stepId: toBeShow.stepId,
             rule: toBeShow.rule ? toBeShow.rule : '',
             args: toBeShow.args ? toBeShow.args : '',
             conclusion: toBeShow.conclusion ? toBeShow.conclusion : '',

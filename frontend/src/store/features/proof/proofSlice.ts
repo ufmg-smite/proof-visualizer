@@ -15,6 +15,7 @@ const initialState: ProofState = {
     visualInfo: {},
     nodesSelected: [],
     clustersInfos: [],
+    subproofs: [],
     smt: '',
 };
 

@@ -26,6 +26,32 @@ function clearHiddenNodes(state: Draft<ProofState>, action: PayloadAction<null>)
     state.hiddenNodes = [];
 }
 
+// Folds each of the given subproofs into a new pi node, returning how many were folded
+function foldSubproofs(state: Draft<ProofState>, subproofs: number[]): number {
+    let folded = 0;
+    subproofs.forEach((subproof) => {
+        const nodes = state.subproofs[subproof].nodes;
+        if (nodes.length < 2) return;
+
+        const piID = state.proof.length + state.hiddenNodes.length;
+        state.hiddenNodes.push([...nodes]);
+        nodes.forEach((node) => (state.proof[node].isHidden = piID));
+        state.visualInfo[piID] = {
+            color: '#555',
+            x: 0,
+            y: 0,
+            selected: false,
+        };
+        folded++;
+    });
+    return folded;
+}
+
+// The subproofs directly inside the given one (-1 for the ones not inside any other)
+function innerSubproofs(state: Draft<ProofState>, subproof: number): number[] {
+    return state.subproofs.map((s, i) => (s.parent === subproof ? i : -1)).filter((i) => i !== -1);
+}
+
 function process(state: Draft<ProofState>, action: PayloadAction<string>): void {
     // Reset the state
     state.clustersInfos = [];
@@ -43,9 +69,10 @@ function process(state: Draft<ProofState>, action: PayloadAction<string>): void 
         isJSON = true;
     }
 
-    const [proof, letMap, clustersColors] = processDot(dot);
+    const { nodes: proof, letMap, clusterColors: clustersColors, subproofs } = processDot(dot);
     state.proof = proof;
     state.letMap = letMap;
+    state.subproofs = subproofs;
     state.view = 'full';
 
     // If there are clusters
@@ -110,6 +137,11 @@ function process(state: Draft<ProofState>, action: PayloadAction<string>): void 
                 selected: false,
             };
         });
+
+        // Start with the subproofs folded
+        if (!state.clustersInfos.length && foldSubproofs(state, innerSubproofs(state, -1))) {
+            state.view = 'clustered';
+        }
     }
     // Set all the hidden nodes as hidden
     state.hiddenNodes.forEach((hiddenNodesArray, i) => {
@@ -252,8 +284,15 @@ function unfoldNodes(state: Draft<ProofState>, action: PayloadAction<number>): v
     // Delete the last position
     delete state.visualInfo[size - 1];
 
+    // If this pi node was a subproof, keep the subproofs inside it folded
+    const hiddenSet = new Set(hiddens);
+    const subproof = state.subproofs.findIndex(
+        ({ nodes }) => nodes.length === hiddenSet.size && nodes.every((node) => hiddenSet.has(node)),
+    );
+    const nRefolded = subproof === -1 ? 0 : foldSubproofs(state, innerSubproofs(state, subproof));
+
     // Add undo action
-    addUndo(new UnfoldUndo([...hiddens], pos, colors));
+    addUndo(new UnfoldUndo([...hiddens], pos, colors, nRefolded));
     // Unselect all the nodes
     unselectNodes(state, { payload: { nodes: state.nodesSelected, cleanAll: true }, type: 'string' });
 }
@@ -479,6 +518,11 @@ function applyView(state: Draft<ProofState>, action: PayloadAction<ProofState['v
                     };
                 });
             }
+            // Fold the subproofs
+            else if (state.subproofs.length) {
+                clearHiddenNodes(state, { payload: null, type: 'string' });
+                if (foldSubproofs(state, innerSubproofs(state, -1))) state.view = 'clustered';
+            }
             break;
         // Apply full view but apply the clustrer color
         case 'colored-full':
@@ -583,8 +627,14 @@ function undo(state: Draft<ProofState>, action: PayloadAction<void>): void {
                     state.visualInfo[id].y = y;
                 });
             } else if (name === 'UnfoldUndo') {
-                const { positions, colors } = topUndo as UnfoldUndo;
+                const { positions, colors, nRefolded } = topUndo as UnfoldUndo;
                 let i;
+                // Remove the pi nodes of the subproofs folded again by the unfold
+                for (i = 0; i < nRefolded; i++) {
+                    const refolded = state.hiddenNodes.pop();
+                    refolded?.forEach((node) => (state.proof[node].isHidden = undefined));
+                    delete state.visualInfo[state.proof.length + state.hiddenNodes.length];
+                }
                 // Create the old pi node in the right position
                 const oldPiNum = colors[colors.length - 1].id;
                 const newSize = state.proof.length + state.hiddenNodes.length;

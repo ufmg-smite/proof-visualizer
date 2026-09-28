@@ -48,6 +48,7 @@ export function sixDigitColor(bgColor: string): string {
 const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
     const {
         id,
+        stepId,
         conclusion,
         rule,
         args,
@@ -74,6 +75,7 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
             } else {
                 openDrawer(
                     {
+                        stepId: stepId,
                         rule: rule,
                         args: args,
                         conclusion: conclusion,
@@ -135,13 +137,15 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
         dependencies: dependencies.length === 1 ? String(dependencies[0].piId) : 'π',
     };
 
+    // Proofs that name their steps show the step id instead of the node id
+    const shownId = stepId ? stepId : id.toString();
     const [idSize, setIdSize] = useState(50);
     const [descendantSize, setDescendantSize] = useState(style.text.width - 50);
 
     // Component Did Mount
     useEffect(() => {
         const font = `${style.text.fontSize}px -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", "Icons16", sans-serif`;
-        const calc = getTextWidth(id.toString(), font) + style.text.padding * 3;
+        const calc = getTextWidth(shownId, font) + style.text.padding * 3;
         setIdSize(calc);
         setDescendantSize(style.text.width - calc);
     }, []);
@@ -169,7 +173,7 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
             </Label>
             <Label x={0} y={70} {...{ align: 'right' }}>
                 <Tag {...style.tag} />
-                <Text {...{ ...style.text, width: idSize }} text={id.toString()} />
+                <Text {...{ ...style.text, width: idSize }} text={shownId} />
             </Label>
             <Label x={idSize} y={70}>
                 <Tag {...style.tag} />

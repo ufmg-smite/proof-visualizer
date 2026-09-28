@@ -31,15 +31,19 @@ export class ColorUndo extends BaseUndo {
 export class UnfoldUndo extends BaseUndo {
     positions: { id: number; x: number; y: number }[];
     colors: { id: number; color: string }[];
+    // Number of subproofs folded again after the unfold, as the last pi nodes
+    nRefolded: number;
 
     constructor(
         nodes: number[],
         positions: { id: number; x: number; y: number }[],
         colors: { id: number; color: string }[],
+        nRefolded = 0,
     ) {
         super(nodes, 'UnfoldUndo');
         this.positions = positions;
         this.colors = colors;
+        this.nRefolded = nRefolded;
     }
 }
 

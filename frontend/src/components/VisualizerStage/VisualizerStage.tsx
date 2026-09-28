@@ -14,6 +14,7 @@ import { selectTheme } from '../../store/features/theme/themeSlice';
 import { NodeInfo, NodeInterface, TreeNode, VisualizerStageProps } from '../../interfaces/interfaces';
 import { renderLetKind, drawerHelpersKind } from '../../interfaces/enum';
 import LetRender from '../VisualizerLetDrawer/LetRender';
+import { hasLets } from '../VisualizerLetDrawer/let';
 import SelectOvelay from './SelectOverlay';
 
 function ruleHelper(rule: string) {
@@ -171,18 +172,20 @@ function ruleHelper(rule: string) {
 }
 
 export function castProofNodeToTreeNode(node: NodeInterface): TreeNode {
+    const id = node.stepId ? node.stepId : node.id;
     const label = node.hiddenNodes?.length
         ? // Pi node
-          `${node.id} : π ➜ ${node.conclusion}`
+          `${id} : π ➜ ${node.conclusion}`
         : node.dependencies.length
         ? // Node with dependencies
-          `${node.id} : β ➜ ${node.conclusion}`
+          `${id} : β ➜ ${node.conclusion}`
         : //Normal node
-          `${node.id} : ${node.conclusion}`;
+          `${id} : ${node.conclusion}`;
 
     // Create the node tree
     return {
         id: node.id,
+        stepId: node.stepId,
         icon: 'graph',
         label: label,
         secondaryLabel: `${node.rule}`,
@@ -345,6 +348,14 @@ const VisualizerStage: React.FC<VisualizerStageProps> = ({ disableExternalDrawer
                     </tr>
                 </thead>
                 <tbody>
+                    {nodeInfo.stepId ? (
+                        <tr>
+                            <td>
+                                <strong>STEP</strong>
+                            </td>
+                            <td>{nodeInfo.stepId}</td>
+                        </tr>
+                    ) : null}
                     <tr>
                         <td>
                             <strong>RULE </strong>
@@ -370,7 +381,7 @@ const VisualizerStage: React.FC<VisualizerStageProps> = ({ disableExternalDrawer
                         <tr>
                             <td>
                                 <strong>ARGS</strong>{' '}
-                                {nodeInfo.args.indexOf('let') !== -1 ? (
+                                {hasLets(nodeInfo.args, letMap) ? (
                                     <Icon
                                         id="icon"
                                         icon="translate"
@@ -385,7 +396,7 @@ const VisualizerStage: React.FC<VisualizerStageProps> = ({ disableExternalDrawer
                             </td>
                             <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                                 {nodeInfo.args}
-                                {nodeInfo.args.indexOf('let') !== -1 ? (
+                                {hasLets(nodeInfo.args, letMap) ? (
                                     <Collapse isOpen={argsHelperIsOpen}>
                                         <Pre style={{ maxHeight: '300px', overflow: 'auto' }} id="pre-rule">
                                             {nodeInfo.args}
@@ -399,7 +410,7 @@ const VisualizerStage: React.FC<VisualizerStageProps> = ({ disableExternalDrawer
                     <tr>
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
                             <strong>CONCLUSION</strong>{' '}
-                            {nodeInfo.conclusion.indexOf('let') !== -1 ? (
+                            {hasLets(nodeInfo.conclusion, letMap) ? (
                                 <>
                                     <Icon
                                         id="icon"
@@ -433,7 +444,7 @@ const VisualizerStage: React.FC<VisualizerStageProps> = ({ disableExternalDrawer
                             ) : null}
                         </td>
                         <td style={{ maxHeight: '300px', overflow: 'auto' }}>
-                            {nodeInfo.conclusion.indexOf('let') !== -1 ? (
+                            {hasLets(nodeInfo.conclusion, letMap) ? (
                                 <LetRender
                                     id={0}
                                     toRender={nodeInfo.conclusion}

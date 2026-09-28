@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Button, Classes } from '@blueprintjs/core';
 import { selectLetMap, selectTheoryLemmas } from '../../store/features/proof/proofSlice';
 import { useAppSelector } from '../../store/hooks';
-import Let from '../VisualizerLetDrawer/let';
+import Let, { findLets } from '../VisualizerLetDrawer/let';
 import { selectTheme } from '../../store/features/theme/themeSlice';
 import { DrawerVisualizerTabProps } from '../../interfaces/interfaces';
 
@@ -40,21 +40,15 @@ const VisualizerTheoryLemma: React.FC<DrawerVisualizerTabProps> = ({ shouldResiz
         Object.keys(letMap).forEach((key) => {
             const currentLet = letMap[key];
 
-            const indices: { [key: number]: string } = {};
             // Finds all occurences of let in the currentLet
-            [...currentLet.matchAll(/let\d+/g)].forEach((match) => {
-                if (match.index) indices[match.index] = match[0];
-            });
+            const indices = findLets(currentLet, letMap);
             letsRef.current[key] = new Let(key, currentLet, letsRef.current, indices);
         });
 
         // Init the theory lemmas
         theoryLemmas.forEach((tl, id) => {
-            const indices: { [key: number]: string } = {};
             // Finds all occurences of let in the currentTL
-            [...tl.matchAll(/let\d+/g)].forEach((match) => {
-                if (match.index) indices[match.index] = match[0];
-            });
+            const indices = findLets(tl, letMap);
 
             letsRef.current[id] = new Let(String(id), tl, letsRef.current, indices);
         });
@@ -118,10 +112,7 @@ const VisualizerTheoryLemma: React.FC<DrawerVisualizerTabProps> = ({ shouldResiz
             }
 
             // Finds all occurences of let in the currentTL
-            const indices: { [key: number]: string } = {};
-            [...currentTL.matchAll(/let\d+/g)].forEach((match) => {
-                if (match.index) indices[match.index] = match[0];
-            });
+            const indices = findLets(currentTL, letMap);
 
             const arr: (JSX.Element | string)[] = [];
             let start = 0;

@@ -6,6 +6,8 @@ import { renderLetKind, ClusterKind } from './enum';
 // NODES
 interface NodeInterface {
     id: number;
+    // The id of the step in the proof, when the proof names its steps
+    stepId?: string;
     conclusion: string;
     rule: string;
     args: string;
@@ -20,6 +22,7 @@ interface NodeInterface {
 
 interface NodeProps {
     id: NodeInterface['id'];
+    stepId: NodeInterface['stepId'];
     conclusion: NodeInterface['conclusion'];
     rule: NodeInterface['rule'];
     args: NodeInterface['args'];
@@ -45,6 +48,7 @@ interface NodeProps {
 
 // Info passed to the info drawer
 interface NodeInfo {
+    stepId?: NodeProps['stepId'];
     rule: NodeProps['rule'];
     args: NodeProps['args'];
     conclusion: NodeProps['conclusion'];
@@ -158,6 +162,7 @@ interface VisualizerDialogProps {
 // TREENODE
 interface TreeNode {
     id: NodeProps['id'];
+    stepId: NodeProps['stepId'];
     conclusion: NodeProps['conclusion'];
     rule: NodeProps['rule'];
     args: NodeProps['args'];
@@ -268,6 +273,12 @@ interface ProofState {
         hiddenNodes: number[];
         type: ClusterKind;
         color: string;
+    }[];
+    // The subproofs of the proof: the nodes each one folds into, and the index of the subproof
+    // containing it (-1 if none)
+    subproofs: {
+        nodes: number[];
+        parent: number;
     }[];
     smt: string;
 }
