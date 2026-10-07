@@ -1,7 +1,8 @@
 import { KonvaEventObject } from 'konva/types/Node';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Label, Text, Tag, Group, Circle, Arrow } from 'react-konva';
 import { NodeProps } from '../../../interfaces/interfaces';
+import { fitInNode } from './abbreviate';
 
 function getTextWidth(text: string, font: string): number {
     const canvas = document.createElement('canvas');
@@ -137,6 +138,7 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
         dependencies: dependencies.length === 1 ? String(dependencies[0].piId) : 'π',
     };
 
+    const shownConclusion = useMemo(() => fitInNode(conclusion), [conclusion]);
     // Proofs that name their steps show the step id instead of the node id
     const shownId = stepId ? stepId : id.toString();
     const [idSize, setIdSize] = useState(50);
@@ -165,7 +167,7 @@ const Node: React.FC<NodeProps> = (props: NodeProps): JSX.Element => {
         >
             <Label x={0} y={0}>
                 <Tag {...style.tag} />
-                <Text {...style.text} text={conclusion} />
+                <Text {...style.text} ellipsis={true} text={shownConclusion} />
             </Label>
             <Label x={0} y={35}>
                 <Tag {...style.tag} />

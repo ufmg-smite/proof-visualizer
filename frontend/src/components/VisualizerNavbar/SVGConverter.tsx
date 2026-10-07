@@ -2,6 +2,7 @@ import React from 'react';
 import '../../interfaces/interfaces';
 import { NodeInterface, ProofState } from '../../interfaces/interfaces';
 import { textColorFromBg, sixDigitColor } from '../VisualizerStage/Canvas/VisualizerNode';
+import { fitInNode, nodeTextWidth } from '../VisualizerStage/Canvas/abbreviate';
 
 interface Point {
     x: number;
@@ -62,6 +63,9 @@ function CreateNode(node: NodeInterface, visualInfo: ProofState['visualInfo'], l
         rule: nHided ? 'π' : node.rule,
         dependencies: node.dependencies.length === 1 ? String(node.dependencies[0].piId) : 'π',
     };
+    // Proofs that name their steps show the step id instead of the node id
+    const shownId = node.stepId ? node.stepId : node.id.toString();
+    const idWidth = Math.max(50, nodeTextWidth(shownId) + 30);
 
     return (
         <>
@@ -79,8 +83,16 @@ function CreateNode(node: NodeInterface, visualInfo: ProofState['visualInfo'], l
             })}
             <rect x={newX + 0} y={newY + 0} width={300} height={35} strokeWidth="1" fill={color} stroke="black" />
             <rect x={newX + 0} y={newY + 35} width={300} height={35} strokeWidth="1" fill={color} stroke="black" />
-            <rect x={newX + 0} y={newY + 70} width={50} height={35} strokeWidth="1" fill={color} stroke="black" />
-            <rect x={newX + 50} y={newY + 70} width={250} height={35} strokeWidth="1" fill={color} stroke="black" />
+            <rect x={newX + 0} y={newY + 70} width={idWidth} height={35} strokeWidth="1" fill={color} stroke="black" />
+            <rect
+                x={newX + idWidth}
+                y={newY + 70}
+                width={300 - idWidth}
+                height={35}
+                strokeWidth="1"
+                fill={color}
+                stroke="black"
+            />
             <defs>
                 <clipPath id={'clip-conc-' + node.id}>
                     <rect x={newX} y={newY} width={300} height={35} />
@@ -89,10 +101,10 @@ function CreateNode(node: NodeInterface, visualInfo: ProofState['visualInfo'], l
                     <rect x={newX} y={newY + 35} width={300} height={35} />
                 </clipPath>
                 <clipPath id={'clip-id-' + node.id}>
-                    <rect x={newX} y={newY + 70} width={50} height={35} />
+                    <rect x={newX} y={newY + 70} width={idWidth} height={35} />
                 </clipPath>
                 <clipPath id={'clip-hidden-' + node.id}>
-                    <rect x={newX + 50} y={newY + 70} width={250} height={35} />
+                    <rect x={newX + idWidth} y={newY + 70} width={300 - idWidth} height={35} />
                 </clipPath>
             </defs>
 
@@ -106,7 +118,7 @@ function CreateNode(node: NodeInterface, visualInfo: ProofState['visualInfo'], l
                 fontFamily={fontFamily}
                 clipPath={`url(#clip-conc-${node.id})`}
             >
-                {node.conclusion}
+                {fitInNode(node.conclusion)}
             </text>
             <text
                 x={newX + 150}
@@ -121,7 +133,7 @@ function CreateNode(node: NodeInterface, visualInfo: ProofState['visualInfo'], l
                 {infos.rule}
             </text>
             <text
-                x={newX + 25}
+                x={newX + idWidth / 2}
                 y={newY + 91}
                 fontSize={fontSize}
                 fill={fill}
@@ -130,10 +142,10 @@ function CreateNode(node: NodeInterface, visualInfo: ProofState['visualInfo'], l
                 fontFamily={fontFamily}
                 clipPath={`url(#clip-id-${node.id})`}
             >
-                {node.id.toString()}
+                {shownId}
             </text>
             <text
-                x={newX + 175}
+                x={newX + (300 + idWidth) / 2}
                 y={newY + 91}
                 fontSize={fontSize}
                 fill={fill}
